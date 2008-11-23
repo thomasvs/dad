@@ -1,0 +1,13 @@
+2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad (added):
+	* dad/audio (added):
+	* dad/audio/common.py (added):
+	* dad/audio/__init__.py (added):
+	* dad/audio/level.py (added):
+	* dad/__init__.py (added):
+	* dad/gstreamer (added):
+	* dad/gstreamer/leveller.py (added):
+	* dad/gstreamer/__init__.py (added):
+	  Initial import of code.
+
