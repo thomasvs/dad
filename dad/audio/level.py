@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: dad.test.test_audio_level -*-
 # vi:si:et:sw=4:sts=4:ts=4
 #
 # DAD - Digital Audio Database
@@ -169,7 +169,7 @@ class Level(list):
                 # ... but if we're close to the end, then pick the end
                 last = self[-1][0]
                 if last - end < delta:
-                    self._log('resetting end to last', last)
+                    self._log('resetting end to last %r' % last)
                     end = last
  
             elif state is FALLING:

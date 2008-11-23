@@ -1,5 +1,16 @@
 2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/level.py:
+	  Fix logging.
+	* dad/test/__init__.py (added):
+	* dad/test/test_audio_level.py (added):
+	  Add test suite.
+	* dad/test/south.pickle (added):
+	* dad/test/home.pickle (added):
+	  Add two pickles for testing.
+
+2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad (added):
 	* dad/audio (added):
 	* dad/audio/common.py (added):
