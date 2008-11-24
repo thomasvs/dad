@@ -49,12 +49,49 @@ class HomeLevelTest(unittest.TestCase):
         handle = open(os.path.join(os.path.dirname(__file__), 'home.pickle'))
         self._level = pickle.load(handle)
 
+    def testTrim(self):
+        trimmed = self._level.trim(self._level.start(), self._level.end())
+        self.assertEquals(trimmed.start(), self._level.start())
+        self.assertEquals(trimmed.end(), self._level.end())
+
+
     def testSlice(self):
         slices = self._level.slice()
         self.assertEquals(len(slices), 2)
 
         first = slices[0]
-        self.failUnless(first[0] < level.SECOND)
+        self.assertEquals(first.start(), 0L)
 
         second = slices[1]
-        self.assertEquals(second[1], self._level[-1][0])
+        self.assertEquals(second.end(), self._level.end())
+
+        self.failUnless(second.start() > first.end())
+
+    def testAttack(self):
+        a = self._level.attack()
+
+        # Home Again reaches slightly above -20 dB close to 2 seconds
+        self.assertEquals(a.get(-20) / level.SECOND, 1)
+
+        self.assertEquals(a.get(-18) / level.SECOND, 4)
+
+    def testDecayFirstSlice(self):
+        slices = self._level.slice()
+        
+        a = slices[0].decay()
+
+        # Home Again drops below -20 dB around 203 seconds
+        self.assertEquals(a.get(-20) / level.SECOND, 203)
+
+    def testAttackSecondSlice(self):
+        slices = self._level.slice()
+        
+        a = slices[1].attack()
+        # Bonus Track reaches slightly above -20 dB close to 228 seconds
+        self.assertEquals(a.get(-20) / level.SECOND, 228)
+
+    def testPercentile(self):
+        self.assertAlmostEqual(self._level.percentile(), -11.427970426543833)
+
+    def testPercentileFirstSlice(self):
+        slices = self._level.slice()

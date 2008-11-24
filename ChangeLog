@@ -1,3 +1,23 @@
+2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
+	* dad/test/test_audio_level.py:
+	  Add start() and end() methods.  Store start as well so the object
+	  becomes 'symmetrical' and can operate on blocks with start and end
+	  time.
+	  Add __repr__, percentile, trim, attack, decay.
+	  Make slices return Level objects
+	  Add Attack.
+	* dad/test/home.pickle:
+	* dad/test/south.pickle:
+	  Update pickles because the Level object changed
+	* dad/audio/mixdata.py (added):
+	* examples/mixdata.py (added):
+	  Add a MixData class. Add an example that calculates it for a
+	  bunch of files in a pickle.
+	* dad/gstreamer/leveller.py:
+	  add get_mixdatas()
+
 2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/test/__init__.py:
