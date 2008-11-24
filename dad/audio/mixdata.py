@@ -28,9 +28,10 @@ class MixData(object):
     """
     I am an object holding all relevant data for mixing.
 
-    @ivar start:         the start time for this track.
-    @ivar end:           the end time for this track.
-    @ivar peak:          the peak dB for this track.
+    @ivar start:         the start time for this track
+    @ivar end:           the end time for this track
+    @ivar peak:          the peak dB for this track
+    @ivar rms:           the rms between start and end
     @ivar rmsPercentile: the 95 percentile rms in dB
     @ivar rmsPeak:       the rms in dB weighted between mix points
     @ivar rmsWeighted:   the rms in dB weighted between mix points
@@ -40,6 +41,7 @@ class MixData(object):
     start = None
     end = None
     peak = None
+    rms = None
     rmsPercentile = None
     rmsPeak = None
     rmsWeighted = None
@@ -63,6 +65,7 @@ def fromLevels(rms, peak):
     m = MixData()
     m.start = rms.start()
     m.end = rms.end()
+    m.rms = rms.rms(start=start, end=end)
     m.rmsPercentile = rms.percentile()
     m.rmsPeak = rms.max()[1]
     # weight 9 dB below max

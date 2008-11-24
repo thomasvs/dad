@@ -1,5 +1,10 @@
 2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/mixdata.py:
+	  Add rms over whole track as well.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/test/test_audio_level.py:
 	  Update test after switching rms() to same scale as object.
 
