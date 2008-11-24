@@ -68,6 +68,7 @@ class Leveller(gst.Pipeline):
         self._source.connect('done', self._source_done_cb)
 
         self._level = gst.element_factory_make("level")
+        self._level.set_property('interval', gst.SECOND / 20) # 50 ms
 
         self._fakesink = gst.element_factory_make("fakesink")
 
@@ -101,7 +102,7 @@ class Leveller(gst.Pipeline):
         if channel is not None:
             return self.rmsdBs[channel]
 
-        rmss = [l.convert(level.SCALE_RAW) for l in self.rmsdBs]
+        rmss = [l.convert(scale=level.SCALE_RAW) for l in self.rmsdBs]
 
         ret = level.Level(scale=level.SCALE_RAW)
 
@@ -172,7 +173,7 @@ class Leveller(gst.Pipeline):
         peak = self.get_peak_dB()
         slices = rms.slice()
         for s in slices:
-            m = mixdata.fromLevels(s, peak.trim(s.start(), s.end()))
+            m = mixdata.fromLevels(s, peak.trim(start=s.start(), end=s.end()))
             ret.append(m)
 
         return ret
@@ -306,7 +307,8 @@ if __name__ == "__main__":
             path = sys.argv[2]
             handle = open(path, 'w')
             import pickle
-            pickle.dump(leveller.get_rms_dB(), handle, 2)
+            rms = leveller.get_rms_dB()
+            pickle.dump(rms, handle, pickle.HIGHEST_PROTOCOL)
             handle.close()
             print 'Dumped RMS dB pickle to %s' % path
     gst.debug('deleting leveller, verify objects are freed')

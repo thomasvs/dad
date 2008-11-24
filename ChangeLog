@@ -1,6 +1,20 @@
 2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/audio/level.py:
+	  Fix buglet where we accidentally created Levels with start as a
+	  method.
+	* dad/audio/common.py:
+	  add safeguard of -100 dB for 0 values.
+	* dad/gstreamer/leveller.py:
+	  Use 50ms instead of 100ms as interval
+	* dad/test/home.pickle:
+	* dad/test/south.pickle:
+	* dad/test/test_audio_level.py:
+	  Adjust pickle and tests for this.
+
+2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
 	* dad/test/test_audio_level.py:
 	  Add start() and end() methods.  Store start as well so the object
 	  becomes 'symmetrical' and can operate on blocks with start and end

@@ -30,4 +30,10 @@ def rawToDecibel(raw):
     """
     Converts a raw amplitude value to decibel
     """
-    return math.log(raw, 10) * 10.0
+    # cheat
+    if raw == 0.0:
+        return -100
+    try:
+        return math.log(raw, 10) * 10.0
+    except OverflowError:
+        raise OverflowError("Cannot take log 10 of %r" % raw)

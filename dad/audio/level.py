@@ -52,7 +52,7 @@ class Level(list):
         self._scale = scale
 
     def __repr__(self):
-        return "<Level from %ld to %ld>" % (self.start(), self.end())
+        return "<Level from %r to %r>" % (self.start(), self.end())
 
     def start(self):
         """
@@ -91,7 +91,7 @@ class Level(list):
         for endtime, value in self:
             l.append((endtime, converter(value)))
 
-        return Level(l, start=self.start, scale=scale)
+        return Level(l, start=self.start(), scale=scale)
 
     def max(self):
         """

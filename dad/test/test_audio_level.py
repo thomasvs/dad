@@ -33,11 +33,11 @@ class SouthLevelTest(unittest.TestCase):
 
     def testMax(self):
         maxTuple = self._level.max()
-        self.assertAlmostEqual(maxTuple[0], 43989841268L)
-        self.assertAlmostEqual(maxTuple[1], -4.7446228530026247)
+        self.assertEqual(maxTuple[0], 47646984126L)
+        self.assertAlmostEqual(maxTuple[1], -4.0117, places=4)
 
     def testRMS(self):
-        self.assertAlmostEqual(self._level.rms(), 0.0843342138227)
+        self.assertAlmostEqual(self._level.rms(), 0.0877, places=4)
 
     def testSlice(self):
         slices = self._level.slice()
@@ -91,7 +91,7 @@ class HomeLevelTest(unittest.TestCase):
         self.assertEquals(a.get(-20) / level.SECOND, 228)
 
     def testPercentile(self):
-        self.assertAlmostEqual(self._level.percentile(), -11.427970426543833)
+        self.assertAlmostEqual(self._level.percentile(), -11.0188, places=4)
 
     def testPercentileFirstSlice(self):
         slices = self._level.slice()
