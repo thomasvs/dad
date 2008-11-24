@@ -65,7 +65,7 @@ def fromLevels(rms, peak):
     m = MixData()
     m.start = rms.start()
     m.end = rms.end()
-    m.rms = rms.rms(start=start, end=end)
+    m.rms = rms.rms()
     m.rmsPercentile = rms.percentile()
     m.rmsPeak = rms.max()[1]
     # weight 9 dB below max
