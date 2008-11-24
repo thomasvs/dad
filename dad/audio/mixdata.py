@@ -28,17 +28,21 @@ class MixData(object):
     """
     I am an object holding all relevant data for mixing.
 
-    @ivar start:  the start time for this track.
-    @ivar end:    the end time for this track.
-    @ivar peakdB: the peak dB for this track.
-    @ivar rmsdB:  the 95 percentile rms in dB for this track.
-    @ivar attack: the attack
-    @ivar decay:  the decay
+    @ivar start:         the start time for this track.
+    @ivar end:           the end time for this track.
+    @ivar peak:          the peak dB for this track.
+    @ivar rmsPercentile: the 95 percentile rms in dB
+    @ivar rmsPeak:       the rms in dB weighted between mix points
+    @ivar rmsWeighted:   the rms in dB weighted between mix points
+    @ivar attack:        the attack
+    @ivar decay:         the decay
     """
     start = None
     end = None
-    peakdB = None
-    rmsdB = None
+    peak = None
+    rmsPercentile = None
+    rmsPeak = None
+    rmsWeighted = None
     attack = None
     decay = None
 
@@ -59,9 +63,15 @@ def fromLevels(rms, peak):
     m = MixData()
     m.start = rms.start()
     m.end = rms.end()
-    m.rmsdB = rms.percentile()
+    m.rmsPercentile = rms.percentile()
+    m.rmsPeak = rms.max()[1]
+    # weight 9 dB below max
     m.attack = rms.attack()
     m.decay = rms.decay()
-    m.peakdB = peak.max()[1]
+    start = m.attack.get(m.rmsPeak - 9)
+    end = m.decay.get(m.rmsPeak - 9)
+    m.rmsWeighted = rms.rms(start=start, end=end)
+    
+    m.peak = peak.max()[1]
 
     return m

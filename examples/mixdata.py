@@ -90,16 +90,20 @@ def main():
         if success:
             print 'Successfully analyzed file %r' % path
             mixdatas = l.get_mixdatas()
-            print '%d slices found.' % len(mixdatas)
+            print '%d slice(s) found.' % len(mixdatas)
             for i, m in enumerate(mixdatas):
-                print 'slice %d: %s - %s, peak %r dB, RMS %r dB' % (
-                    i, gst.TIME_ARGS(m.start), gst.TIME_ARGS(m.end),
-                    m.peakdB, m.rmsdB)
+                print '- slice %d: %s - %s' % (
+                    i, gst.TIME_ARGS(m.start), gst.TIME_ARGS(m.end))
+                print '  - peak              %r dB' % m.peak
+                print '  - peak rms          %r dB' % m.rmsPeak
+                print '  - 95 percentile rms %r dB' % m.rmsPercentile
+                print '  - weighted rms      %r dB' % m.rmsWeighted
 
             tracks[path] = mixdatas
             handle = open(sys.argv[1], 'wb')
             pickle.dump(tracks, handle, 2)
             handle.close()
+            print
 
         gst.debug('deleting leveller, verify objects are freed')
         utils.gc_collect('quit main loop')

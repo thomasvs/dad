@@ -133,7 +133,12 @@ class Level(list):
                 continue
             squaresum += value * value
             
-        return math.sqrt(squaresum / len(l))
+        ret = math.sqrt(squaresum / len(l))
+        if self._scale == SCALE_DECIBEL:
+            ret = common.rawToDecibel(ret)
+            
+        return ret
+         
 
     def trim(self, start=None, end=None):
         """

@@ -1,6 +1,15 @@
 2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/audio/level.py:
+	  Return rms() result in the same scale as the Level object.
+	* dad/audio/mixdata.py:
+	* examples/mixdata.py:
+	  Add our idea of a weighted RMS value too.
+	  Add peak RMS too.
+
+2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
 	  Fix buglet where we accidentally created Levels with start as a
 	  method.
 	* dad/audio/common.py:
