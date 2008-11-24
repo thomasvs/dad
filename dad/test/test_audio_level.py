@@ -37,7 +37,7 @@ class SouthLevelTest(unittest.TestCase):
         self.assertAlmostEqual(maxTuple[1], -4.0117, places=4)
 
     def testRMS(self):
-        self.assertAlmostEqual(self._level.rms(), 0.0877, places=4)
+        self.assertAlmostEqual(self._level.rms(), -10.5704, places=4)
 
     def testSlice(self):
         slices = self._level.slice()
