@@ -1,5 +1,14 @@
 2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/mixdata.py:
+	  add note on weighted time selection
+	* examples/mix.py (added):
+	  Add a first example using gnonlin to mix.  You can clearly
+	  hear the glitches when track2 starts and track1 ends, for
+	  example between London Rain and Smooth Flavours.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/audio/mixdata.py:
 	  Add rms over whole track as well.
 

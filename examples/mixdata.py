@@ -99,6 +99,10 @@ def main():
                 print '  - peak rms          %r dB' % m.rmsPeak
                 print '  - 95 percentile rms %r dB' % m.rmsPercentile
                 print '  - weighted rms      %r dB' % m.rmsWeighted
+                start = m.attack.get(m.rmsPeak - 9)
+                end = m.decay.get(m.rmsPeak - 9)
+                print '  - weighted from %s to %s' % (
+                    gst.TIME_ARGS(start), gst.TIME_ARGS(end))
 
             tracks[path] = mixdatas
             handle = open(sys.argv[1], 'wb')
