@@ -1,5 +1,15 @@
 2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/extern (added):
+	* dad/extern/singledecodebin.py (added):
+	* dad/extern/__init__.py (added):
+	  Add singledecodebin implementation from PiTiVi 0.11.2
+	* examples/mix.py:
+	  Use it instead of the gnlfilesrc that is rumoured to have decodebin
+	  and queue problems.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* examples/mixdata.py:
 	  add note on weighted time selection
 	* examples/mix.py (added):

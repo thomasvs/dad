@@ -12,6 +12,8 @@ import pygst
 pygst.require("0.10")
 import gst
 
+from dad.extern import singledecodebin
+
 
 class Mix(object):
     def __init__(self, tracks, path1=None, path2=None):
@@ -32,6 +34,19 @@ class Mix(object):
         self._path1 = path1
         self._path2 = path2
 
+    def _makeGnlSource(self, name, path):
+        if False:
+            source = gst.element_factory_make("gnlfilesource", name)
+            source.props.location = path
+            return source
+        
+        caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
+        uri = 'file://' + path
+        decodebin = singledecodebin.SingleDecodeBin(caps=caps, uri=uri)
+        source = gst.element_factory_make("gnlsource", name)
+        source.add(decodebin)
+        source.props.caps = caps
+        return source
 
     def setup(self):
         EXTRA = 5 * gst.SECOND # how much of tracks to play outside of mix
@@ -63,9 +78,8 @@ class Mix(object):
         duration = leadout + leadin
         print 'mix duration: %s' % gst.TIME_ARGS(duration)
 
-        source1 = gst.element_factory_make("gnlfilesource", "source1")
+        source1 = self._makeGnlSource('source1', self._path1)
 
-        source1.props.location = self._path1
         source1.props.start = 0 * gst.SECOND
         source1.props.duration = EXTRA + duration
         source1.props.media_start = track1.end - (EXTRA + duration)
@@ -74,9 +88,8 @@ class Mix(object):
 
         self._composition.add(source1)
 
-        source2 = gst.element_factory_make("gnlfilesource", "source2")
+        source2 = self._makeGnlSource('source2', self._path2)
 
-        source2.props.location = self._path2
         source2.props.start = EXTRA
         source2.props.duration = EXTRA + duration
         source2.props.media_start = track2.start
