@@ -95,6 +95,7 @@ def main():
                 print '- slice %d: %s - %s' % (
                     i, gst.TIME_ARGS(m.start), gst.TIME_ARGS(m.end))
                 print '  - peak              %r dB' % m.peak
+                print '  - rms               %r dB' % m.rms
                 print '  - peak rms          %r dB' % m.rmsPeak
                 print '  - 95 percentile rms %r dB' % m.rmsPercentile
                 print '  - weighted rms      %r dB' % m.rmsWeighted
