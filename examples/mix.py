@@ -71,7 +71,7 @@ class Mix(object):
         print 'Track 2: %s' % self._path2
         print '- from %s to %s' % (
             gst.TIME_ARGS(track2.start), gst.TIME_ARGS(track2.end))
-        print '- leadin at %s for %s' % (
+        print '- leadin until %s for %s' % (
             gst.TIME_ARGS(mix2), gst.TIME_ARGS(leadin))
 
         # mix duration is where the two overlap
