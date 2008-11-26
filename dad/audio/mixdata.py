@@ -78,3 +78,24 @@ def fromLevels(rms, peak):
     m.peak = peak.max()[1]
 
     return m
+
+class Mix(object):
+    def __init__(self, mixdata1, mixdata2):
+        """
+        Define the mix for both mixdata's.
+
+        All time values will be relative to mixdata2.start
+        """
+        THRESHOLD = -20 # where to pick the mix point
+
+
+        self.volume1 = -mixdata1.peak
+        self.volume2 = -mixdata2.peak
+
+        mix1 = mixdata1.decay.get(THRESHOLD)
+        mix2 = mixdata2.attack.get(THRESHOLD)
+        self.leadout = mixdata1.end - mix1
+        self.leadin = mix2 - mixdata2.start
+
+        # mix duration is where the two overlap
+        self.duration = self.leadout + self.leadin

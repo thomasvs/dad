@@ -7,11 +7,13 @@ import random
 import pickle
 
 import gobject
+gobject.threads_init()
 
 import pygst
 pygst.require("0.10")
 import gst
 
+from dad.audio import mixdata
 from dad.extern import singledecodebin
 
 
@@ -50,40 +52,33 @@ class Mix(object):
 
     def setup(self):
         EXTRA = 5 * gst.SECOND # how much of tracks to play outside of mix
-        THRESHOLD = -20 # where to pick the mix point
 
         # set up the mix
         track1 = self._tracks[self._path1][0]
         track2 = self._tracks[self._path2][0]
 
-        # find mix point on each track
-        mix1 = track1.decay.get(THRESHOLD)
-        mix2 = track2.attack.get(THRESHOLD)
-        leadout = track1.end - mix1
-        leadin = mix2 - track2.start
+        mix = mixdata.Mix(track1, track2)
 
         print 'Track 1: %s' % self._path1
         print '- from %s to %s' % (
             gst.TIME_ARGS(track1.start), gst.TIME_ARGS(track1.end))
         print '- leadout at %s for %s' % (
-            gst.TIME_ARGS(mix1), gst.TIME_ARGS(leadout))
+            gst.TIME_ARGS(track1.end - mix.leadout), gst.TIME_ARGS(mix.leadout))
 
         print 'Track 2: %s' % self._path2
         print '- from %s to %s' % (
             gst.TIME_ARGS(track2.start), gst.TIME_ARGS(track2.end))
         print '- leadin until %s for %s' % (
-            gst.TIME_ARGS(mix2), gst.TIME_ARGS(leadin))
+            gst.TIME_ARGS(track2.start + mix.leadin), gst.TIME_ARGS(mix.leadin))
 
-        # mix duration is where the two overlap
-        duration = leadout + leadin
-        print 'mix duration: %s' % gst.TIME_ARGS(duration)
+        print 'mix duration: %s' % gst.TIME_ARGS(mix.duration)
 
         source1 = self._makeGnlSource('source1', self._path1)
 
         source1.props.start = 0 * gst.SECOND
-        source1.props.duration = EXTRA + duration
-        source1.props.media_start = track1.end - (EXTRA + duration)
-        source1.props.media_duration = EXTRA + duration
+        source1.props.duration = EXTRA + mix.duration
+        source1.props.media_start = track1.end - (EXTRA + mix.duration)
+        source1.props.media_duration = EXTRA + mix.duration
         source1.props.priority = 1
 
         self._composition.add(source1)
@@ -91,12 +86,15 @@ class Mix(object):
         source2 = self._makeGnlSource('source2', self._path2)
 
         source2.props.start = EXTRA
-        source2.props.duration = EXTRA + duration
+        source2.props.duration = EXTRA + mix.duration
         source2.props.media_start = track2.start
-        source2.props.media_duration = EXTRA + duration
+        source2.props.media_duration = EXTRA + mix.duration
         source2.props.priority = 2
 
         self._composition.add(source2)
+
+        self._source1 = source1
+        self._source2 = source2
 
         # add the mixer effect
         operation = gst.element_factory_make("gnloperation")
@@ -104,15 +102,29 @@ class Mix(object):
         operation.add(adder)
         operation.props.sinks = 2
         operation.props.start = EXTRA
-        operation.props.duration = duration
+        operation.props.duration = mix.duration
         operation.props.priority = 0
 
         self._composition.add(operation)
 
     def start(self):
+        bus = self._pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect('message', self._message_cb)
         self._pipeline.set_state(gst.STATE_PLAYING)
 
+    def _message_cb(self, bus, message):
+        if message.src not in (self._source1, self._source2):
+            return
 
+        source = 'source1'
+        if message.src == self._source2:
+            source = 'source2'
+
+        if message.type == gst.MESSAGE_STATE_CHANGED:
+            old, new, pending = message.parse_state_changed()
+            if new == gst.STATE_PLAYING:
+                print 'playing', source
 
 def main():
     if len(sys.argv) < 2:
