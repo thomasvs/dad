@@ -24,9 +24,11 @@ import math
 
 from dad.audio import common, level
 
+from dad.extern.log import log
+
 class TrackMix(object):
     """
-    I am an object holding all relevant track data for mixing.
+    I am an object holding all relevant data for mixing.
 
     @ivar start:         the start time for this track
     @ivar end:           the end time for this track
@@ -38,6 +40,8 @@ class TrackMix(object):
     @ivar attack:        the attack
     @ivar decay:         the decay
     """
+    name = None
+
     start = None
     end = None
     peak = None
@@ -47,6 +51,7 @@ class TrackMix(object):
     rmsWeighted = None
     attack = None
     decay = None
+
 
 def fromLevels(rms, peak):
     """
@@ -79,23 +84,42 @@ def fromLevels(rms, peak):
 
     return m
 
-class Mix(object):
-    def __init__(self, trackMix1, trackMix2):
+class Mix(object, log.Loggable):
+    def __init__(self, trackMix1, trackMix2, rmsTarget=-15):
         """
         Define the mix for both tracks.
 
         All time values will be relative to trackMix2.start
+
+        @ivar  volume1: volume adjustment for track 1, in dB.
         """
-        THRESHOLD = -20 # where to pick the mix point
+        THRESHOLD = -9 # where to pick the mix point, relative to rmsTarget
 
+        # figure out volume adjustments
+        self.volume1 = self._getVolume(trackMix1, rmsTarget)
+        self.volume2 = self._getVolume(trackMix2, rmsTarget)
 
-        self.volume1 = -trackMix1.peak
-        self.volume2 = -trackMix2.peak
-
-        mix1 = trackMix1.decay.get(THRESHOLD)
-        mix2 = trackMix2.attack.get(THRESHOLD)
+        level1 = rmsTarget + THRESHOLD - self.volume1
+        self.debug('Finding decay point for %f dB', level1)
+        mix1 = trackMix1.decay.get(level1)
+        level2 = rmsTarget + THRESHOLD - self.volume2
+        self.debug('Finding attack point for %f dB', level2)
+        mix2 = trackMix2.attack.get(level2)
         self.leadout = trackMix1.end - mix1
         self.leadin = mix2 - trackMix2.start
 
         # mix duration is where the two overlap
         self.duration = self.leadout + self.leadin
+
+    def _getVolume(self, trackMix, rmsTarget):
+        ret = rmsTarget - trackMix.rmsPercentile
+        if ret > -trackMix.peak:
+            self.warning('Track %r should be adjusted %r dB '
+                'but only has headroom of %r dB',
+                    trackMix.name, ret, -trackMix.peak)
+            ret = -trackMix.peak
+        else:
+            self.debug('Track %r should have a %r dB adjustment',
+                trackMix.name, ret)
+
+        return ret

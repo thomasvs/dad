@@ -1,5 +1,6 @@
 2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/mixing.py:
 	* examples/mix.py:
 	  Use the volumes as well when deciding the mix.
 
