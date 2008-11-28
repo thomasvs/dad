@@ -32,7 +32,7 @@ import gst
 
 from gst.extend import sources, utils, pygobject
 
-from dad.audio import level, mixdata
+from dad.audio import level, mixing
 
 class Leveller(gst.Pipeline):
     """
@@ -163,9 +163,9 @@ class Leveller(gst.Pipeline):
 
         return peak
 
-    def get_mixdatas(self):
+    def get_track_mixes(self):
         """
-        Get mixdata for all slices in this track.
+        Get track mixes for all slices in this track.
         """
         ret = []
         
@@ -173,7 +173,7 @@ class Leveller(gst.Pipeline):
         peak = self.get_peak_dB()
         slices = rms.slice()
         for s in slices:
-            m = mixdata.fromLevels(s, peak.trim(start=s.start(), end=s.end()))
+            m = mixing.fromLevels(s, peak.trim(start=s.start(), end=s.end()))
             ret.append(m)
 
         return ret

@@ -1,5 +1,11 @@
 2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/mixing.py:
+	* dad/gstreamer/leveller.py:
+	  Rename MixData to TrackMix
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* examples/mix.py:
 	* dad/audio/mixing.py (added):
 	* dad/audio/mixdata.py (deleted):

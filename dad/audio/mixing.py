@@ -24,9 +24,9 @@ import math
 
 from dad.audio import common, level
 
-class MixData(object):
+class TrackMix(object):
     """
-    I am an object holding all relevant data for mixing.
+    I am an object holding all relevant track data for mixing.
 
     @ivar start:         the start time for this track
     @ivar end:           the end time for this track
@@ -50,7 +50,7 @@ class MixData(object):
 
 def fromLevels(rms, peak):
     """
-    @rtype: L{MixData}
+    @rtype: L{TrackMix}
     """
     assert rms.start() == peak.start(), \
         "rms %r and peak %r don't start at same time" % (
@@ -62,7 +62,7 @@ def fromLevels(rms, peak):
     rms = rms.convert(scale=level.SCALE_DECIBEL)
     peak = peak.convert(scale=level.SCALE_DECIBEL)
 
-    m = MixData()
+    m = TrackMix()
     m.start = rms.start()
     m.end = rms.end()
     m.rms = rms.rms()
@@ -80,22 +80,22 @@ def fromLevels(rms, peak):
     return m
 
 class Mix(object):
-    def __init__(self, mixdata1, mixdata2):
+    def __init__(self, trackMix1, trackMix2):
         """
-        Define the mix for both mixdata's.
+        Define the mix for both tracks.
 
-        All time values will be relative to mixdata2.start
+        All time values will be relative to trackMix2.start
         """
         THRESHOLD = -20 # where to pick the mix point
 
 
-        self.volume1 = -mixdata1.peak
-        self.volume2 = -mixdata2.peak
+        self.volume1 = -trackMix1.peak
+        self.volume2 = -trackMix2.peak
 
-        mix1 = mixdata1.decay.get(THRESHOLD)
-        mix2 = mixdata2.attack.get(THRESHOLD)
-        self.leadout = mixdata1.end - mix1
-        self.leadin = mix2 - mixdata2.start
+        mix1 = trackMix1.decay.get(THRESHOLD)
+        mix2 = trackMix2.attack.get(THRESHOLD)
+        self.leadout = trackMix1.end - mix1
+        self.leadin = mix2 - trackMix2.start
 
         # mix duration is where the two overlap
         self.duration = self.leadout + self.leadin
