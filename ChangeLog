@@ -1,5 +1,10 @@
 2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/mix.py:
+	  Use the volumes as well when deciding the mix.
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/sources.py (added):
 	  Add an AudioSource that doesn't use a queue but has a set_volume
 	  method.

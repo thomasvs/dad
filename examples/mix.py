@@ -13,8 +13,9 @@ import pygst
 pygst.require("0.10")
 import gst
 
-from dad.audio import mixing
-from dad.extern import singledecodebin
+from dad.gstreamer import sources
+from dad.audio import mixing, common
+from dad.extern.log import log
 
 
 class Mix(object):
@@ -36,18 +37,23 @@ class Mix(object):
         self._path1 = path1
         self._path2 = path2
 
-    def _makeGnlSource(self, name, path):
+    def _makeGnlSource(self, name, path, volume=1.0):
+        # gnlfilesource has queue problems
         if False:
             source = gst.element_factory_make("gnlfilesource", name)
             source.props.location = path
             return source
         
         caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
-        uri = 'file://' + path
-        decodebin = singledecodebin.SingleDecodeBin(caps=caps, uri=uri)
         source = gst.element_factory_make("gnlsource", name)
-        source.add(decodebin)
         source.props.caps = caps
+
+        audiosource = sources.AudioSource(path)
+        audiosource.set_volume(volume)
+        #uri = 'file://' + path
+        #decodebin = singledecodebin.SingleDecodeBin(caps=caps, uri=uri)
+        #source.add(decodebin)
+        source.add(audiosource)
         return source
 
     def setup(self):
@@ -55,7 +61,9 @@ class Mix(object):
 
         # set up the mix
         track1 = self._tracks[self._path1][0]
+        if not track1.name: track1.name = self._path1
         track2 = self._tracks[self._path2][0]
+        if not track2.name: track2.name = self._path2
 
         mix = mixing.Mix(track1, track2)
 
@@ -73,7 +81,9 @@ class Mix(object):
 
         print 'mix duration: %s' % gst.TIME_ARGS(mix.duration)
 
-        source1 = self._makeGnlSource('source1', self._path1)
+        raw = common.decibelToRaw(mix.volume1)
+        print 'Adjusting track 1 by %r' % raw
+        source1 = self._makeGnlSource('source1', self._path1, volume=raw)
 
         source1.props.start = 0 * gst.SECOND
         source1.props.duration = EXTRA + mix.duration
@@ -83,7 +93,9 @@ class Mix(object):
 
         self._composition.add(source1)
 
-        source2 = self._makeGnlSource('source2', self._path2)
+        raw = common.decibelToRaw(mix.volume2)
+        print 'Adjusting track 2 by %r' % raw
+        source2 = self._makeGnlSource('source2', self._path2, volume=raw)
 
         source2.props.start = EXTRA
         source2.props.duration = EXTRA + mix.duration
@@ -107,13 +119,27 @@ class Mix(object):
 
         self._composition.add(operation)
 
+
     def start(self):
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._message_cb)
         self._pipeline.set_state(gst.STATE_PLAYING)
 
+        gobject.timeout_add(500, self._query)
+
+    def _query(self):
+        s = self._source1.get_children()[0]
+        try:
+            print s.query_position(gst.FORMAT_TIME)
+        except gst.QueryError:
+            print 'query failed'
+            pass
+        return True
+
     def _message_cb(self, bus, message):
+        if message.src == self._pipeline:
+            print message
         if message.src not in (self._source1, self._source2):
             return
 
@@ -127,6 +153,8 @@ class Mix(object):
                 print 'playing', source
 
 def main():
+    log.init('DAD_DEBUG')
+
     if len(sys.argv) < 2:
         print 'Please give a tracks pickle path'
 
