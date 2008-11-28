@@ -1,5 +1,11 @@
 2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/gstreamer/sources.py (added):
+	  Add an AudioSource that doesn't use a queue but has a set_volume
+	  method.
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/audio/mixing.py:
 	* dad/gstreamer/leveller.py:
 	  Rename MixData to TrackMix
