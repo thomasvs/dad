@@ -13,7 +13,7 @@ import pygst
 pygst.require("0.10")
 import gst
 
-from dad.audio import mixdata
+from dad.audio import mixing
 from dad.extern import singledecodebin
 
 
@@ -21,7 +21,7 @@ class Mix(object):
     def __init__(self, tracks, path1=None, path2=None):
         """
         @param tracks: dict of path -> list of mixdata
-        @type  tracks: dict of str -> list of L{dad.audio.mixdata.MixData}
+        @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
         """
 
         self._tracks = tracks
@@ -57,7 +57,7 @@ class Mix(object):
         track1 = self._tracks[self._path1][0]
         track2 = self._tracks[self._path2][0]
 
-        mix = mixdata.Mix(track1, track2)
+        mix = mixing.Mix(track1, track2)
 
         print 'Track 1: %s' % self._path1
         print '- from %s to %s' % (

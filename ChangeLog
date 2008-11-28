@@ -1,3 +1,10 @@
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mix.py:
+	* dad/audio/mixing.py (added):
+	* dad/audio/mixdata.py (deleted):
+	  Rename mixdata to mixing
+
 2008-11-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/audio/mixdata.py:
