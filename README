@@ -2,7 +2,7 @@ Examples
 --------
 
 - to create a pickle of TrackMix objects, use:
-PYTHONPATH=`pwd` python examples/mixdata.py tracks.pickle /path/to/all/my/songs/*
+PYTHONPATH=`pwd` python examples/trackmix.py tracks.pickle /path/to/all/my/songs/*
 
 - to use that pickle to listen to a mix, use:
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle
