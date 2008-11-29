@@ -89,9 +89,9 @@ def main():
 
         if success:
             print 'Successfully analyzed file %r' % path
-            mixdatas = l.get_mixdatas()
-            print '%d slice(s) found.' % len(mixdatas)
-            for i, m in enumerate(mixdatas):
+            trackMixes = l.get_track_mixes()
+            print '%d slice(s) found.' % len(trackMixes)
+            for i, m in enumerate(trackMixes):
                 print '- slice %d: %s - %s' % (
                     i, gst.TIME_ARGS(m.start), gst.TIME_ARGS(m.end))
                 print '  - peak              %r dB' % m.peak
@@ -104,7 +104,7 @@ def main():
                 print '  - weighted from %s to %s' % (
                     gst.TIME_ARGS(start), gst.TIME_ARGS(end))
 
-            tracks[path] = mixdatas
+            tracks[path] = trackMixes
             handle = open(sys.argv[1], 'wb')
             pickle.dump(tracks, handle, 2)
             handle.close()
