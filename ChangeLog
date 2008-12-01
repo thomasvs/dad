@@ -1,3 +1,8 @@
+2008-12-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Handle errors.
+
 2008-11-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/trackmix.py (added):

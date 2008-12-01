@@ -47,7 +47,13 @@ def main():
 
     try:
         handle = open(sys.argv[1])
-        tracks = pickle.load(handle)
+        try:
+            tracks = pickle.load(handle)
+        except Exception, e:
+            sys.stderr.write(
+                "Pickle file '%s' cannot be loaded.\n" % sys.argv[1])
+            sys.exit(1)
+
         handle.close()
     except IndexError:
         sys.stderr.write("Please give a pickle file for tracks.\n")
@@ -82,6 +88,9 @@ def main():
                     done = True
                     success = True
                 elif message.type == gst.MESSAGE_ERROR:
+                    sys.stderr.write('Error analyzing file:\n')
+                    error, debug = message.parse_error()
+                    sys.stderr.write('%s.\n' % error)
                     done = True
 
         l.stop()
