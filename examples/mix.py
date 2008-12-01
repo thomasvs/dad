@@ -19,12 +19,13 @@ from dad.extern.log import log
 
 
 class Mix(object):
-    def __init__(self, tracks, path1=None, path2=None):
+    def __init__(self, loop, tracks, path1=None, path2=None):
         """
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
         """
 
+        self._loop = loop
         self._tracks = tracks
         self._pipeline = gst.parse_launch(
             'gnlcomposition name=composition ! '
@@ -40,21 +41,21 @@ class Mix(object):
     def _makeGnlSource(self, name, path, volume=1.0):
         # gnlfilesource has queue problems
         if False:
-            source = gst.element_factory_make("gnlfilesource", name)
-            source.props.location = path
-            return source
+            gnlsource = gst.element_factory_make("gnlfilesource", name)
+            gnlsource.props.location = path
+            return gnlsource
         
         caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
-        source = gst.element_factory_make("gnlsource", name)
-        source.props.caps = caps
+        gnlsource = gst.element_factory_make("gnlsource", name)
+        gnlsource.props.caps = caps
 
         audiosource = sources.AudioSource(path)
         audiosource.set_volume(volume)
         #uri = 'file://' + path
         #decodebin = singledecodebin.SingleDecodeBin(caps=caps, uri=uri)
         #source.add(decodebin)
-        source.add(audiosource)
-        return source
+        gnlsource.add(audiosource)
+        return audiosource, gnlsource
 
     def setup(self):
         EXTRA = 5 * gst.SECOND # how much of tracks to play outside of mix
@@ -82,8 +83,9 @@ class Mix(object):
         print 'mix duration: %s' % gst.TIME_ARGS(mix.duration)
 
         raw = common.decibelToRaw(mix.volume1)
-        print 'Adjusting track 1 by %r' % raw
-        source1 = self._makeGnlSource('source1', self._path1, volume=raw)
+        print 'Adjusting track 1 by %.3f dB' % mix.volume1
+        asource1, source1 = self._makeGnlSource(
+            'source1', self._path1, volume=raw)
 
         source1.props.start = 0 * gst.SECOND
         source1.props.duration = EXTRA + mix.duration
@@ -94,8 +96,9 @@ class Mix(object):
         self._composition.add(source1)
 
         raw = common.decibelToRaw(mix.volume2)
-        print 'Adjusting track 2 by %r' % raw
-        source2 = self._makeGnlSource('source2', self._path2, volume=raw)
+        print 'Adjusting track 2 by %.3f dB' % mix.volume2
+        asource2, source2 = self._makeGnlSource(
+            'source2', self._path2, volume=raw)
 
         source2.props.start = EXTRA
         source2.props.duration = EXTRA + mix.duration
@@ -106,7 +109,9 @@ class Mix(object):
         self._composition.add(source2)
 
         self._source1 = source1
+        self._asource1 = asource1
         self._source2 = source2
+        self._asource2 = asource2
 
         # add the mixer effect
         operation = gst.element_factory_make("gnloperation")
@@ -124,22 +129,37 @@ class Mix(object):
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._message_cb)
+        print 'setting to PLAYING'
         self._pipeline.set_state(gst.STATE_PLAYING)
 
         gobject.timeout_add(500, self._query)
 
     def _query(self):
-        s = self._source1.get_children()[0]
+        s = self._asource2
+        pad = s.get_pad('src')
+        if not pad:
+            # pad not created yet
+            return True
+
         try:
-            print s.query_position(gst.FORMAT_TIME)
+            position, format = pad.query_position(gst.FORMAT_TIME)
         except gst.QueryError:
             print 'query failed'
+            sys.stderr.write('query failed\n')
+            sys.stdout.flush()
             pass
+
+        # position is returned as a gint64, not a guint64 as GstClockTime
+        change, current, pending = s.get_state()
+        if position == -1L and current == gst.STATE_PLAYING:
+            print 'mix done'
+            self._loop.quit()
         return True
 
     def _message_cb(self, bus, message):
         if message.src == self._pipeline:
-            print message
+            # print message
+            pass
         if message.src not in (self._source1, self._source2):
             return
 
@@ -166,10 +186,10 @@ def main():
 
     tracks = pickle.load(open(sys.argv[1]))
 
-    mix = Mix(tracks, path1, path2)
-    mix.setup()
-
     loop = gobject.MainLoop()
+
+    mix = Mix(loop, tracks, path1, path2)
+    mix.setup()
 
     mix.start()
     loop.run()
