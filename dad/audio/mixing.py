@@ -52,6 +52,18 @@ class TrackMix(object):
     attack = None
     decay = None
 
+    def getVolume(self, rmsTarget=-15):
+        ret = rmsTarget - self.rmsPercentile
+        if ret > -self.peak:
+            log.warning('trackmix', 'Track %r should be adjusted %r dB '
+                'but only has headroom of %r dB',
+                    self.name, ret, -self.peak)
+            ret = -self.peak
+        else:
+            log.debug('trackmix', 'Track %r should have a %r dB adjustment',
+                self.name, ret)
+
+        return ret
 
 def fromLevels(rms, peak):
     """
@@ -96,8 +108,8 @@ class Mix(object, log.Loggable):
         THRESHOLD = -9 # where to pick the mix point, relative to rmsTarget
 
         # figure out volume adjustments
-        self.volume1 = self._getVolume(trackMix1, rmsTarget)
-        self.volume2 = self._getVolume(trackMix2, rmsTarget)
+        self.volume1 = trackMix1.getVolume(rmsTarget)
+        self.volume2 = trackMix2.getVolume(rmsTarget)
 
         level1 = rmsTarget + THRESHOLD - self.volume1
         self.debug('Finding decay point for %f dB', level1)
@@ -110,16 +122,3 @@ class Mix(object, log.Loggable):
 
         # mix duration is where the two overlap
         self.duration = self.leadout + self.leadin
-
-    def _getVolume(self, trackMix, rmsTarget):
-        ret = rmsTarget - trackMix.rmsPercentile
-        if ret > -trackMix.peak:
-            self.warning('Track %r should be adjusted %r dB '
-                'but only has headroom of %r dB',
-                    trackMix.name, ret, -trackMix.peak)
-            ret = -trackMix.peak
-        else:
-            self.debug('Track %r should have a %r dB adjustment',
-                trackMix.name, ret)
-
-        return ret

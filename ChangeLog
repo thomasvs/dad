@@ -1,5 +1,10 @@
 2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/mixing.py:
+	  Move getVolume to a method on TrackMix.
+
+2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/sources.py:
 	  Fix cleanup with ghost pads.
 
