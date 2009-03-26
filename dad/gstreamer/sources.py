@@ -60,11 +60,13 @@ class AudioSource(gst.Bin):
 
     def _decodebin_pad_removed_cb(self, decodebin, pad):
         # workaround for gstreamer bug as taken from pitivi's source.py
-        gpad = self._volume.get_pad("src")
+        # gpad = self._volume.get_pad("src")
+        gpad = self.get_pad("src")
         target = gpad.get_target()
         peer = target.get_peer()
         target.unlink(peer)
-        self.remove_pad(self._volume.get_pad("src"))
+        # self.remove_pad(self._volume.get_pad("src"))
+        self.remove_pad(gpad)
 
     def set_volume(self, volume):
         self._volume.props.volume = volume
