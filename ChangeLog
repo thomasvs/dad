@@ -1,5 +1,12 @@
 2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/gstreamer/jukebox.py (added):
+	* examples/jukebox.py (added):
+	  Add jukebox work in progress.  Does 10 tracks now, and
+	  doesn't cleanup because it trips up gnonlin.
+
+2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/audio/mixing.py:
 	  Move getVolume to a method on TrackMix.
 
