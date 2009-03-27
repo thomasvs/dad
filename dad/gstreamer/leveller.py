@@ -226,9 +226,9 @@ class Leveller(gst.Pipeline):
     ### public methods
 
     def start(self):
-        gst.debug("Setting to PLAYING")
+        self.debug("Setting to PLAYING")
         self.set_state(gst.STATE_PLAYING)
-        gst.debug("Set to PLAYING")
+        self.debug("Set to PLAYING, refcount now %d" % self.__grefcount__)
 
     # FIXME: we might want to do this ourselves automatically ?
     def stop(self):
@@ -239,7 +239,7 @@ class Leveller(gst.Pipeline):
         """
         gst.debug("Setting to NULL")
         self.set_state(gst.STATE_NULL)
-        gst.debug("Set to NULL")
+        self.debug("Set to NULL, refcount now %d" % self.__grefcount__)
         utils.gc_collect('Leveller.stop()')
 
     def clean(self):
@@ -251,16 +251,25 @@ class Leveller(gst.Pipeline):
         self.stop()
 
         # let's be ghetto and clean out our bin manually
+        assert self._source.filesrc
+
         self.remove(self._source)
         self.remove(self._level)
         self.remove(self._fakesink)
         gst.debug("Emptied myself")
-        self._source.clean()
         utils.gc_collect('Leveller.clean() cleaned up source')
+        self.debug("source refcount: %d" % self._source.__grefcount__)
+        self._source.stop()
+        self.debug("source refcount on stop: %d" % self._source.__grefcount__)
+        print self._source.filesrc
+        self._source.clean()
+        self.debug("source refcount on clean: %d" % self._source.__grefcount__)
+
         self._source = None
         self._fakesink = None
         self._level = None
         utils.gc_collect('Leveller.clean() done')
+        self.debug("clean done, refcount now %d" % self.__grefcount__)
 
 gobject.type_register(Leveller)
 
@@ -276,27 +285,35 @@ if __name__ == "__main__":
     except IndexError:
         sys.stderr.write("Please give a file to calculate level of\n")
         sys.exit(1)
+    gst.debug('leveller refcount on creation: %d' % leveller.__grefcount__)
 
     bus = leveller.get_bus()
     bus.add_signal_watch()
     done = False
     success = False
 
+    gst.debug('leveller refcount before start: %d' % leveller.__grefcount__)
     leveller.start()
+    gst.debug('leveller refcount after start: %d' % leveller.__grefcount__)
     
     while not done:
         # this call blocks until there is a message
         message = bus.poll(gst.MESSAGE_ANY, gst.SECOND)
         if message:
-            gst.debug("got message from poll: %s/%r" % (message.type, message))
+            gst.log("got message from poll: %s/%r" % (message.type, message))
         else:
-            gst.debug("got NOTHING from poll")
+            gst.log("got NOTHING from poll")
         if message:
             if message.type == gst.MESSAGE_EOS:
                 done = True
                 success = True
             elif message.type == gst.MESSAGE_ERROR:
                 done = True
+
+        # message, if set, holds a ref to leveller, so we delete it here
+        # to assure cleanup of leveller when we del it
+        del message
+        utils.gc_collect('deleted message')
 
     leveller.stop()
     leveller.clean()
@@ -311,8 +328,9 @@ if __name__ == "__main__":
             pickle.dump(rms, handle, pickle.HIGHEST_PROTOCOL)
             handle.close()
             print 'Dumped RMS dB pickle to %s' % path
+
+    assert leveller.__grefcount__ == 1, "There is a leak in leveller's refcount"
     gst.debug('deleting leveller, verify objects are freed')
-    utils.gc_collect('quit main loop')
     del leveller
     utils.gc_collect('deleted leveller')
     gst.debug('stopping forever')

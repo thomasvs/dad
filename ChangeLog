@@ -1,3 +1,10 @@
+2009-03-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	* examples/trackmix.py:
+	  Add some logging and asserting to check on leaks.  Still leaks
+	  though.
+
 2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/jukebox.py (added):

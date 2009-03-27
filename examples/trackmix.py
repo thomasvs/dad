@@ -39,12 +39,9 @@ def main():
     # threads
     gobject.threads_init()
 
-    main = gobject.MainLoop()
-
-    # load our pickle
-
     tracks = {} # dict of path -> list of mixdata
 
+    # load our tracks pickle
     try:
         handle = open(sys.argv[1])
         try:
@@ -62,6 +59,7 @@ def main():
         # does not exist yet, so we'll create it when we save
         pass
 
+    # loop over all files to be analyzed
     for path in sys.argv[2:]:
         if path in tracks.keys():
             print '%r already analyzed, skipping' % path
@@ -80,9 +78,10 @@ def main():
             # this call blocks until there is a message
             message = bus.poll(gst.MESSAGE_ANY, gst.SECOND)
             if message:
-                gst.debug("got message from poll: %s/%r" % (message.type, message))
+                gst.log("got message from poll: %s/%r" % (
+                    message.type, message))
             else:
-                gst.debug("got NOTHING from poll")
+                gst.log("got NOTHING from poll")
             if message:
                 if message.type == gst.MESSAGE_EOS:
                     done = True
@@ -93,8 +92,14 @@ def main():
                     sys.stderr.write('%s.\n' % error)
                     done = True
 
+        # message, if set, holds a ref to leveller, so we delete it here
+        # to assure cleanup of leveller when we del it
+        del message
+        utils.gc_collect('deleted message')
+
         l.stop()
         l.clean()
+        assert l.__grefcount__ == 1, "There is a leak in leveller's refcount"
 
         if success:
             print 'Successfully analyzed file %r' % path
@@ -120,9 +125,9 @@ def main():
             print
 
         gst.debug('deleting leveller, verify objects are freed')
-        utils.gc_collect('quit main loop')
         del l
         utils.gc_collect('deleted leveller')
-        gst.debug('stopping forever')
+
+    gst.debug('stopping forever')
 
 main()
