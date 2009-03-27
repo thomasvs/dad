@@ -1,6 +1,13 @@
 2009-03-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/leveller.py:
+	  Replace gst.extend.sources.AudioSource with uridecodebin,
+	  As suggested by Edward since that one will be maintained.
+	  Still leaks though in the leveller example.
+
+2009-03-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
 	* examples/trackmix.py:
 	  Add some logging and asserting to check on leaks.  Still leaks
 	  though.

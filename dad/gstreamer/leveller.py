@@ -64,8 +64,9 @@ class Leveller(gst.Pipeline):
 
         self._filename = filename
 
-        self._source = sources.AudioSource(filename)
-        self._source.connect('done', self._source_done_cb)
+        self._source = gst.element_factory_make('uridecodebin')
+        # FIXME: we probably need to encode the uri better
+        self._source.props.uri = 'file://' + filename
 
         self._level = gst.element_factory_make("level")
         self._level.set_property('interval', gst.SECOND / 20) # 50 ms
@@ -213,6 +214,7 @@ class Leveller(gst.Pipeline):
     def _source_pad_added_cb(self, source, pad):
         self._source.link(self._level)
 
+    # FIXME: removed now
     def _source_done_cb(self, source, reason):
         gst.debug("done, reason %s" % reason)
         # we ignore eos as a reason here because we wait for pipeline EOS
@@ -250,20 +252,12 @@ class Leveller(gst.Pipeline):
         # clean ourselves up completely
         self.stop()
 
-        # let's be ghetto and clean out our bin manually
-        assert self._source.filesrc
-
         self.remove(self._source)
         self.remove(self._level)
         self.remove(self._fakesink)
         gst.debug("Emptied myself")
         utils.gc_collect('Leveller.clean() cleaned up source')
         self.debug("source refcount: %d" % self._source.__grefcount__)
-        self._source.stop()
-        self.debug("source refcount on stop: %d" % self._source.__grefcount__)
-        print self._source.filesrc
-        self._source.clean()
-        self.debug("source refcount on clean: %d" % self._source.__grefcount__)
 
         self._source = None
         self._fakesink = None
