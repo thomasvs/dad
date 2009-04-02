@@ -98,8 +98,6 @@ def main():
         utils.gc_collect('deleted message')
 
         l.stop()
-        l.clean()
-        assert l.__grefcount__ == 1, "There is a leak in leveller's refcount"
 
         if success:
             print 'Successfully analyzed file %r' % path
@@ -123,6 +121,9 @@ def main():
             pickle.dump(tracks, handle, 2)
             handle.close()
             print
+
+        l.clean()
+        assert l.__grefcount__ == 1, "There is a leak in leveller's refcount"
 
         gst.debug('deleting leveller, verify objects are freed')
         del l

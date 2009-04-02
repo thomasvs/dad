@@ -67,6 +67,7 @@ class Leveller(gst.Pipeline):
         self._source = gst.element_factory_make('uridecodebin')
         # FIXME: we probably need to encode the uri better
         self._source.props.uri = 'file://' + filename
+        gst.debug('__init__: source refcount: %d' % self._source.__grefcount__)
 
         self._level = gst.element_factory_make("level")
         self._level.set_property('interval', gst.SECOND / 20) # 50 ms
@@ -74,7 +75,9 @@ class Leveller(gst.Pipeline):
         self._fakesink = gst.element_factory_make("fakesink")
 
         self.add(self._source, self._level, self._fakesink)
+        gst.debug('__init__ add: source refcount: %d' % self._source.__grefcount__)
         self._source.connect("pad-added", self._source_pad_added_cb)
+        gst.debug('__init__ connect: source refcount: %d' % self._source.__grefcount__)
         self._level.link(self._fakesink)
 
         # will be set when done
@@ -82,6 +85,8 @@ class Leveller(gst.Pipeline):
         self.rmsdBs = [] # list of Level, one per channel
         self.peakdB = level.Level(scale=level.SCALE_DECIBEL)
         self.decaydB = level.Level(scale=level.SCALE_DECIBEL)
+
+        gst.debug('__init__ end: source refcount: %d' % self._source.__grefcount__)
 
     ### public API
     def get_channels(self):
@@ -179,7 +184,7 @@ class Leveller(gst.Pipeline):
 
         return ret
 
-    ### gst.Bin::handle_message override
+    ### gst.Pipeline::handle_message override
 
     def do_handle_message(self, message):
         self.log("got message %r" % message)
@@ -206,8 +211,10 @@ class Leveller(gst.Pipeline):
         elif message.type == gst.MESSAGE_EOS:
             # whole pipeline eos'd, so we're done
             self.emit('done', sources.EOS)
+
         # chain up 
         gst.Pipeline.do_handle_message(self, message)
+        self.log("handled message %r" % message)
 
     ### source callbacks
 
@@ -262,6 +269,11 @@ class Leveller(gst.Pipeline):
         self._source = None
         self._fakesink = None
         self._level = None
+
+        self.rmsdBs = None
+        self.peakdBs = None
+        self.decaydBs = None
+
         utils.gc_collect('Leveller.clean() done')
         self.debug("clean done, refcount now %d" % self.__grefcount__)
 
@@ -272,7 +284,7 @@ if __name__ == "__main__":
     # threads
     gobject.threads_init()
 
-    main = gobject.MainLoop()
+    #main = gobject.MainLoop()
 
     try:
         leveller = Leveller(sys.argv[1])
@@ -287,8 +299,10 @@ if __name__ == "__main__":
     success = False
 
     gst.debug('leveller refcount before start: %d' % leveller.__grefcount__)
+    utils.gc_collect('before start')
     leveller.start()
     gst.debug('leveller refcount after start: %d' % leveller.__grefcount__)
+    utils.gc_collect('after start')
     
     while not done:
         # this call blocks until there is a message
@@ -306,8 +320,9 @@ if __name__ == "__main__":
 
         # message, if set, holds a ref to leveller, so we delete it here
         # to assure cleanup of leveller when we del it
+        m = repr(message)
         del message
-        utils.gc_collect('deleted message')
+        utils.gc_collect('deleted message %s' % m)
 
     leveller.stop()
     leveller.clean()
@@ -323,8 +338,16 @@ if __name__ == "__main__":
             handle.close()
             print 'Dumped RMS dB pickle to %s' % path
 
+    bus.remove_signal_watch()
+    del bus
+    utils.gc_collect('deleted bus')
+
     assert leveller.__grefcount__ == 1, "There is a leak in leveller's refcount"
     gst.debug('deleting leveller, verify objects are freed')
     del leveller
     utils.gc_collect('deleted leveller')
+    utils.gc_collect('deleted leveller')
+    utils.gc_collect('deleted leveller')
+
+    # some more cleanup to help valgrind
     gst.debug('stopping forever')
