@@ -26,6 +26,7 @@ if __name__ == '__main__':
 import os
 import sys
 import math
+import urllib
 
 import gobject
 import gst
@@ -66,7 +67,7 @@ class Leveller(gst.Pipeline):
 
         self._source = gst.element_factory_make('uridecodebin')
         # FIXME: we probably need to encode the uri better
-        self._source.props.uri = 'file://' + filename
+        self._source.props.uri = 'file://' + urllib.quote(filename)
         gst.debug('__init__: source refcount: %d' % self._source.__grefcount__)
 
         self._level = gst.element_factory_make("level")
