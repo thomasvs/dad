@@ -1,5 +1,11 @@
 2009-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/jukebox.py:
+	  Add a real audioconvert in the pipeline so float sources
+	  can go to int sinks.
+
+2009-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/jukebox.py:
 	  We should error out if we can't set ghost pad target.
 

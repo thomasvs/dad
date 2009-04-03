@@ -32,28 +32,31 @@ class Main(object):
         self._jukebox = jukebox.JukeboxSource()
         self._pipeline = gst.Pipeline()
 
-        ac = gst.element_factory_make('audioconvert')
-        self._ac = gst.element_factory_make('identity')
-        # self._ac.connect('notify::last-message', lambda o, a: sys.stdout.write('%r\n' % self._ac.props.last_message))
+        self._identity = gst.element_factory_make('identity')
+        # self._identity.connect('notify::last-message', lambda o, a: sys.stdout.write('%r\n' % self._identity.props.last_message))
 
-        print 'single', self._ac.props.single_segment
-        self._ac.props.single_segment = True
-        print 'single', self._ac.props.single_segment
+        print 'single', self._identity.props.single_segment
+        self._identity.props.single_segment = True
+        print 'single', self._identity.props.single_segment
+
+        ac = gst.element_factory_make('audioconvert')
         queue = gst.element_factory_make('queue')
         sink = gst.element_factory_make('autoaudiosink')
         # sink = gst.parse_launch('bin. ( vorbisenc name=enc ! oggmux ! filesink location=mix.ogg )')
+        #sink = gst.parse_launch('bin. ( audioconvert ! autoaudiosink )')
         #enc = sink.get_by_name('enc')
         #pad = enc.get_pad('sink')
         #gpad = gst.GhostPad('ghost', pad)
         #print sink
         #sink.add_pad(gpad)
 
-        self._pipeline.add(self._jukebox, self._ac, queue, sink)
-        self._jukebox.link(self._ac)
-        self._ac.link(queue)
+        self._pipeline.add(self._jukebox, ac, self._identity, queue, sink)
+        self._jukebox.link(ac)
+        ac.link(self._identity)
+        self._identity.link(queue)
         queue.link(sink)
 
-        paths = [random.choice(tracks.keys()) for i in range(10)]
+        paths = [random.choice(tracks.keys()) for i in range(3)]
 
         for path in paths:
             self._jukebox.add_track(path, self._tracks[path][0])
@@ -69,7 +72,7 @@ class Main(object):
         gobject.timeout_add(500, self.work)
 
     def work(self):
-        pad = self._ac.get_pad('src')
+        pad = self._identity.get_pad('src')
         try:
             position, format = pad.query_position(gst.FORMAT_TIME)
             print 'overall position', gst.TIME_ARGS(position)
@@ -87,7 +90,7 @@ class Main(object):
             print message
             pass
 
-        if message.src == self._ac:
+        if message.src == self._identity:
             print message
 
 def main():
