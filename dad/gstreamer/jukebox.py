@@ -65,7 +65,10 @@ class JukeboxSource(gst.Bin):
 
     def _composition_pad_added_cb(self, composition, pad):
         self.info('composition pad added %r' % pad)
-        self._gpad.set_target(pad)
+        # FIXME: this happens for example without audioconvert,
+        # source in float, sink in int, and should fail more clearly
+        if not self._gpad.set_target(pad):
+            self.error('Could not set target on ghost pad')
         self._gpad.set_active(True)
 
     def add_track(self, path, trackmix):

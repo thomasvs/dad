@@ -1,3 +1,8 @@
+2009-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	  We should error out if we can't set ghost pad target.
+
 2009-03-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/leveller.py:
