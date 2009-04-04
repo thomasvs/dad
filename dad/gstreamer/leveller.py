@@ -63,7 +63,14 @@ class Leveller(gst.Pipeline):
         gst.Pipeline.__init__(self)
         self._channels = None
 
+        # uridecodebin only takes absolute URI's, so we need an abspath
+        filename = os.path.abspath(filename)
+
+        if not os.path.exists(filename):
+            raise KeyError, "%s does not exist" % filename
+
         self._filename = filename
+
 
         self._source = gst.element_factory_make('uridecodebin')
         # FIXME: we probably need to encode the uri better

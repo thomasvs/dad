@@ -1,5 +1,11 @@
 2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/gstreamer/leveller.py:
+	  Convert given path to an absolute path for uridecodebin.
+	  Error out if the given file does not exist.
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/common (added):
 	* dad/common/__init__.py (added):
 	* dad/common/garbage.py (added):
