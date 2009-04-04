@@ -20,20 +20,26 @@
 
 import unittest
 
+import os
 import math
 
+import gobject
 import gst
 
 from dad.audio import level, common
 from dad.common import garbage
 from dad.gstreamer import leveller
 
+gobject.threads_init()
+
 class LevellerTest(garbage.GarbageTrackerTest):
 
     trackedTypes = [gst.Object, gst.MiniObject]
 
+class FakeLevellerTest(LevellerTest):
     def setUp(self):
         garbage.GarbageTrackerTest.setUp(self)
+
         self._leveller = leveller.Leveller('/tmp')
         # cheat and put values in here
         self._half_dB = common.rawToDecibel(0.5)
@@ -68,3 +74,43 @@ class LevellerTest(garbage.GarbageTrackerTest):
         # to avoid float rounding errors, compare against 5/32 by multiplying
         # and inting
         self.assertEquals(int(value ** 2 * 32), 5)
+
+class RealLevellerTest(LevellerTest):
+    def setUp(self):
+        LevellerTest.setUp(self)
+
+        # create a file to level
+        os.system('gst-launch audiotestsrc num-buffers=100 '
+            '! flacenc ! filesink location=test.flac > out 2>&1')
+        # FIXME: handle error 
+
+        self._leveller = leveller.Leveller('test.flac')
+
+    def tearDown(self):
+        del self._leveller
+        garbage.GarbageTrackerTest.tearDown(self)
+
+
+    def test_create_destroy(self):
+        pass
+
+    def test_start_stop(self):
+        self._done = False
+        self._leveller.connect('done', self._done_cb)
+
+        self._leveller.start()
+
+        # FIXME: should this be a GMainLoop ?
+        while not self._done:
+            pass
+
+        level = self._leveller.get_rms()
+        timestamp, value = level.max()
+        self.assertEquals(timestamp, 2194285713L)
+        self.failUnless(0.3201 < value < 0.3202)
+
+        self._leveller.stop()
+        self._leveller.clean()
+
+    def _done_cb(self, leveller, message):
+        self._done = True

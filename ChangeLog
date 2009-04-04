@@ -1,5 +1,12 @@
 2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/test/test_gstreamer_leveller.py:
+	  Add some garbage tracking tests for Leveller, generating an
+	  actual .flac file.
+	  Doesn't pass without the gst-python fix in #577735
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/leveller.py:
 	  Convert given path to an absolute path for uridecodebin.
 	  Error out if the given file does not exist.
