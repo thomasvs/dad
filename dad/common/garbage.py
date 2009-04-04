@@ -22,6 +22,12 @@ import gc
 import unittest
 
 class GarbageTracker(object):
+    """
+    I track specific object types tracked by the garbage collector.
+    Subclass me to find where your Python code leaks these objects.
+
+    @cvar trackedTypes: the object types you want to track.
+    """
 
     trackedTypes = []
 
@@ -49,21 +55,28 @@ class GarbageTracker(object):
         Initialize tracking of garbage collection for all types in
         garbageTypes.
         """
-        # call before doing any allocation in your test, from setUp
-
+        self.cleanTracked()
         self.collectGarbage()
 
-        self._tracked = {}
         for c in self.trackedTypes:
             self._tracked[c] = [
                 o for o in gc.get_objects() if isinstance(o, c)]
 
     def cleanTracked(self):
+        """
+        Clean the list of tracked objects.
+        """
+
         del self._tracked
+        self._tracked = {}
 
     def getNewTracked(self):
+        """
+        Get a list of all newly tracked objects since the last call to
+        trackGarbage.
 
-        self.collectGarbage()
+        @rtype: list of object
+        """
 
         new = []
 
@@ -74,6 +87,10 @@ class GarbageTracker(object):
         return new
 
 class GarbageTrackerTest(unittest.TestCase, GarbageTracker):
+    """
+    Subclass me for tests with automatic garbage tracking.
+    Will fail if during tearDown any new garbage is left.
+    """
 
     def setUp(self):
         self.trackGarbage()
