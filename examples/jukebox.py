@@ -21,7 +21,7 @@ _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
     gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
 class Main(object):
-    def __init__(self, loop, tracks):
+    def __init__(self, loop, tracks, playlist=None):
         """
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
@@ -56,9 +56,14 @@ class Main(object):
         self._identity.link(queue)
         queue.link(sink)
 
+        # pick songs
         paths = [random.choice(tracks.keys()) for i in range(3)]
+        if playlist:
+            lines = open(playlist).readlines()
+        paths = lines[:3]
 
         for path in paths:
+            path = path.strip()
             self._jukebox.add_track(path, self._tracks[path][0])
 
     def start(self):
@@ -100,10 +105,14 @@ def main():
         print 'Please give a tracks pickle path'
 
     tracks = pickle.load(open(sys.argv[1]))
+    playlist = None
+
+    if len(sys.argv) > 2:
+        playlist = sys.argv[2]
 
     loop = gobject.MainLoop()
 
-    main = Main(loop, tracks)
+    main = Main(loop, tracks, playlist)
 
     main.start()
     print 'going into main loop'
