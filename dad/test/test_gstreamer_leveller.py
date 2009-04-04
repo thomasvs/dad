@@ -22,11 +22,18 @@ import unittest
 
 import math
 
+import gst
+
 from dad.audio import level, common
+from dad.common import garbage
 from dad.gstreamer import leveller
 
-class LevellerTest(unittest.TestCase):
+class LevellerTest(garbage.GarbageTrackerTest):
+
+    trackedTypes = [gst.Object, gst.MiniObject]
+
     def setUp(self):
+        garbage.GarbageTrackerTest.setUp(self)
         self._leveller = leveller.Leveller('/tmp')
         # cheat and put values in here
         self._half_dB = common.rawToDecibel(0.5)
@@ -39,6 +46,10 @@ class LevellerTest(unittest.TestCase):
                 sequence=[(level.SECOND, self._quarter_dB)],
                 scale=level.SCALE_DECIBEL),
         ]
+
+    def tearDown(self):
+        del self._leveller
+        garbage.GarbageTrackerTest.tearDown(self)
 
     def test_get_rms_dB_one(self):
         dB = self._leveller.get_rms_dB(channel=1)

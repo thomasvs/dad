@@ -1,3 +1,16 @@
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common (added):
+	* dad/common/__init__.py (added):
+	* dad/common/garbage.py (added):
+	  Add a module for garbage tracking, extracted from
+	  gst-python's testsuite.
+	  Has a class for adding tracking, and a TestSuite class
+	  using it.
+	* dad/test/test_gstreamer_leveller.py:
+	  Use the GarbageTrackerTest to track garbage.
+	  Add a tearDown to clean up.
+
 2009-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/jukebox.py:
