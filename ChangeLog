@@ -1,5 +1,10 @@
 2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/gstreamer/leveller.py:
+	  Give trackmix objects names.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/jukebox.py:
 	  Add a counter for giving gnlsource objects unique names.
 

@@ -186,8 +186,12 @@ class Leveller(gst.Pipeline):
         rms = self.get_rms_dB()
         peak = self.get_peak_dB()
         slices = rms.slice()
-        for s in slices:
+        for i, s in enumerate(slices):
             m = mixing.fromLevels(s, peak.trim(start=s.start(), end=s.end()))
+            if i == 0:
+                m.name = self._filename
+            else:
+                m.name = "slice %d of %s" % (i + 1, self._filename)
             ret.append(m)
 
         return ret
