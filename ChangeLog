@@ -1,5 +1,11 @@
 2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/jukebox.py:
+	  Remove some debug printing.
+	  Parse the sink as a bin, ghosting the unlinked pad and linking that.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/jukebox.py:
 	  Start playing 10 seconds before the first mix starts.
 	  Because of this, only start scheduling when we have two

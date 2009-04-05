@@ -34,21 +34,18 @@ class Main(object):
 
         self._identity = gst.element_factory_make('identity')
         # self._identity.connect('notify::last-message', lambda o, a: sys.stdout.write('%r\n' % self._identity.props.last_message))
-
-        print 'single', self._identity.props.single_segment
         self._identity.props.single_segment = True
-        print 'single', self._identity.props.single_segment
 
         ac = gst.element_factory_make('audioconvert')
         queue = gst.element_factory_make('queue')
-        sink = gst.element_factory_make('autoaudiosink')
+        
+        # parse the sink as a bin, linking to the unconnected pad
+        sink = gst.parse_launch('bin. ( autoaudiosink )')
+        # FIXME: changed to find_unlinked_pad in gstreamer 0.10.20
+        pad = sink.find_unconnected_pad(gst.PAD_SINK)
         # sink = gst.parse_launch('bin. ( vorbisenc name=enc ! oggmux ! filesink location=mix.ogg )')
-        #sink = gst.parse_launch('bin. ( audioconvert ! autoaudiosink )')
-        #enc = sink.get_by_name('enc')
-        #pad = enc.get_pad('sink')
-        #gpad = gst.GhostPad('ghost', pad)
-        #print sink
-        #sink.add_pad(gpad)
+        gpad = gst.GhostPad('ghost', pad)
+        sink.add_pad(gpad)
 
         self._pipeline.add(self._jukebox, ac, self._identity, queue, sink)
         self._jukebox.link(ac)
@@ -118,7 +115,5 @@ def main():
     main.start()
     print 'going into main loop'
     loop.run()
-
-
 
 main()    
