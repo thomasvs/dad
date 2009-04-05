@@ -1,0 +1,11 @@
+- figure out if leveller's do_handle_message leaks messages:
+  valgrind --show-reachable=yes --leak-check=full --suppressions=valgrind-python.supp python dad/gstreamer/leveller.py /home/thomas/gst/media/small/south.mp3 
+
+<bilboed-pi> homeasvs_, basically... in your do_handle_message implementation, the given messages should have a refcount of 1
+
+DEBUG_LEAK=yes GST_GC=yes GST_DEBUG=pyt*:4 PYTHONPATH=$PYTHONPATH:`pwd`  python dad/gstreamer/leveller.py /home/thomas/gst/media/small/south.mp3 
+
+in output, source refcounting looks suspicious, so look for:
+/ref.*uridecodebin0>
+
+
