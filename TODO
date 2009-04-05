@@ -8,4 +8,6 @@ DEBUG_LEAK=yes GST_GC=yes GST_DEBUG=pyt*:4 PYTHONPATH=$PYTHONPATH:`pwd`  python 
 in output, source refcounting looks suspicious, so look for:
 /ref.*uridecodebin0>
 
-
+- figure out why overall position starts counting up from 0 to 10, then when
+the mix starts, resets to 0, then after the mix, goes back to where it
+should have been.
