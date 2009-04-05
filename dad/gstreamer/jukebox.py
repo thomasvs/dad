@@ -54,6 +54,8 @@ class JukeboxSource(gst.Bin):
         self._playing = [] # list of (path, trackmix) tuples
         self._queue = [] # list of (path, trackmix) tuples
 
+        self._scheduled = 0
+
         self._composition = gst.element_factory_make('gnlcomposition')
         self.add(self._composition)
 
@@ -121,15 +123,12 @@ class JukeboxSource(gst.Bin):
         trackmix = self._playing[-1][1]
 
         prev = trackmix
-        for i, (path, trackmix) in enumerate(self._queue):
-            # FIXME: don't use a random number, use a counter
-            import random
-            i = random.choice(xrange(0, 1000000))
+        for path, trackmix in self._queue:
             # FIXME: remove from queue, add to playing
             mix = mixing.Mix(prev, trackmix)
             start = self._lastend - mix.duration
             raw = common.decibelToRaw(trackmix.getVolume())
-            audiosource, gnlsource = self._makeGnlSource("%08d-%s" % (i, path), path, volume=raw)
+            audiosource, gnlsource = self._makeGnlSource(path, path, volume=raw)
             duration = trackmix.end - trackmix.start
             self.info('scheduling %r at %s for %s' % (
                 path, gst.TIME_ARGS(start), gst.TIME_ARGS(duration)))
@@ -210,11 +209,11 @@ class JukeboxSource(gst.Bin):
 
         return True
    
-
-
     def _makeGnlSource(self, name, path, volume=1.0):
         caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
-        gnlsource = gst.element_factory_make("gnlsource", name)
+        gnlsource = gst.element_factory_make("gnlsource",
+            "%08x-%s" % (self._scheduled, name))
+        self._scheduled += 1
         gnlsource.props.caps = caps
 
         audiosource = sources.AudioSource(path)
