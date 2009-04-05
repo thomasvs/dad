@@ -57,10 +57,11 @@ class Main(object):
         queue.link(sink)
 
         # pick songs
-        paths = [random.choice(tracks.keys()) for i in range(3)]
+        files = tracks.keys()
         if playlist:
-            lines = open(playlist).readlines()
-            paths = lines[:3]
+            files = open(playlist).readlines()
+
+        paths = [random.choice(files) for i in range(200)]
 
         for path in paths:
             path = path.strip()
