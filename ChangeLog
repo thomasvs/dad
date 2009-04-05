@@ -1,3 +1,13 @@
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	  Start playing 10 seconds before the first mix starts.
+	  Because of this, only start scheduling when we have two
+	  songs in the queue.
+	  To avoid pygobject bug
+	  http://bugzilla.gnome.org/show_bug.cgi?id=577999
+	  assert that start is positive.
+
 2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/jukebox.py:

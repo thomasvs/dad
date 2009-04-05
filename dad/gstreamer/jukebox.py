@@ -88,16 +88,26 @@ class JukeboxSource(gst.Bin):
             return
 
         if not self._playing:
+            # we need at least two tracks to start
+            if len(self._queue) < 2:
+                self.info('Waiting for 2 queued tracks before we start')
+                return
+
+            print self._queue
+
             path, trackmix = self._queue[0]
             self.info('starting with %s' % path)
             del self._queue[0]
 
             raw = common.decibelToRaw(trackmix.getVolume())
             audiosource, gnlsource = self._makeGnlSource(path, path, volume=raw)
-            start = trackmix.start
-            start = trackmix.end - 20 * gst.SECOND
-            duration = trackmix.end - start
-            #duration = gst.SECOND * 15
+
+            # Start from a position in the first track 10 seconds before the
+            # mix starts
+            next = self._queue[0]
+            mix = mixing.Mix(trackmix, next[1])
+            duration = mix.duration + 10 * gst.SECOND
+            start = trackmix.end - duration
             priority = 1000 - len(self._playing) * 2
             self._setGnlSourceProps(gnlsource, 0L, start, duration, priority)
 
@@ -146,12 +156,13 @@ class JukeboxSource(gst.Bin):
 
             
     def _setGnlSourceProps(self, gnlsource, start, media_start, duration, priority=1):
+        # pygobject doesn't error out when setting a negative long on a UINT64
+        # see http://bugzilla.gnome.org/show_bug.cgi?id=577999
+        assert start >= 0, "start is negative and shouldn't be"
+
         gnlsource.props.start = start
-        try:
-            gnlsource.props.duration = duration
-        except Exception, e:
-            import code; code.interact(local=locals())
         gnlsource.props.media_start = media_start
+        gnlsource.props.duration = duration
         gnlsource.props.media_duration = duration
         gnlsource.props.priority = priority
 
