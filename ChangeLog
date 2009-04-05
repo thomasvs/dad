@@ -1,5 +1,10 @@
 2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/jukebox.py:
+	  Add options for playlist, randomize, size, sink.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/leveller.py:
 	  Give trackmix objects names.
 
