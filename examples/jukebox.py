@@ -60,7 +60,7 @@ class Main(object):
         paths = [random.choice(tracks.keys()) for i in range(3)]
         if playlist:
             lines = open(playlist).readlines()
-        paths = lines[:3]
+            paths = lines[:3]
 
         for path in paths:
             path = path.strip()
