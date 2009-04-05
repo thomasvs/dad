@@ -121,12 +121,15 @@ class JukeboxSource(gst.Bin):
         trackmix = self._playing[-1][1]
 
         prev = trackmix
-        for path, trackmix in self._queue:
+        for i, (path, trackmix) in enumerate(self._queue):
+            # FIXME: don't use a random number, use a counter
+            import random
+            i = random.choice(xrange(0, 1000000))
             # FIXME: remove from queue, add to playing
             mix = mixing.Mix(prev, trackmix)
             start = self._lastend - mix.duration
             raw = common.decibelToRaw(trackmix.getVolume())
-            audiosource, gnlsource = self._makeGnlSource(path, path, volume=raw)
+            audiosource, gnlsource = self._makeGnlSource("%08d-%s" % (i, path), path, volume=raw)
             duration = trackmix.end - trackmix.start
             self.info('scheduling %r at %s for %s' % (
                 path, gst.TIME_ARGS(start), gst.TIME_ARGS(duration)))
