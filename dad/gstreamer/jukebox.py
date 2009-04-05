@@ -95,8 +95,6 @@ class JukeboxSource(gst.Bin):
                 self.info('Waiting for 2 queued tracks before we start')
                 return
 
-            print self._queue
-
             path, trackmix = self._queue[0]
             self.info('starting with %s' % path)
             del self._queue[0]
