@@ -40,6 +40,7 @@ class Mix(object):
 
     def _makeGnlSource(self, name, path, volume=1.0):
         # gnlfilesource has queue problems
+        # gnlfilesrc has queue/decodebin problems causing glitches
         if False:
             gnlsource = gst.element_factory_make("gnlfilesource", name)
             gnlsource.props.location = path
