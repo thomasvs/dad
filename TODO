@@ -11,3 +11,15 @@ in output, source refcounting looks suspicious, so look for:
 - figure out why overall position starts counting up from 0 to 10, then when
 the mix starts, resets to 0, then after the mix, goes back to where it
 should have been.
+
+PYTHONPATH=`pwd` python examples/mix.py tracks.pickle /home/audio/songs/Breeders\ -\ Divine\ Hammer.ogg /home/audio/albums/Arab\ Strap\ -\ Mad\ For\ Sadness/Arab\ Strap\ -\ Piglet\ \(live\).ogg 
+PYTHONPATH=`pwd` python examples/mix.py tracks.pickle 
+Track 1: /home/audio/songs/Gorki - Destroy.ogg
+- from 0:00:00.000000000 to 0:03:06.980136053
+- leadout at 0:00:53.955918366 for 0:02:13.024217687
+Track 2: /home/audio/songs/Eskobar - Skyscraper.ogg
+- from 0:00:00.000000000 to 0:03:36.774240362
+- leadin at 0:00:05.672925169 for 0:00:05.672925169
+mix duration: 0:02:18.697142856
+
+
