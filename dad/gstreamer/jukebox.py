@@ -38,10 +38,13 @@ from dad.gstreamer import sources
 _TEMPLATE = gst.PadTemplate('template', gst.PAD_SRC, gst.PAD_ALWAYS,
     gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
+SCHEDULE_DURATION = gst.SECOND * 1800
+
 class JukeboxSource(gst.Bin):
     """
     I am an audio source that outputs mixed tracks as a player would.
     """
+    # FIXME: signals not emitted yet
     # signal when a song is started
     pygobject.gsignal('started', str)
     # signal when the mix changes from one track to the next
@@ -50,11 +53,14 @@ class JukeboxSource(gst.Bin):
     def __init__(self):
         gst.Bin.__init__(self)
 
-        self._done = [] # list of (path, trackmix) tuples
-        self._playing = [] # list of (path, trackmix) tuples
-        self._queue = [] # list of (path, trackmix) tuples
+        self._added = [] # list of (path, trackmix) added
+        self._scheduled = [] # list of (path, trackmix) tuples to be played
+        self._playing = [] # list of (path, trackmix) tuples playing
+        self._done = [] # list of (path, trackmix) tuples played
 
-        self._scheduled = 0
+        self._addedCount = 0
+
+        self._position = 0L
 
         self._composition = gst.element_factory_make('gnlcomposition')
         self.add(self._composition)
@@ -73,38 +79,48 @@ class JukeboxSource(gst.Bin):
             self.error('Could not set target on ghost pad')
         self._gpad.set_active(True)
 
+    def _stats(self):
+        self.info('%d tracks added, %d tracks composited, %d tracks played' % (
+            len(self._added), len(self._playing), len(self._done)))
+
     def add_track(self, path, trackmix):
         """
         Add the given track to the playing queue.
+
+        @param path:     path to the track to play
+        @type  path:     str
+        @type  trackmix: L{dad.audio.mixing.TrackMix}
+
         """
         self.debug('Adding track %s' % path)
 
-        self._queue.append((path, trackmix))
+        self._added.append((path, trackmix))
         self._process()
+        self._stats()
 
     def _process(self):
         self.debug('_process')
         # process queues and set up tracks
-        if not self._queue:
+        if not self._added:
             # can't do anything
             return
 
         if not self._playing:
             # we need at least two tracks to start
-            if len(self._queue) < 2:
-                self.info('Waiting for 2 queued tracks before we start')
+            if len(self._added) < 2:
+                self.info('Waiting for 2 addedd tracks before we start')
                 return
 
-            path, trackmix = self._queue[0]
+            path, trackmix = self._added[0]
             self.info('starting with %s' % path)
-            del self._queue[0]
+            del self._added[0]
 
             raw = common.decibelToRaw(trackmix.getVolume())
             audiosource, gnlsource = self._makeGnlSource(path, path, volume=raw)
 
             # Start from a position in the first track 10 seconds before the
             # mix starts
-            next = self._queue[0]
+            next = self._added[0]
             mix = mixing.Mix(trackmix, next[1])
             duration = mix.duration + 10 * gst.SECOND
             start = trackmix.end - duration
@@ -121,18 +137,27 @@ class JukeboxSource(gst.Bin):
         trackmix = self._playing[-1][1]
 
         prev = trackmix
-        for path, trackmix in self._queue:
-            # FIXME: remove from queue, add to playing
+        while self._lastend - self._position < SCHEDULE_DURATION:
+            if not self._added:
+                self.info('No more tracks, cannot schedule more')
+                return
+
+            path, trackmix = self._added[0]
+            del self._added[0]
+
             mix = mixing.Mix(prev, trackmix)
             start = self._lastend - mix.duration
             raw = common.decibelToRaw(trackmix.getVolume())
             audiosource, gnlsource = self._makeGnlSource(path, path, volume=raw)
+            #self._scheduled.append((path, trackmix, audiosource, gnlsource))
+            self._playing.append((path, trackmix, audiosource, gnlsource))
+
             duration = trackmix.end - trackmix.start
             self.info('scheduling %r at %s for %s' % (
                 path, gst.TIME_ARGS(start), gst.TIME_ARGS(duration)))
             self._setGnlSourceProps(gnlsource, start, trackmix.start, duration)
             self._composition.add(gnlsource)
-            self._playing.append((path, trackmix, audiosource, gnlsource))
+            # self._playing.append((path, trackmix, audiosource, gnlsource))
 
             # add the mixer effect
             if True:
@@ -151,9 +176,6 @@ class JukeboxSource(gst.Bin):
 
             self._lastend = start + duration
             prev = trackmix
-            
-        self._queue = []
-
             
     def _setGnlSourceProps(self, gnlsource, start, media_start, duration, priority=1):
         # pygobject doesn't error out when setting a negative long on a UINT64
@@ -177,6 +199,23 @@ class JukeboxSource(gst.Bin):
         """
         self.log('work()')
 
+        # get our own position
+        pad = self.get_pad('src')
+        try:
+            position, format = pad.query_position(gst.FORMAT_TIME)
+            print 'internal overall position', gst.TIME_ARGS(position)
+            if position >= self._position:
+                self._position = position
+                if self._lastend - self._position < SCHEDULE_DURATION:
+                    self.debug('Need to schedule some more')
+                    self._process()
+            else:
+                self.warning('position reported went down to %r' % position)
+
+        except Exception, e:
+            print 'exception', e
+        
+        
         # report position of tracks
         for i, entry in enumerate(self._playing[:]):
             (path, trackmix, audiosource, gnlsource) = entry
@@ -189,14 +228,15 @@ class JukeboxSource(gst.Bin):
             position = format = None
             try:
                 position, format = pad.query_position(gst.FORMAT_TIME)
-            except gst.QueryError:
-                print 'query failed'
-                sys.stderr.write('query failed\n')
+            except (TypeError, gst.QueryError):
+                print 'query failed, path %s' % path
+                sys.stderr.write('query failed, path %s\n' % path)
                 sys.stdout.flush()
             self.log('%s: %r' % (path, gst.TIME_ARGS(position)))
             # FIXME: position ends up -1 at end, while gst.CLOCK_TIME_NONE is positive
             # FIXME: cleaning up provokes all sorts of nastiness
-            #if position == gst.CLOCK_TIME_NONE or position == -1:
+            if position == gst.CLOCK_TIME_NONE or position == -1:
+                print 'should clean up', path
             if False:
                 print 'cleaning up', path
                 # clean up
@@ -210,10 +250,11 @@ class JukeboxSource(gst.Bin):
     def _makeGnlSource(self, name, path, volume=1.0):
         caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
         gnlsource = gst.element_factory_make("gnlsource",
-            "%08x-%s" % (self._scheduled, name))
-        self._scheduled += 1
+            "%08x-%s" % (self._addedCount, name))
+        self._addedCount += 1
         gnlsource.props.caps = caps
 
+        # FIXME: maybe use something with uridecodebin instead
         audiosource = sources.AudioSource(path)
         audiosource.set_volume(volume)
         gnlsource.add(audiosource)

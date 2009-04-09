@@ -85,7 +85,7 @@ class Main(object):
             position, format = pad.query_position(gst.FORMAT_TIME)
             print 'overall position', gst.TIME_ARGS(position)
         except Exception, e:
-            print 'exception', e
+            print 'main: exception', e
 
         import sys
         sys.stdout.flush()
