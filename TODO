@@ -12,6 +12,15 @@ in output, source refcounting looks suspicious, so look for:
 the mix starts, resets to 0, then after the mix, goes back to where it
 should have been.
 
+- check the mix from
+  spears - slave 4 u to lemonheads - down about it to jlo-play (volumes)
+
+- check mix from
+  morphine - (my biggest fear) with dc - so good
+
+- check mix from
+  possum dixon - pharmaceutical itch to beyonce - crazy in love (too soft)
+
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle /home/audio/songs/Breeders\ -\ Divine\ Hammer.ogg /home/audio/albums/Arab\ Strap\ -\ Mad\ For\ Sadness/Arab\ Strap\ -\ Piglet\ \(live\).ogg 
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle 
 Track 1: /home/audio/songs/Gorki - Destroy.ogg
