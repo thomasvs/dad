@@ -24,6 +24,7 @@ if __name__ == '__main__':
     pygst.require('0.10')
 
 import sys
+import optparse
 
 import pickle
 
@@ -35,6 +36,14 @@ from gst.extend import utils
 from dad.gstreamer import leveller
 
 def main():
+    parser = optparse.OptionParser()
+
+    parser.add_option('-p', '--playlist',
+        action="store", dest="playlist",
+        help="playlist to analyze files from")
+
+    opts, args = parser.parse_args(sys.argv[1:])
+
     # this call is always necessary if we're going to have callbacks from
     # threads
     gobject.threads_init()
@@ -43,12 +52,12 @@ def main():
 
     # load our tracks pickle
     try:
-        handle = open(sys.argv[1])
+        handle = open(args[0])
         try:
             tracks = pickle.load(handle)
         except Exception, e:
             sys.stderr.write(
-                "Pickle file '%s' cannot be loaded.\n" % sys.argv[1])
+                "Pickle file '%s' cannot be loaded.\n" % args[0])
             sys.exit(1)
 
         handle.close()
@@ -60,7 +69,14 @@ def main():
         pass
 
     # loop over all files to be analyzed
-    for path in sys.argv[2:]:
+    paths = []
+    if len(args) > 1:
+        paths.extend(args[1:])
+    if opts.playlist:
+        paths.extend(open(opts.playlist).readlines())
+
+    for path in paths:
+        path = path.strip()
         if path in tracks.keys():
             print '%r already analyzed, skipping' % path
             continue

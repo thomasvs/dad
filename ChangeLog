@@ -1,3 +1,8 @@
+2009-04-17  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Add option for a playlist.
+
 2009-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/jukebox.py:
