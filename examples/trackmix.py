@@ -51,6 +51,7 @@ def main():
     tracks = {} # dict of path -> list of mixdata
 
     # load our tracks pickle
+    print 'Opening pickle %s' % args[0]
     try:
         handle = open(args[0])
         try:
@@ -133,7 +134,7 @@ def main():
                     gst.TIME_ARGS(start), gst.TIME_ARGS(end))
 
             tracks[path] = trackMixes
-            handle = open(sys.argv[1], 'wb')
+            handle = open(args[0], 'wb')
             pickle.dump(tracks, handle, 2)
             handle.close()
             print
