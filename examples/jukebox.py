@@ -67,7 +67,10 @@ class Main(object):
 
         for path in paths:
             path = path.strip()
-            self._jukebox.add_track(path, self._tracks[path][0])
+            try:
+                self._jukebox.add_track(path, self._tracks[path][0])
+            except KeyError:
+                print "%s not in pickle, skipping" % path
 
     def start(self):
         print 'starting'
