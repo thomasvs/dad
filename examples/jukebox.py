@@ -120,7 +120,7 @@ def main():
     parser.add_option('-r', '--random',
         action="store_true", dest="random",
         help="play tracks in random order")
-    default = 'autoaudiosink'
+    default = 'queue ! autoaudiosink'
     parser.add_option('-s', '--sink',
         action="store", dest="sink",
         help="GStreamer audio sink to output to (defaults to %s" % default,
