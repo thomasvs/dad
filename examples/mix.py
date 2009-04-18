@@ -52,6 +52,8 @@ class Mix(object):
 
         audiosource = sources.AudioSource(path)
         audiosource.set_volume(volume)
+        #audiosource = gst.element_factory_make("uridecodebin")
+        #audiosource.props.uri = 'file://' + path
         #uri = 'file://' + path
         #decodebin = singledecodebin.SingleDecodeBin(caps=caps, uri=uri)
         #source.add(decodebin)
@@ -142,6 +144,7 @@ class Mix(object):
             # pad not created yet
             return True
 
+        position = None
         try:
             position, format = pad.query_position(gst.FORMAT_TIME)
         except gst.QueryError:
@@ -149,6 +152,8 @@ class Mix(object):
             sys.stderr.write('query failed\n')
             sys.stdout.flush()
             pass
+        except TypeError:
+            print 'no result'
 
         # position is returned as a gint64, not a guint64 as GstClockTime
         change, current, pending = s.get_state()

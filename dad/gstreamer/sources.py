@@ -26,11 +26,11 @@ if __name__ == '__main__':
 import os
 import sys
 import math
+import urllib
 
 import gobject
 import gst
 
-from dad.extern import singledecodebin
 
 class AudioSource(gst.Bin):
     """
@@ -42,23 +42,29 @@ class AudioSource(gst.Bin):
 
         caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
 
-        uri = 'file://' + path
-        decodebin = singledecodebin.SingleDecodeBin(caps=caps, uri=uri)
-        #self._convert = gst.element_factory_make('audioconvert', 'convert')
+        self._source = gst.element_factory_make('uridecodebin', 'source-decodebin')
+        self._source.props.uri = 'file://' + urllib.quote(path)
+
+        self._convert = gst.element_factory_make('audioconvert', 'source-convert')
         self._volume = gst.element_factory_make('volume', 'source-volume')
-        self.add(decodebin, self._volume)
-        #self._convert.link(self._volume)
+        self.add(self._source, self._convert, self._volume)
+        self._convert.link(self._volume)
 
-        decodebin.connect('pad-added', self._decodebin_pad_added_cb)
-        decodebin.connect('pad-removed', self._decodebin_pad_removed_cb)
+        self._source.connect('pad-added', self._source_pad_added_cb)
+        self._source.connect('pad-removed', self._source_pad_removed_cb)
 
-    def _decodebin_pad_added_cb(self, decodebin, pad):
-        pad.link(self._volume.get_pad("sink"))
         ghost = gst.GhostPad("src", self._volume.get_pad("src"))
         ghost.set_active(True)
         self.add_pad(ghost)
 
-    def _decodebin_pad_removed_cb(self, decodebin, pad):
+
+    def _source_pad_added_cb(self, source, pad):
+        print 'source pad added', source, pad
+        print 'caps', pad.get_caps()
+        pad.link(self._convert.get_pad("sink"))
+
+    def _source_pad_removed_cb(self, source, pad):
+        print 'source pad removed', source, pad
         # workaround for gstreamer bug as taken from pitivi's source.py
         # gpad = self._volume.get_pad("src")
         gpad = self.get_pad("src")
