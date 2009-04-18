@@ -202,22 +202,23 @@ class JukeboxSource(gst.Bin):
         # get our own position
         pad = self.get_pad('src')
         try:
-            position, format = pad.query_position(gst.FORMAT_TIME)
-            print 'internal overall position', gst.TIME_ARGS(position)
-            if position >= self._position:
-                self._position = position
-                if self._lastend - self._position < SCHEDULE_DURATION:
-                    self.debug('Need to schedule some more')
-                    self._process()
-            else:
-                self.warning('position reported went down to %r' % position)
-
+            res = pad.query_position(gst.FORMAT_TIME)
+            if res != None:
+                position, format = res
+                print 'internal overall position', gst.TIME_ARGS(position)
+                if position >= self._position:
+                    self._position = position
+                    if self._lastend - self._position < SCHEDULE_DURATION:
+                        self.debug('Need to schedule some more')
+                        self._process()
+                else:
+                    self.warning('position reported went down to %r' % position)
         except Exception, e:
-            print 'exception', e
+            print 'exception querying overall position', e
         
         
         # report position of tracks
-        for i, entry in enumerate(self._playing[:]):
+        for (i, entry) in enumerate(self._playing[:]):
             (path, trackmix, audiosource, gnlsource) = entry
             pad = audiosource.get_pad('src')
             if not pad:
@@ -225,15 +226,17 @@ class JukeboxSource(gst.Bin):
                 continue
             # resetting otherwise when except triggers after removing,
             # the new track gets removed
-            position = format = None
+            position = None
+            format = None
             try:
                 position, format = pad.query_position(gst.FORMAT_TIME)
+                self.log('%s: %r' % (path, gst.TIME_ARGS(position)))
             except (TypeError, gst.QueryError):
-                print 'query failed, path %s' % path
-                sys.stderr.write('query failed, path %s\n' % path)
-                sys.stdout.flush()
-            self.log('%s: %r' % (path, gst.TIME_ARGS(position)))
-            # FIXME: position ends up -1 at end, while gst.CLOCK_TIME_NONE is positive
+                # can happen if the track is not playing yet
+                # sys.stderr.write('position query failed, path %s\n' % path)
+                self.log('could not query %s' % path)
+            # FIXME: position ends up -1 at end, while gst.CLOCK_TIME_NONE is
+            # positive
             # FIXME: cleaning up provokes all sorts of nastiness
             if position == gst.CLOCK_TIME_NONE or position == -1:
                 print 'should clean up', path
