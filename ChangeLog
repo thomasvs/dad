@@ -1,3 +1,11 @@
+2009-04-21  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	* dad/gstreamer/sources.py:
+	* examples/jukebox.py:
+	  Convert prints to debug statements.
+	  Update overall position on a single line.
+
 2009-04-19  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/jukebox.py:

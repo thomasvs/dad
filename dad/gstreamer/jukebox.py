@@ -205,7 +205,7 @@ class JukeboxSource(gst.Bin):
             res = pad.query_position(gst.FORMAT_TIME)
             if res != None:
                 position, format = res
-                print 'internal overall position', gst.TIME_ARGS(position)
+                # print 'internal overall position', gst.TIME_ARGS(position)
                 if position >= self._position:
                     self._position = position
                     if self._lastend - self._position < SCHEDULE_DURATION:
@@ -239,7 +239,7 @@ class JukeboxSource(gst.Bin):
             # positive
             # FIXME: cleaning up provokes all sorts of nastiness
             if position == gst.CLOCK_TIME_NONE or position == -1:
-                print 'should clean up', path
+                self.log('should clean up %s' % path)
             if False:
                 print 'cleaning up', path
                 # clean up

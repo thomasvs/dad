@@ -59,12 +59,12 @@ class AudioSource(gst.Bin):
 
 
     def _source_pad_added_cb(self, source, pad):
-        print 'source pad added', source, pad
-        print 'caps', pad.get_caps()
+        self.debug('source pad added: source %r, pad %r' % (source, pad))
+        self.debug('caps: %r' % pad.get_caps())
         pad.link(self._convert.get_pad("sink"))
 
     def _source_pad_removed_cb(self, source, pad):
-        print 'source pad removed', source, pad
+        self.debug('source pad removed: source %r, pad %r' % (source, pad))
         # workaround for gstreamer bug as taken from pitivi's source.py
         # gpad = self._volume.get_pad("src")
         gpad = self.get_pad("src")

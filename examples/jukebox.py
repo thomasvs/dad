@@ -86,12 +86,11 @@ class Main(object):
         pad = self._identity.get_pad('src')
         try:
             position, format = pad.query_position(gst.FORMAT_TIME)
-            print 'overall position', gst.TIME_ARGS(position)
+            sys.stdout.write('\roverall position: %s' % gst.TIME_ARGS(position))
+            sys.stdout.flush()
         except Exception, e:
             print 'main: exception', e
-
-        import sys
-        sys.stdout.flush()
+            sys.stdout.flush()
 
         return True
   
