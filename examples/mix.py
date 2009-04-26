@@ -19,7 +19,7 @@ from dad.extern.log import log
 
 
 class Mix(object):
-    def __init__(self, loop, tracks, path1=None, path2=None):
+    def __init__(self, loop, tracks, opts, path1=None, path2=None):
         """
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
@@ -29,7 +29,7 @@ class Mix(object):
         self._tracks = tracks
         self._pipeline = gst.parse_launch(
             'gnlcomposition name=composition ! '
-            'audioconvert ! queue ! autoaudiosink')
+            'audioconvert ! %s' % opts.sink)
         self._composition = self._pipeline.get_by_name('composition')
         if not path1:
             path1 = random.choice(self._tracks.keys())
@@ -222,7 +222,7 @@ def main():
     
     loop = gobject.MainLoop()
 
-    mix = Mix(loop, tracks, paths[0], paths[1])
+    mix = Mix(loop, tracks, opts, paths[0], paths[1])
     mix.setup()
 
     mix.start()
