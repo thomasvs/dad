@@ -83,6 +83,7 @@ class Mix(object):
         print '- leadin until %s for %s' % (
             gst.TIME_ARGS(track2.start + mix.leadin), gst.TIME_ARGS(mix.leadin))
 
+        print 'mix start:    %s' % gst.TIME_ARGS(EXTRA)
         print 'mix duration: %s' % gst.TIME_ARGS(mix.duration)
 
         raw = common.decibelToRaw(mix.volume1)
