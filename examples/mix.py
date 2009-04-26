@@ -202,6 +202,8 @@ def main():
 
     # select two files to mix
     paths = args[2:]
+    for p in paths:
+        print 'Given %s' % p
 
     if len(paths) < 2:
         missing = 2 - len(paths)
@@ -213,6 +215,9 @@ def main():
             paths.extend([random.choice(files) for i in range(missing)])
         else:
             paths.extend(files[:missing])
+
+        for p in paths[2 - missing:]:
+            print 'Chosen %s' % p
 
         paths = [path.strip() for path in paths]
     
