@@ -124,6 +124,9 @@ class Mix(object):
 
         self._composition.add(operation)
 
+        # schedule a stop
+        gobject.timeout_add(((2 * EXTRA) + mix.duration) / 1000000.0, self.stop)
+        source2.props.duration = EXTRA + mix.duration
 
     def start(self):
         bus = self._pipeline.get_bus()
@@ -133,6 +136,13 @@ class Mix(object):
         self._pipeline.set_state(gst.STATE_PLAYING)
 
         gobject.timeout_add(500, self._query)
+
+    def stop(self):
+        bus = self._pipeline.get_bus()
+        bus.remove_signal_watch()
+        print 'setting to NULL'
+        self._pipeline.set_state(gst.STATE_NULL)
+        self._loop.quit()
 
     def _query(self):
         s = self._asource2
@@ -160,8 +170,8 @@ class Mix(object):
         return True
 
     def _message_cb(self, bus, message):
+        print message
         if message.src == self._pipeline:
-            # print message
             pass
         if message.src not in (self._source1, self._source2):
             return
