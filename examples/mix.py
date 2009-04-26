@@ -201,7 +201,7 @@ def main():
     tracks = pickle.load(open(args[0]))
 
     # select two files to mix
-    paths = args[2:]
+    paths = args[1:]
     for p in paths:
         print 'Given %s' % p
 
