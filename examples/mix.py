@@ -1,9 +1,9 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import optparse
 import sys
 import random
-
 import pickle
 
 import gobject
@@ -181,20 +181,47 @@ class Mix(object):
 def main():
     log.init('DAD_DEBUG')
 
-    if len(sys.argv) < 2:
+    parser = optparse.OptionParser()
+
+    parser.add_option('-p', '--playlist',
+        action="store", dest="playlist",
+        help="playlist to play from")
+    parser.add_option('-r', '--random',
+        action="store_true", dest="random",
+        help="play tracks in random order")
+    default = 'queue ! autoaudiosink'
+    parser.add_option('-s', '--sink',
+        action="store", dest="sink",
+        help="GStreamer audio sink to output to (defaults to %s" % default,
+        default=default)
+
+    options, args = parser.parse_args(sys.argv[1:])
+
+
+    if len(args) < 1:
         print 'Please give a tracks pickle path'
 
-    path1 = path2 = None
-    if len(sys.argv) > 2:
-        path1 = sys.argv[2]
-    if len(sys.argv) > 3:
-        path2 = sys.argv[3]
+    tracks = pickle.load(open(args[0]))
 
-    tracks = pickle.load(open(sys.argv[1]))
+    # select two files to mix
+    paths = args[2:]
 
+    if len(paths) < 2:
+        missing = 2 - len(paths)
+        files = tracks.keys()
+        if options.playlist:
+            files = open(options.playlist).readlines()
+
+        if options.random:
+            paths.extend([random.choice(files) for i in range(missing)])
+        else:
+            paths = files[:missing]
+
+        paths = [path.strip() for path in paths]
+    
     loop = gobject.MainLoop()
 
-    mix = Mix(loop, tracks, path1, path2)
+    mix = Mix(loop, tracks, paths[0], paths[1])
     mix.setup()
 
     mix.start()

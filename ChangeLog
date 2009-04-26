@@ -1,3 +1,9 @@
+2009-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mix.py:
+	  Give the mix example some option parsing so we can reproduce the
+	  same mixes as in jukebox.py easily.
+
 2009-04-21  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/jukebox.py:
