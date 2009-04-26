@@ -19,7 +19,7 @@ from dad.extern.log import log
 
 
 class Mix(object):
-    def __init__(self, loop, tracks, options, path1=None, path2=None):
+    def __init__(self, loop, tracks, options, path1, path2):
         """
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
@@ -31,10 +31,6 @@ class Mix(object):
             'gnlcomposition name=composition ! '
             'audioconvert ! %s' % options.sink)
         self._composition = self._pipeline.get_by_name('composition')
-        if not path1:
-            path1 = random.choice(self._tracks.keys())
-        if not path2:
-            path2 = random.choice(self._tracks.keys())
         self._path1 = path1
         self._path2 = path2
 
@@ -216,7 +212,7 @@ def main():
         if options.random:
             paths.extend([random.choice(files) for i in range(missing)])
         else:
-            paths = files[:missing]
+            paths.extend(files[:missing])
 
         paths = [path.strip() for path in paths]
     
