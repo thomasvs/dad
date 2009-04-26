@@ -125,6 +125,8 @@ class Mix(object):
         self._composition.add(operation)
 
         # schedule a stop
+        # FIXME: this should be done against the pipeline's clock instead;
+        # imagine using a filesink
         gobject.timeout_add(((2 * EXTRA) + mix.duration) / 1000000.0, self.stop)
         source2.props.duration = EXTRA + mix.duration
 
@@ -170,7 +172,7 @@ class Mix(object):
         return True
 
     def _message_cb(self, bus, message):
-        print message
+        #print message
         if message.src == self._pipeline:
             pass
         if message.src not in (self._source1, self._source2):
