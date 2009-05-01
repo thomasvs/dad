@@ -1,3 +1,9 @@
+2009-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Use a temporary file to write the pickle to, so we replace
+	  atomically.
+
 2009-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/mix.py:

@@ -23,9 +23,12 @@ if __name__ == '__main__':
     import pygst
     pygst.require('0.10')
 
+import os
 import sys
 import optparse
+import shutil
 
+import tempfile
 import pickle
 
 import gobject
@@ -134,9 +137,11 @@ def main():
                     gst.TIME_ARGS(start), gst.TIME_ARGS(end))
 
             tracks[path] = trackMixes
-            handle = open(args[0], 'wb')
+            (fd, path) = tempfile.mkstemp(suffix='.dad')
+            handle = os.fdopen(fd, 'wb')
             pickle.dump(tracks, handle, 2)
             handle.close()
+            shutil.move(path, args[0])
             print
 
         l.clean()
