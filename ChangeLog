@@ -1,3 +1,20 @@
+2009-06-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/scheduler.py (added):
+	* dad/common/selecter.py (added):
+	  Add objects for selecting and scheduling.
+	* dad/gstreamer/jukebox.py:
+	  Use the scheduler.
+	* examples/jukebox.py:
+	  Use a selecter and a scheduler.
+
+2009-06-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	* dad/gstreamer/sources.py:
+	* examples/jukebox.py:
+	* examples/mix.py:
+
 2009-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/trackmix.py:

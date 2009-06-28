@@ -16,6 +16,7 @@ import gst
 
 from dad.gstreamer import jukebox
 from dad.audio import mixing, common
+from dad.common import scheduler, selecter
 from dad.extern.log import log
 
 _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
@@ -30,7 +31,8 @@ class Main(object):
 
         self._loop = loop
         self._tracks = tracks
-        self._jukebox = jukebox.JukeboxSource()
+        self._scheduler = scheduler.Scheduler()
+        self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
 
         self._identity = gst.element_factory_make('identity')
@@ -56,21 +58,13 @@ class Main(object):
         queue.link(sink)
 
         # pick songs
-        files = tracks.keys()
-        if options.playlist:
-            files = open(options.playlist).readlines()
+        sel = selecter.SimplePlaylistSelecter(
+            tracks, options.playlist, options.random)
 
-        if options.random:
-            paths = [random.choice(files) for i in range(options.count)]
-        else:
-            paths = files[:options.count]
+        for i in range(options.count):
+            path, track = sel.get()
+            self._scheduler.add_track(path, track)
 
-        for path in paths:
-            path = path.strip()
-            try:
-                self._jukebox.add_track(path, self._tracks[path][0])
-            except KeyError:
-                print "%s not in pickle, skipping" % path
 
     def start(self):
         print 'starting'
@@ -131,6 +125,10 @@ def main():
         print 'Please give a tracks pickle path'
 
     tracks = pickle.load(open(args[0]))
+    if len(tracks) == 0:
+        sys.stderr.write('No tracks in pickle!\n')
+        return 1
+        
 
     loop = gobject.MainLoop()
 
@@ -140,4 +138,6 @@ def main():
     print 'going into main loop'
     loop.run()
 
-main()    
+    return 0
+
+sys.exit(main())
