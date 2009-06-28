@@ -127,7 +127,7 @@ class Mix(object):
         # schedule a stop
         # FIXME: this should be done against the pipeline's clock instead;
         # imagine using a filesink
-        gobject.timeout_add(((2 * EXTRA) + mix.duration) / 1000000.0, self.stop)
+        gobject.timeout_add(((2 * EXTRA) + mix.duration) / 1000000, self.stop)
         source2.props.duration = EXTRA + mix.duration
 
     def start(self):
@@ -150,19 +150,21 @@ class Mix(object):
         s = self._asource2
         pad = s.get_pad('src')
         if not pad:
-            # pad not created yet
+            # pad of track 2 not created yet
             return True
 
         position = None
         try:
             position, format = pad.query_position(gst.FORMAT_TIME)
         except gst.QueryError:
-            print 'query failed'
-            sys.stderr.write('query failed\n')
+            print 'position query failed'
+            sys.stderr.write('position query failed\n')
             sys.stdout.flush()
             pass
         except TypeError:
-            print 'no result'
+            # print 'position query gave no result'
+            # normal if track 2 hasn't started yet
+            pass
 
         # position is returned as a gint64, not a guint64 as GstClockTime
         change, current, pending = s.get_state()
