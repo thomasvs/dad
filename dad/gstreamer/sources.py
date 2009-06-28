@@ -47,8 +47,12 @@ class AudioSource(gst.Bin):
 
         self._convert = gst.element_factory_make('audioconvert', 'source-convert')
         self._volume = gst.element_factory_make('volume', 'source-volume')
-        self.add(self._source, self._convert, self._volume)
-        self._convert.link(self._volume)
+
+        self._capsfilter = gst.element_factory_make('capsfilter', 'capsfilter')
+        self._capsfilter.props.caps = gst.Caps('audio/x-raw-int,channels=2,rate=44100,width=16,depth=16')
+        self.add(self._source, self._convert, self._capsfilter, self._volume)
+        self._convert.link(self._capsfilter)
+        self._capsfilter.link(self._volume)
 
         self._source.connect('pad-added', self._source_pad_added_cb)
         self._source.connect('pad-removed', self._source_pad_removed_cb)
