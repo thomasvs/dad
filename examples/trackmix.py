@@ -23,12 +23,9 @@ if __name__ == '__main__':
     import pygst
     pygst.require('0.10')
 
-import os
 import sys
 import optparse
-import shutil
 
-import tempfile
 import pickle
 
 import gobject
@@ -36,6 +33,7 @@ import gst
 
 from gst.extend import utils
 
+from dad.audio import common
 from dad.gstreamer import leveller
 
 def main():
@@ -126,7 +124,8 @@ def main():
             for i, m in enumerate(trackMixes):
                 print '- slice %d: %s - %s' % (
                     i, gst.TIME_ARGS(m.start), gst.TIME_ARGS(m.end))
-                print '  - peak              %r dB' % m.peak
+                print '  - peak              %02.3f dB (%03.3f %%)' % (
+                    m.peak, common.decibelToRaw(m.peak) * 100.0)
                 print '  - rms               %r dB' % m.rms
                 print '  - peak rms          %r dB' % m.rmsPeak
                 print '  - 95 percentile rms %r dB' % m.rmsPercentile
@@ -137,11 +136,9 @@ def main():
                     gst.TIME_ARGS(start), gst.TIME_ARGS(end))
 
             tracks[path] = trackMixes
-            (fd, path) = tempfile.mkstemp(suffix='.dad')
-            handle = os.fdopen(fd, 'wb')
+            handle = open(args[0], 'wb')
             pickle.dump(tracks, handle, 2)
             handle.close()
-            shutil.move(path, args[0])
             print
 
         l.clean()
