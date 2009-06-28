@@ -52,7 +52,14 @@ class TrackMix(object):
     attack = None
     decay = None
 
-    def getVolume(self, rmsTarget=-15):
+    def getVolume(self, rmsTarget=-15.0):
+        """
+        @param rmsTarget: the target RMS to adjust for, in dB.
+        @type  rmsTarget: float
+
+        @returns: the amount of dB to adjust by to reach the rmsTarget.
+        @rtype:   float
+        """
         ret = rmsTarget - self.rmsPercentile
         if ret > -self.peak:
             log.warning('trackmix', 'Track %r should be adjusted %r dB '
