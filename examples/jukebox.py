@@ -22,7 +22,7 @@ from dad.extern.log import log
 _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
     gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
-class Main(object):
+class Main(log.Loggable):
     def __init__(self, loop, tracks, options):
         """
         @param tracks: dict of path -> list of mixdata
@@ -91,18 +91,16 @@ class Main(object):
 
     def _message_cb(self, bus, message):
         if message.src == self._pipeline:
-            print message
-            pass
-
-        if message.src == self._identity:
-            print message
+            self.debug('message from pipeline: %r', message)
+        elif message.src == self._identity:
+            self.debug('message from identity: %r', message)
 
 def main():
     log.init('DAD_DEBUG')
 
     parser = optparse.OptionParser()
 
-    default = 100
+    default = 10
     parser.add_option('-c', '--count',
         action="store", dest="count",
         help="how many tracks to play (defaults to %d)" % default,
