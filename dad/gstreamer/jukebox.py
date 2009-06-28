@@ -87,16 +87,9 @@ class JukeboxSource(gst.Bin):
         self.info('%d tracks added, %d tracks composited, %d tracks played' % (
             len(self._added), len(self._playing), len(self._done)))
 
-    def start(self):
-        """
-        Start getting tracks from the scheduler.
-        """
-        self._process()
-
     def _scheduled_cb(self, obj, scheduled):
         self.debug('scheduled %r' % scheduled)
 
-        # self._process()
         audiosource, gnlsource = self._makeGnlSource(scheduled.path,
             scheduled.path, volume=common.decibelToRaw(scheduled.volume))
         self._setGnlSourceProps(gnlsource, scheduled.start,
@@ -158,7 +151,7 @@ class JukeboxSource(gst.Bin):
                     self._position = position
                     if self._lastend - self._position < SCHEDULE_DURATION:
                         self.debug('Need to schedule some more')
-                        self._process()
+                        # FIXME:
                 else:
                     self.warning('position reported went down to %r' % position)
         except Exception, e:

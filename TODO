@@ -21,6 +21,9 @@ should have been.
 - check mix from
   possum dixon - pharmaceutical itch to beyonce - crazy in love (too soft)
 
+- check mix from
+  tracy chapman - revolution to elbow - mexican standoff (second too soft)
+
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle /home/audio/songs/Breeders\ -\ Divine\ Hammer.ogg /home/audio/albums/Arab\ Strap\ -\ Mad\ For\ Sadness/Arab\ Strap\ -\ Piglet\ \(live\).ogg 
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle 
 Track 1: /home/audio/songs/Gorki - Destroy.ogg
