@@ -76,3 +76,8 @@ class SimplePlaylistSelecter(Selecter):
         del self._selected[-1]
 
         return tuple
+
+    def select(self):
+        t = self.get()
+        self.info('selecter: selected %r', t)
+        return t

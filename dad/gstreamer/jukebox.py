@@ -75,6 +75,8 @@ class JukeboxSource(gst.Bin):
         self._gpad = gst.ghost_pad_new_no_target_from_template('src', _TEMPLATE)
         self.add_pad(self._gpad)
 
+        self._scheduling = False
+
     def _composition_pad_added_cb(self, composition, pad):
         self.info('composition pad added %r' % pad)
         # FIXME: this happens for example without audioconvert,
@@ -88,6 +90,8 @@ class JukeboxSource(gst.Bin):
             len(self._added), len(self._playing), len(self._done)))
 
     def _scheduled_cb(self, obj, scheduled):
+        self.info('jukebox: scheduled %r' % scheduled)
+        self._scheduling = False
         self.debug('scheduled %r' % scheduled)
 
         audiosource, gnlsource = self._makeGnlSource(scheduled.path,
@@ -117,6 +121,8 @@ class JukeboxSource(gst.Bin):
 
         # update lastend
         self._lastend = scheduled.start + scheduled.duration
+        self.debug('jukebox: lastend updated to %r' % 
+            gst.TIME_ARGS(self._lastend))
            
     def _setGnlSourceProps(self, gnlsource, start, media_start, duration, priority=1):
         # pygobject doesn't error out when setting a negative long on a UINT64
@@ -151,6 +157,11 @@ class JukeboxSource(gst.Bin):
                     self._position = position
                     if self._lastend - self._position < SCHEDULE_DURATION:
                         self.debug('Need to schedule some more')
+                        self.info('jukebox: asking scheduler to schedule')
+                        # only ask once at a time
+                        if not self._scheduling:
+                            self._scheduling = True
+                            self._scheduler.schedule()
                         # FIXME:
                 else:
                     self.warning('position reported went down to %r' % position)

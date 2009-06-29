@@ -31,7 +31,9 @@ class Main(log.Loggable):
 
         self._loop = loop
         self._tracks = tracks
-        self._scheduler = scheduler.Scheduler()
+        sel = selecter.SimplePlaylistSelecter(
+            tracks, options.playlist, options.random)
+        self._scheduler = scheduler.Scheduler(sel)
         self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
 
@@ -58,8 +60,6 @@ class Main(log.Loggable):
         queue.link(sink)
 
         # pick songs
-        sel = selecter.SimplePlaylistSelecter(
-            tracks, options.playlist, options.random)
 
         for i in range(int(options.count)):
             path, track = sel.get()
@@ -78,12 +78,14 @@ class Main(log.Loggable):
 
     def work(self):
         pad = self._identity.get_pad('src')
-        try:
-            position, format = pad.query_position(gst.FORMAT_TIME)
-            sys.stdout.write('\roverall position: %s' % gst.TIME_ARGS(position))
+        res = pad.query_position(gst.FORMAT_TIME)
+        if res:
+            position, format = res
+            sys.stdout.write('\roverall position: %s' % 
+                gst.TIME_ARGS(position))
             sys.stdout.flush()
-        except Exception, e:
-            print 'main: exception', e
+        else:
+            print 'Could not get position'
             sys.stdout.flush()
 
         return True

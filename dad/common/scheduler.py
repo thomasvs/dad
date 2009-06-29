@@ -78,7 +78,7 @@ class Scheduler(log.Loggable, gobject.GObject):
 
     duration = 0
 
-    def __init__(self):
+    def __init__(self, selecter):
         gobject.GObject.__init__(self)
 
         self._added = []
@@ -88,6 +88,8 @@ class Scheduler(log.Loggable, gobject.GObject):
         self._lastScheduled = 0 # counter for last track that was scheduled
 
         self._position = 0L
+
+        self._selecter = selecter
 
     def _stats(self):
         self.info('%d tracks added, %d tracks composited, %d tracks played' % (
@@ -170,10 +172,11 @@ class Scheduler(log.Loggable, gobject.GObject):
         lastScheduled = self._scheduled[self._lastScheduled]
 
         prev = lastScheduled.trackmix
-        while self.duration - self._position < SCHEDULE_DURATION:
-            if not self._added:
-                self.info('Out of added tracks, cannot schedule more')
-                return
+        #while self.duration - self._position < SCHEDULE_DURATION:
+        #    if not self._added:
+        #        self.info('Out of added tracks, cannot schedule more')
+        #        return
+        while self._added:
 
             next = self._added[0]
             del self._added[0]
@@ -182,4 +185,17 @@ class Scheduler(log.Loggable, gobject.GObject):
             self._schedule(next, self.duration - mix.duration, duration)
 
             prev = next.trackmix
+
+    def schedule(self):
+        """
+        Schedule another track.
+
+        Called by users when they're out of scheduled tracks.
+        """
+        self.info('scheduler: asked to schedule, selecting track')
+        path, trackmix = self._selecter.select()
+        # FIXME: should we be doing this ourselves ?
+        self.add_track(path, trackmix)
+        self.info('scheduler: added track', path)
+
 gobject.type_register(Scheduler) 
