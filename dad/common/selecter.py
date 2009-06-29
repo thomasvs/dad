@@ -44,7 +44,7 @@ class SimplePlaylistSelecter(Selecter):
     def _load(self):
         files = self._tracks.keys()
         if self._playlist:
-            files = open(self._.playlist).readlines()
+            files = open(self._playlist).readlines()
 
         if self._random:
             # this can repeat tracks

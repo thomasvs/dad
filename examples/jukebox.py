@@ -61,7 +61,7 @@ class Main(log.Loggable):
         sel = selecter.SimplePlaylistSelecter(
             tracks, options.playlist, options.random)
 
-        for i in range(options.count):
+        for i in range(int(options.count)):
             path, track = sel.get()
             self._scheduler.add_track(path, track)
 
