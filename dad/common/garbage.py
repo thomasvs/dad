@@ -31,7 +31,7 @@ class GarbageTracker(object):
 
     trackedTypes = []
 
-    _tracked = {}
+    _tracked = None
 
     def collectGarbage(self):
         """
@@ -66,8 +66,6 @@ class GarbageTracker(object):
         """
         Clean the list of tracked objects.
         """
-
-        del self._tracked
         self._tracked = {}
 
     def getNewTracked(self):
@@ -77,6 +75,7 @@ class GarbageTracker(object):
 
         @rtype: list of object
         """
+        self.collectGarbage()
 
         new = []
 

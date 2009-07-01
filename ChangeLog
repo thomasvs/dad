@@ -1,3 +1,8 @@
+2009-07-02  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/garbage.py:
+	  Fix broken testsuite after doing a moap bisect to changeset 1150.
+
 2009-06-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/common/scheduler.py:
