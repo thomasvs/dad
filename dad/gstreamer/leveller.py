@@ -196,6 +196,12 @@ class Leveller(gst.Pipeline):
         rms = self.get_rms_dB()
         peak = self.get_peak_dB()
         slices = rms.slice()
+
+        # If there are no slices, then the track is silent.
+        # In that case, return the full track.
+        if not slices:
+            slices = [rms, ]
+
         for i, s in enumerate(slices):
             m = mixing.fromLevels(s, peak.trim(start=s.start(), end=s.end()))
             if i == 0:
