@@ -167,19 +167,29 @@ class Leveller(gst.Pipeline):
 
         @param channel: channel number to get peak values for, starting from 0
         @type  channel: int or None
+
+        @returns: the peak level graph in dB
+        @rtype:   L{level.Level}
         """
         if channel is not None:
             return self.peakdBs[channel]
 
         peak = level.Level(scale=level.SCALE_DECIBEL)
+
         for i, (endtime, v) in enumerate(self.peakdBs[0]):
-            peak.append((endtime, max([l[i][1] for l in self.peakdBs])))
+            maxdB = max([l[i][1] for l in self.peakdBs])
+            if maxdB > 0.0:
+                gst.warning('maxdB higher than unity: %r dB' % maxdB)
+            peak.append((endtime, maxdB))
 
         return peak
 
     def get_track_mixes(self):
         """
         Get track mixes for all slices in this track.
+
+        @returns: list of track mixes for each slice
+        @rtype:   list of L{dad.audio.mixing.TrackMix}
         """
         ret = []
         

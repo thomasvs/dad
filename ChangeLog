@@ -1,3 +1,9 @@
+2009-07-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	  Doc updates.
+	  gst.warning when peak is positive dB.
+
 2009-07-02  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/common/garbage.py:
