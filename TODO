@@ -49,3 +49,6 @@ Successfully analyzed file '/opt/davedina/audio/albums/Various Artists - Sweet R
   - weighted rms      -14.72075072653359 dB
   - weighted from 0:00:02.938775509 to 0:05:17.865215418
 
+  - gst level:
+Got message #2377 from element "level0" (element): level, endtime=(guint64)261983492062, timestamp=(guint64)261870294784, stream-time=(guint64)261870294784, running-time=(guint64)261870294784, duration=(guint64)113197278, rms=(double){ -11.335845489212522, -11.317679092723045 }, peak=(double){ 0.31634743288734779, -0.091473298212539203 }, decay=(double){ 0.31634743288734779, -0.091473298212539203 };
+
