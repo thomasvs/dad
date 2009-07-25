@@ -74,6 +74,9 @@ class TrackMix(object):
 
 def fromLevels(rms, peak):
     """
+    @type  rms:  L{level.Level}
+    @type  peak: L{level.Level}
+
     @rtype: L{TrackMix}
     """
     assert rms.start() == peak.start(), \

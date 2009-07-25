@@ -143,6 +143,8 @@ class Level(list):
     def trim(self, start=None, end=None):
         """
         Return a trimmed level with the given start and end, inclusive.
+
+        @rtype: L{Level}
         """
         if start is None and end is None:
             return self
@@ -182,7 +184,7 @@ class Level(list):
                           the same scale as the object.  If not given, the
                           equivalent of -90 dB is used.
 
-        @rtype:   list of (long, long) tuples
+        @rtype:   list of L{Level}
         @returns: list of slices with their start and end point.
         """
         ret = []
