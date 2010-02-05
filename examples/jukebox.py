@@ -32,8 +32,8 @@ class Main(log.Loggable):
         self._loop = loop
         self._tracks = tracks
         sel = selecter.SimplePlaylistSelecter(
-            tracks, options.playlist, options.random)
-        self._scheduler = scheduler.Scheduler(sel)
+            tracks, options.playlist, options.random, loops=int(options.loops))
+        self._scheduler = scheduler.Scheduler(sel, begin=options.begin)
         self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
 
@@ -107,6 +107,11 @@ def main():
         action="store", dest="count",
         help="how many tracks to play (defaults to %d)" % default,
         default=default)
+    default = -1
+    parser.add_option('-l', '--loops',
+        action="store", dest="loops",
+        help="how many times to loop the playlist (defaults to %d)" % default,
+        default=default)
     parser.add_option('-p', '--playlist',
         action="store", dest="playlist",
         help="playlist to play from")
@@ -118,6 +123,9 @@ def main():
         action="store", dest="sink",
         help="GStreamer audio sink to output to (defaults to %s" % default,
         default=default)
+    parser.add_option('-b', '--begin',
+        action="store_true", dest="begin",
+        help="Start at beginning of first song, instead of before first mix")
 
     opts, args = parser.parse_args(sys.argv[1:])
 

@@ -1,5 +1,15 @@
 2010-02-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/common/scheduler.py:
+	  Add a begin argument, which makes the mix begin at the beginning
+	  of the first song, not at the first mix.
+	* dad/common/selecter.py:
+	  Add an option for the number of loops to take through a playlist.
+	* examples/jukebox.py:
+	  Add both options to command line.
+
+2010-02-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* examples/trackmix.py:
 	  Skip comment lines from playlist.
 

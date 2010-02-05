@@ -78,7 +78,10 @@ class Scheduler(log.Loggable, gobject.GObject):
 
     duration = 0
 
-    def __init__(self, selecter):
+    def __init__(self, selecter, begin=False):
+        """
+        @param begin: whether to play first track from beginning.
+        """
         gobject.GObject.__init__(self)
 
         self._added = []
@@ -89,6 +92,7 @@ class Scheduler(log.Loggable, gobject.GObject):
 
         self._position = 0L
 
+        self._begin = begin
         self._selecter = selecter
 
     def _stats(self):
@@ -161,11 +165,15 @@ class Scheduler(log.Loggable, gobject.GObject):
             self.info('starting with %s' % first.path)
             del self._added[0]
 
-            # Start from a position in the first track 10 seconds before the
-            # mix starts
             next = self._added[0]
-            mix = mixing.Mix(first.trackmix, next.trackmix)
-            duration = mix.duration + 10 * SECOND
+            if self._begin:
+                duration = first.trackmix.end - first.trackmix.start
+            else:
+                # Start from a position in the first track 10 seconds before the
+                # mix starts
+                mix = mixing.Mix(first.trackmix, next.trackmix)
+                duration = mix.duration + 10 * SECOND
+
             self._schedule(first, 0, duration)
 
         # keep going

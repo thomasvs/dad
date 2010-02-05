@@ -34,10 +34,13 @@ class SimplePlaylistSelecter(Selecter):
     """
     I simply select tracks from a tracks pickle and playlist, linear or random.
     """
-    def __init__(self, tracks, playlist=None, random=False):
+    def __init__(self, tracks, playlist=None, random=False, loops=-1):
+        self.debug('Creating selecter, for %d loops', loops)
         self._tracks = tracks
         self._playlist = playlist
         self._random = random
+        self._loop = 0
+        self._loops = loops
 
         self._selected = [] # list of tuple of (path, trackMix)
 
@@ -57,7 +60,7 @@ class SimplePlaylistSelecter(Selecter):
             path = path.strip()
             try:
                 # FIXME: pick random track in file
-                self._selected.append((path, self._tracks[path][0]))
+                self._selected.append((path, self._tracks[path][-1]))
             except KeyError:
                 print "%s not in pickle, skipping" % path
             except IndexError:
@@ -70,7 +73,13 @@ class SimplePlaylistSelecter(Selecter):
         @rtype: tuple of (str, L{TrackMix})
         """
         if not self._selected:
+            self.debug('get out of selected tracks, %d/%d loops',
+                self._loop, self._loops)
+            if self._loop == self._loops:
+                return None
+
             self._load()
+            self._loop += 1
 
         tuple = self._selected[-1]
         del self._selected[-1]
