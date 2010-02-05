@@ -1,3 +1,8 @@
+2010-02-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Skip comment lines from playlist.
+
 2009-07-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/gstreamer/leveller.py:

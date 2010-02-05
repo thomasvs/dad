@@ -78,6 +78,10 @@ def main():
         paths.extend(open(opts.playlist).readlines())
 
     for path in paths:
+        # skip comment lines
+        if path[0] == '#':
+            continue
+
         path = path.strip()
         if path in tracks.keys():
             print '%r already analyzed, skipping' % path
