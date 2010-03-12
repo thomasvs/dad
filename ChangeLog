@@ -55,13 +55,6 @@
 	* examples/jukebox.py:
 	  Use a selecter and a scheduler.
 
-2009-06-28  Thomas Vander Stichele  <thomas at apestaart dot org>
-
-	* dad/gstreamer/jukebox.py:
-	* dad/gstreamer/sources.py:
-	* examples/jukebox.py:
-	* examples/mix.py:
-
 2009-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/trackmix.py:
