@@ -84,7 +84,7 @@ class Scheduler(log.Loggable, gobject.GObject):
         """
         gobject.GObject.__init__(self)
 
-        self._added = []
+        self._added = [] # list of Scheduled
         self._scheduled = {} # hash of number -> Scheduled
 
         self._counter = 0 # counter for how many tracks where added
