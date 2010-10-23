@@ -1,5 +1,12 @@
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/ui (added):
+	* dad/ui/scheduler.py (added):
+	* dad/ui/__init__.py (added):
+	  Add a simple GUI.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* examples/jukebox.py:
 	  Add a simple GUI.
 
