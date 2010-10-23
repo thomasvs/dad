@@ -276,7 +276,7 @@ class Level(list):
         Analyse attack of level, listing the times at which the track
         reaches each RMS level for the first time.
 
-        @rtype: list of (value, time) tuples
+        @rtype: L{Attack}
         """
         lastTime = 0L
         lastValue = -98 # digital silence at 16 bit
@@ -299,7 +299,7 @@ class Level(list):
         Analyse decay of level, listing the times at which the track
         reaches each RMS level for the last time.
 
-        @rtype: list of (value, time) tuples
+        @rtype: L{Attack}
         """
         l = self.trim(start, end).convert(SCALE_DECIBEL)
         l.reverse()

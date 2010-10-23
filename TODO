@@ -24,6 +24,9 @@ should have been.
 - check mix from
   tracy chapman - revolution to elbow - mexican standoff (second too soft)
 
+- check mix
+  embrace - waterfall to national - geese of beverly road (nice)
+
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle /home/audio/songs/Breeders\ -\ Divine\ Hammer.ogg /home/audio/albums/Arab\ Strap\ -\ Mad\ For\ Sadness/Arab\ Strap\ -\ Piglet\ \(live\).ogg 
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle 
 Track 1: /home/audio/songs/Gorki - Destroy.ogg
@@ -38,6 +41,23 @@ mix duration: 0:02:18.697142856
 
 - mix between Pet Shop Boys - Let's make lots of money with YYY's - Heads will roll (first too loud)
 
+- do minimal audio file analysis (as fast as possible):
+	- whether it's an audio file
+	- duration
+	- samplerate
+	- codec
+	- codec properties
+		- bitrate/quality
+		- vorbis
+			- version
+			- encoder
+			- nominal bitrate
+			- upper bitrate
+			- lower bitrate
+			- average bitrate
+	- tags/metadata
+		- extended-comment
+
 BUG IN PEAK:
 Successfully analyzed file '/opt/davedina/audio/albums/Various Artists - Sweet Relief-A Benefit For Victoria Williams/Pearl Jam - Crazy Mary.ogg'
 1 slice(s) found.
@@ -51,4 +71,16 @@ Successfully analyzed file '/opt/davedina/audio/albums/Various Artists - Sweet R
 
   - gst level:
 Got message #2377 from element "level0" (element): level, endtime=(guint64)261983492062, timestamp=(guint64)261870294784, stream-time=(guint64)261870294784, running-time=(guint64)261870294784, duration=(guint64)113197278, rms=(double){ -11.335845489212522, -11.317679092723045 }, peak=(double){ 0.31634743288734779, -0.091473298212539203 }, decay=(double){ 0.31634743288734779, -0.091473298212539203 };
+
+Analyzing file '/opt/davedina/audio/albums/Sly And The Family Stone - The Best Of/Sly And The Family Stone - Hot Fun In The Summertime.ogg'
+Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone - The Best Of/Sly And The Family Stone - Hot Fun In The Summertime.ogg'
+1 slice(s) found.
+- slice 0: 0:00:00.000000000 - 0:02:38.390566893
+  - peak              0.149 dB (103.498 %)
+  - rms               -17.66592044893423 dB
+  - peak rms          -10.210241985833004 dB
+  - 95 percentile rms -14.640833663319711 dB
+  - weighted rms      -17.670577318430926 dB
+  - weighted from 0:00:10.360453514 to 0:02:20.839183673
+
 

@@ -38,7 +38,9 @@ class TrackMix(object):
     @ivar rmsPeak:       the rms in dB weighted between mix points
     @ivar rmsWeighted:   the rms in dB weighted between mix points
     @ivar attack:        the attack
+    @type attack:        L{level.Attack}
     @ivar decay:         the decay
+    @type decay:         L{level.Attack}
     """
     name = None
 
