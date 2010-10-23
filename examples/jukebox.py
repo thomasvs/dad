@@ -23,7 +23,7 @@ _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
     gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
 class Main(log.Loggable):
-    def __init__(self, loop, tracks, options):
+    def __init__(self, loop, tracks, options, useGtk=True):
         """
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
@@ -36,6 +36,17 @@ class Main(log.Loggable):
         self._scheduler = scheduler.Scheduler(sel, begin=options.begin)
         self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
+
+        if useGtk == True:
+            import gtk
+            w = gtk.Window()
+            from dad.ui import scheduler as sch
+            s = sch.SchedulerUI()
+            w.add(s)
+            s.set_scheduler(self._scheduler)
+            w.show_all()
+
+
 
         self._identity = gst.element_factory_make('identity')
         # self._identity.connect('notify::last-message',

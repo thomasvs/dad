@@ -1,5 +1,10 @@
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/jukebox.py:
+	  Add a simple GUI.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/common/selecter.py:
 	  Add a SpreadingArtistSelector.
 	* dad/gstreamer/jukebox.py:
