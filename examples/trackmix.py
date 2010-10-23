@@ -88,7 +88,11 @@ def main():
             continue
 
         print 'Analyzing file %r' % path
-        l = leveller.Leveller(path)
+        try:
+            l = leveller.Leveller(path)
+        except KeyError:
+            print '%s does not exist' % path
+            continue
         bus = l.get_bus()
         bus.add_signal_watch()
         done = False

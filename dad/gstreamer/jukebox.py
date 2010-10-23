@@ -44,6 +44,8 @@ SCHEDULE_DURATION = gst.SECOND * 1800
 class JukeboxSource(gst.Bin):
     """
     I am an audio source that outputs mixed tracks as a player would.
+
+    I use a scheduler to decide what part of a file to play when.
     """
     # FIXME: signals not emitted yet
     # signal when a song is started

@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: dad.test.test_common_selecter -*-
 # vi:si:et:sw=4:sts=4:ts=4
 #
 # DAD - Digital Audio Database
@@ -25,6 +25,27 @@ import random
 
 from dad.extern.log import log
 
+def getPathArtist(path):
+    import re
+    regexps = [
+        re.compile(r"""
+            (?P<track>\d+).
+            (?P<artist>[^-]*) - 
+            (?P<title>.*)""", re.VERBOSE),
+        re.compile(r"""
+            (?P<artist>[^-]*)\s*- 
+            (?P<title>.*)""", re.VERBOSE),
+    ]
+
+    # get artist from a file path
+    basename = os.path.basename(path)
+
+    for regexp in regexps:
+        m = regexp.search(basename)
+        if m:
+            # FIXME: our regexps don't drop the spaces right
+            return m.group('artist').strip()
+
 class Selecter(log.Loggable):
     """
     I implement a selection strategy.
@@ -33,6 +54,12 @@ class Selecter(log.Loggable):
 class SimplePlaylistSelecter(Selecter):
     """
     I simply select tracks from a tracks pickle and playlist, linear or random.
+
+    Each track gets played once.  When all tracks are played, the process
+    is repeated.
+
+    @param tracks: dict of path -> list of trackmix
+    @type  tracks: dict of str -> list of L{dad.audio.mixing.TrackMix}
     """
     def __init__(self, tracks, playlist=None, random=False, loops=-1):
         self.debug('Creating selecter, for %d loops', loops)
@@ -43,15 +70,27 @@ class SimplePlaylistSelecter(Selecter):
         self._loops = loops
 
         self._selected = [] # list of tuple of (path, trackMix)
+        self._load()
+
+    def shuffle(self, files):
+        """
+        Override me for different shuffling algorithm.
+        """
+        res = files[:]
+        random.shuffle(res)
+        return res
 
     def _load(self):
+        self.debug('%d tracks in pickle', len(self._tracks))
         files = self._tracks.keys()
         if self._playlist:
             files = open(self._playlist).readlines()
 
+        self.debug('%d files', len(files))
         if self._random:
+            self.debug('shuffling')
             # this can repeat tracks
-            paths = [random.choice(files) for i in range(len(files))]
+            paths = self.shuffle(files)
         else:
             paths = files[:]
         # we pop tracks from the top, so reverse the paths we go through
@@ -90,3 +129,31 @@ class SimplePlaylistSelecter(Selecter):
         t = self.get()
         self.info('selecter: selected %r', t)
         return t
+
+class SpreadingArtistSelecter(SimplePlaylistSelecter):
+    """
+    I shuffle tracks by spreading the same artists throughout the playlist.
+    """
+    # FIXME: not taking tracks in the file into account
+    def shuffle(self, paths):
+        result = []
+
+        artists = {}
+
+        for path in paths:
+            artist = getPathArtist(path)
+            if not artist in artists.keys():
+                artists[artist] = []
+            artists[artist].append(path)
+
+        print artists
+
+        return paths
+
+if __name__ == '__main__':
+    print 'selecting'
+    path = sys.argv[1]
+    paths = open(path).readlines()
+    selecter = SpreadingArtistSelecter()
+
+

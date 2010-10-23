@@ -1,16 +1,20 @@
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/common/selecter.py:
+	  Add a SpreadingArtistSelector.
+	* dad/gstreamer/jukebox.py:
+	  Doc change.
+	* examples/trackmix.py:
+	  Print an error if a path cannot be levelled.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* TODO:
 	  Add.
 	* dad/audio/level.py:
 	* dad/audio/mixing.py:
 	* dad/common/scheduler.py:
 	  Document.
-
-2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
-
-	* examples/trackmix.py:
-	  Print an error if a path cannot be levelled.
 
 2010-02-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
