@@ -1,5 +1,10 @@
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* examples/jukebox.py:
+	  Add multimedia key listener.  Doesn't do anything yet
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/gstreamer/jukebox.py:
 	* dad/ui/scheduler.py:
 	* examples/jukebox.py:

@@ -64,6 +64,25 @@ class Main(log.Loggable):
             w.set_default_size(640, 480)
             w.show_all()
 
+        # dbussy bits
+
+        def signal_handler(*keys):
+            for key in keys:
+                if key == u'Next':
+                    self.info('Next track')
+
+        import dbus
+        # this import has the side effect of setting the main loop on dbus
+        from dbus import glib
+        bus = dbus.SessionBus()
+        try:
+            listener = bus.get_object('org.gnome.SettingsDaemon',
+                '/org/gnome/SettingsDaemon/MediaKeys')
+            listener.connect_to_signal("MediaPlayerKeyPressed", signal_handler,
+                dbus_interface='org.gnome.SettingsDaemon.MediaKeys')
+        except Exception, e:
+            print 'Cannot listen to multimedia keys', e
+
 
 
         self._identity = gst.element_factory_make('identity')
