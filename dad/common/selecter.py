@@ -99,6 +99,7 @@ class SimplePlaylistSelecter(Selecter):
             path = path.strip()
             try:
                 # FIXME: pick random track in file
+                # for now, pick first one
                 self._selected.append((path, self._tracks[path][-1]))
             except KeyError:
                 print "%s not in pickle, skipping" % path

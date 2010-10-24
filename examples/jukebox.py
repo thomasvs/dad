@@ -39,10 +39,20 @@ class Main(log.Loggable):
 
         if useGtk == True:
             import gtk
+
+            def scheduler_clicked_cb(scheduler, scheduled):
+                print 'seeking to %r' % scheduled
+                where = scheduled.start
+                self._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
+
+
             w = gtk.Window()
             from dad.ui import scheduler as sch
             s = sch.SchedulerUI()
-            w.add(s)
+            s.connect('clicked', scheduler_clicked_cb)
+            sw = gtk.ScrolledWindow()
+            sw.add(s)
+            w.add(sw)
             s.set_scheduler(self._scheduler)
             w.show_all()
 
@@ -69,6 +79,8 @@ class Main(log.Loggable):
         ac.link(self._identity)
         self._identity.link(queue)
         queue.link(sink)
+
+        self._scheduler.connect('scheduled', self._scheduled_cb)
 
         # pick songs
 

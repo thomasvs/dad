@@ -1,5 +1,13 @@
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/common/selecter.py:
+	* dad/ui/scheduler.py:
+	  Implement clicking rows in the scheduler window.
+	* examples/jukebox.py:
+	  Seek to the row clicked.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/ui (added):
 	* dad/ui/scheduler.py (added):
 	* dad/ui/__init__.py (added):
