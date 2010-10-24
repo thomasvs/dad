@@ -80,8 +80,6 @@ class Main(log.Loggable):
         self._identity.link(queue)
         queue.link(sink)
 
-        self._scheduler.connect('scheduled', self._scheduled_cb)
-
         # pick songs
 
         for i in range(int(options.count)):

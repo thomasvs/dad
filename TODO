@@ -72,6 +72,8 @@ Successfully analyzed file '/opt/davedina/audio/albums/Various Artists - Sweet R
   - gst level:
 Got message #2377 from element "level0" (element): level, endtime=(guint64)261983492062, timestamp=(guint64)261870294784, stream-time=(guint64)261870294784, running-time=(guint64)261870294784, duration=(guint64)113197278, rms=(double){ -11.335845489212522, -11.317679092723045 }, peak=(double){ 0.31634743288734779, -0.091473298212539203 }, decay=(double){ 0.31634743288734779, -0.091473298212539203 };
 
+- Check Rid of me - low level track, so mixing gets messed up
+
 Analyzing file '/opt/davedina/audio/albums/Sly And The Family Stone - The Best Of/Sly And The Family Stone - Hot Fun In The Summertime.ogg'
 Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone - The Best Of/Sly And The Family Stone - Hot Fun In The Summertime.ogg'
 1 slice(s) found.
@@ -82,5 +84,4 @@ Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone 
   - 95 percentile rms -14.640833663319711 dB
   - weighted rms      -17.670577318430926 dB
   - weighted from 0:00:10.360453514 to 0:02:20.839183673
-
 
