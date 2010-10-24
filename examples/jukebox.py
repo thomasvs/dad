@@ -40,20 +40,28 @@ class Main(log.Loggable):
         if useGtk == True:
             import gtk
 
-            def scheduler_clicked_cb(scheduler, scheduled):
-                print 'seeking to %r' % scheduled
-                where = scheduled.start
-                self._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
 
 
             w = gtk.Window()
             from dad.ui import scheduler as sch
             s = sch.SchedulerUI()
+
+            def jukebox_started_cb(jukebox, scheduled):
+                s.started(scheduled)
+            self._jukebox.connect('started', jukebox_started_cb)
+
+            def scheduler_clicked_cb(scheduler, scheduled):
+                print 'seeking to %r' % scheduled
+                where = scheduled.start
+                self._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
             s.connect('clicked', scheduler_clicked_cb)
+
+            s.set_scheduler(self._scheduler)
+
             sw = gtk.ScrolledWindow()
             sw.add(s)
             w.add(sw)
-            s.set_scheduler(self._scheduler)
+            w.set_default_size(640, 480)
             w.show_all()
 
 

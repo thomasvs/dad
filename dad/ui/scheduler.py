@@ -41,6 +41,8 @@ class SchedulerUI(gtk.TreeView):
     
         self._treeview.connect('row_activated', self._treeview_clicked_cb)
 
+        self._treerowrefs = {}
+
     def set_scheduler(self, scheduler):
         scheduler.connect('scheduled', self._scheduled_cb)
 
@@ -56,12 +58,22 @@ class SchedulerUI(gtk.TreeView):
             COLUMN_END, gst.TIME_ARGS(scheduled.start + scheduled.duration),
         )
         self._treeview.set_model(self._store)
+        self._treerowrefs[scheduled] = gtk.TreeRowReference(
+            self._store, self._store.get_path(iter))
 
     def _treeview_clicked_cb(self, tv, path, column):
         iter = self._store.get_iter(path)
         scheduled = self._store.get_value(iter, COLUMN_SCHEDULED)
         print 'clicked column', scheduled
         self.emit('clicked', scheduled)
+
+    # call me to indicate a scheduled item has started playing
+    def started(self, scheduled):
+        print 'started', scheduled
+        path = self._treerowrefs[scheduled].get_path()
+        ts = self._treeview.get_selection()
+        ts.select_path(path)
+
 
 gobject.type_register(SchedulerUI)
 

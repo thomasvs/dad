@@ -49,7 +49,7 @@ class JukeboxSource(gst.Bin):
     """
     # FIXME: signals not emitted yet
     # signal when a song is started
-    pygobject.gsignal('started', str)
+    pygobject.gsignal('started', object)
     # signal when the mix changes from one track to the next
     pygobject.gsignal('mixed', str, str)
 
@@ -79,6 +79,8 @@ class JukeboxSource(gst.Bin):
 
         self._scheduling = False
 
+        self._probes = {}
+
     def _composition_pad_added_cb(self, composition, pad):
         self.info('composition pad added %r' % pad)
         # FIXME: this happens for example without audioconvert,
@@ -86,6 +88,8 @@ class JukeboxSource(gst.Bin):
         if not self._gpad.set_target(pad):
             self.error('Could not set target on ghost pad')
         self._gpad.set_active(True)
+
+
 
     def _stats(self):
         self.info('%d tracks added, %d tracks composited, %d tracks played' % (
@@ -103,6 +107,11 @@ class JukeboxSource(gst.Bin):
         self.debug('adding %r' % gnlsource)
         self._composition.add(gnlsource)
         self._playing.append((scheduled, audiosource, gnlsource))
+
+        # add a buffer probe so we can signal started
+        pad = audiosource.get_pad('src')
+        self._probes[pad] = pad.add_buffer_probe(self._buffer_probe)
+
 
         # if this track gets scheduled before lastend, we need an adder
         if scheduled.start < self._lastend:
@@ -136,6 +145,30 @@ class JukeboxSource(gst.Bin):
         gnlsource.props.duration = duration
         gnlsource.props.media_duration = duration
         gnlsource.props.priority = priority
+
+    def _buffer_probe(self, pad, buffer):
+        # called once on first buffer from composition to signal started
+        self.debug('first buffer on pad %r' % pad)
+
+        audiosource = pad.get_parent()
+        scheduled = None
+
+        for s, a, g in self._playing:
+            if a == audiosource:
+                scheduled = s
+
+        if scheduled:
+            self.info('Scheduled %r started' % scheduled)
+            self.emit('started', scheduled)
+        else:
+            self.warning('Got buffer on unknown gnlsource %r' % gnlsource)
+
+        pad.remove_buffer_probe(self._probes[pad])
+        del self._probes[pad]
+
+        # let buffer pass
+        return True
+
 
     def next(self):
         """
@@ -217,3 +250,4 @@ class JukeboxSource(gst.Bin):
         audiosource.set_volume(volume)
         gnlsource.add(audiosource)
         return audiosource, gnlsource
+gobject.type_register(JukeboxSource)

@@ -1,5 +1,13 @@
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/gstreamer/jukebox.py:
+	* dad/ui/scheduler.py:
+	* examples/jukebox.py:
+	  Make jukebox signal when a track starts.
+	  Make scheduler show when a track starts by moving selection.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/common/selecter.py:
 	* dad/ui/scheduler.py:
 	  Implement clicking rows in the scheduler window.
