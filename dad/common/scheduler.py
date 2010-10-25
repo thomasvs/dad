@@ -58,14 +58,18 @@ class Scheduled(object):
     mediaStart = None
     volume = 0.0
 
-    def __init__(self, path, trackmix, number):
+    description = None
+
+    def __init__(self, path, trackmix, number, description=None):
         self.path = path
         self.trackmix = trackmix
         self.number = number
 
+        self.description = description and description or os.path.basename(path)
+
     def __repr__(self):
         return '<scheduler.Scheduled %d for %s>' % (
-            self.number, os.path.basename(self.path))
+            self.number, self.description)
 
 class Scheduler(log.Loggable, gobject.GObject):
     """

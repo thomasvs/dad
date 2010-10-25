@@ -50,10 +50,13 @@ class SchedulerUI(gtk.TreeView):
         self.add_scheduled(scheduled)
 
     def add_scheduled(self, scheduled):
+        """
+        @type  scheduled: L{scheduler.Scheduled}
+        """
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_SCHEDULED, scheduled,
-            COLUMN_PATH, os.path.basename(scheduled.path),
+            COLUMN_PATH, scheduled.description,
             COLUMN_START, gst.TIME_ARGS(scheduled.start),
             COLUMN_END, gst.TIME_ARGS(scheduled.start + scheduled.duration),
         )
@@ -64,7 +67,6 @@ class SchedulerUI(gtk.TreeView):
     def _treeview_clicked_cb(self, tv, path, column):
         iter = self._store.get_iter(path)
         scheduled = self._store.get_value(iter, COLUMN_SCHEDULED)
-        print 'clicked column', scheduled
         self.emit('clicked', scheduled)
 
     # call me to indicate a scheduled item has started playing
