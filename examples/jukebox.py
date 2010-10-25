@@ -10,17 +10,10 @@ import pickle
 import gobject
 gobject.threads_init()
 
-import pygst
-pygst.require("0.10")
-import gst
 
-from dad.gstreamer import jukebox
 from dad.audio import mixing, common
-from dad.common import scheduler, selecter
 from dad.extern.log import log
 
-_TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
-    gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
 class Main(log.Loggable):
     def __init__(self, loop, tracks, options, useGtk=True):
@@ -28,6 +21,13 @@ class Main(log.Loggable):
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
         """
+        import gst
+
+        from dad.gstreamer import jukebox
+        from dad.common import scheduler, selecter
+
+        _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
+            gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
         self._loop = loop
         self._tracks = tracks
@@ -185,6 +185,8 @@ def main():
         sys.stderr.write('No tracks in pickle!\n')
         return 1
         
+    import pygst
+    pygst.require("0.10")
 
     loop = gobject.MainLoop()
 
