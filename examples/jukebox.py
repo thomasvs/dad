@@ -115,6 +115,7 @@ class Main(log.Loggable):
 
 
     def start(self):
+        import gst
         print 'starting'
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
@@ -125,6 +126,7 @@ class Main(log.Loggable):
         gobject.timeout_add(500, self.work)
 
     def work(self):
+        import gst
         pad = self._identity.get_pad('src')
         res = pad.query_position(gst.FORMAT_TIME)
         if res:
