@@ -36,6 +36,7 @@ class Main(log.Loggable):
         self._scheduler = scheduler.Scheduler(sel, begin=options.begin)
         self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
+        self._playing = False
 
         if useGtk == True:
             import gtk
@@ -68,8 +69,17 @@ class Main(log.Loggable):
 
         def signal_handler(*keys):
             for key in keys:
+                self.debug('Key %r pressed', key)
                 if key == u'Next':
                     self.info('Next track')
+                elif key == u'Play':
+                    self.info('Play')
+                    if self._playing:
+                        self._pipeline.set_state(gst.STATE_PAUSED)
+                        self._playing = False
+                    else:
+                        self._pipeline.set_state(gst.STATE_PLAYING)
+                        self._playing = True
 
         import dbus
         # this import has the side effect of setting the main loop on dbus
@@ -121,6 +131,7 @@ class Main(log.Loggable):
         bus.add_signal_watch()
         bus.connect('message', self._message_cb)
         self._pipeline.set_state(gst.STATE_PLAYING)
+        self._playing = True
         print 'started'
         gobject.timeout_add(500, self._jukebox.work)
         gobject.timeout_add(500, self.work)
