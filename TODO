@@ -85,3 +85,6 @@ Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone 
   - weighted rms      -17.670577318430926 dB
   - weighted from 0:00:10.360453514 to 0:02:20.839183673
 
+- make a start selecter method, and a callback, so that the couchdb one
+  can connect and prime its track list
+- probably same for actually getting tracks to play
