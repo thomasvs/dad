@@ -1,0 +1,90 @@
+- figure out if leveller's do_handle_message leaks messages:
+  valgrind --show-reachable=yes --leak-check=full --suppressions=valgrind-python.supp python dad/gstreamer/leveller.py /home/thomas/gst/media/small/south.mp3 
+
+<bilboed-pi> homeasvs_, basically... in your do_handle_message implementation, the given messages should have a refcount of 1
+
+DEBUG_LEAK=yes GST_GC=yes GST_DEBUG=pyt*:4 PYTHONPATH=$PYTHONPATH:`pwd`  python dad/gstreamer/leveller.py /home/thomas/gst/media/small/south.mp3 
+
+in output, source refcounting looks suspicious, so look for:
+/ref.*uridecodebin0>
+
+- figure out why overall position starts counting up from 0 to 10, then when
+the mix starts, resets to 0, then after the mix, goes back to where it
+should have been.
+
+- check the mix from
+  spears - slave 4 u to lemonheads - down about it to jlo-play (volumes)
+
+- check mix from
+  morphine - (my biggest fear) with dc - so good
+
+- check mix from
+  possum dixon - pharmaceutical itch to beyonce - crazy in love (too soft)
+
+- check mix from
+  tracy chapman - revolution to elbow - mexican standoff (second too soft)
+
+- check mix
+  embrace - waterfall to national - geese of beverly road (nice)
+
+PYTHONPATH=`pwd` python examples/mix.py tracks.pickle /home/audio/songs/Breeders\ -\ Divine\ Hammer.ogg /home/audio/albums/Arab\ Strap\ -\ Mad\ For\ Sadness/Arab\ Strap\ -\ Piglet\ \(live\).ogg 
+PYTHONPATH=`pwd` python examples/mix.py tracks.pickle 
+Track 1: /home/audio/songs/Gorki - Destroy.ogg
+- from 0:00:00.000000000 to 0:03:06.980136053
+- leadout at 0:00:53.955918366 for 0:02:13.024217687
+Track 2: /home/audio/songs/Eskobar - Skyscraper.ogg
+- from 0:00:00.000000000 to 0:03:36.774240362
+- leadin at 0:00:05.672925169 for 0:00:05.672925169
+mix duration: 0:02:18.697142856
+
+- mix between TLC - Switch and Grant Lee Buffalo - Mockingbirds sounds off - GLB too loud and too long a mix while TLC still singing.
+
+- mix between Pet Shop Boys - Let's make lots of money with YYY's - Heads will roll (first too loud)
+
+- do minimal audio file analysis (as fast as possible):
+	- whether it's an audio file
+	- duration
+	- samplerate
+	- codec
+	- codec properties
+		- bitrate/quality
+		- vorbis
+			- version
+			- encoder
+			- nominal bitrate
+			- upper bitrate
+			- lower bitrate
+			- average bitrate
+	- tags/metadata
+		- extended-comment
+
+BUG IN PEAK:
+Successfully analyzed file '/opt/davedina/audio/albums/Various Artists - Sweet Relief-A Benefit For Victoria Williams/Pearl Jam - Crazy Mary.ogg'
+1 slice(s) found.
+- slice 0: 0:00:00.000000000 - 0:05:40.078004534
+  - peak              0.316 dB (107.556 %)
+  - rms               -14.71847555396263 dB
+  - peak rms          -10.088037936704655 dB
+  - 95 percentile rms -12.204925539464773 dB
+  - weighted rms      -14.72075072653359 dB
+  - weighted from 0:00:02.938775509 to 0:05:17.865215418
+
+  - gst level:
+Got message #2377 from element "level0" (element): level, endtime=(guint64)261983492062, timestamp=(guint64)261870294784, stream-time=(guint64)261870294784, running-time=(guint64)261870294784, duration=(guint64)113197278, rms=(double){ -11.335845489212522, -11.317679092723045 }, peak=(double){ 0.31634743288734779, -0.091473298212539203 }, decay=(double){ 0.31634743288734779, -0.091473298212539203 };
+
+- Check Rid of me - low level track, so mixing gets messed up
+
+Analyzing file '/opt/davedina/audio/albums/Sly And The Family Stone - The Best Of/Sly And The Family Stone - Hot Fun In The Summertime.ogg'
+Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone - The Best Of/Sly And The Family Stone - Hot Fun In The Summertime.ogg'
+1 slice(s) found.
+- slice 0: 0:00:00.000000000 - 0:02:38.390566893
+  - peak              0.149 dB (103.498 %)
+  - rms               -17.66592044893423 dB
+  - peak rms          -10.210241985833004 dB
+  - 95 percentile rms -14.640833663319711 dB
+  - weighted rms      -17.670577318430926 dB
+  - weighted from 0:00:10.360453514 to 0:02:20.839183673
+
+- make a start selecter method, and a callback, so that the couchdb one
+  can connect and prime its track list
+- probably same for actually getting tracks to play

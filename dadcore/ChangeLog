@@ -1,0 +1,422 @@
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
+	  Add multimedia key listener.  Doesn't do anything yet
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	* dad/ui/scheduler.py:
+	* examples/jukebox.py:
+	  Make jukebox signal when a track starts.
+	  Make scheduler show when a track starts by moving selection.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/selecter.py:
+	* dad/ui/scheduler.py:
+	  Implement clicking rows in the scheduler window.
+	* examples/jukebox.py:
+	  Seek to the row clicked.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/ui (added):
+	* dad/ui/scheduler.py (added):
+	* dad/ui/__init__.py (added):
+	  Add a simple GUI.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
+	  Add a simple GUI.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/selecter.py:
+	  Add a SpreadingArtistSelector.
+	* dad/gstreamer/jukebox.py:
+	  Doc change.
+	* examples/trackmix.py:
+	  Print an error if a path cannot be levelled.
+
+2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* TODO:
+	  Add.
+	* dad/audio/level.py:
+	* dad/audio/mixing.py:
+	* dad/common/scheduler.py:
+	  Document.
+
+2010-02-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/scheduler.py:
+	  Add a begin argument, which makes the mix begin at the beginning
+	  of the first song, not at the first mix.
+	* dad/common/selecter.py:
+	  Add an option for the number of loops to take through a playlist.
+	* examples/jukebox.py:
+	  Add both options to command line.
+
+2010-02-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Skip comment lines from playlist.
+
+2009-07-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	  If the whole track is silent, return a slice for the complete
+	  track, so there's always at least one slice.
+
+2009-07-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	  Doc updates.
+	  gst.warning when peak is positive dB.
+
+2009-07-02  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/garbage.py:
+	  Fix broken testsuite after doing a moap bisect to changeset 1150.
+
+2009-06-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/scheduler.py:
+	* dad/common/selecter.py:
+	* dad/gstreamer/jukebox.py:
+	* examples/jukebox.py:
+	  Make objects cooperate to do the scheduling forever.
+	  Or, until when GStreamer/GNonLin breaks.
+
+2009-06-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* misc (added):
+	* misc/dad-uninstalled (added):
+	  Add uninstalled script
+
+2009-06-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/scheduler.py (added):
+	* dad/common/selecter.py (added):
+	  Add objects for selecting and scheduling.
+	* dad/gstreamer/jukebox.py:
+	  Use the scheduler.
+	* examples/jukebox.py:
+	  Use a selecter and a scheduler.
+
+2009-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Use a temporary file to write the pickle to, so we replace
+	  atomically.
+
+2009-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mix.py:
+	  Schedule a stop from a timeout add to make sure the mix stops
+	  roughly 5 seconds after the end of the first track.
+
+2009-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mix.py:
+	  Give the mix example some option parsing so we can reproduce the
+	  same mixes as in jukebox.py easily.
+
+2009-04-21  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	* dad/gstreamer/sources.py:
+	* examples/jukebox.py:
+	  Convert prints to debug statements.
+	  Update overall position on a single line.
+
+2009-04-19  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	  Don't complain about not being able to query tracks in _playing
+	  that aren't yet playing.
+
+2009-04-18  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/sources.py:
+	* examples/mix.py:
+	  Use uridecodebin in the audiosource bin
+
+2009-04-17  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Add option for a playlist.
+
+2009-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	* examples/jukebox.py:
+	  Don't schedule everything at once.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
+	  Add options for playlist, randomize, size, sink.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	  Give trackmix objects names.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	  Add a counter for giving gnlsource objects unique names.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
+	  Remove some debug printing.
+	  Parse the sink as a bin, ghosting the unlinked pad and linking that.
+
+2009-04-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	  Start playing 10 seconds before the first mix starts.
+	  Because of this, only start scheduling when we have two
+	  songs in the queue.
+	  To avoid pygobject bug
+	  http://bugzilla.gnome.org/show_bug.cgi?id=577999
+	  assert that start is positive.
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
+	  Allow passing a playlist to pick tracks from.
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/garbage.py:
+	  Document better.
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/test/test_gstreamer_leveller.py:
+	  Add some garbage tracking tests for Leveller, generating an
+	  actual .flac file.
+	  Doesn't pass without the gst-python fix in #577735
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	  Convert given path to an absolute path for uridecodebin.
+	  Error out if the given file does not exist.
+
+2009-04-04  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common (added):
+	* dad/common/__init__.py (added):
+	* dad/common/garbage.py (added):
+	  Add a module for garbage tracking, extracted from
+	  gst-python's testsuite.
+	  Has a class for adding tracking, and a TestSuite class
+	  using it.
+	* dad/test/test_gstreamer_leveller.py:
+	  Use the GarbageTrackerTest to track garbage.
+	  Add a tearDown to clean up.
+
+2009-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
+	  Add a real audioconvert in the pipeline so float sources
+	  can go to int sinks.
+
+2009-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py:
+	  We should error out if we can't set ghost pad target.
+
+2009-03-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	  Replace gst.extend.sources.AudioSource with uridecodebin,
+	  As suggested by Edward since that one will be maintained.
+	  Still leaks though in the leveller example.
+
+2009-03-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/leveller.py:
+	* examples/trackmix.py:
+	  Add some logging and asserting to check on leaks.  Still leaks
+	  though.
+
+2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/jukebox.py (added):
+	* examples/jukebox.py (added):
+	  Add jukebox work in progress.  Does 10 tracks now, and
+	  doesn't cleanup because it trips up gnonlin.
+
+2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/mixing.py:
+	  Move getVolume to a method on TrackMix.
+
+2009-03-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/sources.py:
+	  Fix cleanup with ghost pads.
+
+2008-12-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mix.py:
+	  Exit when done based on time queries.
+
+2008-12-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py:
+	  Handle errors.
+
+2008-11-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/trackmix.py (added):
+	* examples/mixdata.py (deleted):
+	  rename mixdata to trackmix.
+
+2008-11-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mixdata.py:
+	  rename mixdata to trackmix.
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/mixing.py:
+	* examples/mix.py:
+	  Use the volumes as well when deciding the mix.
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/gstreamer/sources.py (added):
+	  Add an AudioSource that doesn't use a queue but has a set_volume
+	  method.
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/mixing.py:
+	* dad/gstreamer/leveller.py:
+	  Rename MixData to TrackMix
+
+2008-11-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mix.py:
+	* dad/audio/mixing.py (added):
+	* dad/audio/mixdata.py (deleted):
+	  Rename mixdata to mixing
+
+2008-11-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/mixdata.py:
+	  Create a Mix object to do the mix calculation.
+	* examples/mix.py:
+	  Use it.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/extern (added):
+	* dad/extern/singledecodebin.py (added):
+	* dad/extern/__init__.py (added):
+	  Add singledecodebin implementation from PiTiVi 0.11.2
+	* examples/mix.py:
+	  Use it instead of the gnlfilesrc that is rumoured to have decodebin
+	  and queue problems.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/mixdata.py:
+	  add note on weighted time selection
+	* examples/mix.py (added):
+	  Add a first example using gnonlin to mix.  You can clearly
+	  hear the glitches when track2 starts and track1 ends, for
+	  example between London Rain and Smooth Flavours.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/mixdata.py:
+	  Add rms over whole track as well.
+
+2008-11-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/test/test_audio_level.py:
+	  Update test after switching rms() to same scale as object.
+
+2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
+	  Return rms() result in the same scale as the Level object.
+	* dad/audio/mixdata.py:
+	* examples/mixdata.py:
+	  Add our idea of a weighted RMS value too.
+	  Add peak RMS too.
+
+2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
+	  Fix buglet where we accidentally created Levels with start as a
+	  method.
+	* dad/audio/common.py:
+	  add safeguard of -100 dB for 0 values.
+	* dad/gstreamer/leveller.py:
+	  Use 50ms instead of 100ms as interval
+	* dad/test/home.pickle:
+	* dad/test/south.pickle:
+	* dad/test/test_audio_level.py:
+	  Adjust pickle and tests for this.
+
+2008-11-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
+	* dad/test/test_audio_level.py:
+	  Add start() and end() methods.  Store start as well so the object
+	  becomes 'symmetrical' and can operate on blocks with start and end
+	  time.
+	  Add __repr__, percentile, trim, attack, decay.
+	  Make slices return Level objects
+	  Add Attack.
+	* dad/test/home.pickle:
+	* dad/test/south.pickle:
+	  Update pickles because the Level object changed
+	* dad/audio/mixdata.py (added):
+	* examples/mixdata.py (added):
+	  Add a MixData class. Add an example that calculates it for a
+	  bunch of files in a pickle.
+	* dad/gstreamer/leveller.py:
+	  add get_mixdatas()
+
+2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/test/__init__.py:
+	  Add GStreamer import stuff for trial dad
+	* dad/test/test_gstreamer_leveller.py (added):
+	  Add another test.
+
+2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/level.py:
+	  Fix logging.
+	* dad/test/__init__.py (added):
+	* dad/test/test_audio_level.py (added):
+	  Add test suite.
+	* dad/test/south.pickle (added):
+	* dad/test/home.pickle (added):
+	  Add two pickles for testing.
+
+2008-11-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad (added):
+	* dad/audio (added):
+	* dad/audio/common.py (added):
+	* dad/audio/__init__.py (added):
+	* dad/audio/level.py (added):
+	* dad/__init__.py (added):
+	* dad/gstreamer (added):
+	* dad/gstreamer/leveller.py (added):
+	* dad/gstreamer/__init__.py (added):
+	  Initial import of code.
+
