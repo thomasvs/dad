@@ -1,0 +1,23 @@
+2010-11-20  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dad/common/cachedb.py:
+	  Rename open to map.
+	  Chain up to parent if not cached.
+	* python/dad/model/daddb.py (added):
+	* scripts/online.py:
+	  Rewrite using new daddb.py
+
+2010-11-20  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dad/common/manydef.py:
+	  Fire straight away if there are no callables.
+	  Space per 200 instead.
+
+2010-11-20  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* README:
+	* couchdb/views/stats (added):
+	* couchdb/views/stats/reduce.js (added):
+	* couchdb/views/stats/map.js (added):
+	  Add stats view.
+

@@ -1,0 +1,8 @@
+------------------------------------------------------------
+revno: 39
+committer: Thomas Vander Stichele <thomas@apestaart.org>
+branch nick: object-views
+timestamp: Wed 2010-11-17 17:46:11 +0100
+message:
+  Add a map method that opens a doc and then maps it to an objectFactory.
+  Also allows subclasses to cache using 'mapped'.

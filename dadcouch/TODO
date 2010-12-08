@@ -1,0 +1,15 @@
+* write caching couchdb server in paisley that
+  - caches complete docs parsed into objects by id and class
+  - notifies about changes to cached docs
+  - notifies about changes to previously returned view results
+	(change/add/delete)
+* use it to reimplement consistency checking, such that we can reuse the
+  methods that look up a file for a track
+* dadtest does not have categories, add to script
+* dad does not have slices
+* add verification that trackscores are unique
+* slice-lookup: used by trackloader with wrong params, when it does not have
+  track_id; also by getSlices in daddb; so maybe split in two separate views ?
+* integrate new mapping into paisley
+* release paisley
+* find a way to either properly split or merge couchdb dad and other dad

@@ -1,0 +1,6 @@
+Get dad.audio.mixing:
+	ln -sf /home/thomas/svn/src/dad/trunk/dad/audio python/dad/
+
+Couchdb hints:
+	get all id's
+		curl "http://localhost:5984/dad/_all_docs" | cut -c8-39 tail -n -1

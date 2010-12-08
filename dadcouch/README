@@ -1,0 +1,58 @@
+generate test database (using couchdb-python)
+----------------------
+generate: from dad
+	PYTHONPATH=`pwd`/python python scripts/gentest.py > /tmp/ids
+edit:
+	vim /tmp/ids
+	(remove the debug output)
+dump: from couchdb-python
+	python couchdb/tools/dump.py  -i /tmp/ids http://localhost:5984/dad > /tmp/dad-partial.dump
+
+load: 
+	curl -X DELETE http://127.0.0.1:5984/dadtest
+	curl -X PUT http://127.0.0.1:5984/dadtest
+	couchdb-load  http://localhost:5984/dadtest < /tmp/dad-partial.dump 
+
+push:
+	couchapp push couchdb dad http://thomas:pass@localhost:5984/dadtest
+
+check consistency: from dad
+	PYTHONPATH=`pwd`/python python scripts/consistency.py localhost dadtest
+
+
+get stats
+---------
+curl "http://localhost:5984/dad/_design/dad/_view/stats?group=true"
+
+{"rows":[
+{"key":"album","value":1479},
+{"key":"artist","value":1988},
+{"key":"audiofile","value":19326},
+{"key":"category","value":5},
+{"key":"directory","value":1534},
+{"key":"score","value":1861},
+{"key":"track","value":18619},
+{"key":"trackalbum","value":19261},
+{"key":"user","value":11},
+{"key":"volume","value":1}
+]}
+
+
+
+
+backup and restore
+------------------
+
+backup:
+
+couchdb-dump http://localhost:5984/dad > dad.couchdb.dump
+
+restore:
+
+- delete in futon
+- create new database in futon
+- curl -X PUT http://127.0.0.1:5984/dad
+- couchdb-load http://localhost:5984/dad < dad.couchdb.dump 
+
+Don't couchapp push until after loading, otherwise you get doc conflict
+after doc 99999...
