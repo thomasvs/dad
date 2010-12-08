@@ -24,11 +24,14 @@ import os
 import math
 
 import gobject
+
+import pygst
+pygst.require('0.10')
 import gst
 
 from dad.audio import level, common
 from dad.common import garbage
-from dad.gstreamer import leveller
+from dadgst.gstreamer import leveller
 
 gobject.threads_init()
 

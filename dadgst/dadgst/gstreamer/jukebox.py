@@ -33,7 +33,7 @@ import gst
 from gst.extend import pygobject
 
 from dad.audio import mixing, common
-from dad.gstreamer import sources
+from dadgst.gstreamer import sources
 from dad.common import scheduler
 
 _TEMPLATE = gst.PadTemplate('template', gst.PAD_SRC, gst.PAD_ALWAYS,

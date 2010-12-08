@@ -10,35 +10,49 @@ import pickle
 import gobject
 gobject.threads_init()
 
+from twisted.python import reflect
 
 from dad.audio import mixing, common
 from dad.extern.log import log
 
 
+
 class Main(log.Loggable):
-    def __init__(self, loop, tracks, options, useGtk=True):
+    def __init__(self, loop, options, useGtk=True):
         """
         @param tracks: dict of path -> list of mixdata
         @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
         """
         import gst
 
-        from dad.gstreamer import jukebox
+        from dadgst.gstreamer import jukebox
         from dad.common import scheduler, selecter
 
         _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
             gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
         self._loop = loop
-        self._tracks = tracks
-        sel = selecter.SimplePlaylistSelecter(
-            tracks, options.playlist, options.random, loops=int(options.loops))
+        #self._tracks = tracks
+
+        selecterArgs = []
+        selecterClassName = options.selecter
+
+        if ':' in options.selecter:
+            selecterClassName, line = options.selecter.split(':', 1)
+            selecterArgs = line.split(' ')
+        selecterClass = reflect.namedAny(selecterClassName)
+        parser = selecterClass.option_parser()
+        selOptions, selArgs = parser.parse_args(selecterArgs)
+        sel = selecterClass(selOptions)
+        
+        #sel = selecter.SimplePlaylistSelecter(
+        #    tracks, options.playlist, options.random, loops=int(options.loops))
         self._scheduler = scheduler.Scheduler(sel, begin=options.begin)
         self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
         self._playing = False
 
-        if useGtk == True:
+        if useGtk == False:
             import gtk
 
 
@@ -188,22 +202,26 @@ def main():
         action="store_true", dest="begin",
         help="Start at beginning of first song, instead of before first mix")
 
-    opts, args = parser.parse_args(sys.argv[1:])
+    parser.add_option('', '--selecter',
+        action="store", dest="selecter",
+        help="Selecter class to use")
+
+    options, args = parser.parse_args(sys.argv[1:])
 
     if len(args) < 1:
         print 'Please give a tracks pickle path'
 
-    tracks = pickle.load(open(args[0]))
-    if len(tracks) == 0:
-        sys.stderr.write('No tracks in pickle!\n')
-        return 1
+#    tracks = pickle.load(open(args[0]))
+#    if len(tracks) == 0:
+#        sys.stderr.write('No tracks in pickle!\n')
+#        return 1
         
     import pygst
     pygst.require("0.10")
 
     loop = gobject.MainLoop()
 
-    main = Main(loop, tracks, opts)
+    main = Main(loop, options)
 
     main.start()
     print 'going into main loop'

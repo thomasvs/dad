@@ -76,7 +76,7 @@ class Scheduler(log.Loggable, gobject.GObject):
     I schedule tracks for a playout system.
     I decide when which part of each file should be played, at which volume.
 
-    I use a scheduler to get tracks to schedule.
+    I use a selecter to get tracks to schedule.
 
     @ivar duration: the total duration of all currently scheduled tracks
     """

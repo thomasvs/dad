@@ -33,6 +33,23 @@ options=
 export PATH=$BASEDIR/bin${PATH:+:$PATH}
 export PYTHONPATH=$BASEDIR${PYTHONPATH:+:$PYTHONPATH}
 
+# check if we have more projects
+for d in $BASEDIR/../*
+do
+  project=`basename $d`
+  if test $project != dadcore
+  then
+    PYTHONDIR=`cd $d && pwd`
+    if test -d $PYTHONDIR/python
+    then
+      PYTHONDIR=$PYTHONDIR/python
+    fi
+  fi
+  export PYTHONPATH=$PYTHONDIR:$PYTHONPATH
+done
+
+echo PYTHONPATH: $PYTHONPATH
+
 # if we got a command, run it, else start a shell
 if test ! -z "$1";
 then
