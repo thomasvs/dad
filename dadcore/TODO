@@ -88,3 +88,7 @@ Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone 
 - make a start selecter method, and a callback, so that the couchdb one
   can connect and prime its track list
 - probably same for actually getting tracks to play
+
+ * rename trackmix to slice ?
+ * find better name for slice, since it is a python keyword
+

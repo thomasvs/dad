@@ -202,9 +202,11 @@ def main():
         action="store_true", dest="begin",
         help="Start at beginning of first song, instead of before first mix")
 
+    default = 'dad.common.selecter.SimplePlaylistSelecter'
     parser.add_option('', '--selecter',
         action="store", dest="selecter",
-        help="Selecter class to use")
+        help="Selecter class to use (default %s)" % default,
+        default=default)
 
     options, args = parser.parse_args(sys.argv[1:])
 
