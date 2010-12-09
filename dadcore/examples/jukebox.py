@@ -210,14 +210,6 @@ def main():
 
     options, args = parser.parse_args(sys.argv[1:])
 
-    if len(args) < 1:
-        print 'Please give a tracks pickle path'
-
-#    tracks = pickle.load(open(args[0]))
-#    if len(tracks) == 0:
-#        sys.stderr.write('No tracks in pickle!\n')
-#        return 1
-        
     import pygst
     pygst.require("0.10")
 

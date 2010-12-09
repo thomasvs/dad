@@ -22,8 +22,13 @@ import os
 import sys
 import math
 import random
+import optparse
+import pickle
 
 from dad.extern.log import log
+
+_DEFAULT_LOOPS = -1
+_DEFAULT_TRACKS = 'tracks.pickle'
 
 def getPathArtist(path):
     import re
@@ -51,6 +56,28 @@ class Selecter(log.Loggable):
     I implement a selection strategy.
     """
 
+class OptionParser(optparse.OptionParser):
+    standard_option_list = [
+        optparse.Option('-l', '--loops',
+            action="store", dest="loops",
+            help="how many times to loop the playlist (defaults to %d)" %
+                _DEFAULT_LOOPS,
+            default=_DEFAULT_LOOPS),
+        optparse.Option('-r', '--random',
+            action="store_true", dest="random",
+            help="play tracks in random order"),
+        optparse.Option('-t', '--tracks',
+            action="store", dest="tracks",
+            help="A tracks pickle to read trackmix data from (default '%s'" %
+                _DEFAULT_TRACKS,
+            default=_DEFAULT_TRACKS),
+        optparse.Option('-p', '--playlist',
+            action="store", dest="playlist",
+            help="A playlist file to play tracks from"),
+    ]
+
+
+
 class SimplePlaylistSelecter(Selecter):
     """
     I simply select tracks from a tracks pickle and playlist, linear or random.
@@ -61,13 +88,17 @@ class SimplePlaylistSelecter(Selecter):
     @param tracks: dict of path -> list of trackmix
     @type  tracks: dict of str -> list of L{dad.audio.mixing.TrackMix}
     """
-    def __init__(self, tracks, playlist=None, random=False, loops=-1):
-        self.debug('Creating selecter, for %d loops', loops)
-        self._tracks = tracks
-        self._playlist = playlist
-        self._random = random
+
+    option_parser = OptionParser
+
+    def __init__(self, options):
+        self._tracks = pickle.load(open(options.tracks))
+
+        self._playlist = options.playlist
+        self._random = options.random
         self._loop = 0
-        self._loops = loops
+        self._loops = options.loops
+        self.debug('Creating selecter, for %d loops', self._loops)
 
         self._selected = [] # list of tuple of (path, trackMix)
         self._load()
