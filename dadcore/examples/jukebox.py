@@ -22,7 +22,7 @@ class Main(log.Loggable):
         self._loop = loop # main loop
 
     # FIXME: gtk frontend should be some kind of viewer class
-    def setup(self, options, useGtk=True):
+    def setup(self, options):
         import gst
 
         from dadgst.gstreamer import jukebox
@@ -59,7 +59,7 @@ class Main(log.Loggable):
         self._pipeline = gst.Pipeline()
         self._playing = False
 
-        if useGtk == False:
+        if options.gtk == True:
             import gtk
 
 
@@ -144,6 +144,9 @@ class Main(log.Loggable):
             path, track = sel.get()
             self._scheduler.add_track(path, track)
 
+        # setup succeeded
+        return True
+
 
     def start(self):
         import gst
@@ -190,13 +193,11 @@ def main():
         help="how many tracks to play (defaults to %d)" % default,
         default=default)
     default = -1
+    # FIXME: should we proxy this to selecter or throw out ?
     parser.add_option('-l', '--loops',
         action="store", dest="loops",
         help="how many times to loop the playlist (defaults to %d)" % default,
-        default=default)
-    parser.add_option('-p', '--playlist',
-        action="store", dest="playlist",
-        help="playlist to play from")
+        default=default),
     parser.add_option('-r', '--random',
         action="store_true", dest="random",
         help="play tracks in random order")
@@ -215,6 +216,11 @@ def main():
         help="Selecter class to use (default %s)" % default,
         default=default)
 
+    parser.add_option('-g', '--gtk',
+        action="store_true", dest="gtk",
+        help="whether to use GTK+ (defaults to %default)",
+        default=False)
+ 
     options, args = parser.parse_args(sys.argv[1:])
 
     import pygst
