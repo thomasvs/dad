@@ -62,7 +62,8 @@ class OptionParser(optparse.OptionParser):
             default=_DEFAULT_LOOPS),
         optparse.Option('-r', '--random',
             action="store_true", dest="random",
-            help="play tracks in random order"),
+            help="play tracks in random order (defaults to %default)",
+            default=_DEFAULT_RANDOM),
     ]
 
 
@@ -73,6 +74,14 @@ class Selecter(log.Loggable):
     """
     option_parser_class = OptionParser
 
+    def setup(self):
+        """
+        Override me to set up the selecter, connect to the backend, and prime
+        the first few selected tracks.
+
+        Can return a deferred which will be waited on.
+        """
+        raise NotImplementedError
 
 class SimplePlaylistOptionParser(OptionParser):
     standard_option_list = OptionParser.standard_option_list + [
@@ -110,6 +119,8 @@ class SimplePlaylistSelecter(Selecter):
         self.debug('Creating selecter, for %d loops', self._loops)
 
         self._selected = [] # list of tuple of (path, trackMix)
+
+    def setup(self):
         self._load()
 
     def shuffle(self, files):

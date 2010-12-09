@@ -21,6 +21,61 @@ class Main(log.Loggable):
     def __init__(self, loop):
         self._loop = loop # main loop
 
+    def _setup_dbus(self):
+        # dbussy bits
+
+        def signal_handler(*keys):
+            for key in keys:
+                self.debug('Key %r pressed', key)
+                if key == u'Next':
+                    self.info('Next track')
+                elif key == u'Play':
+                    self.info('Play')
+                    if self._playing:
+                        self._pipeline.set_state(gst.STATE_PAUSED)
+                        self._playing = False
+                    else:
+                        self._pipeline.set_state(gst.STATE_PLAYING)
+                        self._playing = True
+
+        import dbus
+        # this import has the side effect of setting the main loop on dbus
+        from dbus import glib
+        bus = dbus.SessionBus()
+        try:
+            listener = bus.get_object('org.gnome.SettingsDaemon',
+                '/org/gnome/SettingsDaemon/MediaKeys')
+            listener.connect_to_signal("MediaPlayerKeyPressed", signal_handler,
+                dbus_interface='org.gnome.SettingsDaemon.MediaKeys')
+        except Exception, e:
+            print 'Cannot listen to multimedia keys', e
+
+    def _setup_gtk(self):
+            import gtk
+
+            w = gtk.Window()
+            from dad.ui import scheduler as sch
+            s = sch.SchedulerUI()
+
+            def jukebox_started_cb(jukebox, scheduled):
+                s.started(scheduled)
+            self._jukebox.connect('started', jukebox_started_cb)
+
+            def scheduler_clicked_cb(scheduler, scheduled):
+                print 'seeking to %r' % scheduled
+                where = scheduled.start
+                self._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
+            s.connect('clicked', scheduler_clicked_cb)
+
+            s.set_scheduler(self._scheduler)
+
+            sw = gtk.ScrolledWindow()
+            sw.add(s)
+            w.add(sw)
+            w.set_default_size(640, 480)
+            w.show_all()
+
+
     # FIXME: gtk frontend should be some kind of viewer class
     def setup(self, options):
         import gst
@@ -50,70 +105,20 @@ class Main(log.Loggable):
             return False
 
         selOptions, selArgs = parser.parse_args(selecterArgs)
-        sel = selecterClass(selOptions)
+        self._selecter = selecterClass(selOptions)
         
         #sel = selecter.SimplePlaylistSelecter(
         #    tracks, options.playlist, options.random, loops=int(options.loops))
-        self._scheduler = scheduler.Scheduler(sel, begin=options.begin)
+        self._scheduler = scheduler.Scheduler(self._selecter,
+            begin=options.begin)
         self._jukebox = jukebox.JukeboxSource(self._scheduler)
         self._pipeline = gst.Pipeline()
         self._playing = False
 
         if options.gtk == True:
-            import gtk
+            self._setup_gtk()
 
-
-
-            w = gtk.Window()
-            from dad.ui import scheduler as sch
-            s = sch.SchedulerUI()
-
-            def jukebox_started_cb(jukebox, scheduled):
-                s.started(scheduled)
-            self._jukebox.connect('started', jukebox_started_cb)
-
-            def scheduler_clicked_cb(scheduler, scheduled):
-                print 'seeking to %r' % scheduled
-                where = scheduled.start
-                self._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
-            s.connect('clicked', scheduler_clicked_cb)
-
-            s.set_scheduler(self._scheduler)
-
-            sw = gtk.ScrolledWindow()
-            sw.add(s)
-            w.add(sw)
-            w.set_default_size(640, 480)
-            w.show_all()
-
-        # dbussy bits
-
-        def signal_handler(*keys):
-            for key in keys:
-                self.debug('Key %r pressed', key)
-                if key == u'Next':
-                    self.info('Next track')
-                elif key == u'Play':
-                    self.info('Play')
-                    if self._playing:
-                        self._pipeline.set_state(gst.STATE_PAUSED)
-                        self._playing = False
-                    else:
-                        self._pipeline.set_state(gst.STATE_PLAYING)
-                        self._playing = True
-
-        import dbus
-        # this import has the side effect of setting the main loop on dbus
-        from dbus import glib
-        bus = dbus.SessionBus()
-        try:
-            listener = bus.get_object('org.gnome.SettingsDaemon',
-                '/org/gnome/SettingsDaemon/MediaKeys')
-            listener.connect_to_signal("MediaPlayerKeyPressed", signal_handler,
-                dbus_interface='org.gnome.SettingsDaemon.MediaKeys')
-        except Exception, e:
-            print 'Cannot listen to multimedia keys', e
-
+        self._setup_dbus()
 
 
         self._identity = gst.element_factory_make('identity')
@@ -141,7 +146,7 @@ class Main(log.Loggable):
         # pick songs
 
         for i in range(int(options.count)):
-            path, track = sel.get()
+            path, track = self._selecter.get()
             self._scheduler.add_track(path, track)
 
         # setup succeeded

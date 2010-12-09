@@ -42,7 +42,7 @@ _DEFAULT_BELOW = 1.0
 _DEFAULT_CATEGORY = 'Good'
 
 class OptionParser(selecter.OptionParser):
-    standard_option_list = [
+    standard_option_list = selecter.OptionParser.standard_option_list + [
         optparse.Option('-H', '--host',
             action="store", dest="host",
             help="CouchDB hostname (defaults to %default)",
@@ -101,7 +101,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self._tracks = [] # list of L{couch.Track}
 
-    def start(self):
+    def setup(self):
+        self.debug('setup')
         return self._load()
 
     def shuffle(self, files):
