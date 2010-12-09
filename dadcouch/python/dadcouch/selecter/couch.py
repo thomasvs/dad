@@ -126,6 +126,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
             for succeeded, result in resultList:
                 print result
                 (track, slice, path, score, userId) = result
+                # FIXME: samplerate?
+                print "Play %s from %d to %d" % (path, slice.start, slice.end)
 
         d.addCallback(showPlaylist)
         return d
@@ -160,55 +162,20 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 def main():
     log.init()
 
-    parser = optparse.OptionParser()
-
-    parser.add_option('-c', '--category',
-        action="store", dest="category",
-        help="category to make playlist for",
-        default="Good")
-
-    parser.add_option('-a', '--above',
-        action="store", dest="above",
-        help="lower bound for scores",
-        default="0.7")
-    parser.add_option('-b', '--below',
-        action="store", dest="below",
-        help="upper bound for scores",
-        default="1.0")
-
-    parser.add_option('-u', '--user',
-        action="store", dest="user",
-        help="user")
-
-
+    parser = OptionParser()
     opts, args = parser.parse_args(sys.argv)
 
-    print opts, args
+    selecter = CouchSelecter(opts)
 
-    serverName = 'localhost'
-    if len(args) > 1:
-        serverName = args[1]
-
-    dbName = 'dad'
-    if len(args) > 2:
-        dbName = args[2]
-
-    server = couchdb.CouchDB(serverName)
-    dadDB = daddb.DADDB(server, dbName)
-
-    selecter = CouchSelecter(dadDB,
-        opts.category, opts.user, opts.above, opts.below)
-
-    d = selecter.start()
-    def started(_):
-        print 'selecter started'
-    d.addCallback(started)
+    d = selecter.setup()
+    def setup(_):
+        self.info('Selecter set up')
+    d.addCallback(setup)
     d.addErrback(log.warningFailure)
 
+    # start the reactor
     from twisted.internet import reactor
     reactor.run()
 
 if __name__ == '__main__':
-    print 'selecting'
-
     main()

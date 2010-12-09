@@ -79,7 +79,20 @@ class Selecter(log.Loggable):
         Override me to set up the selecter, connect to the backend, and prime
         the first few selected tracks.
 
+        Should get at least two tracks so playback can begin and get can be
+        called.
+
+        Should get more tracks in the background.
+
         Can return a deferred which will be waited on.
+        """
+        raise NotImplementedError
+
+    def get(self):
+        """
+        Get a track to play.
+
+        @rtype: tuple of (str, L{TrackMix})
         """
         raise NotImplementedError
 
