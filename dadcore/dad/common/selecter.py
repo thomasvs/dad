@@ -28,6 +28,8 @@ import pickle
 from dad.extern.log import log
 
 _DEFAULT_LOOPS = -1
+_DEFAULT_RANDOM = True
+
 _DEFAULT_TRACKS = 'tracks.pickle'
 
 def getPathArtist(path):
@@ -51,21 +53,29 @@ def getPathArtist(path):
             # FIXME: our regexps don't drop the spaces right
             return m.group('artist').strip()
 
-class Selecter(log.Loggable):
-    """
-    I implement a selection strategy.
-    """
 
 class OptionParser(optparse.OptionParser):
     standard_option_list = [
         optparse.Option('-l', '--loops',
-            action="store", dest="loops",
-            help="how many times to loop the playlist (defaults to %d)" %
-                _DEFAULT_LOOPS,
+            action="store", dest="loops", type="int",
+            help="how many times to loop the playlist (defaults to %default)",
             default=_DEFAULT_LOOPS),
         optparse.Option('-r', '--random',
             action="store_true", dest="random",
             help="play tracks in random order"),
+    ]
+
+
+
+class Selecter(log.Loggable):
+    """
+    I implement a selection strategy.
+    """
+    option_parser_class = OptionParser
+
+
+class SimplePlaylistOptionParser(OptionParser):
+    standard_option_list = OptionParser.standard_option_list + [
         optparse.Option('-t', '--tracks',
             action="store", dest="tracks",
             help="A tracks pickle to read trackmix data from (default '%s'" %
@@ -75,7 +85,6 @@ class OptionParser(optparse.OptionParser):
             action="store", dest="playlist",
             help="A playlist file to play tracks from"),
     ]
-
 
 
 class SimplePlaylistSelecter(Selecter):
@@ -89,7 +98,7 @@ class SimplePlaylistSelecter(Selecter):
     @type  tracks: dict of str -> list of L{dad.audio.mixing.TrackMix}
     """
 
-    option_parser = OptionParser
+    option_parser_class = SimplePlaylistOptionParser
 
     def __init__(self, options):
         self._tracks = pickle.load(open(options.tracks))

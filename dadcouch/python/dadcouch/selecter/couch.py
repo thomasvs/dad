@@ -35,59 +35,49 @@ from dadcouch.common import cachedb
 from dadcouch.model import couch, daddb
 
 _DEFAULT_HOST = 'localhost'
-_DEFAULT_PORT = '5984'
+_DEFAULT_PORT = 5984
 _DEFAULT_DB = 'dad'
-_DEFAULT_LOOPS = -1
+_DEFAULT_ABOVE = 0.7
+_DEFAULT_BELOW = 1.0
+_DEFAULT_CATEGORY = 'Good'
 
-class OptionParser(optparse.OptionParser):
+class OptionParser(selecter.OptionParser):
     standard_option_list = [
         optparse.Option('-H', '--host',
             action="store", dest="host",
-            help="CouchDB hostname (defaults to %s)" % _DEFAULT_HOST,
+            help="CouchDB hostname (defaults to %default)",
             default=_DEFAULT_HOST),
         optparse.Option('-P', '--port',
-            action="store", dest="port",
-            help="CouchDB port (defaults to %s)" % _DEFAULT_PORT,
+            action="store", dest="port", type="int",
+            help="CouchDB port (defaults to %default)",
             default=_DEFAULT_PORT),
         optparse.Option('-D', '--database',
             action="store", dest="database",
             help="CouchDB database name (defaults to %s)" % _DEFAULT_DB,
             default=_DEFAULT_DB),
-        optparse.Option('-l', '--loops',
-            action="store", dest="loops",
-            help="how many times to loop the playlist (defaults to %d)" %
-                _DEFAULT_LOOPS,
-            default=_DEFAULT_LOOPS),
-
        optparse.Option('-c', '--category',
             action="store", dest="category",
-            help="category to make playlist for",
-            default="Good"),
-
+            help="category to make playlist for (defaults to %default)",
+            default=_DEFAULT_CATEGORY),
         optparse.Option('-a', '--above',
-            action="store", dest="above",
-            help="lower bound for scores",
-            default="0.7"),
+            action="store", dest="above", type="float",
+            help="lower bound for scores (defaults to %default)",
+            default=_DEFAULT_ABOVE),
         optparse.Option('-b', '--below',
-            action="store", dest="below",
-            help="upper bound for scores",
-            default="1.0"),
+            action="store", dest="below", type="float",
+            help="upper bound for scores (defaults to %default)",
+            default=_DEFAULT_BELOW),
         optparse.Option('-u', '--user',
             action="store", dest="user",
             help="user"),
-        optparse.Option('-r', '--random',
-            action="store_true", dest="random",
-            help="play tracks in random order"),
-
     ]
 
-    
 
 class CouchSelecter(selecter.Selecter, log.Loggable):
     """
     """
 
-    option_parser = OptionParser
+    option_parser_class = OptionParser
 
     logCategory = 'couchselecter'
 
@@ -100,8 +90,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self._category = options.category
         self._user = options.user
-        self._above = float(options.above)
-        self._below = float(options.below)
+        self._above = options.above
+        self._below = options.below
         self._random = options.random
         self._loop = 0
 
@@ -221,4 +211,3 @@ if __name__ == '__main__':
     print 'selecting'
 
     main()
-

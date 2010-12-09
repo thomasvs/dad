@@ -18,11 +18,11 @@ from dad.extern.log import log
 
 
 class Main(log.Loggable):
-    def __init__(self, loop, options, useGtk=True):
-        """
-        @param tracks: dict of path -> list of mixdata
-        @type  tracks: dict of str -> list of L{dad.audio.mixing.MixData}
-        """
+    def __init__(self, loop):
+        self._loop = loop # main loop
+
+    # FIXME: gtk frontend should be some kind of viewer class
+    def setup(self, options, useGtk=True):
         import gst
 
         from dadgst.gstreamer import jukebox
@@ -31,8 +31,7 @@ class Main(log.Loggable):
         _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,
             gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
 
-        self._loop = loop
-        #self._tracks = tracks
+        # parse selecter class and arguments
 
         selecterArgs = []
         selecterClassName = options.selecter
@@ -41,7 +40,15 @@ class Main(log.Loggable):
             selecterClassName, line = options.selecter.split(':', 1)
             selecterArgs = line.split(' ')
         selecterClass = reflect.namedAny(selecterClassName)
-        parser = selecterClass.option_parser()
+        parser = selecterClass.option_parser_class()
+        self.debug('Creating selecter %r with args %r',
+            selecterClass, selecterArgs)
+
+        if 'help' in selecterArgs:
+            print 'Options for selecter %s' % selecterClassName
+            parser.print_help()
+            return False
+
         selOptions, selArgs = parser.parse_args(selecterArgs)
         sel = selecterClass(selOptions)
         
@@ -215,7 +222,9 @@ def main():
 
     loop = gobject.MainLoop()
 
-    main = Main(loop, options)
+    main = Main(loop)
+    if not main.setup(options):
+        return -1
 
     main.start()
     print 'going into main loop'
