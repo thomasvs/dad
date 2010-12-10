@@ -99,11 +99,14 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self._selected = [] # list of tuple of (path, trackMix)
 
-        self._tracks = [] # list of L{couch.Track}
+        self._tracks = [] # list of L{couch.Track}; private cache
 
     def setup(self):
         self.debug('setup')
-        return self._load()
+        return self.load()
+
+    def load(self):
+        return self._loadLimited(4)
 
     def shuffle(self, files):
         """
@@ -113,51 +116,38 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         random.shuffle(res)
         return res
 
-    def _load(self):
-        
-        #d = self._dadDB.getTrack(self._user, self._category,
-        #    self._above, self._below)
+    def _loadLimited(self, limit):
+        # get a few results as fast as possible
         d = self._dadDB.getPlaylist(self._user, self._category,
-            self._above, self._below, limit=5)
-        def showPlaylist(result):
-            resultList = list(result)
-            log.debug('playlist', 'got %r paths resolved', len(resultList))
+            self._above, self._below, limit=limit)
+        d.addCallback(self._getPlaylistCb)
 
-            for succeeded, result in resultList:
-                print result
-                (track, slice, path, score, userId) = result
-                # FIXME: samplerate?
-                print "Play %s from %d to %d" % (path, slice.start, slice.end)
+        # we won't wait on this one; it's an internal deferred to get
+        # all items which is slower
 
-        d.addCallback(showPlaylist)
+        self.loadDeferred = self._dadDB.getPlaylist(self._user, self._category,
+            self._above, self._below)
+        self.loadDeferred.addCallback(self._getPlaylistCb, resetLoad=True)
+        self.debug('setting loadDef to %r', self.loadDeferred)
+
         return d
 
+    def _getPlaylistCb(self, result, resetLoad=False):
+        if resetLoad:
+            self.debug('setting loadDef to None')
+            self.loadDeferred = None
+
+        resultList = list(result)
+        log.debug('playlist', 'got %r paths resolved', len(resultList))
+
+        for succeeded, result in resultList:
+            if not succeeded:
+                print result
+            else:
+                if result not in self._tracks:
+                    self._tracks.append(result)
+                    self._selected.append(result)
  
-    
-    def get(self):
-        """
-        Get a track to play.
-
-        @rtype: tuple of (str, L{TrackMix})
-        """
-        if not self._selected:
-            self.debug('get out of selected tracks, %d/%d loops',
-                self._loop, self._loops)
-            if self._loop == self._loops:
-                return None
-
-            self._load()
-            self._loop += 1
-
-        tuple = self._selected[-1]
-        del self._selected[-1]
-
-        return tuple
-
-    def select(self):
-        t = self.get()
-        self.info('selecter: selected %r', t)
-        return t
 
 def main():
     log.init()
@@ -167,11 +157,44 @@ def main():
 
     selecter = CouchSelecter(opts)
 
+    def output(result):
+        track, slice, path, score, userId = result
+        print path
+        sys.stdout.flush()
+
     d = selecter.setup()
-    def setup(_):
-        self.info('Selecter set up')
-    d.addCallback(setup)
+    def setupCb(_):
+        log.info('main', 'Selecter set up')
+        return True
+    d.addCallback(setupCb)
+
+    def select(cont):
+        if not cont:
+            log.info('main', 'no further selecting')
+            return
+
+        if cont is not True:
+            # result from a previous get call
+            output(cont)
+
+        log.info('main', 'selecting')
+        while True:
+            log.debug('main', 'getting track now')
+            track = selecter.getNow()
+            if not track:
+                break
+
+            output(track)
+            sys.stdout.flush()
+
+        log.debug('main', 'getting track later')
+        d = selecter.get()
+        d.addCallback(select)
+        return d
+    d.addCallback(select)
+
     d.addErrback(log.warningFailure)
+    d.addCallback(lambda _: reactor.stop())
 
     # start the reactor
     from twisted.internet import reactor

@@ -127,7 +127,7 @@ class DADDB(log.Loggable):
                 def callable(slice, trackId):
                     d = self.getSliceFile(slice)
                     def cb(audiofile, trackId):
-                        print 'resolveSlices cb', audiofile, trackId
+                        # print 'resolveSlices cb', audiofile, trackId
                         trackDict[trackId][2] = audiofile
                         return audiofile, trackId
                     d.addCallback(cb, trackId)
@@ -142,7 +142,7 @@ class DADDB(log.Loggable):
         def getPaths(result):
             resultList = list(result)
             log.debug('playlist', 'got %r slices resolved', len(resultList))
-            print resultList
+            # print resultList
 
             dls = manydef.DeferredListSpaced()
 
@@ -150,7 +150,7 @@ class DADDB(log.Loggable):
                 def callable(audiofile, trackId):
                     d = self.getFilePath(audiofile)
                     def cb(path, trackId):
-                        print 'getPaths cb', audiofile, trackId
+                        # print 'getPaths cb', audiofile, trackId
                         trackDict[trackId][2] = path
                         return trackDict[trackId]
                     d.addCallback(cb, trackId)
@@ -266,8 +266,11 @@ class DADDB(log.Loggable):
                     trackIdToScore[trackScore.subjectId] = trackScore
 
                 for succeeded, track in result:
-                    trackScore = trackIdToScore[track.id]
-                    res.append((track, trackScore.score, trackScore.userId))
+                    if not succeeded:
+                        log.warningFailure(track)
+                    else:
+                        trackScore = trackIdToScore[track.id]
+                        res.append((track, trackScore.score, trackScore.userId))
 
                 return res
             d.addCallback(loaded)

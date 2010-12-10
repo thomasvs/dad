@@ -25,6 +25,8 @@ import random
 import optparse
 import pickle
 
+from twisted.internet import defer
+
 from dad.extern.log import log
 
 _DEFAULT_LOOPS = -1
@@ -74,6 +76,94 @@ class Selecter(log.Loggable):
     """
     option_parser_class = OptionParser
 
+    loadDeferred = None # set when a complete load is in progress in backend
+
+
+    ### base method implementations
+
+    def get(self):
+        """
+        Get a track to play, possibly waiting to (re)query the backend.
+
+        @rtype: deferred firing tuple of (str, L{TrackMix}) or None when done.
+        """
+        # if we still have tracks loaded, return them
+        res = self.getNow()
+
+        if res:
+            self.debug('get(): returning immediately %r', res)
+            return defer.succeed(res)
+
+        # no tracks loaded, so if necessary reload
+        if self.loadDeferred:
+            self.debug('get(): already loading, returning a deferred for later')
+            d = defer.Deferred()
+            # wait for results to come in
+
+            def loadCb(_):
+                self.debug('get(): loaded, returning a recursive get')
+                # recursively get
+                d2 = self.get()
+                d2.addCallback(lambda r: d.callback(r))
+                return d2
+            self.loadDeferred.addCallback(loadCb)
+
+            return d
+
+        # reload 
+        self.debug('get(): ran out of selected tracks, %d/%d loops',
+            self._loop, self._loops)
+        if self._loop == self._loops:
+            # done
+            self.debug('get(): completed all loops')
+            return defer.succeed(None)
+
+        self.debug('get(): reloading')
+        d = self.load()
+
+        def loadCb(result):
+            self._loop += 1
+            self.debug('get(): loaded, starting loop %d of %d',
+                self._loop, self._loops)
+        d.addCallback(loadCb)
+        # another recursive call
+        d.addCallback(lambda _: self.get())
+
+        return d
+
+    def getNow(self):
+        """
+        Get a track to play, or return False if none are ready to be selected.
+
+        @rtype: tuple of (str, L{TrackMix})
+        """
+        if not self._selected:
+            return None
+
+        tuple = self._selected[-1]
+        del self._selected[-1]
+
+        return tuple
+
+    def select(self):
+        d = self.get()
+
+        def _getCb(result):
+            self.info('selected %r', result)
+            return result
+        d.addCallback(_getCb)
+
+        return d
+
+    def selectNow(self):
+        t = self.getNow()
+        if t:
+            self.info('selected %r', t)
+        else:
+            self.info('could not select a track now')
+        return t
+
+    ### overridable methods
     def setup(self):
         """
         Override me to set up the selecter, connect to the backend, and prime
@@ -88,13 +178,14 @@ class Selecter(log.Loggable):
         """
         raise NotImplementedError
 
-    def get(self):
+    def load(self):
         """
-        Get a track to play.
+        Load all tracks to be scheduled.
 
-        @rtype: tuple of (str, L{TrackMix})
+        @rtype: L{defer.Deferred}
         """
         raise NotImplementedError
+
 
 class SimplePlaylistOptionParser(OptionParser):
     standard_option_list = OptionParser.standard_option_list + [
@@ -170,26 +261,6 @@ class SimplePlaylistSelecter(Selecter):
             except IndexError:
                 print "path %s does not have trackmix object in pickle" % path
         
-    def get(self):
-        """
-        Get a track to play.
-
-        @rtype: tuple of (str, L{TrackMix})
-        """
-        if not self._selected:
-            self.debug('get out of selected tracks, %d/%d loops',
-                self._loop, self._loops)
-            if self._loop == self._loops:
-                return None
-
-            self._load()
-            self._loop += 1
-
-        tuple = self._selected[-1]
-        del self._selected[-1]
-
-        return tuple
-
     def select(self):
         t = self.get()
         self.info('selecter: selected %r', t)
