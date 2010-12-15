@@ -168,32 +168,44 @@ def main():
         return True
     d.addCallback(setupCb)
 
-    def select(cont):
-        if not cont:
-            log.info('main', 'no further selecting')
-            return
+    def startSelecting():
+        # return a deferred that will be fired when we're done selecting
+        selectD = defer.Deferred()
 
-        if cont is not True:
-            # result from a previous get call
-            output(cont)
+        def select(cont):
+            if not cont:
+                log.info('main', 'no further selecting')
+                selectD.callback(None)
+                return
 
-        log.info('main', 'selecting')
-        while True:
-            log.debug('main', 'getting track now')
-            track = selecter.getNow()
-            if not track:
-                break
+            if cont is not True:
+                # result from a previous get call
+                output(cont)
 
-            output(track)
-            sys.stdout.flush()
+            log.info('main', 'selecting')
+            while False:
+                log.debug('main', 'getting track now')
+                track = selecter.getNow()
+                if not track:
+                    break
 
-        log.debug('main', 'getting track later')
-        d = selecter.get()
-        d.addCallback(select)
-        return d
-    d.addCallback(select)
+                output(track)
+                sys.stdout.flush()
+
+            log.debug('main', 'getting track later')
+            d = selecter.get()
+            d.addCallback(lambda r: reactor.callLater(0L, select, r))
+            return d
+
+        # trigger the chained selects
+        select(True)
+
+        return selectD
+
+    d.addCallback(lambda _: startSelecting())
 
     d.addErrback(log.warningFailure)
+
     d.addCallback(lambda _: reactor.stop())
 
     # start the reactor
