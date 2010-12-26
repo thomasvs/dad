@@ -1,3 +1,10 @@
+2010-12-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/test/test_common_pathscan.py (added):
+	* dad/common/pathscan.py (added):
+	  Add a module to parse a path for the artist, so we
+	  can test separately.
+
 2010-10-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/jukebox.py:
