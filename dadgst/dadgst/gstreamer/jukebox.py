@@ -95,7 +95,7 @@ class JukeboxSource(gst.Bin):
         self.info('%d tracks added, %d tracks composited, %d tracks played' % (
             len(self._added), len(self._playing), len(self._done)))
 
-    def _scheduled_cb(self, obj, scheduled):
+    def _scheduled_cb(self, scheduler, scheduled):
         self.info('jukebox: scheduled %r' % scheduled)
         self._scheduling = False
         self.debug('scheduled %r' % scheduled)
@@ -179,27 +179,35 @@ class JukeboxSource(gst.Bin):
         """
         Schedule me regularly to make sure cleanups and other things happen.
         """
-        self.log('work()')
+        self.debug('work()')
 
         # get our own position
         pad = self.get_pad('src')
         try:
             res = pad.query_position(gst.FORMAT_TIME)
+
             if res != None:
                 position, format = res
-                # print 'internal overall position', gst.TIME_ARGS(position)
-                if position >= self._position:
-                    self._position = position
-                    if self._lastend - self._position < SCHEDULE_DURATION:
-                        self.debug('Need to schedule some more')
+            else:
+                # for example, when not yet playing
+                position = 0L
+                format = gst.FORMAT_TIME
+
+            # print 'internal overall position', gst.TIME_ARGS(position)
+            if position >= self._position:
+                self._position = position
+                if self._lastend - self._position < SCHEDULE_DURATION:
+                    self.debug('work(): Need to schedule some more')
+                    # only ask once at a time
+                    if not self._scheduling:
                         self.info('jukebox: asking scheduler to schedule')
-                        # only ask once at a time
-                        if not self._scheduling:
-                            self._scheduling = True
-                            self._scheduler.schedule()
-                        # FIXME:
-                else:
-                    self.warning('position reported went down to %r' % position)
+                        self._scheduling = True
+                        self._scheduler.schedule()
+                    else:
+                        self.debug('already waiting on a scheduler answer')
+                    # FIXME:
+            else:
+                self.warning('position reported went down to %r' % position)
         except Exception, e:
             print 'exception querying overall position', e
         

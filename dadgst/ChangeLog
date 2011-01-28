@@ -1,0 +1,5 @@
+2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/gstreamer/jukebox.py:
+	  Adapt to core changes.
+
