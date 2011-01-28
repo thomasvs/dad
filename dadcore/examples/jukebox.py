@@ -183,6 +183,11 @@ class Main(log.Loggable):
             return defer.fail(False)
 
         selOptions, selArgs = parser.parse_args(selecterArgs)
+        # FIXME: handle this nicer, too easy to hit
+        if selArgs:
+            print "WARNING: make sure you specify options with dashes"
+            print "Did not parse %r" % selArgs
+
         self._selecter = selecterClass(selOptions)
         
         #sel = selecter.SimplePlaylistSelecter(

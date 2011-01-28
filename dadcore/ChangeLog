@@ -1,6 +1,13 @@
 2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/audio/mixing.py:
+	  Do a 5 second default fadein/out
+	* examples/jukebox.py:
+	  Complain if the arguments are not specified properly.
+
+2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/audio/mixing.py:
 	  Work in case no attack or decay is present for the mix; for now
 	  don't overlap at all.
 	* dad/common/scheduler.py:

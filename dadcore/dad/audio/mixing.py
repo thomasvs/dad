@@ -30,8 +30,8 @@ class TrackMix(object):
     """
     I am an object holding all relevant data for mixing.
 
-    @ivar start:         the start time for this track
-    @ivar end:           the end time for this track
+    @ivar start:         the start time for this track, in nanoseconds.
+    @ivar end:           the end time for this track, in nanoseconds.
     @ivar peak:          the peak dB for this track
     @ivar rms:           the rms between start and end
     @ivar rmsPercentile: the 95 percentile rms in dB
@@ -127,7 +127,7 @@ class Mix(object, log.Loggable):
         self.debug('Finding decay point in track 1 for %f dB', level1)
         if not trackMix1.decay:
             self.warning('track mix 1 does not have decay')
-            mix1 = trackMix1.end
+            mix1 = max(trackMix1.end - 5 * 10 ** 9, trackMix1.start)
         else:
             mix1 = trackMix1.decay.get(level1)
         self.debug('Found decay point at %.3f seconds in track 1',
@@ -137,7 +137,7 @@ class Mix(object, log.Loggable):
         self.debug('Finding attack point for %f dB', level2)
         if not trackMix2.attack:
             self.warning('track mix 2 does not have attack')
-            mix2 = trackMix2.start # to come out with leadin 0
+            mix2 = min(trackMix2.start + 5 * 10 ** 9, trackMix2.end) # to come out with leadin 0
         else:
             mix2 = trackMix2.attack.get(level2)
         self.debug('Found attack point at %.3f seconds in track 2',
