@@ -1,3 +1,23 @@
+2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/selecter.py:
+	  Making the selecter work deferred.
+	* dad/common/scheduler.py:
+	  Add log categories.
+	  Log signal emits.
+	  Select twice always; the scheduler only gets schedule() called
+	  once at startup, but needs two tracks to start.
+	  Consider actually asking to schedule until a certain time in
+	  the future.
+	* dad/ui/scheduler.py:
+	  Add logging. Comment.
+	* examples/jukebox.py:
+	  Create the JukeboxSource in __init__ before setup()
+	  Move bits from main to GstPlayer class.
+	  Proxy some clicks from the UI.
+	  Make gtk optional.
+	  Now works for simple playlist scheduler.
+
 2010-12-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/test/test_common_pathscan.py (added):

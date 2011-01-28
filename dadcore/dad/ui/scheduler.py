@@ -9,9 +9,12 @@ import gtk
 
 from gst.extend import pygobject
 
+from dad.extern.log import log
+
 (COLUMN_SCHEDULED, COLUMN_PATH, COLUMN_START, COLUMN_END) = range(4)
 
-class SchedulerUI(gtk.TreeView):
+class SchedulerUI(gtk.TreeView, log.Loggable):
+    logCategory = 'schedulerui'
 
     pygobject.gsignal('clicked', object)
 
@@ -41,9 +44,13 @@ class SchedulerUI(gtk.TreeView):
     
         self._treeview.connect('row_activated', self._treeview_clicked_cb)
 
-        self._treerowrefs = {}
+        self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
 
     def set_scheduler(self, scheduler):
+        """
+        Call me before any tracks get scheduled.
+        """
+        self.debug('set_scheduler: %r', scheduler)
         scheduler.connect('scheduled', self._scheduled_cb)
 
     def _scheduled_cb(self, scheduler, scheduled):
@@ -53,6 +60,7 @@ class SchedulerUI(gtk.TreeView):
         """
         @type  scheduled: L{scheduler.Scheduled}
         """
+        self.debug('add_scheduled: adding %r', scheduled)
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_SCHEDULED, scheduled,

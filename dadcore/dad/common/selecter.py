@@ -27,33 +27,13 @@ import pickle
 
 from twisted.internet import defer
 
+from dad.common import pathscan
 from dad.extern.log import log
 
 _DEFAULT_LOOPS = -1
 _DEFAULT_RANDOM = True
 
 _DEFAULT_TRACKS = 'tracks.pickle'
-
-def getPathArtist(path):
-    import re
-    regexps = [
-        re.compile(r"""
-            (?P<track>\d+).
-            (?P<artist>[^-]*) - 
-            (?P<title>.*)""", re.VERBOSE),
-        re.compile(r"""
-            (?P<artist>[^-]*)\s*- 
-            (?P<title>.*)""", re.VERBOSE),
-    ]
-
-    # get artist from a file path
-    basename = os.path.basename(path)
-
-    for regexp in regexps:
-        m = regexp.search(basename)
-        if m:
-            # FIXME: our regexps don't drop the spaces right
-            return m.group('artist').strip()
 
 
 class OptionParser(optparse.OptionParser):
@@ -74,6 +54,8 @@ class Selecter(log.Loggable):
     """
     I implement a selection strategy.
     """
+    logCategory = 'selecter'
+
     option_parser_class = OptionParser
 
     loadDeferred = None # set when a complete load is in progress in backend
@@ -214,18 +196,27 @@ class SimplePlaylistSelecter(Selecter):
     option_parser_class = SimplePlaylistOptionParser
 
     def __init__(self, options):
-        self._tracks = pickle.load(open(options.tracks))
+        self._tracks = {}
+        if options.tracks:
+            self._tracks = pickle.load(open(options.tracks))
 
         self._playlist = options.playlist
         self._random = options.random
         self._loop = 0
         self._loops = options.loops
         self.debug('Creating selecter, for %d loops', self._loops)
+        self.debug('Random: %r', self._random)
 
         self._selected = [] # list of tuple of (path, trackMix)
 
     def setup(self):
+        # this loads all synchronously, but should be fast
         self._load()
+        return defer.succeed(None)
+
+    def load(self):
+        self._load()
+        return defer.succeed(None)
 
     def shuffle(self, files):
         """
@@ -277,19 +268,62 @@ class SpreadingArtistSelecter(SimplePlaylistSelecter):
         artists = {}
 
         for path in paths:
-            artist = getPathArtist(path)
+            artist = pathscan.getPathArtist(path)
             if not artist in artists.keys():
                 artists[artist] = []
             artists[artist].append(path)
 
-        print artists
+        paths = []
 
-        return paths
+        for artist, p in artists.items():
+            paths.append(random.choice(p))
+
+        res = paths[:]
+
+        if self._random:
+            random.shuffle(res)
+
+        return res
+
 
 if __name__ == '__main__':
-    print 'selecting'
-    path = sys.argv[1]
-    paths = open(path).readlines()
-    selecter = SpreadingArtistSelecter()
+    from twisted.internet import reactor
+    log.init('DAD_DEBUG')
+
+    parser = SpreadingArtistSelecter.option_parser_class()
+    opts, args = parser.parse_args(sys.argv[1:])
+
+    selecter = SpreadingArtistSelecter(opts)
+
+    state = {
+        'count': 0,
+        'deferred': defer.Deferred(), # fire when we're done
+    }
+
+    def selectedCb(selected, state):
+        state['count'] += 1
+        print "selected: %3d: %r" % (state['count'], selected)
+        if state['count'] == 100:
+            state['deferred'].callback(None)
+            return
+
+        # callLater to avoid recursion of deferreds
+        def callLater(state):
+            d = selecter.select()
+            d.addCallback(selectedCb, state)
+            return d
+
+        reactor.callLater(0L, callLater, state)
+
+    d = selecter.setup()
+    def setupCb(_):
+        d = selecter.select()
+        d.addCallback(selectedCb, state)
+        return state['deferred']
+    d.addCallback(setupCb)
 
 
+    # finish
+    d.addCallback(lambda _: reactor.callLater(0L, reactor.stop))
+
+    reactor.run()

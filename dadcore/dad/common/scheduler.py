@@ -80,7 +80,9 @@ class Scheduler(log.Loggable, gobject.GObject):
 
     @ivar duration: the total duration of all currently scheduled tracks
     """
-    pygobject.gsignal('scheduled', object)
+    logCategory = 'scheduler'
+
+    pygobject.gsignal('scheduled', object) # Scheduled
 
     duration = 0
 
@@ -140,6 +142,7 @@ class Scheduler(log.Loggable, gobject.GObject):
             )
         self.duration = scheduled.start + scheduled.duration
         self.debug('scheduled audio until %r', TIME_ARGS(self.duration))
+        self.debug('emitting scheduled for %r', scheduled)
         self.emit('scheduled', scheduled)
 
 
@@ -164,7 +167,7 @@ class Scheduler(log.Loggable, gobject.GObject):
         if len(self._scheduled.keys()) < 1:
             # we need at least two tracks to start
             if len(self._added) < 2:
-                self.info('Waiting for 2 added tracks before we start')
+                self.info('Waiting for 2 added tracks before we schedule anything')
                 return
 
             first = self._added[0]
@@ -206,10 +209,14 @@ class Scheduler(log.Loggable, gobject.GObject):
 
         Called by users when they're out of scheduled tracks.
         """
-        self.info('scheduler: asked to schedule, selecting track')
-        path, trackmix = self._selecter.select()
+        self.info('asked to schedule, asking selecter to select track')
+        d = self._selecter.select()
         # FIXME: should we be doing this ourselves ?
-        self.add_track(path, trackmix)
-        self.info('scheduler: added track', path)
+        d.addCallback(lambda (p, t): self.add_track(p, t))
+        # FIXME: we do a second one here because we need two to get started
+        # but doing this always seems wrong
+        d.addCallback(lambda _: self._selecter.select())
+        d.addCallback(lambda (p, t): self.add_track(p, t))
+        return d
 
 gobject.type_register(Scheduler) 
