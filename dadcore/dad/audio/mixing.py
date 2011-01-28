@@ -111,7 +111,7 @@ def fromLevels(rms, peak):
 class Mix(object, log.Loggable):
     def __init__(self, trackMix1, trackMix2, rmsTarget=-15):
         """
-        Define the mix for both tracks.
+        Define the mix for from track 1 to track 2.
 
         All time values will be relative to trackMix2.start
 
@@ -124,13 +124,29 @@ class Mix(object, log.Loggable):
         self.volume2 = trackMix2.getVolume(rmsTarget)
 
         level1 = rmsTarget + THRESHOLD - self.volume1
-        self.debug('Finding decay point for %f dB', level1)
-        mix1 = trackMix1.decay.get(level1)
+        self.debug('Finding decay point in track 1 for %f dB', level1)
+        if not trackMix1.decay:
+            self.warning('track mix 1 does not have decay')
+            mix1 = trackMix1.end
+        else:
+            mix1 = trackMix1.decay.get(level1)
+        self.debug('Found decay point at %.3f seconds in track 1',
+            mix1 / float(10 ** 9))
+
         level2 = rmsTarget + THRESHOLD - self.volume2
         self.debug('Finding attack point for %f dB', level2)
-        mix2 = trackMix2.attack.get(level2)
+        if not trackMix2.attack:
+            self.warning('track mix 2 does not have attack')
+            mix2 = trackMix2.start # to come out with leadin 0
+        else:
+            mix2 = trackMix2.attack.get(level2)
+        self.debug('Found attack point at %.3f seconds in track 2',
+            mix2 / float(10 ** 9))
+
         self.leadout = trackMix1.end - mix1
         self.leadin = mix2 - trackMix2.start
 
         # mix duration is where the two overlap
         self.duration = self.leadout + self.leadin
+        self.debug('Mix overlaps for %.3f seconds',
+            self.duration / float(10 ** 9))

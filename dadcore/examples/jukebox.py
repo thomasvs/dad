@@ -11,11 +11,13 @@ import gobject
 gobject.threads_init()
 
 from twisted.python import reflect
+from twisted.internet import defer
 
 from dad.audio import mixing, common
 from dad.extern.log import log
 
 from dad.common import player
+
 class GstPlayer(player.Player):
 
     def __init__(self, scheduler):
@@ -178,7 +180,7 @@ class Main(log.Loggable):
         if 'help' in selecterArgs:
             print 'Options for selecter %s' % selecterClassName
             parser.print_help()
-            return False
+            return defer.fail(False)
 
         selOptions, selArgs = parser.parse_args(selecterArgs)
         self._selecter = selecterClass(selOptions)
@@ -273,7 +275,11 @@ def main():
 
         print 'calling main.start'
         return main.start()
+    def setupEb(failure):
+        reactor.callLater(0L, reactor.stop)
+
     d.addCallback(setupCb)
+    d.addErrback(setupEb)
 
 
     print 'going into main loop'

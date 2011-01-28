@@ -27,7 +27,9 @@ import pickle
 
 from twisted.internet import defer
 
+from dad.audio import mixing
 from dad.common import pathscan
+
 from dad.extern.log import log
 
 _DEFAULT_LOOPS = -1
@@ -59,6 +61,10 @@ class Selecter(log.Loggable):
     option_parser_class = OptionParser
 
     loadDeferred = None # set when a complete load is in progress in backend
+
+
+    def __init__(self, options):
+        self._selected = [] # list of tuple of (path, trackMix)
 
 
     ### base method implementations
@@ -145,6 +151,10 @@ class Selecter(log.Loggable):
             self.info('could not select a track now')
         return t
 
+    def selected(self, path, trackmix):
+        assert isinstance(trackmix, mixing.TrackMix)
+        self._selected.append((path, trackmix))
+
     ### overridable methods
     def setup(self):
         """
@@ -196,6 +206,8 @@ class SimplePlaylistSelecter(Selecter):
     option_parser_class = SimplePlaylistOptionParser
 
     def __init__(self, options):
+        Selecter.__init__(self, options)
+
         self._tracks = {}
         if options.tracks:
             self._tracks = pickle.load(open(options.tracks))
@@ -207,8 +219,6 @@ class SimplePlaylistSelecter(Selecter):
         self.debug('Creating selecter, for %d loops', self._loops)
         self.debug('Random: %r', self._random)
 
-        self._selected = [] # list of tuple of (path, trackMix)
-
     def setup(self):
         # this loads all synchronously, but should be fast
         self._load()
@@ -218,6 +228,7 @@ class SimplePlaylistSelecter(Selecter):
         self._load()
         return defer.succeed(None)
 
+    # FIXME: should this be pushed to base class ?
     def shuffle(self, files):
         """
         Override me for different shuffling algorithm.
@@ -246,17 +257,12 @@ class SimplePlaylistSelecter(Selecter):
             try:
                 # FIXME: pick random track in file
                 # for now, pick first one
-                self._selected.append((path, self._tracks[path][-1]))
+                self.selected(path, self._tracks[path][-1])
             except KeyError:
                 print "%s not in pickle, skipping" % path
             except IndexError:
                 print "path %s does not have trackmix object in pickle" % path
         
-    def select(self):
-        t = self.get()
-        self.info('selecter: selected %r', t)
-        return t
-
 class SpreadingArtistSelecter(SimplePlaylistSelecter):
     """
     I shuffle tracks by spreading the same artists throughout the playlist.

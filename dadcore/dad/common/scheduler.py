@@ -113,10 +113,12 @@ class Scheduler(log.Loggable, gobject.GObject):
 
         @param path:     path to the track to play
         @type  path:     str
-        @type  trackmix: L{dad.audio.mixing.TrackMix}
+        @type  trackmix: L{mixing.TrackMix}
 
         @rtype: the scheduled track's number
         """
+        assert isinstance(trackmix, mixing.TrackMix)
+
         self.debug('Adding track %d: %s', self._counter, path)
         
         s = Scheduled(path, trackmix, self._counter)
@@ -128,6 +130,12 @@ class Scheduler(log.Loggable, gobject.GObject):
         return s
 
     def _schedule(self, scheduled, start, duration):
+        """
+        @type  scheduled: L{Scheduled}
+        @type  start:     int
+        @param start:     at what playing time should start, in nanoseconds
+        @param duration:  how much of the track to play, in nanoseconds
+        """
         scheduled.start = start
         scheduled.duration = duration
         scheduled.mediaStart = scheduled.trackmix.end - duration
@@ -176,10 +184,12 @@ class Scheduler(log.Loggable, gobject.GObject):
 
             next = self._added[0]
             if self._begin:
+                self.debug('Playing the first track completely')
                 duration = first.trackmix.end - first.trackmix.start
             else:
                 # Start from a position in the first track 10 seconds before the
                 # mix starts
+                self.debug('Playing only 10 secs of first track')
                 mix = mixing.Mix(first.trackmix, next.trackmix)
                 duration = mix.duration + 10 * SECOND
 

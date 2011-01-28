@@ -1,5 +1,20 @@
 2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/mixing.py:
+	  Work in case no attack or decay is present for the mix; for now
+	  don't overlap at all.
+	* dad/common/scheduler.py:
+	  Document and debug more.
+	* dad/common/selecter.py:
+	  Add selected base method.  Push _selected into base class.
+	  Chain up __init__.
+	  Remove an implementation of select that is not needed.
+	* examples/jukebox.py:
+	  Return a failure if help was asked so we can errback on it
+	  and stop the reactor.
+
+2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/common/selecter.py:
 	  Making the selecter work deferred.
 	* dad/common/scheduler.py:
