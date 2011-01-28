@@ -92,6 +92,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self._category = options.category
         self._user = options.user
+        self.debug('Selecting for user %r', self._user)
         self._above = options.above
         self._below = options.below
         self._random = options.random
