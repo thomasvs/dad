@@ -1,3 +1,9 @@
+2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/selecter/couch.py:
+	  Convert result to TrackMix.
+	  Now playback works again, albeit without mixes.
+
 2010-11-20  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dad/common/cachedb.py:

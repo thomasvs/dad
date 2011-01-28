@@ -82,8 +82,10 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
     logCategory = 'couchselecter'
 
     def __init__(self, options):
+        selecter.Selecter.__init__(self, options)
     #def __init__(self, dadDB, category, user,
     #    above=0.7, below=1.0, random=False, loops=-1):
+
         self.debug('Creating selecter, for %d loops', options.loops)
         db = cachedb.CachingCouchDB(options.host, int(options.port))
         self._dadDB = daddb.DADDB(db, 'dad')
@@ -96,8 +98,6 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self._loop = 0
 
         self._loops = options.loops
-
-        self._selected = [] # list of tuple of (path, trackMix)
 
         self._tracks = [] # list of L{couch.Track}; private cache
 
@@ -140,13 +140,32 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         resultList = list(result)
         log.debug('playlist', 'got %r paths resolved', len(resultList))
 
+        def samplesToNano(samples):
+            seconds = samples / 44100.0
+            return int(seconds * 10 ** 9)
+
         for succeeded, result in resultList:
             if not succeeded:
-                print result
+                print "couchselecter: FAILED:", result
             else:
                 if result not in self._tracks:
                     self._tracks.append(result)
-                    self._selected.append(result)
+                    track, slice, path, score, userId = result
+                    # FIXME: convert to trackmix in a nicer way
+                    trackmix = mixing.TrackMix()
+                    # FIXME: this is in samples !
+                    trackmix.start = samplesToNano(slice.start)
+                    trackmix.end = samplesToNano(slice.end)
+                    trackmix.peak = slice.peak
+                    trackmix.rmsPeak = slice.rms_peak
+                    trackmix.rmsPercentile = slice.rms_percentile
+                    trackmix.rmsWeighted = slice.rms_weighted
+                    # FIXME: attack and decay !
+                    trackmix.attack = None
+                    trackmix.decay = None
+
+                    # FIXME: make this fail, then clean up all twisted warnings
+                    self.selected(path, trackmix)
  
 
 def main():
