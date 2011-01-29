@@ -1,5 +1,11 @@
 2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/common/selecter.py:
+	  Allow creating a selecter with no options, triggering defaults.
+	  Remove track pickle from default.
+
+2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/common/player.py (added):
 	* dad/common/log.py (added):
 	  Add missing files.

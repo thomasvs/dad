@@ -35,7 +35,7 @@ from dad.extern.log import log
 _DEFAULT_LOOPS = -1
 _DEFAULT_RANDOM = True
 
-_DEFAULT_TRACKS = 'tracks.pickle'
+# _DEFAULT_TRACKS = 'tracks.pickle'
 
 
 class OptionParser(optparse.OptionParser):
@@ -65,6 +65,11 @@ class Selecter(log.Loggable):
 
     def __init__(self, options):
         self._selected = [] # list of tuple of (path, trackMix)
+
+        if not options:
+            parser = self.option_parser_class()
+            options, _ = parser.parse_args([])
+        self.options = options
 
 
     ### base method implementations
@@ -183,9 +188,7 @@ class SimplePlaylistOptionParser(OptionParser):
     standard_option_list = OptionParser.standard_option_list + [
         optparse.Option('-t', '--tracks',
             action="store", dest="tracks",
-            help="A tracks pickle to read trackmix data from (default '%s'" %
-                _DEFAULT_TRACKS,
-            default=_DEFAULT_TRACKS),
+            help="A tracks pickle to read trackmix data from"),
         optparse.Option('-p', '--playlist',
             action="store", dest="playlist",
             help="A playlist file to play tracks from"),
@@ -209,13 +212,13 @@ class SimplePlaylistSelecter(Selecter):
         Selecter.__init__(self, options)
 
         self._tracks = {}
-        if options.tracks:
-            self._tracks = pickle.load(open(options.tracks))
+        if self.options.tracks:
+            self._tracks = pickle.load(open(self.options.tracks))
 
-        self._playlist = options.playlist
-        self._random = options.random
+        self._playlist = self.options.playlist
+        self._random = self.options.random
         self._loop = 0
-        self._loops = options.loops
+        self._loops = self.options.loops
         self.debug('Creating selecter, for %d loops', self._loops)
         self.debug('Random: %r', self._random)
 
