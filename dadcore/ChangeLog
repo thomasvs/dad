@@ -1,5 +1,10 @@
 2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/test/test_common_selecter.py (added):
+	  Add a unit test.
+
+2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/common/selecter.py:
 	  Allow creating a selecter with no options, triggering defaults.
 	  Remove track pickle from default.
