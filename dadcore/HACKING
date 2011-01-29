@@ -1,0 +1,26 @@
+Flow
+----
+- player .setup()
+  - creates JukeboxSource with scheduler
+    - __init__ connects to scheduled signal
+  - tells the jukebox to .work() in setup
+  - jukebox.work() notices we don't have enough time left (we started at 0)
+  - asks scheduler to .schedule()
+  - scheduler asks selecter to select() a track
+  - selecter reloads, get files from pickle, selectes, does a get(), and
+    returns a track
+  - scheduler adds the track
+  - scheduler ._process() will wait for 2 added tracks before actually
+    scheduling, and emitting the scheduled signal
+
+Testing
+-------
+- selecter:
+  python dad/common/selecter.py -h
+  By default, selects from tracks.pickle
+- example jukebox:
+  - simple playlist:
+  - couch-based:
+  python examples/jukebox.py -g --selecter=dadcouch.selecter.couch.CouchSelecter:help
+  python examples/jukebox.py -g --selecter=dadcouch.selecter.couch.CouchSelecter:user=thomas
+ 
