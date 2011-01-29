@@ -1,5 +1,11 @@
 2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/slices-by-audiofile (added):
+	* couchdb/views/slices-by-audiofile/map.js (added):
+	  Look up slices by audiofile.id, start, end
+
+2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/lookup.py:
 	  Raise a KeyError if we cannot look up a directory for a track.
 	* python/dadcouch/model/daddb.py:
