@@ -13,3 +13,5 @@
 * integrate new mapping into paisley
 * release paisley
 * find a way to either properly split or merge couchdb dad and other dad
+* find a way not notify frontend that it's taking a while to get the info
+  to start
