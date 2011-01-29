@@ -33,7 +33,7 @@ from dad.common import pathscan
 from dad.extern.log import log
 
 _DEFAULT_LOOPS = -1
-_DEFAULT_RANDOM = False
+_DEFAULT_RANDOM = True
 
 _DEFAULT_TRACKS = 'tracks.pickle'
 
