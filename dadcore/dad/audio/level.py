@@ -325,6 +325,7 @@ class Level(list):
         import sys
         sys.stdout.write(message + '\n')
 
+# FIXME: also used for decay
 class Attack(list):
     """
     I am a list that represents a list of value (dB), time points.
