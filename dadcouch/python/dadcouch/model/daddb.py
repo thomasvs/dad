@@ -97,7 +97,7 @@ class DADDB(log.Loggable):
             'track-score', TrackScore))
 
         d.addCallback(lambda _: self.getTracks(
-            userName, categoryName, above, below, limit=limit))
+            userName, categoryName, above, below, limit=limit, random=random))
         d.addErrback(log.warningFailure, swallow=False)
 
         def resolveTracks(tracks):
@@ -151,16 +151,7 @@ class DADDB(log.Loggable):
 
             dls = manydef.DeferredListSpaced()
 
-            # order by trackId
-            trackIdToAudioFile = {}
             for succeeded, (audiofile, trackId) in resultList:
-                trackIdToAudioFile[trackId] = audiofile
-
-            trackIds = trackIdToAudioFile.keys()
-            trackIds.sort()
-
-            for trackId in trackIds:
-                audiofile = trackIdToAudioFile[trackId]
                 def callable(audiofile, trackId):
                     d = self.getFilePath(audiofile)
                     def cb(path, trackId):
@@ -265,13 +256,16 @@ class DADDB(log.Loggable):
             # pick limit trackScores if necessary
             kept = trackScores
             if limit:
+                self.debug('Limiting trackScores to %d', limit)
                 if random:
+                    self.debug('Limiting randomly')
                     kept = []
                     import random as rm
                     for i in range(0, limit):
-                        kept.append(random.choice(trackScores))
+                        kept.append(rm.choice(trackScores))
                         trackScores.remove(kept[-1])
                 else:
+                    self.debug('Limiting first %d', limit)
                     kept = trackScores[:limit]
 
             self.debug('loading tracks for %r trackScores', len(kept))
@@ -294,7 +288,7 @@ class DADDB(log.Loggable):
                         trackScore = trackIdToScore[track.id]
                         res.append((track, trackScore.score, trackScore.userId))
 
-                res.sort(key=lambda r: r[0].id)
+                #res.sort(key=lambda r: r[0].id)
                 return res
             d.addCallback(loaded)
             return d

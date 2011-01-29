@@ -5,15 +5,21 @@
 
 import sys
 import pickle
+import optparse
 
 from couchdb import client
 
-from dad.model import lookup, couch
+from dad.common import log
 
-server = client.Server('http://localhost:5984')
-cdb = server['dad']
+from dadcouch.model import lookup, couch
+from dadcouch.selecter import couch as couchs
 
-def load(path):
+def load(opts, path):
+    server = client.Server('http://localhost:5984')
+    # FIXME: put this in quotes and see a 500 that gets unhandled
+    cdb = server[opts.database]
+
+    print 'Loading pickle', path
     handle = open(path)
     d = pickle.load(handle)
     for path, l in d.items():
@@ -23,16 +29,17 @@ def load(path):
         assert type(path) is unicode
 
         if not path:
-            print 'THOMAS: ERROR: no path', path
+            print 'ERROR: no path', path
             continue
 
         try:
             audiofile = lookup.getAudioFile(cdb, path)
-        except Exception, e:
-            print e
-            print path, type(path)
-            print 'THOMAS: WARNING: %s not in database' % path
+        except KeyError, e:
+            print 'WARNING: %s not in database' % path
             continue
+        except Exception, e:
+            print log.getExceptionMessage(e)
+            raise
             
         #print audiofile, type(audiofile)
         if not audiofile:
@@ -46,27 +53,61 @@ def load(path):
             end = tm.end * 44100 / (10 ** 9)
 
             # only save if it doesn't yet exist
-            print 'THOMAS: key', audiofile.id, start, end
-            result = couch.Slice.view(cdb, 'dad/slice-lookup',
+            log.debug('load', 'audiofile id %r, start %r, end %r' % (
+                audiofile.id, start, end))
+            result = couch.Slice.view(cdb, 'dad/slices-by-audiofile',
                 key=[audiofile.id, start, end],
                 include_docs=True)
             slices = list(result)
 
             if not slices:
+                # save a slice with an empty track, to be filled in later
                 slice = couch.Slice(audiofile_id=audiofile.id,
                 start=start, end=end, peak=tm.peak,
                 rms=tm.rms, rms_percentile=tm.rmsPercentile,
                 rms_peak=tm.rmsPeak, rms_weighted=tm.rmsWeighted,
                 attack=tm.attack, decay=tm.decay)
-                print 'THOMAS: saving slice', slice
                 assert type(tm.attack[0][1]) is long
                 assert type(slice.attack[0][1]) is long
-                print slice.store(cdb)
+                if not opts.dryrun:
+                    print 'INFO: saving slice %r for path %r' % (slice, path)
+                    r = slice.store(cdb)
+                    self.debug('store result: %r', r)
+                else:
+                    print 'INFO: dry run, not saving slice %r for path %r' % (
+                        slice, path)
             else:
-                print 'THOMAS: slice already there', slice
+                slice = slices[0]
+                print 'INFO: slice path %r, start %r, end %r, id %r exists' % (
+                    path, start, end, slice.id)
+                if not slice.attack or not slice.decay:
+                    print 'INFO: but no attack/decay'
+                    if not slice.attack:
+                        slice.attack = tm.attack
+                    if not slice.decay:
+                        slice.decay = tm.decay
+                    if not opts.dryrun:
+                        print "INFO: Storing slice attack/decay"
+                        slice.store(cdb)
+                    else:
+                        print "INFO: Dry run, not storing slice attack/decay"
 
-            return
+            #return
 
+class OptionParser(optparse.OptionParser):
+    standard_option_list = couchs.couchdb_option_list + \
+        [
+            optparse.Option('-d', '--dry-run',
+                action="store_true", dest="dryrun",
+                help="Do not change database (defaults to %default)",
+                default=False),
+        ]
                 
-for path in sys.argv[1:]:
-    load(path)
+if __name__ == '__main__':
+    log.init()
+
+    parser = OptionParser()
+    opts, args = parser.parse_args(sys.argv[1:])
+    
+    for path in args:
+        load(opts, path)

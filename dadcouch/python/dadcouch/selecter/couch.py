@@ -41,8 +41,7 @@ _DEFAULT_ABOVE = 0.7
 _DEFAULT_BELOW = 1.0
 _DEFAULT_CATEGORY = 'Good'
 
-class OptionParser(selecter.OptionParser):
-    standard_option_list = selecter.OptionParser.standard_option_list + [
+couchdb_option_list = [
         optparse.Option('-H', '--host',
             action="store", dest="host",
             help="CouchDB hostname (defaults to %default)",
@@ -55,6 +54,11 @@ class OptionParser(selecter.OptionParser):
             action="store", dest="database",
             help="CouchDB database name (defaults to %s)" % _DEFAULT_DB,
             default=_DEFAULT_DB),
+]
+
+class OptionParser(selecter.OptionParser):
+    standard_option_list = selecter.OptionParser.standard_option_list + \
+        couchdb_option_list + [
        optparse.Option('-c', '--category',
             action="store", dest="category",
             help="category to make playlist for (defaults to %default)",

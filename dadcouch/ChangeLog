@@ -1,5 +1,18 @@
 2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/lookup.py:
+	  Raise a KeyError if we cannot look up a directory for a track.
+	* python/dadcouch/model/daddb.py:
+	  Don't do random lookups by default, but add an optional kwarg
+	  for it.
+	* python/dadcouch/selecter/couch.py:
+	  Extract couchdb options.
+	* scripts/trackloader.py:
+	  Use couchdb options parsing.
+	  Clean up output.
+
+2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	  Add a random parameter to getPlaylist and getTracks.
 	  Default to False instead so we can reproduce runs.

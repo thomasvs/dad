@@ -19,6 +19,8 @@ def getAudioFile(db, path):
     """
     directory, name = os.path.split(path)
     directory = findOrAddDirectory(db, directory, add=False)
+    if not directory:
+        raise KeyError("No directory for %r" % path)
     audiofile = findOrAddAudioFile(db, directory, name, add=False)
     return audiofile
 
