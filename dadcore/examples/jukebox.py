@@ -171,7 +171,7 @@ class Main(log.Loggable):
 
         if ':' in options.selecter:
             selecterClassName, line = options.selecter.split(':', 1)
-            selecterArgs = line.split(' ')
+            selecterArgs = line.split(':')
         selecterClass = reflect.namedAny(selecterClassName)
         parser = selecterClass.option_parser_class()
         self.debug('Creating selecter %r with args %r',
