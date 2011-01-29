@@ -1,3 +1,12 @@
+2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
+	  Add a random parameter to getPlaylist and getTracks.
+	  Default to False instead so we can reproduce runs.
+	* python/dadcouch/selecter/couch.py:
+	  Allow specifying the database.
+	  Remove shuffle for now.
+
 2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/selecter/couch.py:

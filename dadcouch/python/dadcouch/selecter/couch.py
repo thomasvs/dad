@@ -26,7 +26,7 @@ import random
 
 from twisted.internet import defer
 
-from dad.audio import mixing
+from dad.audio import mixing, level
 from dad.common import log
 from dad.common import selecter
 
@@ -88,7 +88,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self.debug('Creating selecter, for %d loops', options.loops)
         db = cachedb.CachingCouchDB(options.host, int(options.port))
-        self._dadDB = daddb.DADDB(db, 'dad')
+        self._dadDB = daddb.DADDB(db, options.database)
 
         self._category = options.category
         self._user = options.user
@@ -96,6 +96,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self._above = options.above
         self._below = options.below
         self._random = options.random
+        self.debug('Selecting randomly: %r', self._random)
         self._loop = 0
 
         self._loops = options.loops
@@ -109,25 +110,18 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
     def load(self):
         return self._loadLimited(4)
 
-    def shuffle(self, files):
-        """
-        Override me for different shuffling algorithm.
-        """
-        res = files[:]
-        random.shuffle(res)
-        return res
-
     def _loadLimited(self, limit):
         # get a few results as fast as possible
         d = self._dadDB.getPlaylist(self._user, self._category,
-            self._above, self._below, limit=limit)
+            self._above, self._below, limit=limit, random=self._random)
         d.addCallback(self._getPlaylistCb)
 
         # we won't wait on this one; it's an internal deferred to get
         # all items which is slower
+        # FIXME: also gets some we already have, filter them somehow ?
 
         self.loadDeferred = self._dadDB.getPlaylist(self._user, self._category,
-            self._above, self._below)
+            self._above, self._below, random=self._random)
         self.loadDeferred.addCallback(self._getPlaylistCb, resetLoad=True)
         self.debug('setting loadDef to %r', self.loadDeferred)
 
@@ -146,28 +140,35 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
             return int(seconds * 10 ** 9)
 
         for succeeded, result in resultList:
+
             if not succeeded:
                 print "couchselecter: FAILED:", result
-            else:
-                if result not in self._tracks:
-                    self._tracks.append(result)
-                    track, slice, path, score, userId = result
-                    # FIXME: convert to trackmix in a nicer way
-                    trackmix = mixing.TrackMix()
-                    # FIXME: this is in samples !
-                    trackmix.start = samplesToNano(slice.start)
-                    trackmix.end = samplesToNano(slice.end)
-                    trackmix.peak = slice.peak
-                    trackmix.rmsPeak = slice.rms_peak
-                    trackmix.rmsPercentile = slice.rms_percentile
-                    trackmix.rmsWeighted = slice.rms_weighted
-                    # FIXME: attack and decay !
-                    trackmix.attack = None
-                    trackmix.decay = None
+                continue
 
-                    # FIXME: make this fail, then clean up all twisted warnings
-                    self.selected(path, trackmix)
- 
+            if result not in self._tracks:
+                self._tracks.append(result)
+                track, slice, path, score, userId = result
+                self.debug('Got result for track %r', track.name)
+                # FIXME: convert to trackmix in a nicer way
+                trackmix = mixing.TrackMix()
+                # FIXME: this is in samples !
+                trackmix.start = samplesToNano(slice.start)
+                trackmix.end = samplesToNano(slice.end)
+                trackmix.peak = slice.peak
+                trackmix.rmsPeak = slice.rms_peak
+                trackmix.rmsPercentile = slice.rms_percentile
+                trackmix.rmsWeighted = slice.rms_weighted
+                # FIXME: attack and decay !
+                if not slice.attack:
+                    self.warning('Slice %r does not have attack', slice)
+                if not slice.decay:
+                    self.warning('Slice %r does not have decay', slice)
+                trackmix.attack = level.Attack(slice.attack)
+                trackmix.decay = level.Attack(slice.decay)
+
+                # FIXME: make this fail, then clean up all twisted warnings
+                self.selected(path, trackmix)
+
 
 def main():
     log.init()
@@ -178,7 +179,7 @@ def main():
     selecter = CouchSelecter(opts)
 
     def output(result):
-        track, slice, path, score, userId = result
+        path, trackmix = result
         print path
         sys.stdout.flush()
 

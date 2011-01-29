@@ -75,8 +75,13 @@ class DADDB(log.Loggable):
         return d
 
     ### data-specific methods
-    def getPlaylist(self, userName, categoryName, above, below, limit=None):
+    def getPlaylist(self, userName, categoryName, above, below, limit=None,
+        random=False):
         """
+        @type  limit:        int or None
+        @type  random:       bool
+
+        @returns: list of tracks and additional info, ordered by track id
         @rtype: L{defer.Deferred} firing
                 list of Track, Slice, path, score, userId
         """
@@ -146,7 +151,16 @@ class DADDB(log.Loggable):
 
             dls = manydef.DeferredListSpaced()
 
+            # order by trackId
+            trackIdToAudioFile = {}
             for succeeded, (audiofile, trackId) in resultList:
+                trackIdToAudioFile[trackId] = audiofile
+
+            trackIds = trackIdToAudioFile.keys()
+            trackIds.sort()
+
+            for trackId in trackIds:
+                audiofile = trackIdToAudioFile[trackId]
                 def callable(audiofile, trackId):
                     d = self.getFilePath(audiofile)
                     def cb(path, trackId):
@@ -214,7 +228,8 @@ class DADDB(log.Loggable):
 
         return d
 
-    def getTracks(self, userName, categoryName, above, below, limit=None):
+    def getTracks(self, userName, categoryName, above, below, limit=None,
+                  random=False):
         """
         Get all tracks matching the given user's scores for the given category.
 
@@ -222,7 +237,11 @@ class DADDB(log.Loggable):
         @type  categoryName: str
         @type  above:        float
         @type  below:        float
+        @type  limit:        int or None
+        @type  random:       bool
 
+        @returns: list of tracks and additional info;
+                  ordered by track id or randomized on request
         @rtype: L{defer.Deferred} firing list of (Track, score, userId)
         """
         assert type(above) is float, 'above is type %r, not float' % type(above)
@@ -246,11 +265,14 @@ class DADDB(log.Loggable):
             # pick limit trackScores if necessary
             kept = trackScores
             if limit:
-                kept = []
-                import random
-                for i in range(0, limit):
-                    kept.append(random.choice(trackScores))
-                    trackScores.remove(kept[-1])
+                if random:
+                    kept = []
+                    import random as rm
+                    for i in range(0, limit):
+                        kept.append(random.choice(trackScores))
+                        trackScores.remove(kept[-1])
+                else:
+                    kept = trackScores[:limit]
 
             self.debug('loading tracks for %r trackScores', len(kept))
 
@@ -272,6 +294,7 @@ class DADDB(log.Loggable):
                         trackScore = trackIdToScore[track.id]
                         res.append((track, trackScore.score, trackScore.userId))
 
+                res.sort(key=lambda r: r[0].id)
                 return res
             d.addCallback(loaded)
             return d
