@@ -33,7 +33,7 @@ from dad.common import pathscan
 from dad.extern.log import log
 
 _DEFAULT_LOOPS = -1
-_DEFAULT_RANDOM = True
+_DEFAULT_RANDOM = False
 
 _DEFAULT_TRACKS = 'tracks.pickle'
 
@@ -44,9 +44,9 @@ class OptionParser(optparse.OptionParser):
             action="store", dest="loops", type="int",
             help="how many times to loop the playlist (defaults to %default)",
             default=_DEFAULT_LOOPS),
-        optparse.Option('-r', '--random',
-            action="store_true", dest="random",
-            help="play tracks in random order (defaults to %default)",
+        optparse.Option('-R', '--no-random',
+            action="store_false", dest="random",
+            help="do not play tracks in random order (defaults to %default)",
             default=_DEFAULT_RANDOM),
     ]
 
