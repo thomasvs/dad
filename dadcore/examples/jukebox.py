@@ -89,6 +89,17 @@ class GstPlayer(player.Player):
 
         return True
   
+    def toggle(self):
+        """
+        Toggle between paused and playing, as a result of a UI event.
+        """
+        import gst
+        if self._playing:
+            self._pipeline.set_state(gst.STATE_PAUSED)
+            self._playing = False
+        else:
+            self._pipeline.set_state(gst.STATE_PLAYING)
+            self._playing = True
 
     def scheduled_cb(self, scheduler, scheduled):
         print "FIXME: not sure why I should implement scheduled_cb", scheduler, scheduled
@@ -113,12 +124,7 @@ class Main(log.Loggable):
                     self.info('Next track')
                 elif key == u'Play':
                     self.info('Play')
-                    if self._playing:
-                        self._pipeline.set_state(gst.STATE_PAUSED)
-                        self._playing = False
-                    else:
-                        self._pipeline.set_state(gst.STATE_PLAYING)
-                        self._playing = True
+                    self._player.toggle()
 
         import dbus
         # this import has the side effect of setting the main loop on dbus
