@@ -1,6 +1,11 @@
 2011-01-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/jukebox.py:
+	  Extract seek method.
+
+2011-01-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
 	  Extract toggle method to player and attach it to Play button.
 
 2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>

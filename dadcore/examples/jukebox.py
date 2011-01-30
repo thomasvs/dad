@@ -88,6 +88,11 @@ class GstPlayer(player.Player):
             sys.stdout.flush()
 
         return True
+
+    def seek(self, where):
+        # FIXME: poking into private bits
+        import gst
+        self._player._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
   
     def toggle(self):
         """
@@ -153,9 +158,7 @@ class Main(log.Loggable):
             def scheduler_clicked_cb(scheduler, scheduled):
                 print 'seeking to %r' % scheduled
                 where = scheduled.start
-                # FIXME: poking into private bits
-                import gst
-                self._player._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
+                self._player.seek(where)
             sui.connect('clicked', scheduler_clicked_cb)
 
             sui.set_scheduler(self._scheduler)
