@@ -1,6 +1,11 @@
 2011-01-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/jukebox.py:
+	  Add next and previous method, and tie it to dbus.
+
+2011-01-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* examples/jukebox.py:
 	  Extract seek method.
 
 2011-01-30  Thomas Vander Stichele  <thomas at apestaart dot org>

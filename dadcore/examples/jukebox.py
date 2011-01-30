@@ -27,6 +27,8 @@ class GstPlayer(player.Player):
 
         self._jukebox = jukebox.JukeboxSource(self.scheduler)
 
+        self._scheduled = [] # (time, scheduled)
+
     def setup(self, sink):
 
         import gst
@@ -74,12 +76,25 @@ class GstPlayer(player.Player):
         gobject.timeout_add(500, self._jukebox.work)
         gobject.timeout_add(500, self.work)
 
-    def work(self):
+    def get_position(self):
+        """
+        Return the position, in nanoseconds.
+        """
         import gst
+
         pad = self._identity.get_pad('src')
         res = pad.query_position(gst.FORMAT_TIME)
         if res:
-            position, format = res
+            position, _ = res
+            return position
+
+        return None
+ 
+    def work(self):
+        position = self.get_position()
+
+        if position is not None:
+            # move this out to UI
             sys.stdout.write('\roverall position: %s' % 
                 gst.TIME_ARGS(position))
             sys.stdout.flush()
@@ -90,9 +105,10 @@ class GstPlayer(player.Player):
         return True
 
     def seek(self, where):
-        # FIXME: poking into private bits
         import gst
-        self._player._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
+        self.debug("Seek to %r", gst.TIME_ARGS(where))
+        # FIXME: poking into private bits
+        self._pipeline.seek_simple(gst.FORMAT_TIME, 0, where)
   
     def toggle(self):
         """
@@ -106,8 +122,68 @@ class GstPlayer(player.Player):
             self._pipeline.set_state(gst.STATE_PLAYING)
             self._playing = True
 
+    def previous(self):
+        """
+        Skip to the previous song.
+        """
+        position = self.get_position()
+        if position is None:
+            print "Cannot get position so cannot go to next"
+            return False
+
+        # FIXME: search better
+        import gst
+        self.debug('previous: current position %r', gst.TIME_ARGS(position))
+        r = self._scheduled[:]
+        r.reverse()
+        hit = 0
+        for where, scheduled in r:
+            if position > where:
+                hit += 1
+                # we want the track *before* the one where position is higher,
+                # since that one is the currently playing track
+                if hit == 2:
+                    break
+
+        if position < where:
+            print "Cannot go back because at beginning"
+            return False
+            
+        self.seek(where)
+
+        self.debug('Previous, seeking to scheduled %r, where %r',
+            scheduled, where)
+        return True 
+
+
+    def next(self):
+        """
+        Skip to the next song.
+        """
+        position = self.get_position()
+        if position is None:
+            print "Cannot get position so cannot go to next"
+            return False
+
+        # FIXME: search better
+        import gst
+        self.debug('next: current position %r', gst.TIME_ARGS(position))
+        for where, scheduled in self._scheduled:
+            if position < where:
+                break
+
+        if position > where:
+            print "Cannot get position because no songs left"
+            return False
+            
+        self.seek(where)
+
+        self.debug('Next, seeking to scheduled %r, where %r',
+            scheduled, where)
+        return True 
+
     def scheduled_cb(self, scheduler, scheduled):
-        print "FIXME: not sure why I should implement scheduled_cb", scheduler, scheduled
+        self._scheduled.append((scheduled.start, scheduled)) 
 
     def _message_cb(self, bus, message):
         if message.src == self._pipeline:
@@ -127,6 +203,10 @@ class Main(log.Loggable):
                 self.debug('Key %r pressed', key)
                 if key == u'Next':
                     self.info('Next track')
+                    self._player.next()
+                if key == u'Previous':
+                    self.info('Previous track')
+                    self._player.previous()
                 elif key == u'Play':
                     self.info('Play')
                     self._player.toggle()
