@@ -94,6 +94,7 @@ class GstPlayer(player.Player):
         position = self.get_position()
 
         if position is not None:
+            import gst
             # move this out to UI
             sys.stdout.write('\roverall position: %s' % 
                 gst.TIME_ARGS(position))
