@@ -34,7 +34,7 @@ import gst
 from gst.extend import utils
 
 from dad.audio import common
-from dad.gstreamer import leveller
+from dadgst.gstreamer import leveller
 
 def main():
     parser = optparse.OptionParser()
