@@ -1,3 +1,10 @@
+2011-02-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* README:
+	  Update how to run jukebox.
+	* dad/common/selecter.py:
+	  Complain about empty track pickles.
+
 2011-01-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/jukebox.py:

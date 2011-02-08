@@ -214,6 +214,9 @@ class SimplePlaylistSelecter(Selecter):
         self._tracks = {}
         if self.options.tracks:
             self._tracks = pickle.load(open(self.options.tracks))
+            if len(self._tracks) == 0:
+                raise IndexError("The tracks pickle %s is empty" %
+                    self.options.tracks)
 
         self._playlist = self.options.playlist
         self._random = self.options.random
@@ -242,6 +245,8 @@ class SimplePlaylistSelecter(Selecter):
 
     def _load(self):
         self.debug('%d tracks in pickle', len(self._tracks))
+        if len(self._tracks) == 0:
+            raise IndexError("The tracks pickle is empty")
         files = self._tracks.keys()
         if self._playlist:
             files = open(self._playlist).readlines()
