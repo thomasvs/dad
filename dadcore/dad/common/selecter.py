@@ -250,6 +250,7 @@ class SimplePlaylistSelecter(Selecter):
         files = self._tracks.keys()
         if self._playlist:
             files = open(self._playlist).readlines()
+            files = [line for line in files if not line.startswith('#')]
 
         self.debug('%d files', len(files))
         if self._random:
@@ -262,6 +263,8 @@ class SimplePlaylistSelecter(Selecter):
         paths.reverse()
         for path in paths:
             path = path.strip()
+            if not path.startswith(os.path.sep) and self._playlist:
+                path = os.path.join(os.path.dirname(self._playlist), path)
             try:
                 # FIXME: pick random track in file
                 # for now, pick first one
