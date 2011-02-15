@@ -11,7 +11,7 @@ from gst.extend import pygobject
 
 from dad.extern.log import log
 
-(COLUMN_SCHEDULED, COLUMN_PATH, COLUMN_START, COLUMN_END) = range(4)
+(COLUMN_SCHEDULED, COLUMN_ARTISTS, COLUMN_TITLE, COLUMN_PATH, COLUMN_START, COLUMN_END) = range(6)
 
 class SchedulerUI(gtk.TreeView, log.Loggable):
     logCategory = 'schedulerui'
@@ -26,13 +26,24 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
             )
 
         self._treeview = self # gtk.TreeView()
 
-        column = gtk.TreeViewColumn('Path', gtk.CellRendererText(),
-                                    text=COLUMN_PATH)
+        column = gtk.TreeViewColumn('Artists', gtk.CellRendererText(),
+                                    text=COLUMN_ARTISTS)
         self._treeview.append_column(column)
+
+        column = gtk.TreeViewColumn('Title', gtk.CellRendererText(),
+                                    text=COLUMN_TITLE)
+        self._treeview.append_column(column)
+
+        # do not show path now that we have artist and title
+        # column = gtk.TreeViewColumn('Path', gtk.CellRendererText(),
+        #                             text=COLUMN_PATH)
+        # self._treeview.append_column(column)
 
         column = gtk.TreeViewColumn('Start', gtk.CellRendererText(),
                                     text=COLUMN_START)
@@ -64,7 +75,9 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_SCHEDULED, scheduled,
-            COLUMN_PATH, scheduled.description,
+            COLUMN_ARTISTS, "\n".join(scheduled.artists),
+            COLUMN_TITLE, scheduled.title or scheduled.description,
+            COLUMN_PATH, scheduled.path,
             COLUMN_START, gst.TIME_ARGS(scheduled.start),
             COLUMN_END, gst.TIME_ARGS(scheduled.start + scheduled.duration),
         )

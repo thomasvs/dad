@@ -1,3 +1,15 @@
+2011-02-16  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/selecter.py:
+	  Add Selected class.
+	* dad/common/scheduler.py:
+	  add artists and title.
+	  Use Selected objects.
+	* dad/common/pathscan.py:
+	  parse artists too.
+	* dad/ui/scheduler.py:
+	  Show artists in ui.
+
 2011-02-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/common/selecter.py:

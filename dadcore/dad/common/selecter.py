@@ -38,6 +38,22 @@ _DEFAULT_RANDOM = True
 # _DEFAULT_TRACKS = 'tracks.pickle'
 
 
+class Selected(object):
+    """
+    I represent a selected object.
+    """
+    path = None
+    trackmix = None
+
+    artists = None
+    title = None
+
+    def __init__(self, path, trackmix, artists=None, title=None):
+        self.path = path
+        self.trackmix = trackmix
+        self.artists = artists or []
+        self.title = title
+
 class OptionParser(optparse.OptionParser):
     standard_option_list = [
         optparse.Option('-l', '--loops',
@@ -64,7 +80,7 @@ class Selecter(log.Loggable):
 
 
     def __init__(self, options):
-        self._selected = [] # list of tuple of (path, trackMix)
+        self._selected = [] # list of Selected objects
 
         if not options:
             parser = self.option_parser_class()
@@ -139,6 +155,9 @@ class Selecter(log.Loggable):
         return tuple
 
     def select(self):
+        """
+        @rtype: L{Selected}
+        """
         d = self.get()
 
         def _getCb(result):
@@ -156,9 +175,9 @@ class Selecter(log.Loggable):
             self.info('could not select a track now')
         return t
 
-    def selected(self, path, trackmix):
-        assert isinstance(trackmix, mixing.TrackMix)
-        self._selected.append((path, trackmix))
+    def selected(self, selected):
+        assert isinstance(selected, Selected)
+        self._selected.append(selected)
 
     ### overridable methods
     def setup(self):
@@ -225,6 +244,8 @@ class SimplePlaylistSelecter(Selecter):
         self.debug('Creating selecter, for %d loops', self._loops)
         self.debug('Random: %r', self._random)
 
+        self._selectables = [] # list of Selected
+ 
     def setup(self):
         # this loads all synchronously, but should be fast
         self._load()
@@ -253,26 +274,40 @@ class SimplePlaylistSelecter(Selecter):
             files = [line for line in files if not line.startswith('#')]
 
         self.debug('%d files', len(files))
+        for path in files:
+            if not path.startswith(os.path.sep) and self._playlist:
+                path = os.path.join(os.path.dirname(self._playlist), path)
+            # FIXME: checking the file is expensive
+            # if not os.path.exists(path):
+            #    print "%s does not exist, skipping" % path
+            #    continue
+            try:
+                trackmix = self._tracks[path][-1]
+            except KeyError:
+                print "%s not in pickle, skipping" % path
+                continue
+            except IndexError:
+                print "path %s does not have trackmix object in pickle" % path
+                continue
+
+            path = path.strip()
+            artists, title = pathscan.parsePath(path) # FIXME: split
+            if not artists and not title:
+                # fall back to file name for title
+                title = os.path.basename(os.path.splitext(path)[0])
+            s = Selected(path, trackmix, artists=artists, title=title)
+            self._selectables.append(s)
+
         if self._random:
             self.debug('shuffling')
             # this can repeat tracks
-            paths = self.shuffle(files)
+            selectables = self.shuffle(self._selectables)
         else:
-            paths = files[:]
+            selectables = self._selectables[:]
         # we pop tracks from the top, so reverse the paths we go through
-        paths.reverse()
-        for path in paths:
-            path = path.strip()
-            if not path.startswith(os.path.sep) and self._playlist:
-                path = os.path.join(os.path.dirname(self._playlist), path)
-            try:
-                # FIXME: pick random track in file
-                # for now, pick first one
-                self.selected(path, self._tracks[path][-1])
-            except KeyError:
-                print "%s not in pickle, skipping" % path
-            except IndexError:
-                print "path %s does not have trackmix object in pickle" % path
+        selectables.reverse()
+        for selectable in selectables:
+            self.selected(selectable)
         
 class SpreadingArtistSelecter(SimplePlaylistSelecter):
     """
@@ -284,6 +319,7 @@ class SpreadingArtistSelecter(SimplePlaylistSelecter):
 
         artists = {}
 
+        # FIXME: reuse selectables logic
         for path in paths:
             artist = pathscan.getPathArtist(path)
             if not artist in artists.keys():

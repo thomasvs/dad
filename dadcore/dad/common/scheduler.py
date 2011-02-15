@@ -58,14 +58,23 @@ class Scheduled(object):
     mediaStart = None
     volume = 0.0
 
+    artists = None
+    title = None
     description = None
 
-    def __init__(self, path, trackmix, number, description=None):
+    def __init__(self, path, trackmix, number, artists=None, title=None, description=None):
         self.path = path
         self.trackmix = trackmix
         self.number = number
 
-        self.description = description and description or os.path.basename(path)
+        self.artists = artists or []
+        self.title = title
+        if description:
+            self.description = description
+        elif artists and title:
+            self.description = " & ".join(artists) + ' - ' + title
+        else:
+            self.description = os.path.basename(path)
 
     def __repr__(self):
         return '<scheduler.Scheduled %d for %s>' % (
@@ -107,7 +116,7 @@ class Scheduler(log.Loggable, gobject.GObject):
         self.info('%d tracks added, %d tracks composited, %d tracks played' % (
             len(self._added), len(self._playing), len(self._done)))
 
-    def add_track(self, path, trackmix):
+    def add_track(self, selected):
         """
         Add the given track to the schedule queue.
 
@@ -117,11 +126,17 @@ class Scheduler(log.Loggable, gobject.GObject):
 
         @rtype: the scheduled track's number
         """
+        # FIXME: pass selected to scheduled ?
+        path = selected.path
+        trackmix = selected.trackmix
+        artists = selected.artists
+        title = selected.title
+
         assert isinstance(trackmix, mixing.TrackMix)
 
         self.debug('Adding track %d: %s', self._counter, path)
         
-        s = Scheduled(path, trackmix, self._counter)
+        s = Scheduled(path, trackmix, self._counter, artists=artists, title=title)
         self._added.append(s)
         self._counter += 1
 
@@ -222,11 +237,11 @@ class Scheduler(log.Loggable, gobject.GObject):
         self.info('asked to schedule, asking selecter to select track')
         d = self._selecter.select()
         # FIXME: should we be doing this ourselves ?
-        d.addCallback(lambda (p, t): self.add_track(p, t))
+        d.addCallback(lambda (s): self.add_track(s))
         # FIXME: we do a second one here because we need two to get started
         # but doing this always seems wrong
         d.addCallback(lambda _: self._selecter.select())
-        d.addCallback(lambda (p, t): self.add_track(p, t))
+        d.addCallback(lambda (s): self.add_track(s))
         return d
 
 gobject.type_register(Scheduler) 

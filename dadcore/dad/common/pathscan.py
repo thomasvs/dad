@@ -20,7 +20,15 @@
 
 import os
 
+# FIXME: remove this method
 def getPathArtist(path):
+    artists, title = parsePath(path)
+    return " & ".join(artists)
+
+def parsePath(path):
+    # remove extension
+    (path, _) = os.path.splitext(path)
+
     import re
     regexps = [
         # 102_Justin_Timberlake_and_Timbaland_-_Sexyback-50K4.mp3
@@ -50,11 +58,16 @@ def getPathArtist(path):
         m = regexp.search(basename)
         if m:
             # FIXME: our regexps don't drop the spaces right
-            artist = m.group('artist')
-            if not artist.strip():
+            artist = m.group('artist').strip()
+            title = m.group('title').strip()
+            if not artist and not title:
                 continue
 
             # convert underscore to space
             artist = " ".join(artist.split("_"))
 
-            return artist.strip()
+            artist = artist.strip()
+            artists = [a.strip() for a in artist.split("&")]
+            return artists, title
+
+    return None, None
