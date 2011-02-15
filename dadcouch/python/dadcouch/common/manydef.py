@@ -60,9 +60,12 @@ class DeferredListSpaced(defer.Deferred):
 
         for i in range(index + 1, index + count):
             callable, args, kwargs = self._callables[i]
-            #print 'THOMAS: deferring with', i, args, kwargs
-            #sys.stdout.flush()
-            d.addCallback(lambda _, a, k: callable(*a, **k), args, kwargs)
+            # print 'THOMAS: deferring with', i, args, kwargs
+            sys.stdout.flush()
+            # d.addCallback(lambda _, c, a, k: sys.stderr.write(
+            #    "callable of %r %r %r\n" % (c, a, k)), callable, args, kwargs)
+            d.addCallback(lambda _, c, a, k:
+                c(*a, **k), callable, args, kwargs)
             d.addCallbacks(self._cbDeferred, self._cbDeferred,
                            callbackArgs=(i, defer.SUCCESS),
                            errbackArgs=(i, defer.FAILURE))

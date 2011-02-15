@@ -35,6 +35,10 @@ class DADDB(log.Loggable):
     logCategory = 'daddb'
 
     def __init__(self, db, dbName):
+        """
+        @type  db:     L{dadcouch.extern.paisley.couchdb.CouchDB}
+        @type  dbName: str
+        """
         self.db = db
         self.dbName = dbName
 
@@ -74,6 +78,39 @@ class DADDB(log.Loggable):
 
         return d
 
+    def resolveIds(self, obj, idAttr, objAttr, klazz):
+        """
+        Resolve id's on an object into the relevant objects using the given
+        klazz.
+
+        @rtype: L{defer.Deferred}
+        """
+        ids = getattr(obj, idAttr)
+        if not isinstance(ids, list):
+            ids = [ids, ]
+
+        res = []
+        d = defer.Deferred()
+        def mapped(o, res):
+            res.append(o)
+
+        for i in ids:
+            d.addCallback(lambda _, j: self.db.map(self.dbName, j, klazz), i)
+            d.addCallback(mapped, res)
+
+        def done(_, res):
+            ids = getattr(obj, idAttr)
+            if not isinstance(ids, list):
+                res = res[0]
+            setattr(obj, objAttr, res)
+
+        d.addCallback(done, res)
+
+        d.callback(None)
+
+        return d
+            
+
     ### data-specific methods
     def getPlaylist(self, userName, categoryName, above, below, limit=None,
         random=False):
@@ -111,6 +148,8 @@ class DADDB(log.Loggable):
                 trackDict[track.id] = [track, None, None, score, userId]
                 log.debug('playlist', 'track %r has score %f by user %r',
                     track, score, userId)
+                d.addCallable(self.resolveIds, track,
+                    'artist_ids', 'artists', couch.Artist)
                 d.addCallable(self.getSlices, track)
 
             d.start()
@@ -123,7 +162,14 @@ class DADDB(log.Loggable):
 
             d = manydef.DeferredListSpaced()
 
-            for succeeded, slicesGen in resultList:
+            for succeeded, result in resultList:
+                if not succeeded:
+                    self.warningFailure(result)
+                if not result:
+                    # result from resolveIds
+                    continue
+
+                slicesGen = result
                 # FIXME: only keep first audiofile for now
                 slice = list(slicesGen)[0]
 
@@ -233,7 +279,7 @@ class DADDB(log.Loggable):
 
         @returns: list of tracks and additional info;
                   ordered by track id or randomized on request
-        @rtype: L{defer.Deferred} firing list of (Track, score, userId)
+        @rtype: L{defer.Deferred} firing list of (couch.Track, score, userId)
         """
         assert type(above) is float, 'above is type %r, not float' % type(above)
 

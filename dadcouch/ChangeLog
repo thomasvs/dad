@@ -1,3 +1,12 @@
+2011-02-16  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/common/manydef.py:
+	  Fix a bug where we were not properly passing the callable to the
+	  lambda.
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/selecter/couch.py:
+	  Adapt to selecter changes so that we can show artist and title.
+
 2011-01-29  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* couchdb/views/slices-by-audiofile (added):

@@ -171,8 +171,10 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 trackmix.decay = level.Attack(slice.decay)
 
                 # FIXME: make this fail, then clean up all twisted warnings
-                self.selected(path, trackmix)
-
+                artists = [a.displayname for a in track.artists]
+                artists.sort()
+                s = selecter.Selected(path, trackmix, artists=artists, title=track.name)
+                self.selected(s)
 
 def main():
     log.init()
@@ -182,9 +184,8 @@ def main():
 
     selecter = CouchSelecter(opts)
 
-    def output(result):
-        path, trackmix = result
-        print path
+    def output(selected):
+        print selected.path, selected.artists, selected.title
         sys.stdout.flush()
 
     d = selecter.setup()
