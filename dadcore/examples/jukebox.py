@@ -18,6 +18,103 @@ from dad.extern.log import log
 
 from dad.common import player
 
+class UI:
+    """
+    I am a base class for a UI.
+    """
+    def __init__(self, player):
+        self._player = player
+
+    def set_schedule_position(self, position):
+        raise NotImplementedError
+
+    def set_schedule_length(self, length):
+        raise NotImplementedError
+
+class CommandUI(UI):
+    """
+    I am a simple command-line application UI.
+    """
+    def __init__(self, player):
+        self._player = player
+
+    def set_schedule_position(self, position):
+        if position is not None:
+            import gst
+            sys.stdout.write('\roverall position: %s' % 
+                gst.TIME_ARGS(position))
+            sys.stdout.flush()
+        else:
+            print 'Could not get position'
+            sys.stdout.flush()
+
+class GTKUI(UI):
+    def __init__(self, player):
+
+        self._player = player
+
+        self._playing = None
+
+        import gtk
+
+        self._window = gtk.Window()
+        from dad.ui import scheduler as sch, seek
+        sui = sch.SchedulerUI()
+
+        def jukebox_started_cb(jukebox, scheduled):
+            sui.started(scheduled)
+            import gst
+            self._seekui.set_track_length(
+                float(scheduled.duration) / gst.SECOND)
+            self._seekui.set_track_offset(
+                float(scheduled.start) / gst.SECOND)
+            self._seekui.set_schedule_length(
+                float(self._player.scheduler.duration) / gst.SECOND)
+            self._playing = scheduled
+            self._window.set_title('dad: %s - %s' % (
+                " & ".join(scheduled.artists), scheduled.title))
+
+        # FIXME: poking into private bits
+        self._player._jukebox.connect('started', jukebox_started_cb)
+
+        def scheduler_clicked_cb(scheduler, scheduled):
+            print 'seeking to %r' % scheduled
+            where = scheduled.start
+            self._player.seek(where)
+        sui.connect('clicked', scheduler_clicked_cb)
+
+        sui.set_scheduler(player.scheduler)
+
+        sw = gtk.ScrolledWindow()
+        sw.add(sui)
+
+        box = gtk.VBox()
+        box.set_homogeneous(False)
+        box.add(sw)
+
+        self._seekui = seek.SeekUI()
+        box.pack_end(self._seekui, expand=False, fill=False)
+
+        def _seeked_schedule_cb(seekui, position):
+            import gst
+            self._player.seek(position * gst.SECOND)
+        self._seekui.connect('seeked-schedule', _seeked_schedule_cb)
+            
+
+        self._window.add(box)
+
+        self._window.set_default_size(640, 480)
+        self._window.show_all()
+
+    def set_schedule_position(self, position):
+        import gst
+        if position is not None:
+            self._seekui.set_schedule_position(float(position) / gst.SECOND)
+            if self._playing is not None:
+                self._seekui.set_track_position(
+                    float(position - self._playing.start) / gst.SECOND)
+
+
 class GstPlayer(player.Player):
 
     def __init__(self, scheduler):
@@ -28,6 +125,8 @@ class GstPlayer(player.Player):
         self._jukebox = jukebox.JukeboxSource(self.scheduler)
 
         self._scheduled = [] # (time, scheduled)
+
+        self._uis = [CommandUI(self), ]
 
     def setup(self, sink):
 
@@ -82,7 +181,8 @@ class GstPlayer(player.Player):
         """
         import gst
 
-        pad = self._identity.get_pad('src')
+        # FIXME: the src pad gives NONE during mixes, why ?
+        pad = self._identity.get_pad('sink')
         res = pad.query_position(gst.FORMAT_TIME)
         if res:
             position, _ = res
@@ -92,18 +192,11 @@ class GstPlayer(player.Player):
  
     def work(self):
         position = self.get_position()
-
-        if position is not None:
-            import gst
-            # move this out to UI
-            sys.stdout.write('\roverall position: %s' % 
-                gst.TIME_ARGS(position))
-            sys.stdout.flush()
-        else:
-            print 'Could not get position'
-            sys.stdout.flush()
+        for ui in self._uis:
+            ui.set_schedule_position(position)
 
         return True
+
 
     def seek(self, where):
         import gst
@@ -225,30 +318,9 @@ class Main(log.Loggable):
             print 'Cannot listen to multimedia keys', e
 
     def _setup_gtk(self):
-            import gtk
-
-            w = gtk.Window()
-            from dad.ui import scheduler as sch
-            sui = sch.SchedulerUI()
-
-            def jukebox_started_cb(jukebox, scheduled):
-                sui.started(scheduled)
-            # FIXME: poking into private bits
-            self._player._jukebox.connect('started', jukebox_started_cb)
-
-            def scheduler_clicked_cb(scheduler, scheduled):
-                print 'seeking to %r' % scheduled
-                where = scheduled.start
-                self._player.seek(where)
-            sui.connect('clicked', scheduler_clicked_cb)
-
-            sui.set_scheduler(self._scheduler)
-
-            sw = gtk.ScrolledWindow()
-            sw.add(sui)
-            w.add(sw)
-            w.set_default_size(640, 480)
-            w.show_all()
+            gtkui = GTKUI(self._player)
+            # FIXME: don't poke in privates
+            self._player._uis.append(gtkui)
 
 
     # FIXME: gtk frontend should be some kind of viewer class

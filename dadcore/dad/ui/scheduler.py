@@ -45,13 +45,13 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
         #                             text=COLUMN_PATH)
         # self._treeview.append_column(column)
 
-        column = gtk.TreeViewColumn('Start', gtk.CellRendererText(),
-                                    text=COLUMN_START)
-        self._treeview.append_column(column)
+        # column = gtk.TreeViewColumn('Start', gtk.CellRendererText(),
+        #                             text=COLUMN_START)
+        # self._treeview.append_column(column)
     
-        column = gtk.TreeViewColumn('End', gtk.CellRendererText(),
-                                    text=COLUMN_END)
-        self._treeview.append_column(column)
+        # column = gtk.TreeViewColumn('End', gtk.CellRendererText(),
+        #                             text=COLUMN_END)
+        # self._treeview.append_column(column)
     
         self._treeview.connect('row_activated', self._treeview_clicked_cb)
 
