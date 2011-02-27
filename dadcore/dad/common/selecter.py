@@ -277,6 +277,7 @@ class SimplePlaylistSelecter(Selecter):
         for path in files:
             if not path.startswith(os.path.sep) and self._playlist:
                 path = os.path.join(os.path.dirname(self._playlist), path)
+            path = path.strip()
             # FIXME: checking the file is expensive
             # if not os.path.exists(path):
             #    print "%s does not exist, skipping" % path
@@ -290,7 +291,6 @@ class SimplePlaylistSelecter(Selecter):
                 print "path %s does not have trackmix object in pickle" % path
                 continue
 
-            path = path.strip()
             artists, title = pathscan.parsePath(path) # FIXME: split
             if not artists and not title:
                 # fall back to file name for title
