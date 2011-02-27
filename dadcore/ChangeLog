@@ -1,3 +1,9 @@
+2011-02-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/ui/seek.py (added):
+	  Add a double seek widget, one for current track and one for the
+	  whole schedule.
+
 2011-02-16  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/common/selecter.py:
