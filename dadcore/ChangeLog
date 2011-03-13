@@ -1,3 +1,9 @@
+2011-03-13  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/pathscan.py:
+	* dad/test/test_common_pathscan.py:
+	  Fix A-Ha songs.
+
 2011-02-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/common/formatting.py (added):

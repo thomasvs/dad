@@ -47,3 +47,9 @@ class ArtistTest(unittest.TestCase):
         self.assertEquals(pathscan.getPathArtist(
             u'/home/audio/bbq/04. Coldplay - Fix You.mp3'),
             u'Coldplay')
+
+    def testSix(self):
+        self.assertEquals(pathscan.getPathArtist(
+            u'/home/audio/bbq/A-Ha - Crying In The Rain'),
+            u'A-Ha')
+

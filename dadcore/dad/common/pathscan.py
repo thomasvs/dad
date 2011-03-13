@@ -33,10 +33,12 @@ def parsePath(path):
     regexps = [
         # 102_Justin_Timberlake_and_Timbaland_-_Sexyback-50K4.mp3
         # should be before a more generic one
+        # start with a track number
         re.compile(r"""^
             (?P<track>\d+)\s*[.-]\s*
             (?P<artist>[^-]*) - 
             (?P<title>.*)""", re.VERBOSE),
+        # start with a track number
         re.compile(r"""^
             (?P<track>\d+)
             (?P<artist>[^-]*) - 
@@ -46,6 +48,10 @@ def parsePath(path):
             (?P<track>\d+)\s*-
             (?P<title>.*)"""
             , re.VERBOSE),
+        # A-Ha - Crying In The Rain
+        re.compile(r"""^
+            (?P<artist>.*) - 
+            (?P<title>.*)""", re.VERBOSE),
         re.compile(r"""^
             (?P<artist>[^-]*)\s*- 
             (?P<title>.*)""", re.VERBOSE),
