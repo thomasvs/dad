@@ -1,3 +1,8 @@
+2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/gstreamer/jukebox.py:
+	  Time can now go back since we can seek.
+
 2011-01-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgst/gstreamer/jukebox.py:

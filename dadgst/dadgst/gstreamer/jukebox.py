@@ -194,7 +194,7 @@ class JukeboxSource(gst.Bin):
                 format = gst.FORMAT_TIME
 
             # print 'internal overall position', gst.TIME_ARGS(position)
-            if position >= self._position:
+            if True: # position >= self._position:
                 self._position = position
                 if self._lastend - self._position < SCHEDULE_DURATION:
                     self.debug('work(): Need to schedule some more')
