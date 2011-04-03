@@ -92,7 +92,8 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
 
     # call me to indicate a scheduled item has started playing
     def started(self, scheduled):
-        print 'started', scheduled
+        # FIXME: instead of printing, signal to the command ui
+        print '\rstarted', scheduled
         path = self._treerowrefs[scheduled].get_path()
         ts = self._treeview.get_selection()
         ts.select_path(path)
