@@ -22,7 +22,6 @@
 
 import sys
 import os
-import optparse
 
 from twisted.internet import reactor, protocol, base, stdio
 from twisted.spread import pb
@@ -45,37 +44,10 @@ except:
     log = Log()
 
 ### server code
-class MasterHeaven(pb.Root):
-    logCategory = 'master-heaven'
-
-    implements(portal.IRealm)
-
-    def remote_echo(self, st):
-        log.debug('master', 'echoing: %r', st)
-        return st
-
-    ### portal.IRealm method
-
-    def requestAvatar(self, avatarId, mind, *interfaces):
-        if pb.IPerspective in interfaces:
-            avatar = self.avatarClass(self, avatarId, mind)
-            assert avatarId not in self.avatars
-            self.avatars[avatarId] = avatar
-            return pb.IPerspective, avatar, avatar.logout
-        else:
-            raise NotImplementedError("no interface")
-
-    def removeAvatar(self, avatarId):
-        if avatarId in self.avatars:
-            del self.avatars[avatarId]
-        else:
-            self.warning("some programmer is telling me about an avatar "
-                         "I have no idea about: %s", avatarId)
-
 
 # FIXME: rename
 # FIXME: why do I need this fake stub class ? Is there no more direct way
-# ti hook to writeToChild
+# to hook to writeToChild
 class MyTransport:
     def __init__(self, protocol, childWriteFd):
         self._protocol = protocol
@@ -119,9 +91,8 @@ class SlaveProcessProtocol(protocol.ProcessProtocol):
             self.deferred.errback(rc)
 
 # FIXME: rewrite to listenFD/listenStdio
-def spawnSlave():
+def spawnSlave(server):
     log.debug('master', 'spawning slave')
-    server = pb.PBServerFactory(MasterHeaven())
 
     # we'll use fd3 for reading from child, and fd4 for writing to it
     mypp = SlaveProcessProtocol(server, 4)
@@ -163,22 +134,55 @@ def connectStdio(factory):
     c.connect()
     log.debug('slave', 'after connecting: state %r, timeoutid %r, transport %r',
         c.state, c.timeoutID, c.transport)
+    # FIXME: we shouldn't do this manually
+    c.cancelTimeout()
     return c
 
-def slave():
+### application code
+class MasterHeaven(pb.Root):
+    logCategory = 'master-heaven'
+
+    implements(portal.IRealm)
+
+    def remote_echo(self, st):
+        log.debug('master', 'echoing: %r', st)
+        return st
+
+    ### portal.IRealm method
+
+    def requestAvatar(self, avatarId, mind, *interfaces):
+        if pb.IPerspective in interfaces:
+            avatar = self.avatarClass(self, avatarId, mind)
+            assert avatarId not in self.avatars
+            self.avatars[avatarId] = avatar
+            return pb.IPerspective, avatar, avatar.logout
+        else:
+            raise NotImplementedError("no interface")
+
+    def removeAvatar(self, avatarId):
+        if avatarId in self.avatars:
+            del self.avatars[avatarId]
+        else:
+            self.warning("some programmer is telling me about an avatar "
+                         "I have no idea about: %s", avatarId)
+
+
+def mainMaster():
+    log.debug('master', 'mainMaster')
+    server = pb.PBServerFactory(MasterHeaven())
+    spawnSlave(server)
+    spawnSlave(server)
+
+def mainSlave():
     # this is the slave
     log.debug('slave', 'slave is started')
 
     # log in to manager with a pb client over the processprotocol somehow
     clientFactory = pb.PBClientFactory()
     c = connectStdio(clientFactory)
-    # FIXME: we shouldn't do this manually
-    c.cancelTimeout()
-
 
     log.debug('slave', 'clientFactory._broker %r', clientFactory._broker)
     d = clientFactory.getRootObject()
-    # import code; code.interact(local=locals())
     def cb(root):
         log.debug('slave', 'slave got root: %r' % root)
         return root.callRemote("echo", "hello network")
@@ -186,6 +190,8 @@ def slave():
     d.addCallback(cb)
 
 def main():
+    import optparse
+
     log.init()
 
     parser = optparse.OptionParser()
@@ -199,10 +205,11 @@ def main():
     print 'running reactor'
 
     if not options.slave:
-        reactor.callLater(0, spawnSlave)
+        reactor.callLater(0, mainMaster)
     else:
-        reactor.callLater(0, slave)
+        reactor.callLater(0, mainSlave)
 
     reactor.run()
 
-main()
+if __name__ == '__main__':
+    main()
