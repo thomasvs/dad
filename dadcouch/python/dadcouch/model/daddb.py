@@ -31,6 +31,43 @@ class TrackScore(mapping.Document):
         self.subjectId = d['key'][2]
         self.score = float(d['value'])
 
+class ItemTracks:
+    # map tracks-by-album and tracks-by-artist
+    def fromDict(self, d):
+        self.type = d['key'][1] # 0 for artist/album row, 1 for trackm row
+
+        v = d['value']
+
+        if self.type == 0:
+            # artist/album row, full doc
+            self.name = v['name']
+            self.sortname = v.get('sortname', v['name'])
+            self.id = d['id']
+
+            # will be set in a callback to count tracks on this album
+            self.tracks = 0
+        else:
+            # trackalbum, only track_id
+            self.trackId = d['id']
+
+class AlbumsByArtist:
+    # map albums-by-artist
+    def fromDict(self, d):
+        self.type = d['key'][1] # 0 for artist row, 1 for album row
+
+        v = d['value']
+
+        if self.type == 0:
+            # artist
+            self.name = v['name']
+            self.sortname = v.get('sortname', v['name'])
+            self.id = d['id']
+            self.albums = []
+        else:
+            # album
+            self.albumId = d['id']
+
+
 class DADDB(log.Loggable):
     logCategory = 'daddb'
 

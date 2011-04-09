@@ -1,3 +1,10 @@
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
+	  Move objectFactories for tracks here.
+	* tests/artists.py:
+	  Use base classes.
+
 2011-02-16  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/common/manydef.py:

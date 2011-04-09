@@ -15,66 +15,31 @@ from twisted.internet import defer
 
 defer.Deferred.debug = 1
 
-from dadcouch.extern.paisley import couchdb, views
+
+from dad.base import base
 from dad.extern.log import log
+
+from dadcouch.model import daddb
+
+from dadcouch.extern.paisley import couchdb, views
 
 server = couchdb.CouchDB('localhost')
 DB = 'dadtest'
 
-# should go to model.daddb
-class ItemTracks:
-    # map tracks-by-album and tracks-by-artist
-    def fromDict(self, d):
-        self.type = d['key'][1] # 0 for artist/album row, 1 for trackm row
-
-        v = d['value']
-
-        if self.type == 0:
-            # artist/album row, full doc
-            self.name = v['name']
-            self.sortname = v.get('sortname', v['name'])
-            self.id = d['id']
-
-            # will be set in a callback to count tracks on this album
-            self.tracks = 0
-        else:
-            # trackalbum, only track_id
-            self.trackId = d['id']
-
-class AlbumsByArtist:
-    # map albums-by-artist
-    def fromDict(self, d):
-        self.type = d['key'][1] # 0 for artist row, 1 for album row
-
-        v = d['value']
-
-        if self.type == 0:
-            # artist
-            self.name = v['name']
-            self.sortname = v.get('sortname', v['name'])
-            self.id = d['id']
-            self.albums = []
-        else:
-            # album
-            self.albumId = d['id']
-
-
-# base class for couchdb model; should probably also have a generic
-# model base class
-class Model(log.Loggable):
+class CouchDBModel(base.Model):
     def __init__(self, server, db):
         self._server = server
         self._db = db
 
-class ArtistSelectorModel(Model):
+class ArtistSelectorModel(CouchDBModel):
     def get(self):
         """
-        @returns: a deferred firing a list of ItemTracks objects representing
-                  only artists and their track count.
+        @returns: a deferred firing a list of L{daddb.ItemTracks} objects
+                  representing only artists and their track count.
         """
         self.debug('get')
         v = views.View(self._server, self._db, 'dad', 'tracks-by-artist',
-            ItemTracks)
+            daddb.ItemTracks)
         try:
             d = v.queryView()
         except Exception, e:
@@ -105,14 +70,14 @@ class ArtistSelectorModel(Model):
 
         return d
 
-class AlbumSelectorModel(Model):
+class AlbumSelectorModel(CouchDBModel):
 
     artistAlbums = None # artist id -> album ids
 
     def get(self):
         """
-        @returns: a deferred firing a list of ItemTracks objects representing
-                  only albums and their track count.
+        @returns: a deferred firing a list of L{daddb.ItemTracks} objects
+                  representing only albums and their track count.
         """
         self.debug('get')
 
@@ -120,12 +85,12 @@ class AlbumSelectorModel(Model):
 
         # first, load a mapping of artists to albums
         view = views.View(self._server, self._db, 'dad', 'albums-by-artist',
-                          AlbumsByArtist)
+                          daddb.AlbumsByArtist)
         d.addCallback(lambda _, v: v.queryView(), view)
 
         def cb(items):
             self.debug('parsing albums-by-artist')
-            # convert list of ordered AlbumsByArtist of mixed type
+            # convert list of ordered daddb.AlbumsByArtist of mixed type
             # into a list of only album itemTracks with their track count
             artists = []
 
@@ -149,7 +114,7 @@ class AlbumSelectorModel(Model):
 
         # now, load the tracks per album, and aggregate and return
         view = views.View(self._server, self._db, 'dad', 'tracks-by-album',
-                          ItemTracks)
+                          daddb.ItemTracks)
         d.addCallback(lambda _, v: v.queryView(), view)
 
         def cb(itemTracks):
@@ -204,24 +169,7 @@ import gtk
     COLUMN_TRACKS,
 ) = range(4)
 
-class SelectorView(log.Loggable):
-    """
-    I am a base class for selector widgets.
-    """
-    title = 'Selector, override me'
-
-    def add_row(self, i, display, sort, tracks):
-        raise NotImplementedError
-
-    def throb(self, active=True):
-        """
-        Start or stop throbbing the selector to indicate activity.
-
-        @param active: whether to throb
-        """
-        pass
- 
-class GTKSelectorView(gtk.VBox, SelectorView):
+class GTKSelectorView(gtk.VBox, base.SelectorView):
     """
     I am a selector widget for a list of objects.
 
@@ -409,19 +357,7 @@ class AlbumSelectorView(GTKSelectorView):
         self._selection.select_path((0, ))
 
 # move to base class
-class SelectorController(log.Loggable):
-    def __init__(self, model):
-        self._model = model
-        self._views = []
-
-    def addView(self, view):
-        self._views.append(view)
-
-    def doViews(self, method, *args, **kwargs):
-        for view in self._views:
-            m = getattr(view, method)
-            m(*args, **kwargs)
-
+class SelectorController(base.Controller):
     def populate(self):
         self.debug('populate()')
         self.doViews('throb', True)
