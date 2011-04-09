@@ -26,137 +26,6 @@ from dadcouch.extern.paisley import couchdb, views
 server = couchdb.CouchDB('localhost')
 DB = 'dadtest'
 
-class CouchDBModel(base.Model):
-    def __init__(self, server, db):
-        self._server = server
-        self._db = db
-
-class ArtistSelectorModel(CouchDBModel):
-    def get(self):
-        """
-        @returns: a deferred firing a list of L{daddb.ItemTracks} objects
-                  representing only artists and their track count.
-        """
-        self.debug('get')
-        v = views.View(self._server, self._db, 'dad', 'tracks-by-artist',
-            daddb.ItemTracks)
-        try:
-            d = v.queryView()
-        except Exception, e:
-            print 'THOMAS: exception', e
-            return defer.fail(e)
-
-        def cb(itemTracks):
-            # convert list of ordered itemTracks of mixed type
-            # into a list of only artist itemTracks with their track count
-            ret = []
-
-            artist = None
-
-            for i in itemTracks:
-                if i.type == 0:
-                    artist = i
-                    ret.append(artist)
-                else:
-                    artist.tracks += 1
-
-            return ret
-        d.addCallback(cb)
-
-        def eb(failure):
-            print 'THOMAS: Failure:', failure
-            return failure
-        d.addErrback(eb)
-
-        return d
-
-class AlbumSelectorModel(CouchDBModel):
-
-    artistAlbums = None # artist id -> album ids
-
-    def get(self):
-        """
-        @returns: a deferred firing a list of L{daddb.ItemTracks} objects
-                  representing only albums and their track count.
-        """
-        self.debug('get')
-
-        d = defer.Deferred()
-
-        # first, load a mapping of artists to albums
-        view = views.View(self._server, self._db, 'dad', 'albums-by-artist',
-                          daddb.AlbumsByArtist)
-        d.addCallback(lambda _, v: v.queryView(), view)
-
-        def cb(items):
-            self.debug('parsing albums-by-artist')
-            # convert list of ordered daddb.AlbumsByArtist of mixed type
-            # into a list of only album itemTracks with their track count
-            artists = []
-
-            album = None
-
-            for i in items:
-                if i.type == 0:
-                    artist = i
-                    artists.append(artist)
-                else:
-                    artist.albums.append(i)
-
-            self.artistAlbums = {}
-
-            for artist in artists:
-                self.artistAlbums[artist.id] = [a.albumId for a in artist.albums]
-
-            return None
-
-        d.addCallback(cb)
-
-        # now, load the tracks per album, and aggregate and return
-        view = views.View(self._server, self._db, 'dad', 'tracks-by-album',
-                          daddb.ItemTracks)
-        d.addCallback(lambda _, v: v.queryView(), view)
-
-        def cb(itemTracks):
-            self.debug('parsing tracks-by-album')
-            # convert list of ordered itemTracks of mixed type
-            # into a list of only album itemTracks with their track count
-            ret = []
-
-            album = None
-            for i in itemTracks:
-                if i.type == 0:
-                    album = i
-                    ret.append(album)
-                else:
-                    album.tracks += 1
-
-            return ret
-
-        d.addCallback(cb)
-
-        d.callback(None)
-
-        return d
-
-    def get_artists_albums(self, artist_ids):
-        """
-        @rtype: list of str
-        """
-        # return a list of album ids for the given list of artist ids
-        # returns None if the first total row is selected, ie all artists
-        ret = {}
-
-        # first row has totals, and [None}
-        if None in artist_ids:
-            return None
-
-        for artist in artist_ids:
-            for album in self.artistAlbums[artist]:
-                ret[album] = 1
-
-        return ret.keys()
-
 # should move to gtk part
 
 import gobject
@@ -452,13 +321,13 @@ def main():
     window.add(box)
 
     artistView = ArtistSelectorView()
-    artistModel = ArtistSelectorModel(server, db)
+    artistModel = daddb.ArtistSelectorModel(server, db)
     artistController = ArtistSelectorController(artistModel)
     artistController.addView(artistView)
     box.pack_start(artistView)
 
     albumView = AlbumSelectorView()
-    albumModel = AlbumSelectorModel(server, db)
+    albumModel = daddb.AlbumSelectorModel(server, db)
     albumController = AlbumSelectorController(albumModel)
     albumController.addView(albumView)
     box.pack_start(albumView)

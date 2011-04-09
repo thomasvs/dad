@@ -1,6 +1,12 @@
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
+	* tests/artists.py:
+	  Move out CouchDB model classes.
+
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
 	  Move objectFactories for tracks here.
 	* tests/artists.py:
 	  Use base classes.
