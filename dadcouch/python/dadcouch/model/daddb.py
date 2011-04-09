@@ -357,7 +357,6 @@ class DADDB(log.Loggable):
 
             d = self.loadTracks(kept)
             def loaded(result):
-                print 'THOMAS: result', type(result), result
                 self.debug('loaded tracks for %r trackScores', len(kept))
 
 
@@ -371,7 +370,6 @@ class DADDB(log.Loggable):
                     if not succeeded:
                         log.warningFailure(track)
                     else:
-                        print 'THOMAS: track', track
                         trackScore = trackIdToScore[track.id]
                         res.append((track, trackScore.score, trackScore.userId))
 
