@@ -176,6 +176,9 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 artists.sort()
                 s = selecter.Selected(path, trackmix, artists=artists, title=track.name)
                 self.selected(s)
+                self.debug('cache stats: %r lookups, %r hits, %r cached',
+                    self._cache.lookups, self._cache.hits,
+                    self._cache.cached)
 
 def main():
     log.init()
@@ -198,6 +201,9 @@ def main():
     def startSelecting():
         # return a deferred that will be fired when we're done selecting
         selectD = defer.Deferred()
+        log.debug('main', 'startSelecting')
+        log.debug('main', 'cache stats: %r lookups, %r hits, %r cached',
+            selecter._cache.lookups, selecter._cache.hits, selecter._cache.cached)
 
         def select(cont):
             if not cont:

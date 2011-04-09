@@ -10,12 +10,14 @@ gtk2reactor.install()
 
 import os
 import sys
+import optparse
 
 
 from dad.base import base
 from dad.extern.log import log
 
 from dadcouch.model import daddb
+from dadcouch.selecter import couch
 
 from dadcouch.extern.paisley import client, views
 
@@ -298,7 +300,6 @@ class AlbumSelectorController(SelectorController):
 
 
 def main():
-
     from twisted.internet import reactor
 
     from twisted.internet import defer
@@ -307,17 +308,14 @@ def main():
     log.init('DAD_DEBUG')
     log.debug('main', 'start')
 
-    server = 'localhost'
-    if len(sys.argv) > 1:
-        server = sys.argv[1]
-
-    db = 'dad'
-    if len(sys.argv) > 2:
-        db = sys.argv[2]
+    parser = optparse.OptionParser()
+    parser.add_options(couch.couchdb_option_list)
+    options, args = parser.parse_args()
 
     # this rebinds and makes it break in views
     # db = client.CouchDB('localhost', dbName='dad')
-    server = client.CouchDB(server)
+    server = client.CouchDB(host=options.host, port=options.port)
+    dbName = options.database
 
     window = gtk.Window()
 
@@ -326,13 +324,13 @@ def main():
     window.add(box)
 
     artistView = ArtistSelectorView()
-    artistModel = daddb.ArtistSelectorModel(server, db)
+    artistModel = daddb.ArtistSelectorModel(server, dbName)
     artistController = ArtistSelectorController(artistModel)
     artistController.addView(artistView)
     box.pack_start(artistView)
 
     albumView = AlbumSelectorView()
-    albumModel = daddb.AlbumSelectorModel(server, db)
+    albumModel = daddb.AlbumSelectorModel(server, dbName)
     albumController = AlbumSelectorController(albumModel)
     albumController.addView(albumView)
     box.pack_start(albumView)
