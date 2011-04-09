@@ -1,0 +1,5 @@
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/views.py (added):
+	  Add GTK-based views extracted from couchdb artists test.
+
