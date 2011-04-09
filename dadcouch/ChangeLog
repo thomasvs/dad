@@ -2,6 +2,12 @@
 
 	* python/dadcouch/model/daddb.py:
 	* tests/artists.py:
+	  Reorder code before making it a module.
+
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
+	* tests/artists.py:
 	  Move out CouchDB model classes.
 
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>

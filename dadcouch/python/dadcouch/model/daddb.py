@@ -7,6 +7,7 @@ import optparse
 
 from twisted.internet import defer
 
+from dadcouch.extern.paisley import couchdb
 from dadcouch.extern.paisley import couchdb, views, mapping
 
 from dad.base import base

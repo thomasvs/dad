@@ -1,19 +1,15 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+# twisted.web.http imports reactor
+# FIXME: fix that so we can move this install to main
 from twisted.internet import gtk2reactor
 gtk2reactor.install()
-
 
 # artist selector
 
 import os
 import sys
-
-from twisted.python import failure
-from twisted.internet import defer
-
-defer.Deferred.debug = 1
 
 
 from dad.base import base
@@ -22,9 +18,6 @@ from dad.extern.log import log
 from dadcouch.model import daddb
 
 from dadcouch.extern.paisley import couchdb, views
-
-server = couchdb.CouchDB('localhost')
-DB = 'dadtest'
 
 # should move to gtk part
 
@@ -227,6 +220,12 @@ class AlbumSelectorView(GTKSelectorView):
 
 # move to base class
 class SelectorController(base.Controller):
+    def __init__(self, model):
+        base.Controller.__init__(self, model)
+
+        from twisted.internet import reactor
+        self._reactor = reactor
+
     def populate(self):
         self.debug('populate()')
         self.doViews('throb', True)
@@ -250,9 +249,9 @@ class SelectorController(base.Controller):
                         return
 
                     self.addItem(item)
-                reactor.callLater(0, space, iterator, size)
+                self._reactor.callLater(0, space, iterator, size)
 
-            reactor.callLater(0, space, iter(iterable), size=11)
+            self._reactor.callLater(0, space, iter(iterable), size=11)
             self.debug('populated')
         d.addCallback(cb)
 
@@ -299,6 +298,12 @@ class AlbumSelectorController(SelectorController):
 
 
 def main():
+
+    from twisted.internet import reactor
+
+    from twisted.internet import defer
+    defer.Deferred.debug = 1
+
     log.init('DAD_DEBUG')
     log.debug('main', 'start')
 
@@ -348,10 +353,7 @@ def main():
     artistController.populate()
     albumController.populate()
 
+    reactor.run()
 
-from twisted.internet import reactor
-
-main()
-
-reactor.run()
-
+if __name__ == '__main__':
+    main()
