@@ -58,7 +58,7 @@ class GTKUI(UI):
         import gtk
 
         self._window = gtk.Window()
-        from dad.ui import scheduler as sch, seek
+        from dadgtk.views import scheduler as sch, seek
         sui = sch.SchedulerUI()
 
         def jukebox_started_cb(jukebox, scheduled):

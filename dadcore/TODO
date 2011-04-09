@@ -1,6 +1,8 @@
-- add time display in gtk interface
-- add a seek bar
 - when seeking to a track, prioritize new track such that only that one plays
+- add last.fm support, possibly using python-lastfm, see mixins.async_callback
+  which is based on threads, but maybe replacing urllib2 and the decorator
+  allows us to do everything with pure-twisted-deferreds
+- add error handling; playing a non-existing file just stops the player
 
 - figure out if leveller's do_handle_message leaks messages:
   valgrind --show-reachable=yes --leak-check=full --suppressions=valgrind-python.supp python dad/gstreamer/leveller.py /home/thomas/gst/media/small/south.mp3 
@@ -100,3 +102,5 @@ Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone 
 - python examples/jukebox.py -g --selecter=dadcouch.selecter.couch:help
 AttributeError: 'module' object has no attribute 'option_parser_class'
   Instead, make it list classes in that module
+
+- don't fail on an empty or non-existing category
