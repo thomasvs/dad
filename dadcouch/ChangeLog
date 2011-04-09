@@ -1,5 +1,10 @@
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/artists.py:
+	  Refactor to use new dadgtk.
+
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/selecter/couch.py:
 	  Add some cache debugging.
 	* tests/artists.py:
