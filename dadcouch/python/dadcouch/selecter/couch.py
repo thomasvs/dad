@@ -30,7 +30,7 @@ from dad.audio import mixing, level
 from dad.common import log
 from dad.common import selecter
 
-from dadcouch.extern.paisley import couchdb, views, mapping
+from dadcouch.extern.paisley import client, views, mapping
 from dadcouch.common import cachedb
 from dadcouch.model import couch, daddb
 
@@ -92,6 +92,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self.debug('Creating selecter, for %d loops', options.loops)
         db = cachedb.CachingCouchDB(options.host, int(options.port))
+        db = client.CouchDB(options.host, int(options.port))
         self._dadDB = daddb.DADDB(db, options.database)
 
         self._category = options.category

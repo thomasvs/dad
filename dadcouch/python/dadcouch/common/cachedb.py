@@ -10,16 +10,16 @@ CouchDB caching client.
 
 from twisted.internet import defer
 
-from dadcouch.extern.paisley import couchdb
+from dadcouch.extern.paisley import client
 
-class CachingCouchDB(couchdb.CouchDB):
+class CachingCouchDB(client.CouchDB):
     """
     I cache parsed docs.
     """
 
     def __init__(self, host, port=5984, dbName=None,
                        username=None, password=None):
-        couchdb.CouchDB.__init__(self, host, port, dbName, username, password)
+        client.CouchDB.__init__(self, host, port, dbName, username, password)
         self._cache = {} # dict of dbName to dict of id to doc
 
         self.lookups = 0
@@ -43,7 +43,7 @@ class CachingCouchDB(couchdb.CouchDB):
             return defer.succeed(self._cache[dbName][objId])
 
         # otherwise, load and map through parent implementation
-        return couchdb.CouchDB.map(self, dbName, objId, objFactory)
+        return client.CouchDB.map(self, dbName, objId, objFactory)
 
     def getCached(self, dbName, objId):
         return self._cache[dbName][objId]

@@ -17,7 +17,7 @@ from dad.extern.log import log
 
 from dadcouch.model import daddb
 
-from dadcouch.extern.paisley import couchdb, views
+from dadcouch.extern.paisley import client, views
 
 # should move to gtk part
 
@@ -316,8 +316,8 @@ def main():
         db = sys.argv[2]
 
     # this rebinds and makes it break in views
-    # db = couchdb.CouchDB('localhost', dbName='dad')
-    server = couchdb.CouchDB(server)
+    # db = client.CouchDB('localhost', dbName='dad')
+    server = client.CouchDB(server)
 
     window = gtk.Window()
 

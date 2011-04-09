@@ -1,5 +1,14 @@
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/common/cachedb.py:
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/selecter/couch.py:
+	* tests/artists.py:
+	  Refactor to use the cache branch of my paisley github
+	  checkout.
+
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	* tests/artists.py:
 	  Reorder code before making it a module.

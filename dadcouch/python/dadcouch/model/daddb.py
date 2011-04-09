@@ -7,8 +7,7 @@ import optparse
 
 from twisted.internet import defer
 
-from dadcouch.extern.paisley import couchdb
-from dadcouch.extern.paisley import couchdb, views, mapping
+from dadcouch.extern.paisley import client, views, mapping
 
 from dad.base import base
 from dad.common import log
@@ -76,7 +75,7 @@ class DADDB(log.Loggable):
 
     def __init__(self, db, dbName):
         """
-        @type  db:     L{dadcouch.extern.paisley.couchdb.CouchDB}
+        @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
         @type  dbName: str
         """
         self.db = db
@@ -90,7 +89,7 @@ class DADDB(log.Loggable):
         Specify include_docs=True if you want to load full docs (and
         allow them to get cached)
 
-        @type  db:       L{couchdb.CouchDB}
+        @type  db:       L{client.CouchDB}
         @type  dbName:   str
         @param klazz:    the class to instantiate objects from
         @param viewName: name of the view to load objects from
@@ -358,6 +357,7 @@ class DADDB(log.Loggable):
 
             d = self.loadTracks(kept)
             def loaded(result):
+                print 'THOMAS: result', type(result), result
                 self.debug('loaded tracks for %r trackScores', len(kept))
 
 
@@ -371,6 +371,7 @@ class DADDB(log.Loggable):
                     if not succeeded:
                         log.warningFailure(track)
                     else:
+                        print 'THOMAS: track', track
                         trackScore = trackIdToScore[track.id]
                         res.append((track, trackScore.score, trackScore.userId))
 
@@ -458,6 +459,7 @@ class DADDB(log.Loggable):
                 result.append(trackScore)
 
         self.debug('kept %d of %d track scores', len(result), total)
+        self.debug('first track score %r', result[0])
 
         return result
 
