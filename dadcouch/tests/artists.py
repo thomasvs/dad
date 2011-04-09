@@ -15,14 +15,13 @@ from twisted.internet import defer
 
 defer.Deferred.debug = 1
 
-from dad.extern.paisley import couchdb, views
+from dadcouch.extern.paisley import couchdb, views
 from dad.extern.log import log
-
-from dad.model import couch
 
 server = couchdb.CouchDB('localhost')
 DB = 'dadtest'
 
+# should go to model.daddb
 class ItemTracks:
     # map tracks-by-album and tracks-by-artist
     def fromDict(self, d):
@@ -60,6 +59,8 @@ class AlbumsByArtist:
             self.albumId = d['id']
 
 
+# base class for couchdb model; should probably also have a generic
+# model base class
 class Model(log.Loggable):
     def __init__(self, server, db):
         self._server = server
@@ -191,6 +192,8 @@ class AlbumSelectorModel(Model):
 
         return ret.keys()
 
+# should move to gtk part
+
 import gobject
 import gtk
 
@@ -201,7 +204,24 @@ import gtk
     COLUMN_TRACKS,
 ) = range(4)
 
-class SelectorView(gtk.VBox, log.Loggable):
+class SelectorView(log.Loggable):
+    """
+    I am a base class for selector widgets.
+    """
+    title = 'Selector, override me'
+
+    def add_row(self, i, display, sort, tracks):
+        raise NotImplementedError
+
+    def throb(self, active=True):
+        """
+        Start or stop throbbing the selector to indicate activity.
+
+        @param active: whether to throb
+        """
+        pass
+ 
+class GTKSelectorView(gtk.VBox, SelectorView):
     """
     I am a selector widget for a list of objects.
 
@@ -210,7 +230,6 @@ class SelectorView(gtk.VBox, log.Loggable):
     I also have a throbber next to the title button.
     """
 
-    title = 'Selector, override me'
     # FIXME: handle singular/plural properly
     first = 'All %d items'
 
@@ -305,6 +324,7 @@ class SelectorView(gtk.VBox, log.Loggable):
             COLUMN_DISPLAY, template % (albums, tracks),
             COLUMN_SORT, None)
 
+    ### SelectorView implementations
     def add_row(self, i, display, sort, tracks):
         iter = self._store.append()
         self._store.set(iter,
@@ -335,12 +355,12 @@ class SelectorView(gtk.VBox, log.Loggable):
             self.throbber.set_from_file(os.path.join(path, 'Throbber.png'))
 
 
-class ArtistSelectorView(SelectorView):
+class ArtistSelectorView(GTKSelectorView):
 
     title = 'Artists'
     first = 'All %d artists'
 
-class AlbumSelectorView(SelectorView):
+class AlbumSelectorView(GTKSelectorView):
 
     title = 'Albums'
     first = 'All %d albums'
@@ -348,7 +368,7 @@ class AlbumSelectorView(SelectorView):
     _album_ids = None
 
     def __init__(self):
-        SelectorView.__init__(self)
+        GTKSelectorView.__init__(self)
 
         # filtering
         def match_album_ids(model, iter):
@@ -388,6 +408,7 @@ class AlbumSelectorView(SelectorView):
         # reselect the first
         self._selection.select_path((0, ))
 
+# move to base class
 class SelectorController(log.Loggable):
     def __init__(self, model):
         self._model = model
