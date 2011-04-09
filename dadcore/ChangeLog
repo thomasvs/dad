@@ -1,3 +1,10 @@
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/base (added):
+	* dad/base/base.py (added):
+	* dad/base/__init__.py (added):
+	  Add dad.base.base with common base classes.
+
 2011-04-03  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* examples/daemon.py:
