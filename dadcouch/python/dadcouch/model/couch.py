@@ -4,7 +4,7 @@
 import datetime
 import math
 
-from dadcouch.common import mapping
+from dadcouch.extern.paisley import mapping
 
 class Category(mapping.Document):
     type = mapping.TextField(default="category")

@@ -1,5 +1,11 @@
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/common/mapping.py (deleted):
+	  Delete mapping wrapper.
+
+2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/common/cachedb.py:
 	* python/dadcouch/model/daddb.py:
 	* python/dadcouch/selecter/couch.py:
