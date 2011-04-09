@@ -31,7 +31,6 @@ from dad.common import log
 from dad.common import selecter
 
 from dadcouch.extern.paisley import client, views, mapping
-from dadcouch.common import cachedb
 from dadcouch.model import couch, daddb
 
 _DEFAULT_HOST = 'localhost'
@@ -91,9 +90,10 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
     #    above=0.7, below=1.0, random=False, loops=-1):
 
         self.debug('Creating selecter, for %d loops', options.loops)
-        db = cachedb.CachingCouchDB(options.host, int(options.port))
-        db = client.CouchDB(options.host, int(options.port))
-        self._dadDB = daddb.DADDB(db, options.database)
+        self._cache = client.MemoryCache()
+        self._db = client.CouchDB(options.host, int(options.port),
+            cache=self._cache)
+        self._dadDB = daddb.DADDB(self._db, options.database)
 
         self._category = options.category
         self._user = options.user
