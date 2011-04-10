@@ -1,3 +1,12 @@
+2011-04-10  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/scheduler.py:
+	* dadgtk/views/views.py:
+	* data (added):
+	* data/ui (added):
+	  Moved from dadcouch.
+	  Extracted a Throbber base class.
+
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/views.py (added):

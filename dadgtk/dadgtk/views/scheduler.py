@@ -11,10 +11,18 @@ from gst.extend import pygobject
 
 from dad.extern.log import log
 
-(COLUMN_SCHEDULED, COLUMN_ARTISTS, COLUMN_TITLE, COLUMN_PATH, COLUMN_START, COLUMN_END) = range(6)
+# FIXME: rename SCHEDULED to ID or OBJECT
+(
+    COLUMN_SCHEDULED,
+    COLUMN_ARTISTS,
+    COLUMN_TITLE,
+    COLUMN_PATH,
+    COLUMN_START,
+    COLUMN_END
+) = range(6)
 
-class SchedulerUI(gtk.TreeView, log.Loggable):
-    logCategory = 'schedulerui'
+class TracksUI(gtk.TreeView, log.Loggable):
+    logCategory = 'tracksui'
 
     pygobject.gsignal('clicked', object)
 
@@ -57,6 +65,34 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
 
         self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
 
+    def _scheduled_cb(self, scheduler, scheduled):
+        self.add_scheduled(scheduled)
+
+    def add(self, item, artists, title, path, start, end):
+        """
+        """
+        self.debug('add: adding %r', item)
+        iter = self._store.append()
+        self._store.set(iter,
+            COLUMN_SCHEDULED, item,
+            COLUMN_ARTISTS, "\n".join(artists),
+            COLUMN_TITLE, title,
+            COLUMN_PATH, path,
+            COLUMN_START, start,
+            COLUMN_END, end
+        )
+        self._treeview.set_model(self._store)
+        self._treerowrefs[item] = gtk.TreeRowReference(
+            self._store, self._store.get_path(iter))
+
+    def _treeview_clicked_cb(self, tv, path, column):
+        iter = self._store.get_iter(path)
+        item = self._store.get_value(iter, COLUMN_SCHEDULED)
+        self.emit('clicked', item)
+
+class SchedulerUI(TracksUI):
+    logCategory = 'schedulerui'
+
     def set_scheduler(self, scheduler):
         """
         Call me before any tracks get scheduled.
@@ -67,29 +103,6 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
     def _scheduled_cb(self, scheduler, scheduled):
         self.add_scheduled(scheduled)
 
-    def add_scheduled(self, scheduled):
-        """
-        @type  scheduled: L{scheduler.Scheduled}
-        """
-        self.debug('add_scheduled: adding %r', scheduled)
-        iter = self._store.append()
-        self._store.set(iter,
-            COLUMN_SCHEDULED, scheduled,
-            COLUMN_ARTISTS, "\n".join(scheduled.artists),
-            COLUMN_TITLE, scheduled.title or scheduled.description,
-            COLUMN_PATH, scheduled.path,
-            COLUMN_START, gst.TIME_ARGS(scheduled.start),
-            COLUMN_END, gst.TIME_ARGS(scheduled.start + scheduled.duration),
-        )
-        self._treeview.set_model(self._store)
-        self._treerowrefs[scheduled] = gtk.TreeRowReference(
-            self._store, self._store.get_path(iter))
-
-    def _treeview_clicked_cb(self, tv, path, column):
-        iter = self._store.get_iter(path)
-        scheduled = self._store.get_value(iter, COLUMN_SCHEDULED)
-        self.emit('clicked', scheduled)
-
     # call me to indicate a scheduled item has started playing
     def started(self, scheduled):
         # FIXME: instead of printing, signal to the command ui
@@ -98,6 +111,16 @@ class SchedulerUI(gtk.TreeView, log.Loggable):
         ts = self._treeview.get_selection()
         ts.select_path(path)
 
+    def add_scheduled(self, scheduled):
+        """
+        @type  scheduled: L{scheduler.Scheduled}
+        """
+        self.debug('add_scheduled: adding %r', scheduled)
+        self.add(scheduled, scheduled.artists,
+            scheduled.title or scheduled.description,
+            scheduled.path,
+            gst.TIME_ARGS(scheduled.start),
+            gst.TIME_ARGS(scheduled.start + scheduled.duration))
 
 gobject.type_register(SchedulerUI)
 

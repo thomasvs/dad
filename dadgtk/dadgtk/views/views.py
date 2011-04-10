@@ -15,6 +15,28 @@ from dad.base import base
     COLUMN_TRACKS,
 ) = range(4)
 
+class Throbber(gtk.Image):
+    path = None
+
+    def set_path(self, path):
+        self.path = path
+
+    def throb(self, active=True):
+        """
+        Start or stop throbbing the selector to indicate activity.
+
+        @param active: whether to throb
+        """
+        path = self.path
+        if not path:
+            path = os.path.join(os.path.dirname(__file__), '../../data/ui') 
+
+        if active:
+            self.set_from_file(os.path.join(path, 'Throbber.gif'))
+        else:
+            self.set_from_file(os.path.join(path, 'Throbber.png'))
+
+
 class GTKSelectorView(gtk.VBox, base.SelectorView):
     """
     I am a selector widget for a list of objects.
@@ -56,8 +78,8 @@ class GTKSelectorView(gtk.VBox, base.SelectorView):
 
         self.pack_start(hbox, expand=False, fill=False)
 
-        self.throbber = gtk.Image()
-        self.throb(False)
+        self.throbber = Throbber()
+        self.throbber.throb(False)
         hbox.pack_start(self.throbber, expand=False)
 
         sw = gtk.ScrolledWindow()
@@ -139,14 +161,7 @@ class GTKSelectorView(gtk.VBox, base.SelectorView):
 
         @param active: whether to throb
         """
-        path = self._throbber_path
-        if not path:
-            path = os.path.join(os.path.dirname(__file__), '../data/ui') 
-
-        if active:
-            self.throbber.set_from_file(os.path.join(path, 'Throbber.gif'))
-        else:
-            self.throbber.set_from_file(os.path.join(path, 'Throbber.png'))
+        self.throbber.throb(active)
 
 
 class ArtistSelectorView(GTKSelectorView):
