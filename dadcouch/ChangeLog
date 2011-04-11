@@ -1,3 +1,10 @@
+2011-04-10  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* data/ui (deleted):
+	* data/ui/Throbber.png (deleted):
+	* data/ui/Throbber.gif (deleted):
+	  Moved to dadgtk.
+
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* tests/artists.py:
