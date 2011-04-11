@@ -4,6 +4,7 @@
 import os
 import sys
 import optparse
+import time
 
 from twisted.internet import defer
 
@@ -550,9 +551,8 @@ class DADDB(log.Loggable):
         return d
 
 class CouchDBModel(base.Model):
-    def __init__(self, server, db):
-        self._server = server
-        self._db = db
+    def __init__(self, daddb):
+        self._daddb = daddb
 
 class ArtistSelectorModel(CouchDBModel):
     def get(self):
@@ -560,8 +560,10 @@ class ArtistSelectorModel(CouchDBModel):
         @returns: a deferred firing a list of L{daddb.ItemTracks} objects
                   representing only artists and their track count.
         """
+        start = time.time()
         self.debug('get')
-        v = views.View(self._server, self._db, 'dad', 'tracks-by-artist',
+        v = views.View(self._daddb.db, self._daddb.dbName,
+            'dad', 'tracks-by-artist',
             ItemTracks)
         try:
             d = v.queryView()
@@ -583,6 +585,8 @@ class ArtistSelectorModel(CouchDBModel):
                 else:
                     artist.tracks += 1
 
+            self.debug('get: got %d artists in %d seconds',
+                len(ret), time.time() - start)
             return ret
         d.addCallback(cb)
 
@@ -607,8 +611,9 @@ class AlbumSelectorModel(CouchDBModel):
         d = defer.Deferred()
 
         # first, load a mapping of artists to albums
-        view = views.View(self._server, self._db, 'dad', 'albums-by-artist',
-                          AlbumsByArtist)
+        view = views.View(self._daddb.db, self._daddb.dbName,
+            'dad', 'albums-by-artist',
+            AlbumsByArtist)
         d.addCallback(lambda _, v: v.queryView(), view)
 
         def cb(items):
@@ -636,8 +641,9 @@ class AlbumSelectorModel(CouchDBModel):
         d.addCallback(cb)
 
         # now, load the tracks per album, and aggregate and return
-        view = views.View(self._server, self._db, 'dad', 'tracks-by-album',
-                          ItemTracks)
+        view = views.View(self._daddb.db, self._daddb.dbName,
+            'dad', 'tracks-by-album',
+            ItemTracks)
         d.addCallback(lambda _, v: v.queryView(), view)
 
         def cb(itemTracks):
@@ -679,5 +685,70 @@ class AlbumSelectorModel(CouchDBModel):
                 ret[album] = 1
 
         return ret.keys()
+
+class TrackSelectorModel(CouchDBModel):
+    # FIXME: this should actually be able to pass results in as they arrive,
+    # instead of everything at the end
+    def get(self):
+        """
+        @returns: a deferred firing a list of L{daddb.Track} objects.
+        """
+        d = defer.Deferred()
+
+        self.debug('get')
+        start = time.time()
+
+
+        # get artists cached
+        def cache(_):
+            v = views.View(self._daddb.db, self._daddb.dbName,
+                'dad', 'artists', couch.Artist, include_docs=True)
+            return v.queryView()
+        d.addCallback(cache)
+
+
+        def loadTracks(artists):
+            self.debug('get: %r artists cached in %d seconds',
+                len(list(artists)), time.time() - start)
+            v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
+                couch.Track, include_docs=True)
+            try:
+                d = v.queryView()
+                return d
+            except Exception, e:
+                print 'THOMAS: exception', e
+                return defer.fail(e)
+        d.addCallback(loadTracks)
+
+        def cb(tracks):
+            # tracks: list of Track
+            # import code; code.interact(local=locals())
+            trackList = list(tracks)
+            log.debug('playlist', 'got %r tracks', len(trackList))
+
+            d = manydef.DeferredListSpaced()
+
+            for track in trackList:
+                d.addCallable(self._daddb.resolveIds, track,
+                    'artist_ids', 'artists', couch.Artist)
+
+            def trackedCb(_, tl):
+                self.debug('get: %r tracks resolved in %d seconds',
+                    len(list(tl)), time.time() - start)
+                # import code; code.interact(local=locals())
+                return tl
+            d.addCallback(trackedCb, trackList)
+            d.start()
+            return d
+
+        d.addCallback(cb)
+
+        def eb(failure):
+            print 'THOMAS: Failure:', failure
+            return failure
+        d.addErrback(eb)
+
+        d.callback(None)
+        return d
 
 

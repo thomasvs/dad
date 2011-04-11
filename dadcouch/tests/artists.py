@@ -22,7 +22,7 @@ from dadcouch.selecter import couch
 
 from dadcouch.extern.paisley import client
 
-from dadgtk.views import views
+from dadgtk.views import views, scheduler
 
 # move to base class
 class SelectorController(base.Controller):
@@ -40,7 +40,8 @@ class SelectorController(base.Controller):
         d = self._model.get()
 
         def cb(iterable):
-            self.debug('got results: %r' % len(iterable))
+            # iterable can be generator
+            #self.debug('got results: %r' % len(iterable))
             self.debug('populating')
 
             # space out add_artist calls from the iterator in blocks of a given
@@ -102,6 +103,15 @@ class AlbumSelectorController(SelectorController):
         self.doViews('add_row', item.id, "%s (%d)" % (item.name, item.tracks),
             item.sortname, item.tracks)
 
+class TrackSelectorController(SelectorController):
+
+    logCategory = 'trackSC'
+
+    def addItem(self, item):
+        # add a track
+        self.doViews('add_item', item, [a.name for a in item.artists],
+            "%s" % item.name, None, None, None)
+
 
 def main():
     from twisted.internet import reactor
@@ -110,6 +120,7 @@ def main():
     defer.Deferred.debug = 1
 
     log.init('DAD_DEBUG')
+    log.logTwisted()
     log.debug('main', 'start')
 
     parser = optparse.OptionParser()
@@ -118,29 +129,43 @@ def main():
 
     # this rebinds and makes it break in views
     # db = client.CouchDB('localhost', dbName='dad')
-    server = client.CouchDB(host=options.host, port=options.port)
+    cache = client.MemoryCache()
+    server = client.CouchDB(host=options.host, port=options.port, cache=cache)
     dbName = options.database
+    db = daddb.DADDB(server, dbName)
 
     window = gtk.Window()
 
-    box = gtk.HBox()
+    vbox = gtk.VBox()
 
-    window.add(box)
+    hbox = gtk.HBox()
+
+    vbox.add(hbox)
+
+    window.add(vbox)
 
     artistView = views.ArtistSelectorView()
-    artistModel = daddb.ArtistSelectorModel(server, dbName)
+    artistModel = daddb.ArtistSelectorModel(db)
     artistController = ArtistSelectorController(artistModel)
     artistController.addView(artistView)
-    box.pack_start(artistView)
+    hbox.pack_start(artistView)
 
     albumView = views.AlbumSelectorView()
-    albumModel = daddb.AlbumSelectorModel(server, dbName)
+    albumModel = daddb.AlbumSelectorModel(db)
     albumController = AlbumSelectorController(albumModel)
     albumController.addView(albumView)
-    box.pack_start(albumView)
+    hbox.pack_start(albumView)
+
+    trackView = scheduler.TracksUI()
+    trackModel = daddb.TrackSelectorModel(db)
+    trackController = TrackSelectorController(trackModel)
+    trackController.addView(trackView)
+
+    vbox.add(trackView)
 
     # listen to changes on artist selection so we can filter the albums view
     def artist_selected_cb(self, ids):
+        import code; code.interact(local=locals())
         album_ids = albumModel.get_artists_albums(ids)
         albumView.set_album_ids(album_ids)
 
@@ -152,8 +177,14 @@ def main():
     window.show_all()
 
     # start loading artists and albums
-    artistController.populate()
-    albumController.populate()
+
+    d = defer.Deferred()
+
+    d.addCallback(lambda _: artistController.populate())
+    d.addCallback(lambda _: albumController.populate())
+    d.addCallback(lambda _: trackController.populate())
+
+    d.callback(None)
 
     reactor.run()
 
