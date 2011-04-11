@@ -1,3 +1,8 @@
+2011-04-11  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/scheduler.py:
+	  Further refactoring.
+
 2011-04-10  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/scheduler.py:

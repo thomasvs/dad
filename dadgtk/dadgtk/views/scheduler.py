@@ -21,14 +21,30 @@ from dad.extern.log import log
     COLUMN_END
 ) = range(6)
 
-class TracksUI(gtk.TreeView, log.Loggable):
+class TracksUI(gtk.VBox, log.Loggable):
     logCategory = 'tracksui'
 
     pygobject.gsignal('clicked', object)
 
     def __init__(self):
-        gtk.Widget.__init__(self)
+        gtk.VBox.__init__(self)
 
+        self._create_store()
+
+        self._treeview = gtk.TreeView(self._store)
+        self._add_columns()
+        self._treeview.props.rules_hint = True
+
+        sw = gtk.ScrolledWindow()
+        self.add(sw)
+   
+        self._treeview.connect('row_activated', self._treeview_clicked_cb)
+
+        sw.add(self._treeview)
+
+        self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
+
+    def _create_store(self):
         self._store = gtk.ListStore(
             object,
             gobject.TYPE_STRING,
@@ -38,8 +54,27 @@ class TracksUI(gtk.TreeView, log.Loggable):
             gobject.TYPE_STRING,
             )
 
-        self._treeview = self # gtk.TreeView()
+    def _scheduled_cb(self, scheduler, scheduled):
+        self.add_scheduled(scheduled)
 
+    def add_item(self, item, artists, title, path, start, end):
+        """
+        """
+        #self.debug('add: adding %r', item)
+        iter = self._store.append()
+        self._store.set(iter,
+            COLUMN_SCHEDULED, item,
+            COLUMN_ARTISTS, "\n".join(artists),
+            COLUMN_TITLE, title,
+            COLUMN_PATH, path,
+            COLUMN_START, start,
+            COLUMN_END, end
+        )
+        self._treeview.set_model(self._store)
+        self._treerowrefs[item] = gtk.TreeRowReference(
+            self._store, self._store.get_path(iter))
+
+    def _add_columns(self):
         column = gtk.TreeViewColumn('Artists', gtk.CellRendererText(),
                                     text=COLUMN_ARTISTS)
         self._treeview.append_column(column)
@@ -60,35 +95,14 @@ class TracksUI(gtk.TreeView, log.Loggable):
         # column = gtk.TreeViewColumn('End', gtk.CellRendererText(),
         #                             text=COLUMN_END)
         # self._treeview.append_column(column)
-    
-        self._treeview.connect('row_activated', self._treeview_clicked_cb)
-
-        self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
-
-    def _scheduled_cb(self, scheduler, scheduled):
-        self.add_scheduled(scheduled)
-
-    def add(self, item, artists, title, path, start, end):
-        """
-        """
-        self.debug('add: adding %r', item)
-        iter = self._store.append()
-        self._store.set(iter,
-            COLUMN_SCHEDULED, item,
-            COLUMN_ARTISTS, "\n".join(artists),
-            COLUMN_TITLE, title,
-            COLUMN_PATH, path,
-            COLUMN_START, start,
-            COLUMN_END, end
-        )
-        self._treeview.set_model(self._store)
-        self._treerowrefs[item] = gtk.TreeRowReference(
-            self._store, self._store.get_path(iter))
-
+ 
     def _treeview_clicked_cb(self, tv, path, column):
         iter = self._store.get_iter(path)
         item = self._store.get_value(iter, COLUMN_SCHEDULED)
         self.emit('clicked', item)
+
+    def throb(self, active=True):
+        print 'THOMAS: FIXME: throb', active
 
 class SchedulerUI(TracksUI):
     logCategory = 'schedulerui'
@@ -116,7 +130,7 @@ class SchedulerUI(TracksUI):
         @type  scheduled: L{scheduler.Scheduled}
         """
         self.debug('add_scheduled: adding %r', scheduled)
-        self.add(scheduled, scheduled.artists,
+        self.add_item(scheduled, scheduled.artists,
             scheduled.title or scheduled.description,
             scheduled.path,
             gst.TIME_ARGS(scheduled.start),
