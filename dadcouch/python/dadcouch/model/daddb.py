@@ -508,7 +508,7 @@ class DADDB(log.Loggable):
         self.log('getting path for file %r', file)
         # FIXME: file.directory_id seems unicode; does not work for url; handle
         # this in paisley internally ?
-        d = self.db.map(self.dbName, str(file.directory_id), couch.Directory)
+        d = self.db.map(self.dbName, unicode(file.directory_id), couch.Directory)
 
         def eb(failure, file):
             log.warningFailure(failure)
@@ -534,9 +534,9 @@ class DADDB(log.Loggable):
 
             if getattr(obj, 'parent_id', None):
                 d = self.db.map(
-                    self.dbName, str(obj.parent_id), couch.Directory)
+                    self.dbName, unicode(obj.parent_id), couch.Directory)
             elif getattr(obj, 'volume_id', None):
-                d = self.db.map(self.dbName, str(obj.volume_id), couch.Volume)
+                d = self.db.map(self.dbName, unicode(obj.volume_id), couch.Volume)
 
             assert d, 'child %r did not have parent path or volume' % obj
 
@@ -696,7 +696,8 @@ class TrackSelectorModel(CouchDBModel):
         d = defer.Deferred()
 
         self.debug('get')
-        start = time.time()
+        last = [time.time(), ]
+        start = last[0]
 
 
         # get artists cached
@@ -708,8 +709,9 @@ class TrackSelectorModel(CouchDBModel):
 
 
         def loadTracks(artists):
-            self.debug('get: %r artists cached in %d seconds',
-                len(list(artists)), time.time() - start)
+            self.debug('get: %r artists cached in %.3f seconds',
+                len(list(artists)), time.time() - last[0])
+            last[0] = time.time()
             v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
                 couch.Track, include_docs=True)
             try:
@@ -724,7 +726,9 @@ class TrackSelectorModel(CouchDBModel):
             # tracks: list of Track
             # import code; code.interact(local=locals())
             trackList = list(tracks)
-            log.debug('playlist', 'got %r tracks', len(trackList))
+            log.debug('playlist', 'got %r tracks in %.3f seconds',
+                len(trackList), time.time() - last[0])
+            last[0] = time.time()
 
             d = manydef.DeferredListSpaced()
 
@@ -733,14 +737,13 @@ class TrackSelectorModel(CouchDBModel):
                     'artist_ids', 'artists', couch.Artist)
 
             def trackedCb(_, tl):
-                self.debug('get: %r tracks resolved in %d seconds',
-                    len(list(tl)), time.time() - start)
+                self.debug('get: %r tracks resolved in %.3f seconds',
+                    len(list(tl)), time.time() - last[0])
                 # import code; code.interact(local=locals())
                 return tl
             d.addCallback(trackedCb, trackList)
             d.start()
             return d
-
         d.addCallback(cb)
 
         def eb(failure):
