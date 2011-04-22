@@ -3,11 +3,8 @@
 
 import os
 
-import gst
 import gobject
 import gtk
-
-from gst.extend import pygobject
 
 from dad.extern.log import log
 
@@ -24,7 +21,10 @@ from dad.extern.log import log
 class TracksUI(gtk.VBox, log.Loggable):
     logCategory = 'tracksui'
 
-    pygobject.gsignal('clicked', object)
+    __gsignals__ = {
+        'clicked':
+            (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (object, ))
+    }
 
     def __init__(self):
         gtk.VBox.__init__(self)
@@ -129,6 +129,7 @@ class SchedulerUI(TracksUI):
         """
         @type  scheduled: L{scheduler.Scheduled}
         """
+        import gst
         self.debug('add_scheduled: adding %r', scheduled)
         self.add_item(scheduled, scheduled.artists,
             scheduled.title or scheduled.description,

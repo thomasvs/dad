@@ -1,3 +1,10 @@
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/scheduler.py:
+	  Use __gsignals__ instead of gst-python's stuff.
+	  Move the one gst import inside a function, so we can
+	  import this module without losing our options to gst.
+
 2011-04-11  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/scheduler.py:
