@@ -1,3 +1,8 @@
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/base/base.py:
+	  Add viewAdded() to model base class.
+
 2011-04-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/base (added):
