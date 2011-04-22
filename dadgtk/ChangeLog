@@ -1,5 +1,11 @@
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/track-info.ui (added):
+	* dadgtk/views/track.py (added):
+	  Add a view on a track.
+
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/scheduler.py:
 	  Use __gsignals__ instead of gst-python's stuff.
 	  Move the one gst import inside a function, so we can
