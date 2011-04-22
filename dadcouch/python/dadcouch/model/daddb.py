@@ -33,6 +33,15 @@ class TrackScore(mapping.Document):
         self.subjectId = d['key'][2]
         self.score = float(d['value'])
 
+# map track view
+class Track(mapping.Document):
+    id = mapping.TextField()
+    name = mapping.TextField()
+
+    def fromDict(self, d):
+        self.id = d['id']
+        self.name = d['key']
+
 class ItemTracks:
     # map tracks-by-album and tracks-by-artist
     def fromDict(self, d):
@@ -401,6 +410,10 @@ class DADDB(log.Loggable):
 
         def cb(rows):
             l = list(rows)
+            if len(l) == 0:
+                raise KeyError("No object for key %r in view %r" % (
+                    key, viewName))
+
             assert len(l) is 1, 'Got %r objects for key %r' % (
                 len(l), key)
 
@@ -432,6 +445,19 @@ class DADDB(log.Loggable):
         @rtype: L{defer.Deferred} firing L{couch.User}
         """
         return self._getSingleByKey('users', couch.User, userName)
+
+
+    def getOrAddUser(self, userName):
+        d = self.getUser(userName)
+
+        def eb(failure):
+            self.debug('User %r does not exist, adding', userName)
+            failure.trap(KeyError)
+            self.debug('User %r does not exist, adding', userName)
+            u = couch.User(name=userName)
+            return self.db.saveDoc(self.dbName, u._data)
+        d.addErrback(eb)
+        return d
 
     def getTrackScoresByCategory(self, category, user=None):
         """
@@ -472,7 +498,7 @@ class DADDB(log.Loggable):
 
         context = {}
 
-        d.addCallback(lambda _: self.getUser(userName))
+        d.addCallback(lambda _: self.getOrAddUser(userName))
         d.addCallback(lambda u: context.__setitem__('user', u))
         d.addCallback(lambda _: self.getCategory(categoryName))
         d.addCallback(lambda c: context.__setitem__('category', c))
@@ -767,15 +793,19 @@ class TrackSelectorModel(CouchDBModel):
             v = views.View(self._daddb.db, self._daddb.dbName,
                 'dad', 'artists', couch.Artist, include_docs=True)
             return v.queryView()
-        d.addCallback(cache)
+        # d.addCallback(cache)
 
 
         def loadTracks(artists):
-            self.debug('get: %r artists cached in %.3f seconds',
-                len(list(artists)), time.time() - last[0])
+            if artists:
+                self.debug('get: %r artists cached in %.3f seconds',
+                    len(list(artists)), time.time() - last[0])
             last[0] = time.time()
+            # FIXME: include_docs makes this last forever
+            # v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
+            #    couch.Track, include_docs=True)
             v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
-                couch.Track, include_docs=True)
+                Track, include_docs=False)
             try:
                 d = v.queryView()
                 return d
@@ -794,9 +824,16 @@ class TrackSelectorModel(CouchDBModel):
 
             d = manydef.DeferredListSpaced()
 
+            class O(object):
+                name = 'Unknown'
+            o = O()
+
             for track in trackList:
-                d.addCallable(self._daddb.resolveIds, track,
-                    'artist_ids', 'artists', couch.Artist)
+                track.artists = [o, ]
+                # FIXME: THOMAS: speed this up
+                #d.addCallable(self._daddb.resolveIds, track,
+                #    'artist_ids', 'artists', couch.Artist)
+                pass
 
             def trackedCb(_, tl):
                 self.debug('get: %r tracks resolved in %.3f seconds',
@@ -846,7 +883,7 @@ class TrackModel(CouchDBModel):
         d = defer.Deferred()
 
         if userName:
-            d.addCallback(lambda _: self._daddb.getUser(userName))
+            d.addCallback(lambda _: self._daddb.getOrAddUser(userName))
             d.addCallback(lambda u: context.__setitem__('user', u))
 
 

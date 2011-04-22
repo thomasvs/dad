@@ -167,12 +167,36 @@ def main():
 
     # listen to changes on artist selection so we can filter the albums view
     def artist_selected_cb(self, ids):
-        import code; code.interact(local=locals())
         album_ids = albumModel.get_artists_albums(ids)
         albumView.set_album_ids(album_ids)
 
     artistView.connect('selected', artist_selected_cb)
 
+    def track_selected_cb(self, trackObj):
+        w = gtk.Window()
+
+        from dadgtk.views import track
+        view = track.TrackView()
+
+        w.add(view.widget)
+
+
+        model = daddb.TrackModel(db)
+        import track
+        controller = track.TrackController(model)
+        controller.addView(view)
+        # FIXME: don't hardcode
+        options.user = 'thomas'
+        d = controller.populate(trackObj.id, userName=options.user)
+        d.addCallback(lambda _: w.set_title(trackObj.name))
+
+        w.show_all()
+
+
+
+ 
+
+    trackView.connect('clicked', track_selected_cb)
 
     window.set_default_size(640, 480)
 

@@ -1,6 +1,18 @@
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
+	  Add getOrAddUser so we can rate for users that do not exist.
+	  Temporarily remove getting full track docs because it's slow,
+	  until we benchmark and get smarter about it.
+	* tests/artists.py:
+	  Hook up showing the UI for a track.
+	* tests/track.py:
+	  Move reactor installation to a __main__ check to not break
+	  importing it.
+
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
 	  Add code to score tracks.
 	* tests/track.py (added):
 	  Add a test that allows us to show a track based on the title.

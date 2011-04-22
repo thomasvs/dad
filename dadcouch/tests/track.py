@@ -1,10 +1,11 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-# twisted.web.http imports reactor
-# FIXME: fix that so we can move this install to main
-from twisted.internet import gtk2reactor
-gtk2reactor.install()
+if __name__ == '__main__':
+    # twisted.web.http imports reactor
+    # FIXME: fix that so we can move this install to main
+    from twisted.internet import gtk2reactor
+    gtk2reactor.install()
 
 import os
 import sys
@@ -87,7 +88,9 @@ class TrackController(base.Controller):
         return d
 
 def main():
+
     from twisted.internet import reactor
+
 
     from twisted.internet import defer
     defer.Deferred.debug = 1
