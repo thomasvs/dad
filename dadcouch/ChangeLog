@@ -1,5 +1,11 @@
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/artists.py:
+	* tests/track.py:
+	  Use the new view error method.
+
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	  Add getOrAddUser so we can rate for users that do not exist.
 	  Temporarily remove getting full track docs because it's slow,

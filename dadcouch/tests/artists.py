@@ -64,15 +64,8 @@ class SelectorController(base.Controller):
 
         def eb(failure):
             self.warningFailure(failure)
-            label = gtk.Label("%r: %r" % (failure, failure.value.args))
-            dialog = gtk.Dialog("failed to populate",
-                               None,
-                               gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                               (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
-            dialog.vbox.pack_start(label)
-            label.show()
-            response = dialog.run()
-            dialog.destroy()
+            self.doViews('error', "failed to populate",
+                "%r: %r" % (failure, failure.value.args))
         d.addErrback(eb)
 
         return d
@@ -135,7 +128,7 @@ def main():
     db = daddb.DADDB(server, dbName)
 
     window = gtk.Window()
-    window.connect('destroy', gtk.main_quit)
+    window.connect('destroy', lambda _: reactor.stop())
 
     vbox = gtk.VBox()
 

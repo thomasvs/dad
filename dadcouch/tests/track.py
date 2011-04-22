@@ -33,9 +33,6 @@ class TrackController(base.Controller):
     def __init__(self, model):
         base.Controller.__init__(self, model)
 
-        from twisted.internet import reactor
-        self._reactor = reactor
-
     def viewAdded(self, view):
         view.connect('scored', self._scored)
 
@@ -63,15 +60,8 @@ class TrackController(base.Controller):
 
         def eb(failure):
             self.warningFailure(failure)
-            label = gtk.Label("%r: %r" % (failure, failure.value.args))
-            dialog = gtk.Dialog("failed to populate",
-                               None,
-                               gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                               (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
-            dialog.vbox.pack_start(label)
-            label.show()
-            response = dialog.run()
-            dialog.destroy()
+            self.doViews('error', "failed to populate",
+                "%r: %r" % (failure, failure.value.args))
         d.addErrback(eb)
 
         d.addCallback(lambda _: self._model.getScores(userName=userName))
