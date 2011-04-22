@@ -135,6 +135,7 @@ def main():
     db = daddb.DADDB(server, dbName)
 
     window = gtk.Window()
+    window.connect('destroy', gtk.main_quit)
 
     vbox = gtk.VBox()
 
@@ -162,6 +163,7 @@ def main():
     trackController.addView(trackView)
 
     vbox.add(trackView)
+
 
     # listen to changes on artist selection so we can filter the albums view
     def artist_selected_cb(self, ids):

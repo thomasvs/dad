@@ -1,5 +1,10 @@
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/artists.py:
+	  Destroy on window close.
+
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/scores-by-subject (added):
 	* couchdb/views/scores-by-subject/map.js (added):
 	  Add a map to list scores by subject id.
