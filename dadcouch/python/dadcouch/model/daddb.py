@@ -113,19 +113,22 @@ class DADDB(log.Loggable):
         def eb(failure):
             self.warning('Failed to query view: %r',
                 log.getFailureMessage(failure))
+            sys.stderr.write(failure.getTraceback())
             return failure
         d.addErrback(eb)
 
         return d
 
-    def resolveIds(self, obj, idAttr, objAttr, klazz):
+    # FIXME: move this method to paisley
+    def resolveIds(self, obj, idAttr, objAttr, klazz, getter=getattr, setter=setattr):
         """
         Resolve id's on an object into the relevant objects using the given
         klazz.
 
-        @rtype: L{defer.Deferred}
+        @rtype: L{defer.Deferred} firing obj, so it can be chained.
         """
-        ids = getattr(obj, idAttr)
+        ids = getter(obj, idAttr)
+
         if not isinstance(ids, list):
             ids = [ids, ]
 
@@ -135,14 +138,18 @@ class DADDB(log.Loggable):
             res.append(o)
 
         for i in ids:
+            # FIXME: again, unicode!
+            i = unicode(i)
             d.addCallback(lambda _, j: self.db.map(self.dbName, j, klazz), i)
             d.addCallback(mapped, res)
 
         def done(_, res):
-            ids = getattr(obj, idAttr)
+            ids = getter(obj, idAttr)
             if not isinstance(ids, list):
                 res = res[0]
-            setattr(obj, objAttr, res)
+            setter(obj, objAttr, res)
+
+            return obj
 
         d.addCallback(done, res)
 
@@ -150,6 +157,10 @@ class DADDB(log.Loggable):
 
         return d
             
+    def resolveDictIds(self, obj, idAttr, objAttr, klazz,
+            getter=getattr, setter=setattr):
+        return self.resolveIds(obj, idAttr, objAttr, klazz,
+            getter=dict.__getitem__, setter=dict.__setitem__)
 
     ### data-specific methods
     def getPlaylist(self, userName, categoryName, above, below, limit=None,
@@ -446,6 +457,57 @@ class DADDB(log.Loggable):
             startkey=startkey, endkey=endkey)
         return d
 
+    def getScores(self, subject):
+        # get all scores for this subject
+        d = self.viewDocs(
+            'scores-by-subject', couch.Score, key=subject.id, include_docs=True)
+        return d
+
+    def score(self, subject, userName, categoryName, score):
+        """
+        Score the given subject.
+        """
+        self.debug('asked to score subject %r for user %r and category %r to score %r', subject, userName, categoryName, score)
+        d = defer.Deferred()
+
+        context = {}
+
+        d.addCallback(lambda _: self.getUser(userName))
+        d.addCallback(lambda u: context.__setitem__('user', u))
+        d.addCallback(lambda _: self.getCategory(categoryName))
+        d.addCallback(lambda c: context.__setitem__('category', c))
+        # FIXME: unicode
+        d.addCallback(lambda _: self.db.map(self.dbName,
+            unicode(subject.id), couch.Score))
+
+        def cb(_):
+            c = context['category'].id
+            u = context['user'].id
+            s = subject.id
+
+            return self.viewDocs('track-score', couch.Score,
+                include_docs=True, key=[c, u, s])
+        d.addCallback(cb)
+
+        def update(scores):
+            scores = list(scores)
+            if len(scores) != 1:
+                print 'THOMAS: WARNING: not 1 score', scores
+
+            s = scores[0]
+            cid = context['category'].id
+            for d in s.scores:
+                if cid == d['category_id']:
+                    d['score'] = score
+
+            # FIXME: why is data private ?
+            return self.db.saveDoc(self.dbName, s._data)
+
+        d.addCallback(update)
+
+        d.callback(None)
+        return d
+
     # filter out the track id's that don't match the score requested
     def filterTrackScores(self, trackScores, above, below):
         self.debug('filtering track scores')
@@ -473,7 +535,7 @@ class DADDB(log.Loggable):
 
         return d
 
-    def resolveTrack(self, track):
+    def resolveTrackSlices(self, track):
         """
         Given a track, resolve it to an actual slice of an audiofile.
 
@@ -754,4 +816,84 @@ class TrackSelectorModel(CouchDBModel):
         d.callback(None)
         return d
 
+class TrackModel(CouchDBModel):
+    """
+    I represent a track in a CouchDB database.
+    """
+    def get(self, trackId):
+        """
+        Get a track by id and resolve its artists.
+
+        @returns: a deferred firing a L{couch.Track} object.
+        """
+        d = self._daddb.db.map(self._daddb.dbName, trackId, couch.Track)
+        d.addCallback(lambda track:
+            self._daddb.resolveIds(track, 'artist_ids', 'artists',
+            couch.Artist))
+
+        d.addCallback(lambda track: setattr(self, 'track', track))
+        d.addCallback(lambda _: self.track)
+        return d
+
+    def getScores(self, userName=None):
+        """
+        Get a track's scores and resolve their user and category.
+        """
+
+        context = {}
+        context['user'] = None
+
+        d = defer.Deferred()
+
+        if userName:
+            d.addCallback(lambda _: self._daddb.getUser(userName))
+            d.addCallback(lambda u: context.__setitem__('user', u))
+
+
+        d.addCallback(lambda _: self._daddb.getScores(self.track))
+
+        def cb(scores):
+            scores = list(scores)
+            kept = []
+
+            self.debug('Got %d scores for all users', len(scores))
+
+            d2 = defer.Deferred()
+
+            userId = None
+            if context['user']:
+                # FIXME: unicode
+                userId = unicode(context['user'].id)
+
+            for score in scores:
+                print 'score', score
+                if userId:
+                    if unicode(score.user_id) != userId:
+                        continue
+                    score.user = context['user']
+                else:
+                    d2.addCallback(lambda _, s:
+                        self._daddb.resolveIds(s, 'user_id', 'user',
+                        couch.User), score)
+
+                kept.append(score)
+                for line in score.scores:
+                    d2.addCallback(lambda _, l:
+                        self._daddb.resolveDictIds(l, 'category_id', 'category',
+                    couch.Category), line)
+
+            d2.addCallback(lambda _: kept)
+
+            self.debug('Kept %d scores', len(kept))
+
+            d2.callback(None)
+            return d2
+
+        d.addCallback(cb)
+
+        d.callback(None)
+        return d
+
+    def score(self, subject, userName, categoryName, score):
+        self._daddb.score(subject, userName, categoryName, score)
 

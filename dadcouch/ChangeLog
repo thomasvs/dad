@@ -1,5 +1,12 @@
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Add code to score tracks.
+	* tests/track.py (added):
+	  Add a test that allows us to show a track based on the title.
+
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* tests/artists.py:
 	  Destroy on window close.
 
