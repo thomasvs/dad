@@ -164,6 +164,20 @@ class GTKSelectorView(gtk.VBox, base.SelectorView):
         self.throbber.throb(active)
 
 
+    # FIXME: push to base class ?
+    def error(self, title, debug):
+
+            label = gtk.Label(debug)
+            dialog = gtk.Dialog(title,
+                               None,
+                               gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                               (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+            dialog.vbox.pack_start(label)
+            label.show()
+            response = dialog.run()
+            dialog.destroy()
+ 
+
 class ArtistSelectorView(GTKSelectorView):
 
     title = 'Artists'
