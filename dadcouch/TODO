@@ -1,3 +1,8 @@
+* write tests for model.daddb
+* move controllers to a base class
+* make controllers react to changes for the documents they control
+* use inlinecallbacks in code to make it more readable
+* write a general-purpose paisley command line app
 * write caching couchdb server in paisley that
   - caches complete docs parsed into objects by id and class
   - notifies about changes to cached docs
