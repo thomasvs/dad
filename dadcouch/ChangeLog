@@ -1,3 +1,8 @@
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/selecter/couch.py:
+	  Split off user option as well so we can use it in tests.
+
 2011-04-16  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:

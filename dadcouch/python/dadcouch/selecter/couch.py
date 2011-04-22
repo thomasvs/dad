@@ -55,9 +55,15 @@ couchdb_option_list = [
             default=_DEFAULT_DB),
 ]
 
+user_option_list = [
+        optparse.Option('-u', '--user',
+            action="store", dest="user",
+            help="user"),
+]
+
 class OptionParser(selecter.OptionParser):
     standard_option_list = selecter.OptionParser.standard_option_list + \
-        couchdb_option_list + [
+        couchdb_option_list + user_option_list + [
        optparse.Option('-c', '--category',
             action="store", dest="category",
             help="category to make playlist for (defaults to %default)",
@@ -70,9 +76,6 @@ class OptionParser(selecter.OptionParser):
             action="store", dest="below", type="float",
             help="upper bound for scores (defaults to %default)",
             default=_DEFAULT_BELOW),
-        optparse.Option('-u', '--user',
-            action="store", dest="user",
-            help="user"),
     ]
 
 
