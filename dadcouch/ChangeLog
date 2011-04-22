@@ -1,5 +1,11 @@
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/scores-by-subject (added):
+	* couchdb/views/scores-by-subject/map.js (added):
+	  Add a map to list scores by subject id.
+
+2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/selecter/couch.py:
 	  Split off user option as well so we can use it in tests.
 
