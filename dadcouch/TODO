@@ -1,3 +1,4 @@
+* populate track list one by one instead of after resolving all
 * write tests for model.daddb
 * move controllers to a base class
 * make controllers react to changes for the documents they control
