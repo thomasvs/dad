@@ -48,7 +48,7 @@ class DeferredListSpaced(defer.Deferred):
     # this serializes but runs out of stack if count is too high and deferreds
     # return results immediately
     def _blockSerialize(self, index, count):
-        #print 'blockSerialize', index, count
+        print 'THOMAS: blockSerialize', index, count
         callable, args, kwargs = self._callables[index]
         #print 'THOMAS: callable', callable
         #print 'THOMAS: calling with', index, args, kwargs

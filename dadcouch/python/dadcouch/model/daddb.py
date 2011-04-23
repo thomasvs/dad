@@ -158,7 +158,8 @@ class DADDB(log.Loggable):
                 res = res[0]
             setter(obj, objAttr, res)
 
-            return obj
+            # FIXME: returning this breaks couch selecter ? add test
+            # return obj
 
         d.addCallback(done, res)
 
