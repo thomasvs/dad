@@ -1,5 +1,10 @@
 2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Refactor getOrAddUser to use inlineCallbacks.
+
+2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* scripts/show-coverage.py (added):
 	* scripts/pep8.py (added):
 	* Makefile (added):

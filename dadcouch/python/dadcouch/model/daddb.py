@@ -447,20 +447,17 @@ class DADDB(log.Loggable):
         """
         return self._getSingleByKey('users', couch.User, userName)
 
-
+    @defer.inlineCallbacks
     def getOrAddUser(self, userName):
-        d = self.getUser(userName)
-
-        def eb(failure):
-            self.debug('User %r does not exist, adding', userName)
-            failure.trap(KeyError)
+        try:
+            ret = yield self.getUser(userName)
+        except KeyError:
             self.debug('User %r does not exist, adding', userName)
             u = couch.User(name=userName)
-            d2 = self.db.saveDoc(self.dbName, u._data)
-            d2.addCallback(lambda _: self.getUser(userName))
-            return d2
-        d.addErrback(eb)
-        return d
+            yield self.db.saveDoc(self.dbName, u._data)
+            ret = yield self.getUser(userName)
+
+        defer.returnValue(ret)
 
     def getTrackScoresByCategory(self, category, user=None):
         """
