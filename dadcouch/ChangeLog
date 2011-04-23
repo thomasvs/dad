@@ -1,3 +1,8 @@
+2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/extern/__init__.py:
+	  Get paisley on our sys.path
+
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* tests/artists.py:
