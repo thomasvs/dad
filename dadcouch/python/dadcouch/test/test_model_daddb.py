@@ -12,7 +12,8 @@ from dadcouch.extern.paisley.test import test_util
 from dadcouch.model import daddb, couch
 
 
-class CategoryTestCase(test_util.CouchDBTestCase):
+class DADDBTestCase(test_util.CouchDBTestCase):
+
     @defer.inlineCallbacks
     def setUp(self):
         test_util.CouchDBTestCase.setUp(self)
@@ -31,6 +32,9 @@ class CategoryTestCase(test_util.CouchDBTestCase):
             "%s http://localhost:%d/dadtest/" % (couchPath, self.wrapper.port))
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
+
+class SimpleTestCase(DADDBTestCase):
+
     @defer.inlineCallbacks
     def test_getCategory(self):
         category = couch.Category(name='Good')
@@ -45,14 +49,47 @@ class CategoryTestCase(test_util.CouchDBTestCase):
 
     @defer.inlineCallbacks
     def test_getOrAddUser(self):
+        # first one adds
         retrieved = yield self.daddb.getOrAddUser('thomas')
 
         self.assertEquals(retrieved[u'name'], 'thomas')
         self.assertEquals(type(retrieved[u'name']), unicode)
 
+        # second one only retrieves
+        retrieved = yield self.daddb.getOrAddUser('thomas')
+
+        self.assertEquals(retrieved[u'name'], 'thomas')
+        self.assertEquals(type(retrieved[u'name']), unicode)
+
+        # try one with unicode
         name = u'j\xe9r\xe9my'
         retrieved = yield self.daddb.getOrAddUser(name)
 
         self.assertEquals(retrieved[u'name'], name)
         self.assertEquals(type(retrieved[u'name']), unicode)
 
+
+class AdvancedTestCase(DADDBTestCase):
+
+    @defer.inlineCallbacks
+    def setUp(self):
+        yield DADDBTestCase.setUp(self)
+
+        objs = []
+        self.ids = []
+
+        objs.append(couch.Category(name='Good'))
+        objs.append(couch.User(name='thomas'))
+        objs.append(couch.Track(name='hit me with your rhythm stick'))
+
+        for o in objs:
+            ret = yield self.db.saveDoc('dadtest', o._data)
+            self.ids.append(ret['id'])
+
+    @defer.inlineCallbacks
+    def test_score(self):
+        track = yield self.db.map('dadtest', self.ids[2], couch.Track)
+        yield self.daddb.score(track, 'thomas', 'Good', 0.7)
+
+        random = yield self.daddb.getTrack('thomas', 'Good', 0.6, 0.8)
+        self.assertEquals(random.name, track.name)
