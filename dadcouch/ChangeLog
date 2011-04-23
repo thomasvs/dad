@@ -1,5 +1,14 @@
 2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Change test case.
+	* python/dadcouch/test/test_model_daddb.py (added):
+	  Add a test, using couchapp to push our couchdb stuff to
+	  database.
+	  Add a simple getCategory test.
+
+2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/extern/__init__.py:
 	  Get paisley on our sys.path
 

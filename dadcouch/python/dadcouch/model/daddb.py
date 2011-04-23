@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test_case_name: dadcouch.test.test_model_daddb -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import os
