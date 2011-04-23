@@ -34,6 +34,7 @@ class CategoryTestCase(test_util.CouchDBTestCase):
     @defer.inlineCallbacks
     def test_getCategory(self):
         category = couch.Category(name='Good')
+        # FIXME: don't poke at _data
         stored = yield self.db.saveDoc('dadtest', category._data)
         retrieved = yield self.daddb.getCategory('Good')
 
@@ -41,3 +42,17 @@ class CategoryTestCase(test_util.CouchDBTestCase):
             self.assertEquals(category[key], retrieved[key])
         for key in [u'id', u'rev']:
             self.assertEquals(stored[key], retrieved[u'_' + key])
+
+    @defer.inlineCallbacks
+    def test_getOrAddUser(self):
+        retrieved = yield self.daddb.getOrAddUser('thomas')
+
+        self.assertEquals(retrieved[u'name'], 'thomas')
+        self.assertEquals(type(retrieved[u'name']), unicode)
+
+        name = u'j\xe9r\xe9my'
+        retrieved = yield self.daddb.getOrAddUser(name)
+
+        self.assertEquals(retrieved[u'name'], name)
+        self.assertEquals(type(retrieved[u'name']), unicode)
+

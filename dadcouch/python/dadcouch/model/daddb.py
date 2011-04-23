@@ -456,7 +456,9 @@ class DADDB(log.Loggable):
             failure.trap(KeyError)
             self.debug('User %r does not exist, adding', userName)
             u = couch.User(name=userName)
-            return self.db.saveDoc(self.dbName, u._data)
+            d2 = self.db.saveDoc(self.dbName, u._data)
+            d2.addCallback(lambda _: self.getUser(userName))
+            return d2
         d.addErrback(eb)
         return d
 
