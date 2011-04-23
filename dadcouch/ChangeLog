@@ -1,5 +1,12 @@
 2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* scripts/show-coverage.py (added):
+	* scripts/pep8.py (added):
+	* Makefile (added):
+	  Add some scripts and Makefile targets for coverage and pep8.
+
+2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	* python/dadcouch/test/test_model_daddb.py:
 	  Add more tests.
