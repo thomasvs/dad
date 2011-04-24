@@ -496,61 +496,45 @@ class DADDB(log.Loggable):
             'scores-by-subject', couch.Score, key=subject.id, include_docs=True)
         return d
 
+    @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
         """
         Score the given subject.
         """
-        self.debug('asked to score subject %r for user %r and category %r to score %r', subject, userName, categoryName, score)
-        d = defer.Deferred()
+        self.debug('asked to score subject %r '
+            'for user %r and category %r to score %r',
+            subject, userName, categoryName, score)
 
-        context = {}
+        user = yield self.getOrAddUser(userName)
+        category = yield self.getCategory(categoryName)
+        yield self.db.map(self.dbName, unicode(subject.id), couch.Score)
 
-        d.addCallback(lambda _: self.getOrAddUser(userName))
-        d.addCallback(lambda u: context.__setitem__('user', u))
-        d.addCallback(lambda _: self.getCategory(categoryName))
-        d.addCallback(lambda c: context.__setitem__('category', c))
-        # FIXME: unicode
-        d.addCallback(lambda _: self.db.map(self.dbName,
-            unicode(subject.id), couch.Score))
 
-        def cb(_):
-            c = context['category'].id
-            u = context['user'].id
-            s = subject.id
+        scores = yield self.viewDocs('track-score', couch.Score,
+                include_docs=True, key=[category.id, user.id, subject.id])
+        scores = list(scores)
 
-            return self.viewDocs('track-score', couch.Score,
-                include_docs=True, key=[c, u, s])
-        d.addCallback(cb)
+        if len(scores) == 0:
+            # no score yet, we're the first
+            s = couch.Score(subject_id=subject.id,
+                subject_type=subject.type,
+                user_id=user.id,
+                scores=[{
+                    'category_id': category.id,
+                    'score': score,
+                }, ])
+        else:
+            s = scores[0]
+            if len(scores) != 1:
+                print 'THOMAS: WARNING: not 1 score', scores
 
-        def update(scores):
-            scores = list(scores)
+            cid = category.id
+            for d in s.scores:
+                if cid == d['category_id']:
+                    d['score'] = score
 
-            if len(scores) == 0:
-                # no score yet, we're the first
-                s = couch.Score(subject_id=subject.id,
-                    subject_type=subject.type,
-                    user_id=context['user'].id,
-                    scores=[{
-                        'category_id': context['category'].id,
-                        'score': score,
-                    }, ])
-            else:
-                s = scores[0]
-                if len(scores) != 1:
-                    print 'THOMAS: WARNING: not 1 score', scores
-
-                cid = context['category'].id
-                for d in s.scores:
-                    if cid == d['category_id']:
-                        d['score'] = score
-
-            # FIXME: why is data private ?
-            return self.db.saveDoc(self.dbName, s._data)
-
-        d.addCallback(update)
-
-        d.callback(None)
-        return d
+        # FIXME: why is data private ?
+        yield self.db.saveDoc(self.dbName, s._data)
 
     # filter out the track id's that don't match the score requested
     def filterTrackScores(self, trackScores, above, below):

@@ -1,5 +1,10 @@
 2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  convert score to inlinecallbacks.
+
+2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  Fix a bug in Score.scores; it should be a list of dicts.
 	* python/dadcouch/model/daddb.py:
