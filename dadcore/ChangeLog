@@ -1,3 +1,10 @@
+2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/controller (added):
+	* dad/controller/__init__.py (added):
+	* dad/controller/selector.py (added):
+	  Move selector controllers here.
+
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/base/base.py:
