@@ -561,7 +561,7 @@ class DADDB(log.Loggable):
  
         """
         d = manydef.DeferredListSpaced()
-ontext['category']
+
         for trackScore in list(trackScores):
             d.addCallable(self.db.map,
                 self.dbName, trackScore.subjectId, couch.Track)
