@@ -492,9 +492,8 @@ class DADDB(log.Loggable):
 
     def getScores(self, subject):
         # get all scores for this subject
-        d = self.viewDocs(
-            'scores-by-subject', couch.Score, key=subject.id, include_docs=True)
-        return d
+        return self.viewDocs('scores-by-subject', couch.Score,
+            key=subject.id, include_docs=True)
 
     @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
@@ -562,7 +561,7 @@ class DADDB(log.Loggable):
  
         """
         d = manydef.DeferredListSpaced()
-
+ontext['category']
         for trackScore in list(trackScores):
             d.addCallable(self.db.map,
                 self.dbName, trackScore.subjectId, couch.Track)
