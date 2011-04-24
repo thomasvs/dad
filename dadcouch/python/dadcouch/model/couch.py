@@ -128,11 +128,12 @@ class Score(mapping.Document):
 
     subject_id = mapping.TextField()
     subject_type = mapping.TextField()
+    # FIXME: category_id should go here ?
     category_id = mapping.TextField()
     user_id = mapping.TextField()
-    scores = mapping.DictField(mapping.Mapping.build(
+    scores = mapping.ListField(mapping.DictField(mapping.Mapping.build(
         category_id=mapping.TextField(),
-        score=mapping.FloatField()))
+        score=mapping.FloatField())))
     added = mapping.DateTimeField(default=datetime.datetime.now)
 
 class Slice(mapping.Document):

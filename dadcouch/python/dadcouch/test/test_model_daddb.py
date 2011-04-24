@@ -89,7 +89,25 @@ class AdvancedTestCase(DADDBTestCase):
     @defer.inlineCallbacks
     def test_score(self):
         track = yield self.db.map('dadtest', self.ids[2], couch.Track)
-        yield self.daddb.score(track, 'thomas', 'Good', 0.7)
+        ret = yield self.daddb.score(track, 'thomas', 'Good', 0.7)
 
-        random = yield self.daddb.getTrack('thomas', 'Good', 0.6, 0.8)
+        # we should have only one track
+        category = yield self.db.map('dadtest', self.ids[0], couch.Category)
+        trackScores = yield self.daddb.getTrackScoresByCategory(category)
+        trackScores = list(trackScores)
+        self.assertEquals(len(trackScores), 1)
+        ts = trackScores[0]
+        self.assertEquals(ts.categoryId, category.id)
+        self.assertEquals(ts.score, 0.7)
+
+        # this should be the only random track
+        t = yield self.daddb.getTrack('thomas', 'Good', 0.6, 0.8)
+        (random, s, userId) = t
         self.assertEquals(random.name, track.name)
+        self.assertEquals(s, 0.7)
+        self.assertEquals(userId, self.ids[1])
+
+        scores = yield self.daddb.getScores(track)
+        scores = list(scores)
+        self.assertEquals(scores[0].subject_type, 'track')
+        self.assertEquals(scores[0].subject_id, track.id)

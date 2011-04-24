@@ -91,6 +91,9 @@ class DADDB(log.Loggable):
         self.db = db
         self.dbName = dbName
 
+        self.debug('My FUTON is at http://%s:%d/_utils/index.html',
+            self.db.host, self.db.port)
+
     ### generic helper methods
     def viewDocs(self, viewName, klazz, *args, **kwargs):
         """
@@ -313,11 +316,15 @@ class DADDB(log.Loggable):
             trackScore = random.choice(trackScores)
             self.debug('picked random trackScore %r' % trackScore)
 
-            d = self.loadTracks([trackScore, ])
+            d = self.loadTracksFromTrackScores([trackScore, ])
             def loaded(result):
-                self.debug('loaded track %r', result)
+                result = list(result)
+                assert len(result) == 1
+                success, track = result[0]
+                assert success
+                self.debug('loaded track %r', track)
 
-                return (result, trackScore.score, trackScore.userId)
+                return (track, trackScore.score, trackScore.userId)
             d.addCallback(loaded)
             return d
         d.addCallback(cb)
@@ -377,7 +384,7 @@ class DADDB(log.Loggable):
 
             self.debug('loading tracks for %r trackScores', len(kept))
 
-            d = self.loadTracks(kept)
+            d = self.loadTracksFromTrackScores(kept)
             def loaded(result):
                 self.debug('loaded tracks for %r trackScores', len(kept))
 
@@ -517,14 +524,25 @@ class DADDB(log.Loggable):
 
         def update(scores):
             scores = list(scores)
-            if len(scores) != 1:
-                print 'THOMAS: WARNING: not 1 score', scores
 
-            s = scores[0]
-            cid = context['category'].id
-            for d in s.scores:
-                if cid == d['category_id']:
-                    d['score'] = score
+            if len(scores) == 0:
+                # no score yet, we're the first
+                s = couch.Score(subject_id=subject.id,
+                    subject_type=subject.type,
+                    user_id=context['user'].id,
+                    scores=[{
+                        'category_id': context['category'].id,
+                        'score': score,
+                    }, ])
+            else:
+                s = scores[0]
+                if len(scores) != 1:
+                    print 'THOMAS: WARNING: not 1 score', scores
+
+                cid = context['category'].id
+                for d in s.scores:
+                    if cid == d['category_id']:
+                        d['score'] = score
 
             # FIXME: why is data private ?
             return self.db.saveDoc(self.dbName, s._data)
@@ -544,13 +562,21 @@ class DADDB(log.Loggable):
         for total, trackScore in enumerate(trackScores):
             if above <= trackScore.score <= below:
                 result.append(trackScore)
+        total += 1
 
         self.debug('kept %d of %d track scores', len(result), total)
         self.debug('first track score %r', result[0])
 
         return result
 
-    def loadTracks(self, trackScores):
+    def loadTracksFromTrackScores(self, trackScores):
+        """
+        @returns: a L{defer.Deferred}
+                  firing a list of (succeeded, Track/failure)
+        @rtype:   a L{defer.Deferred}
+                  firing a list of (bool, L{Track}/Failure)
+ 
+        """
         d = manydef.DeferredListSpaced()
 
         for trackScore in list(trackScores):
@@ -903,7 +929,6 @@ class TrackModel(CouchDBModel):
                 userId = unicode(context['user'].id)
 
             for score in scores:
-                print 'score', score
                 if userId:
                     if unicode(score.user_id) != userId:
                         continue

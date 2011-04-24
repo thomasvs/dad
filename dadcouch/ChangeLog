@@ -1,5 +1,15 @@
 2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  Fix a bug in Score.scores; it should be a list of dicts.
+	* python/dadcouch/model/daddb.py:
+	  Fix internals of some functions according to test.
+	  Rename ambiguously named function.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Fix score test.
+
+2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/test/__init__.py:
 	  Init log for tests.
 
