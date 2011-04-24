@@ -1,3 +1,8 @@
+2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/test/__init__.py:
+	  Init log for tests.
+
 2011-04-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/test/test_model_daddb.py:
