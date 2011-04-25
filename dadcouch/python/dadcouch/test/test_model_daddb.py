@@ -132,8 +132,14 @@ class TrackSelectorModelTestCase(DADDBTestCase):
             couch.Track)
         self.assertEquals(retrieved.name, 'hit me')
 
-        got = yield model.get()
-        got = yield model.get()
+        def cb(res):
+            self.cbCalled = True
+            self.assertEquals(res.name, 'hit me')
+
+        self.cbCalled = False
+        got = yield model.get(cb=cb)
+        self.failUnless(self.cbCalled)
+
         # self.assertEquals(type(retrieved), generator)
 
         first = got[0]
@@ -141,7 +147,6 @@ class TrackSelectorModelTestCase(DADDBTestCase):
         self.assertEquals(first.name, 'hit me')
 
         # can't compare two mapped objects directly
-        # self.assertEquals(first.artist_ids, [artistId, ])
         self.assertEquals(first.artists[0].name, artist.name)
 
 class TrackModelTestCase(DADDBTestCase):
@@ -159,6 +164,5 @@ class TrackModelTestCase(DADDBTestCase):
             couch.Track)
         self.assertEquals(retrieved.name, 'hit me')
 
-        print 'THOMAS: get model'
         retrieved = yield model.get(stored['id'])
         self.assertEquals(retrieved.name, 'hit me')

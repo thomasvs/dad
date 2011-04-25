@@ -3,7 +3,7 @@
 
 # twisted.web.http imports reactor
 # FIXME: fix that so we can move this install to main
-from twisted.internet import gtk2reactor
+from dadgtk.twisted import gtk2reactor
 gtk2reactor.install()
 
 # artist selector
@@ -69,7 +69,7 @@ def main():
     albumController.addView(albumView)
     hbox.pack_start(albumView)
 
-    trackView = scheduler.TracksUI()
+    trackView = scheduler.TracksUI(first=True)
     trackModel = daddb.TrackSelectorModel(db)
     trackController = selector.TrackSelectorController(trackModel)
     trackController.addView(trackView)

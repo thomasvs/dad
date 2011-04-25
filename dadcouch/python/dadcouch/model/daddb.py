@@ -805,7 +805,7 @@ class TrackSelectorModel(CouchDBModel):
             v = views.View(self._daddb.db, self._daddb.dbName,
                 'dad', 'artists', couch.Artist, include_docs=True)
             return v.queryView()
-        # d.addCallback(cache)
+        d.addCallback(cache)
 
 
         def loadTracks(artists):
@@ -833,6 +833,7 @@ class TrackSelectorModel(CouchDBModel):
             last[0] = time.time()
 
             dls = manydef.DeferredListSpaced()
+            dls.DELAY = 0.1
 
             class O(object):
                 name = 'Unknown'

@@ -1,5 +1,14 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Cache artists again for faster lookup.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Adapt test.
+	* tests/artists.py:
+	  use our reactor, does not seem to fix things though.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/common/manydef.py:
 	  Add a small delay before firing result of a block.
 
