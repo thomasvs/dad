@@ -1,3 +1,9 @@
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/twisted/gtk2reactor.py:
+	  Patched with http://twistedmatrix.com/trac/ticket/5067
+	  to see if artists.py becomes more responsive.
+
 2011-04-22  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/views.py:

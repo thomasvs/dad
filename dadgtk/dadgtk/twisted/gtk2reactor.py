@@ -247,7 +247,8 @@ class Gtk2Reactor(posixbase.PosixReactorBase):
         if delay == 0:
             return # shouldn't delay, so just return
         self.doIterationTimer = gobject.timeout_add(int(delay * 1000),
-                                                self.doIterationTimeout)
+                                                self.doIterationTimeout,
+                                                priority=gobject.PRIORITY_DEFAULT_IDLE)
         # This will either wake up from IO or from a timeout.
         self.__iteration(1) # block
         # note: with the .simulate timer below, delays > 0.1 will always be
@@ -318,7 +319,7 @@ class Gtk2Reactor(posixbase.PosixReactorBase):
         if timeout is None:
             timeout = 0.1
         # grumble
-        self._simtag = gobject.timeout_add(int(timeout * 1010), self.simulate)
+        self._simtag = gobject.timeout_add(int(timeout * 1010), self.simulate, priority=gobject.PRIORITY_DEFAULT_IDLE)
 
 
 
