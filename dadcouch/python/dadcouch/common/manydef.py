@@ -86,8 +86,7 @@ class DeferredListSpaced(defer.Deferred):
         if succeeded == defer.FAILURE and self.consumeErrors:
             result = None
 
-        return result
-        # return later(lambda r: r, result)
+        return later(lambda r: r, result)
  
     # adds deferred-returning callbacks in a loop at once;
     # this serializes but runs out of stack if count is too high and deferreds

@@ -1,6 +1,11 @@
 2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/common/manydef.py:
+	  Use later() wrapper for each deferred being fired too.
+
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/common/manydef.py:
 	  Add a later() method to do deferred triggering of result delay.
 	  Use it at the end, but not yet for every result, so we see the
 	  difference.
