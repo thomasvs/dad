@@ -1,5 +1,10 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/common/gtk2reactor.py:
+	  Import twisted's gtk2 reactor so we can play with the priorities.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	* python/dadcouch/test/test_model_daddb.py:
 	  Rewrite code, prepare for adding callbacks for getting tracks
