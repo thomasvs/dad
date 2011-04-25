@@ -15,6 +15,8 @@ load:
 
 push:
 	couchapp push couchdb dad http://thomas:pass@localhost:5984/dadtest
+	couchapp push --docid _design/dad couchdb http://localhost:5984/dadtest
+
 
 check consistency: from dad
 	PYTHONPATH=`pwd`/python python scripts/consistency.py localhost dadtest
