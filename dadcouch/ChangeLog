@@ -2,6 +2,12 @@
 
 	* python/dadcouch/common/manydef.py:
 	* python/dadcouch/test/test_common_manydef.py:
+	  Add test for failures too.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/common/manydef.py:
+	* python/dadcouch/test/test_common_manydef.py:
 	  Add concept of callbacks and errbacks to callables.
 	  Add a test for it.
 
