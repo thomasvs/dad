@@ -112,6 +112,33 @@ class AdvancedTestCase(DADDBTestCase):
         self.assertEquals(scores[0].subject_type, 'track')
         self.assertEquals(scores[0].subject_id, track.id)
 
+class TrackSelectorModelTestCase(DADDBTestCase):
+
+    @defer.inlineCallbacks
+    def test_get(self):
+
+        model = daddb.TrackSelectorModel(self.daddb)
+
+        artist = couch.Artist(name='ian dury')
+        stored = yield self.db.saveDoc('dadtest', artist._data)
+        artistId = stored['id']
+
+        track = couch.Track(name='hit me', artist_ids=[artistId, ])
+
+        # FIXME: don't poke at _data
+        stored = yield self.db.saveDoc('dadtest', track._data)
+
+        retrieved = yield self.daddb.db.map(self.daddb.dbName, stored['id'],
+            couch.Track)
+        self.assertEquals(retrieved.name, 'hit me')
+
+        retrieved = yield model.get()
+        # self.assertEquals(type(retrieved), generator)
+
+        first = retrieved[0]
+        self.assertEquals(first.name, 'hit me')
+        # self.assertEquals(first.type, 'track')
+        # self.assertEquals(first.artist_ids, ['aebc'])
 
 class TrackModelTestCase(DADDBTestCase):
 

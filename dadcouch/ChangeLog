@@ -1,6 +1,12 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/test/test_model_daddb.py:
+	  Add a test for TrackSelectorModel with some comments for
+	  things to fix so we get artist names too.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/test/test_model_daddb.py:
 	  Add a test for TrackModel.
 	* python/dadcouch/model/daddb.py:
 	  Return the original object in resolveIds.
