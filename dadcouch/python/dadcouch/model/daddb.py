@@ -833,7 +833,7 @@ class TrackSelectorModel(CouchDBModel):
             last[0] = time.time()
 
             dls = manydef.DeferredListSpaced()
-            dls.DELAY = 0.1
+            dls.DELAY = 0.05
 
             class O(object):
                 name = 'Unknown'

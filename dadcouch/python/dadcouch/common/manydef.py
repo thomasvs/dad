@@ -49,7 +49,6 @@ class DeferredListSpaced(defer.Deferred):
         self.finishedCount += 1
 
         def later(callable, *args):
-            print 'later', self.DELAY, callable, args
             if self.DELAY == 0.0:
                 return callable(*args)
 
