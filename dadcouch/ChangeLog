@@ -1,5 +1,11 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/common/manydef.py:
+	* python/dadcouch/test/test_common_manydef.py (added):
+	  Move test code to a unit test
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/tracks/map.js:
 	  Add artist_ids as value.
 	* python/dadcouch/model/daddb.py:

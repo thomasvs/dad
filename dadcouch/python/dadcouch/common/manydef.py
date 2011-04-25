@@ -89,36 +89,3 @@ class DeferredListSpaced(defer.Deferred):
             reactor.callLater(0L, self._blockSerialize, index, left)
 
             index += left
-
-
-# a callback to test with
-def listcount(res, count):
-    count.append(res)
-    #print res, len(count)
-
-    d = defer.Deferred()
-    d.callback(None)
-    return d
-
-def many():
-    #d = forspacer(listcount, 1000)
-    #d = dlspacer(listcount, 1000)
-    #d = laterspacer(listcount, 1000)
-
-    d = DeferredListSpaced()
-
-    count = []
-    for i in range(0, 1000):
-        d.addCallable(listcount, i, count)
-
-    d.start()
-
-    d.addCallback(lambda _: reactor.stop())
-
-if __name__ == '__main__':
-
-    from twisted.internet import reactor
-
-    reactor.callLater(0, many)
-    reactor.run()
-            
