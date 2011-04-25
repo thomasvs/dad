@@ -26,8 +26,12 @@ class TracksUI(gtk.VBox, log.Loggable):
             (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (object, ))
     }
 
-    def __init__(self):
+    def __init__(self, first=False):
         gtk.VBox.__init__(self)
+
+        self._first = first
+        self._first_iter = None
+        self._count = 0
 
         self._create_store()
 
@@ -44,6 +48,7 @@ class TracksUI(gtk.VBox, log.Loggable):
 
         self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
 
+
     def _create_store(self):
         self._store = gtk.ListStore(
             object,
@@ -53,6 +58,15 @@ class TracksUI(gtk.VBox, log.Loggable):
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             )
+
+
+        if self._first:
+            self._first_iter = self._store.append()
+            self._show_count()
+
+    def _show_count(self):
+        self._store.set(self._first_iter,
+            COLUMN_TITLE, "All %d tracks" % self._count)
 
     def _scheduled_cb(self, scheduler, scheduled):
         self.add_scheduled(scheduled)
@@ -73,6 +87,10 @@ class TracksUI(gtk.VBox, log.Loggable):
         self._treeview.set_model(self._store)
         self._treerowrefs[item] = gtk.TreeRowReference(
             self._store, self._store.get_path(iter))
+
+        self._count += 1
+        if self._first:
+            self._show_count()
 
     def _add_columns(self):
         column = gtk.TreeViewColumn('Artists', gtk.CellRendererText(),
