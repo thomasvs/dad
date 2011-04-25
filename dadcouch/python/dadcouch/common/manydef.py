@@ -48,6 +48,22 @@ class DeferredListSpaced(defer.Deferred):
         self.resultList[index] = (succeeded, result)
         self.finishedCount += 1
 
+        def later(callable, *args):
+            print 'later', self.DELAY, callable, args
+            if self.DELAY == 0.0:
+                return callable(*args)
+
+            def l(mydef, args):
+                try:
+                    res = callable(*args)
+                    mydef.callback(res)
+                except Exception, e:
+                    print 'THOMAS: oops', e
+                    mydef.errback(failure.Failure(e))
+            d = defer.Deferred()
+            reactor.callLater(self.DELAY, l, d, args)
+            return d
+
         # we call the callbacks before updating internal state and possibly
         # calling back
         if callbacks:
@@ -61,21 +77,17 @@ class DeferredListSpaced(defer.Deferred):
 
         if not self.called:
             if succeeded == defer.SUCCESS and self.fireOnOneCallback:
-                self.callback((result, index))
+                later(self.callback, (result, index))
             elif succeeded == defer.FAILURE and self.fireOnOneErrback:
-                self.errback(failure.Failure(FirstError(result, index)))
+                later(self.errback, failure.Failure(FirstError(result, index)))
             elif self.finishedCount == len(self.resultList):
-                self.callback(self.resultList)
+                later(self.callback, self.resultList)
 
         if succeeded == defer.FAILURE and self.consumeErrors:
             result = None
 
-        if self.DELAY == 0.0:
-            return result
-
-        d = defer.Deferred()
-        reactor.callLater(self.DELAY, d.callback, result)
-        return d
+        return result
+        # return later(lambda r: r, result)
  
     # adds deferred-returning callbacks in a loop at once;
     # this serializes but runs out of stack if count is too high and deferreds
