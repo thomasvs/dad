@@ -1,5 +1,11 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/track.py:
+	* dadgtk/views/views.py:
+	  Make base class for GTK+ views.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/scheduler.py:
 	  Add an optional first line to count tracks.
 

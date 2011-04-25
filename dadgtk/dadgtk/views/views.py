@@ -37,7 +37,23 @@ class Throbber(gtk.Image):
             self.set_from_file(os.path.join(path, 'Throbber.png'))
 
 
-class GTKSelectorView(gtk.VBox, base.SelectorView):
+class GTKView(base.View):
+
+    # FIXME: push to base class ?
+    def error(self, title, debug):
+
+            label = gtk.Label(debug)
+            dialog = gtk.Dialog(title,
+                               None,
+                               gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                               (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+            dialog.vbox.pack_start(label)
+            label.show()
+            response = dialog.run()
+            dialog.destroy()
+ 
+
+class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     """
     I am a selector widget for a list of objects.
 
@@ -164,19 +180,7 @@ class GTKSelectorView(gtk.VBox, base.SelectorView):
         self.throbber.throb(active)
 
 
-    # FIXME: push to base class ?
-    def error(self, title, debug):
 
-            label = gtk.Label(debug)
-            dialog = gtk.Dialog(title,
-                               None,
-                               gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                               (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
-            dialog.vbox.pack_start(label)
-            label.show()
-            response = dialog.run()
-            dialog.destroy()
- 
 
 class ArtistSelectorView(GTKSelectorView):
 

@@ -9,8 +9,10 @@ import gtk
 
 from dad.base import base
 
+from dadgtk.views import views
 
-class TrackView(gobject.GObject):
+
+class TrackView(views.GTKView, gobject.GObject):
 
     __gsignals__ = {
         'scored': 
