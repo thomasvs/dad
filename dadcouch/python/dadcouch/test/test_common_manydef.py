@@ -8,6 +8,9 @@ from dadcouch.common import manydef
 
 class DeferredListSpacedTestCase(unittest.TestCase):
 
+    def setUp(self):
+        self.count = []
+
     # FIXME: add test for a broken listcount function
     # a deferred-returning callback to test with
     def listcount(self, res, count):
@@ -17,18 +20,43 @@ class DeferredListSpacedTestCase(unittest.TestCase):
         d.callback(None)
         return d
 
+    def listcountCallback(self, _, res, count):
+        count.append(res)
+
+    def dlscount(self, dls, check, withCb=False):
+
+        for i in range(0, 1000):
+            dls.addCallable(self.listcount, i, self.count)
+            if withCb:
+                dls.addCallableCallback(self.listcountCallback, i, self.count)
+
+        dls.start()
+        dls.addCallback(check)
+        return dls
+
+
     def test_DLS(self):
 
-        d = manydef.DeferredListSpaced()
-
-        count = []
-        for i in range(0, 1000):
-            d.addCallable(self.listcount, i, count)
-
-        d.start()
+        dls = manydef.DeferredListSpaced()
 
         def check(_):
-            self.assertEquals(len(count), 1000)
-        d.addCallback(check)
-        return d
+            self.assertEquals(len(self.count), 1000)
 
+        return self.dlscount(dls, check)
+
+    def test_DLSOne(self):
+
+        dls = manydef.DeferredListSpaced(fireOnOneCallback=True)
+
+        def check(_):
+            self.assertEquals(len(self.count), 1)
+        return self.dlscount(dls, check)
+
+    def test_DLSCallback(self):
+
+        dls = manydef.DeferredListSpaced()
+
+        def check(_):
+            self.assertEquals(len(self.count), 2000)
+
+        return self.dlscount(dls, check, withCb=True)

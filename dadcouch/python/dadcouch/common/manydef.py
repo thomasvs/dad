@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test_case_name: dadcouch.test.test_common_manydef -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import sys
@@ -22,14 +22,40 @@ class DeferredListSpaced(defer.Deferred):
         self.consumeErrors = consumeErrors
         self.finishedCount = 0
 
+        # list of callable, args, kwargs, callbacks
+        # where callbacks is list of
+        # (cb, cbArgs, cbKWArgs,     def test_DLS(self):
         self._callables = []
+        
 
     def addCallable(self, callable, *args, **kwargs):
-        self._callables.append((callable, args, kwargs))
+        self._callables.append((callable, args, kwargs, []))
 
-    def _cbDeferred(self, result, index, succeeded):
+    def addCallableCallback(self, callback, *args, **kwargs):
+        if self._callables[-1][3] is None:
+            self._callables[-1][3] = []
+
+        self._callables[-1][3].append((callback, args, kwargs, None, None, None))
+
+    def addCallableErrback(self, errback, *args, **kwargs):
+        if self._callables[-1][3] is None:
+            self._callables[-1][3] = []
+
+        self._callables[-1][3].append((None, None, None, errback, args, kwargs))
+
+    def _cbDeferred(self, result, index, succeeded, callbacks):
         self.resultList[index] = (succeeded, result)
         self.finishedCount += 1
+
+        # we call the callbacks before updating internal state and possibly
+        # calling back
+        if callbacks:
+            for cb, cbargs, cbkwargs, eb, ebargs, ebkwargs in callbacks:
+                if cb and succeeded == defer.SUCCESS:
+                    cb(result, *cbargs, **cbkwargs)
+                if eb and succeeded == defer.FAILURE:
+                    eb(result, *ebargs, **ebkwargs)
+
 
         if not self.called:
             if succeeded == defer.SUCCESS and self.fireOnOneCallback:
@@ -49,17 +75,17 @@ class DeferredListSpaced(defer.Deferred):
     # return results immediately
     def _blockSerialize(self, index, count):
         print 'THOMAS: blockSerialize', index, count
-        callable, args, kwargs = self._callables[index]
+        callable, args, kwargs, callbacks = self._callables[index]
         #print 'THOMAS: callable', callable
         #print 'THOMAS: calling with', index, args, kwargs
         #sys.stdout.flush()
         d = defer.maybeDeferred(callable, *args, **kwargs)
         d.addCallbacks(self._cbDeferred, self._cbDeferred,
-                       callbackArgs=(index, defer.SUCCESS),
-                       errbackArgs=(index, defer.FAILURE))
+                       callbackArgs=(index, defer.SUCCESS, callbacks),
+                       errbackArgs=(index, defer.FAILURE, callbacks))
 
         for i in range(index + 1, index + count):
-            callable, args, kwargs = self._callables[i]
+            callable, args, kwargs, callbacks = self._callables[i]
             # print 'THOMAS: deferring with', i, args, kwargs
             sys.stdout.flush()
             # d.addCallback(lambda _, c, a, k: sys.stderr.write(
@@ -67,8 +93,8 @@ class DeferredListSpaced(defer.Deferred):
             d.addCallback(lambda _, c, a, k:
                 c(*a, **k), callable, args, kwargs)
             d.addCallbacks(self._cbDeferred, self._cbDeferred,
-                           callbackArgs=(i, defer.SUCCESS),
-                           errbackArgs=(i, defer.FAILURE))
+                           callbackArgs=(i, defer.SUCCESS, callbacks),
+                           errbackArgs=(i, defer.FAILURE, callbacks))
         return d
 
 
