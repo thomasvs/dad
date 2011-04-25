@@ -1,5 +1,14 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/tracks/map.js:
+	  Add artist_ids as value.
+	* python/dadcouch/model/daddb.py:
+	  Add artist_ids to TrackRow result, and resolve Ids for them.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Add test.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/test/test_model_daddb.py:
 	  Add a test for TrackSelectorModel with some comments for
 	  things to fix so we get artist names too.

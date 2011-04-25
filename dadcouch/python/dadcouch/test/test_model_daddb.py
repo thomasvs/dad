@@ -132,13 +132,16 @@ class TrackSelectorModelTestCase(DADDBTestCase):
             couch.Track)
         self.assertEquals(retrieved.name, 'hit me')
 
-        retrieved = yield model.get()
+        got = yield model.get()
         # self.assertEquals(type(retrieved), generator)
 
-        first = retrieved[0]
+        first = got[0]
+        artist = yield self.db.map(self.daddb.dbName, artistId, couch.Artist)
         self.assertEquals(first.name, 'hit me')
-        # self.assertEquals(first.type, 'track')
-        # self.assertEquals(first.artist_ids, ['aebc'])
+
+        # can't compare two mapped objects directly
+        # self.assertEquals(first.artist_ids, [artistId, ])
+        self.assertEquals(first.artists[0].name, artist.name)
 
 class TrackModelTestCase(DADDBTestCase):
 

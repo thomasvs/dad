@@ -34,13 +34,14 @@ class TrackScore(mapping.Document):
         self.score = float(d['value'])
 
 # map track view
-class Track(mapping.Document):
+class TrackRow(mapping.Document):
     id = mapping.TextField()
     name = mapping.TextField()
 
     def fromDict(self, d):
         self.id = d['id']
         self.name = d['key']
+        self.artist_ids = d['value']
 
 class ItemTracks:
     # map tracks-by-album and tracks-by-artist
@@ -790,7 +791,7 @@ class TrackSelectorModel(CouchDBModel):
     # instead of everything at the end
     def get(self):
         """
-        @returns: a deferred firing a list of L{daddb.Track} objects.
+        @returns: a deferred firing a list of L{daddb.TrackRow} objects.
         """
         d = defer.Deferred()
 
@@ -816,7 +817,7 @@ class TrackSelectorModel(CouchDBModel):
             # v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
             #    couch.Track, include_docs=True)
             v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
-                Track, include_docs=False)
+                TrackRow)
             try:
                 d = v.queryView()
                 return d
@@ -842,8 +843,8 @@ class TrackSelectorModel(CouchDBModel):
             for track in trackList:
                 track.artists = [o, ]
                 # FIXME: THOMAS: speed this up
-                #d.addCallable(self._daddb.resolveIds, track,
-                #    'artist_ids', 'artists', couch.Artist)
+                d.addCallable(self._daddb.resolveIds, track,
+                    'artist_ids', 'artists', couch.Artist)
                 pass
 
             def trackedCb(_, tl):

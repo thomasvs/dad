@@ -1,5 +1,5 @@
 function(doc) {
     if (doc.type == 'track') {
-        emit(doc.name, 1);
+        emit(doc.name, doc.artist_ids);
     }
 }
