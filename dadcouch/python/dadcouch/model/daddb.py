@@ -789,7 +789,7 @@ class AlbumSelectorModel(CouchDBModel):
 class TrackSelectorModel(CouchDBModel):
     # FIXME: this should actually be able to pass results in as they arrive,
     # instead of everything at the end
-    def get(self):
+    def get(self, cb=None, *cbArgs, **cbKWArgs):
         """
         @returns: a deferred firing a list of L{daddb.TrackRow} objects.
         """
@@ -816,17 +816,15 @@ class TrackSelectorModel(CouchDBModel):
             # FIXME: include_docs makes this last forever
             # v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
             #    couch.Track, include_docs=True)
-            v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
-                TrackRow)
-            try:
-                d = v.queryView()
-                return d
-            except Exception, e:
-                print 'THOMAS: exception', e
-                return defer.fail(e)
+            vd = self._daddb.viewDocs('tracks', TrackRow)
+            def eb(f):
+                print 'THOMAS: failure', f
+                return f
+            vd.addErrback(eb)
+            return vd
         d.addCallback(loadTracks)
 
-        def cb(tracks):
+        def loadTracksCb(tracks):
             # tracks: list of Track
             # import code; code.interact(local=locals())
             trackList = list(tracks)
@@ -834,7 +832,7 @@ class TrackSelectorModel(CouchDBModel):
                 len(trackList), time.time() - last[0])
             last[0] = time.time()
 
-            d = manydef.DeferredListSpaced()
+            dls = manydef.DeferredListSpaced()
 
             class O(object):
                 name = 'Unknown'
@@ -843,24 +841,27 @@ class TrackSelectorModel(CouchDBModel):
             for track in trackList:
                 track.artists = [o, ]
                 # FIXME: THOMAS: speed this up
-                d.addCallable(self._daddb.resolveIds, track,
+                dls.addCallable(self._daddb.resolveIds, track,
                     'artist_ids', 'artists', couch.Artist)
-                pass
+                if cb:
+                    dls.addCallableCallback(cb, *cbArgs, **cbKWArgs)
 
             def trackedCb(_, tl):
                 self.debug('get: %r tracks resolved in %.3f seconds',
                     len(list(tl)), time.time() - last[0])
                 # import code; code.interact(local=locals())
                 return tl
-            d.addCallback(trackedCb, trackList)
-            d.start()
-            return d
-        d.addCallback(cb)
+            dls.addCallback(trackedCb, trackList)
+            dls.start()
+            return dls
+        d.addCallback(loadTracksCb)
 
         def eb(failure):
             print 'THOMAS: Failure:', failure
             return failure
         d.addErrback(eb)
+
+        self.debug('get(): calling back deferred chain')
 
         d.callback(None)
         return d

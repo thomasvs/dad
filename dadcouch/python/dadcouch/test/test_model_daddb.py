@@ -133,6 +133,7 @@ class TrackSelectorModelTestCase(DADDBTestCase):
         self.assertEquals(retrieved.name, 'hit me')
 
         got = yield model.get()
+        got = yield model.get()
         # self.assertEquals(type(retrieved), generator)
 
         first = got[0]
@@ -158,5 +159,6 @@ class TrackModelTestCase(DADDBTestCase):
             couch.Track)
         self.assertEquals(retrieved.name, 'hit me')
 
+        print 'THOMAS: get model'
         retrieved = yield model.get(stored['id'])
         self.assertEquals(retrieved.name, 'hit me')

@@ -1,5 +1,12 @@
 2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/test/test_model_daddb.py:
+	  Rewrite code, prepare for adding callbacks for getting tracks
+	  into the model.
+
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/common/manydef.py:
 	* python/dadcouch/test/test_common_manydef.py:
 	  Add test for failures too.
