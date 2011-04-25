@@ -1,3 +1,15 @@
+2011-04-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/test/test_model_daddb.py:
+	  Add a test for TrackModel.
+	* python/dadcouch/model/daddb.py:
+	  Return the original object in resolveIds.
+	  Adapt in getPlaylist to this change so selector still works.
+	* python/dadcouch/selecter/couch.py:
+	  Add an errback for failures falling off the wagon.
+	* tests/track.py:
+	  Add some FIXME's and asserts.
+
 2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* tests/artists.py:

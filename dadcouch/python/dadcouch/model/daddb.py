@@ -155,14 +155,13 @@ class DADDB(log.Loggable):
             d.addCallback(lambda _, j: self.db.map(self.dbName, j, klazz), i)
             d.addCallback(mapped, res)
 
-        def done(_, res):
+        def done(_, r):
             ids = getter(obj, idAttr)
             if not isinstance(ids, list):
-                res = res[0]
-            setter(obj, objAttr, res)
+                r = r[0]
+            setter(obj, objAttr, r)
 
-            # FIXME: returning this breaks couch selecter ? add test
-            # return obj
+            return obj
 
         d.addCallback(done, res)
 
@@ -202,6 +201,9 @@ class DADDB(log.Loggable):
         d.addErrback(log.warningFailure, swallow=False)
 
         def resolveTracks(tracks):
+            # returns: a deferred firing a list of
+            # (result, Track/sliceGen alternating
+
             # tracks: list of Track, score, userId
             trackList = list(tracks)
             log.debug('playlist', 'got %r tracks', len(trackList))
@@ -229,7 +231,7 @@ class DADDB(log.Loggable):
             for succeeded, result in resultList:
                 if not succeeded:
                     self.warningFailure(result)
-                if not result:
+                if isinstance(result, couch.Track):
                     # result from resolveIds
                     continue
 
@@ -878,7 +880,7 @@ class TrackModel(CouchDBModel):
             couch.Artist))
 
         d.addCallback(lambda track: setattr(self, 'track', track))
-        d.addCallback(lambda _: self.track)
+        d.addCallback(lambda _, s: s.track, self)
         return d
 
     def getScores(self, userName=None):

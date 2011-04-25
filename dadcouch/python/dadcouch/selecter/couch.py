@@ -123,6 +123,10 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         d = self._dadDB.getPlaylist(self._user, self._category,
             self._above, self._below, limit=limit, random=self._random)
         d.addCallback(self._getPlaylistCb)
+        def eb(f):
+            log.warningFailure(f)
+            return f
+        d.addErrback(eb)
 
         # we won't wait on this one; it's an internal deferred to get
         # all items which is slower

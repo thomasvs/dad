@@ -30,6 +30,7 @@ class TrackController(base.Controller):
 
     _track = None
 
+    # FIXME: push to base class
     def __init__(self, model):
         base.Controller.__init__(self, model)
 
@@ -40,10 +41,12 @@ class TrackController(base.Controller):
     def _scored(self, view, category, score):
         print 'THOMAS: scored', category, score
         # FIXME: user ?
+        # FIXME: make interface for this model
         self._model.score(self._track, 'thomas', category, score)
 
     def populate(self, trackId, userName=None):
-        self.debug('populate(): trackId %r type  %r', trackId, type(trackId))
+        assert type(trackId) is unicode
+        self.debug('populate(): trackId %r', trackId)
         # self.doViews('throb', True)
 
         # populate with the Track

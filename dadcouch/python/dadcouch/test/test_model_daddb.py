@@ -111,3 +111,22 @@ class AdvancedTestCase(DADDBTestCase):
         scores = list(scores)
         self.assertEquals(scores[0].subject_type, 'track')
         self.assertEquals(scores[0].subject_id, track.id)
+
+
+class TrackModelTestCase(DADDBTestCase):
+
+    @defer.inlineCallbacks
+    def test_get(self):
+
+        model = daddb.TrackModel(self.daddb)
+
+        track = couch.Track(name='hit me')
+        # FIXME: don't poke at _data
+        stored = yield self.db.saveDoc('dadtest', track._data)
+
+        retrieved = yield self.daddb.db.map(self.daddb.dbName, stored['id'],
+            couch.Track)
+        self.assertEquals(retrieved.name, 'hit me')
+
+        retrieved = yield model.get(stored['id'])
+        self.assertEquals(retrieved.name, 'hit me')
