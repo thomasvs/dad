@@ -9,6 +9,7 @@ from twisted.python import failure
 class DeferredListSpaced(defer.Deferred):
 
     SPACE = 200
+    DELAY = 0.0
 
     def __init__(self, fireOnOneCallback=0, fireOnOneErrback=0,
                  consumeErrors=0):
@@ -50,6 +51,7 @@ class DeferredListSpaced(defer.Deferred):
         # we call the callbacks before updating internal state and possibly
         # calling back
         if callbacks:
+            # FIXME: shouldn't these be chaining ?
             for cb, cbargs, cbkwargs, eb, ebargs, ebkwargs in callbacks:
                 if cb and succeeded == defer.SUCCESS:
                     cb(result, *cbargs, **cbkwargs)
@@ -68,7 +70,12 @@ class DeferredListSpaced(defer.Deferred):
         if succeeded == defer.FAILURE and self.consumeErrors:
             result = None
 
-        return result
+        if self.DELAY == 0.0:
+            return result
+
+        d = defer.Deferred()
+        reactor.callLater(self.DELAY, d.callback, result)
+        return d
  
     # adds deferred-returning callbacks in a loop at once;
     # this serializes but runs out of stack if count is too high and deferreds
@@ -112,6 +119,6 @@ class DeferredListSpaced(defer.Deferred):
             left = count > self.SPACE and self.SPACE or count
             count -= left
 
-            reactor.callLater(0L, self._blockSerialize, index, left)
+            reactor.callLater(0, self._blockSerialize, index, left)
 
             index += left
