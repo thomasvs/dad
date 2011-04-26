@@ -45,7 +45,7 @@ class TrackController(base.Controller):
         self._model.score(self._track, 'thomas', category, score)
 
     def populate(self, trackId, userName=None):
-        assert type(trackId) is unicode
+        assert type(trackId) is unicode, 'trackId %r is not unicode' % trackId
         self.debug('populate(): trackId %r', trackId)
         # self.doViews('throb', True)
 

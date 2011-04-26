@@ -885,64 +885,45 @@ class TrackModel(CouchDBModel):
         d.addCallback(lambda _, s: s.track, self)
         return d
 
+    @defer.inlineCallbacks
     def getScores(self, userName=None):
         """
         Get a track's scores and resolve their user and category.
         """
 
-        context = {}
-        context['user'] = None
-
-        d = defer.Deferred()
-
+        userId = None
         if userName:
-            d.addCallback(lambda _: self._daddb.getOrAddUser(userName))
-            d.addCallback(lambda u: context.__setitem__('user', u))
+            user = yield self._daddb.getOrAddUser(userName)
+            # FIXME: unicode
+            user.Id = unicode(user.id)
 
 
-        d.addCallback(lambda _: self._daddb.getScores(self.track))
+        scores = yield self._daddb.getScores(self.track)
 
-        def cb(scores):
-            scores = list(scores)
-            kept = []
+        scores = list(scores)
+        kept = []
 
-            self.debug('Got %d scores for all users', len(scores))
+        self.debug('Got %d scores for all users', len(scores))
 
-            d2 = defer.Deferred()
+        for score in scores:
+            if userId:
+                if unicode(score.user_id) != userId:
+                    continue
+                score.user = user
+            else:
+                yield self._daddb.resolveIds(score, 'user_id', 'user',
+                    couch.User)
 
-            userId = None
-            if context['user']:
-                # FIXME: unicode
-                userId = unicode(context['user'].id)
+            kept.append(score)
+            for line in score.scores:
+                # line looks like a dict but is an AnonymousStruct
+                yield self._daddb.resolveIds(line, 'category_id', 'category',
+                couch.Category,
+                getter=line.__class__.__getitem__,
+                setter=line.__class__.__setitem__)
 
-            for score in scores:
-                if userId:
-                    if unicode(score.user_id) != userId:
-                        continue
-                    score.user = context['user']
-                else:
-                    d2.addCallback(lambda _, s:
-                        self._daddb.resolveIds(s, 'user_id', 'user',
-                        couch.User), score)
-
-                kept.append(score)
-                for line in score.scores:
-                    # line looks like a dict but is an AnonymousStruct
-                    d2.addCallback(lambda _, l:
-                        self._daddb.resolveIds(l, 'category_id', 'category',
-                    couch.Category, getter=l.__class__.__getitem__, setter=l.__class__.__setitem__), line)
-
-            d2.addCallback(lambda _: kept)
-
-            self.debug('Kept %d scores', len(kept))
-
-            d2.callback(None)
-            return d2
-
-        d.addCallback(cb)
-
-        d.callback(None)
-        return d
+        self.debug('Kept %d scores', len(kept))
+        defer.returnValue(kept)
 
     def score(self, subject, userName, categoryName, score):
         self._daddb.score(subject, userName, categoryName, score)

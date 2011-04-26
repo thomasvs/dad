@@ -115,7 +115,10 @@ class AdvancedTestCase(DADDBTestCase):
         model = daddb.TrackModel(self.daddb)
 
         retrieved = yield model.get(track.id)
-        yield model.getScores()
+        res = yield model.getScores()
+
+        self.assertEquals(len(res), 1)
+        self.assertEquals(res[0].user_id, userId)
 
 
 class TrackSelectorModelTestCase(DADDBTestCase):

@@ -1,5 +1,14 @@
 2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Rewrite getScores to use inline callbacks.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Actually test the result of getScores.
+	* tests/track.py:
+	  Make assert more helpful.
+
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/test/test_model_daddb.py:
 	  Add TrackModel.getScore() to test.
 	* python/dadcouch/model/daddb.py:
