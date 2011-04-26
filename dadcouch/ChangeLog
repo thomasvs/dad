@@ -1,5 +1,10 @@
 2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/track.py:
+	  Rewrite populate using inlineCallbacks.
+
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	* python/dadcouch/test/test_model_daddb.py:
 	  Add getCategories()

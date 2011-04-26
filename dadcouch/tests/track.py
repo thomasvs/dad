@@ -13,6 +13,9 @@ import optparse
 
 import gtk
 
+from twisted.internet import defer
+from twisted.python import failure
+
 from dad.base import base
 from dad.extern.log import log
 
@@ -44,41 +47,33 @@ class TrackController(base.Controller):
         # FIXME: make interface for this model
         self._model.score(self._track, 'thomas', category, score)
 
+    @defer.inlineCallbacks
     def populate(self, trackId, userName=None):
         assert type(trackId) is unicode, 'trackId %r is not unicode' % trackId
         self.debug('populate(): trackId %r', trackId)
         # self.doViews('throb', True)
 
         # populate with the Track
-        d = self._model.get(trackId)
+        try:
+            self._track = yield self._model.get(trackId)
 
-        def cb(t):
-            self._track = t
             self.debug('populating')
             self.doViews('set_artist', " & ".join(
-                [a.name for a in t.artists]))
-            self.doViews('set_title', t.name)
+                [a.name for a in self._track.artists]))
+            self.doViews('set_title', self._track.name)
             self.debug('populated')
-        d.addCallback(cb)
-
-        def eb(failure):
-            self.warningFailure(failure)
+        except Exception, e:
+            self.warningFailure(failure.Failure(e))
             self.doViews('error', "failed to populate",
-                "%r: %r" % (failure, failure.value.args))
-        d.addErrback(eb)
+                "%r: %r" % (e, e.args))
 
-        d.addCallback(lambda _: self._model.getScores(userName=userName))
-        def getScoresCb(scores):
-            # scores: list of couch.Score with resolutions
-            for s in scores:
-                for score in s.scores:
-                    # FIXME: user
-                    self.doViews('set_score', score['category']['name'],
-                        score['score'])
-
-
-        d.addCallback(getScoresCb)
-        return d
+        scores = yield self._model.getScores(userName=userName)
+        # scores: list of couch.Score with resolutions
+        for s in scores:
+            for score in s.scores:
+                # FIXME: user
+                self.doViews('set_score', score['category']['name'],
+                    score['score'])
 
 def main():
 
