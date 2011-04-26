@@ -22,6 +22,7 @@ class View(log.Loggable):
     I am a base class for views.
     """
 
+    # FIXME: error ?
 
 class SelectorView(View):
     """
