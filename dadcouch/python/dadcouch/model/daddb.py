@@ -3,18 +3,17 @@
 
 import os
 import sys
-import optparse
 import time
 
 from twisted.internet import defer
 
-from dadcouch.extern.paisley import client, views, mapping
+from dadcouch.extern.paisley import views, mapping
 
 from dad.base import base
 from dad.common import log
 
 from dadcouch.common import manydef
-from dadcouch.model import couch, lookup
+from dadcouch.model import couch
 
 # value to use for ENDKEY when looking up strings
 # FIXME: something better; with unicode ?
@@ -928,9 +927,10 @@ class TrackModel(CouchDBModel):
 
                 kept.append(score)
                 for line in score.scores:
+                    # line looks like a dict but is an AnonymousStruct
                     d2.addCallback(lambda _, l:
-                        self._daddb.resolveDictIds(l, 'category_id', 'category',
-                    couch.Category), line)
+                        self._daddb.resolveIds(l, 'category_id', 'category',
+                    couch.Category, getter=l.__class__.__getitem__, setter=l.__class__.__setitem__), line)
 
             d2.addCallback(lambda _: kept)
 

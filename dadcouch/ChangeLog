@@ -1,5 +1,12 @@
 2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/test/test_model_daddb.py:
+	  Add TrackModel.getScore() to test.
+	* python/dadcouch/model/daddb.py:
+	  Fix the implementation so that test, and also track example work.
+
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/common/manydef.py:
 	  Remove print.
 	* python/dadcouch/model/daddb.py:

@@ -5,7 +5,6 @@ import os
 import commands
 
 from twisted.internet import defer
-from twisted.trial import unittest
 
 from dadcouch.extern.paisley.test import test_util
 
@@ -111,6 +110,13 @@ class AdvancedTestCase(DADDBTestCase):
         scores = list(scores)
         self.assertEquals(scores[0].subject_type, 'track')
         self.assertEquals(scores[0].subject_id, track.id)
+
+        # test track model
+        model = daddb.TrackModel(self.daddb)
+
+        retrieved = yield model.get(track.id)
+        yield model.getScores()
+
 
 class TrackSelectorModelTestCase(DADDBTestCase):
 
