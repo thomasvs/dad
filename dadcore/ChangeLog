@@ -1,3 +1,10 @@
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/controller/selector.py:
+	  Fire a deferred from populate so we can chain.
+	  Make track selector's populate use a callback to add items
+	  while receiving them.
+
 2011-04-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/controller (added):

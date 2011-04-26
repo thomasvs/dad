@@ -1,6 +1,8 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+from twisted.internet import defer
+
 from dad.base import base
 
 # move to base class
@@ -25,20 +27,23 @@ class SelectorController(base.Controller):
 
             # space out add_artist calls from the iterator in blocks of a given
             # size; this allows the throbber to update
-            def space(iterator, size=1):
+            def space(iterator, viewD, size=1):
                 for i in range(size):
                     try:
                         item = iterator.next()
                     except StopIteration:
                         self.doViews('throb', False)
                         self.debug('filled view')
+                        viewD.callback(None)
                         return
 
                     self.addItem(item)
-                self._reactor.callLater(0, space, iterator, size)
+                self._reactor.callLater(0, space, iterator, viewD, size)
 
-            self._reactor.callLater(0, space, iter(iterable), size=11)
+            viewD = defer.Deferred()
+            self._reactor.callLater(0, space, iter(iterable), viewD, size=11)
             self.debug('populated')
+            return viewD
         d.addCallback(cb)
 
         def eb(failure):
@@ -83,3 +88,18 @@ class TrackSelectorController(SelectorController):
         # add a track
         self.doViews('add_item', item, [a.name for a in item.artists],
             "%s" % item.name, None, None, None)
+
+    def populate(self):
+        self.debug('populate()')
+        self.doViews('throb', True)
+
+        # populate with the iterable we get from the model
+        d = self._model.get(cb=lambda r: self.addItem(r))
+        def cb(res):
+            self.debug('populated()')
+            return res
+        d.addCallback(cb)
+
+        return d
+
+
