@@ -446,6 +446,9 @@ class DADDB(log.Loggable):
         """
         return self._getSingleByKey('categories', couch.Category, categoryName)
 
+    def getCategories(self):
+        return self.viewDocs('categories', couch.Category, include_docs=True)
+
     def getUser(self, userName):
         """
         Given a userName, return the L{User} object.

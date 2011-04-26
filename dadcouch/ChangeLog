@@ -1,6 +1,12 @@
 2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/test/test_model_daddb.py:
+	  Add getCategories()
+
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
 	  Rewrite getScores to use inline callbacks.
 	* python/dadcouch/test/test_model_daddb.py:
 	  Actually test the result of getScores.

@@ -46,6 +46,10 @@ class SimpleTestCase(DADDBTestCase):
         for key in [u'id', u'rev']:
             self.assertEquals(stored[key], retrieved[u'_' + key])
 
+        categories = yield self.daddb.getCategories()
+        categories = list(categories)
+        self.assertEquals(categories[0].name, u'Good')
+
     @defer.inlineCallbacks
     def test_getOrAddUser(self):
         # first one adds
@@ -108,6 +112,7 @@ class AdvancedTestCase(DADDBTestCase):
 
         scores = yield self.daddb.getScores(track)
         scores = list(scores)
+        
         self.assertEquals(scores[0].subject_type, 'track')
         self.assertEquals(scores[0].subject_id, track.id)
 
