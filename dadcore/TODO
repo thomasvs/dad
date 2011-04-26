@@ -104,3 +104,5 @@ AttributeError: 'module' object has no attribute 'option_parser_class'
   Instead, make it list classes in that module
 
 - don't fail on an empty or non-existing category
+
+- create dad/base/track which groups the TrackController and base class for view and model
