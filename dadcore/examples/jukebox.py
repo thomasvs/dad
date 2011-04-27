@@ -85,12 +85,9 @@ class GTKUI(UI):
 
         sui.set_scheduler(player.scheduler)
 
-        sw = gtk.ScrolledWindow()
-        sw.add(sui)
-
         box = gtk.VBox()
         box.set_homogeneous(False)
-        box.add(sw)
+        box.add(sui)
 
         self._seekui = seek.SeekUI()
         box.pack_end(self._seekui, expand=False, fill=False)
