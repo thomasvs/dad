@@ -888,6 +888,9 @@ class TrackModel(CouchDBModel):
         d.addCallback(lambda _, s: s.track, self)
         return d
 
+    def getCategories(self):
+        return self._daddb.getCategories()
+
     @defer.inlineCallbacks
     def getScores(self, userName=None):
         """

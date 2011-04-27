@@ -67,13 +67,21 @@ class TrackController(base.Controller):
             self.doViews('error', "failed to populate",
                 "%r: %r" % (e, e.args))
 
+        categories = yield self._model.getCategories()
         scores = yield self._model.getScores(userName=userName)
         # scores: list of couch.Score with resolutions
-        for s in scores:
-            for score in s.scores:
+        res = {} # category name -> score
+        for category in categories:
+            res[category.name] = None
+
+        for couchScore in scores:
+            for scoreDict in couchScore.scores:
+                # scoreDict is DictField of category_id/score/category
                 # FIXME: user
-                self.doViews('set_score', score['category']['name'],
-                    score['score'])
+                res[scoreDict['category'].name] = scoreDict['score']
+
+        for categoryName, score in res.items():
+            self.doViews('set_score', categoryName, score)
 
 def main():
 
