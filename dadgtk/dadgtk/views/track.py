@@ -48,10 +48,16 @@ class TrackView(views.GTKView, gobject.GObject):
 
     # scores are dynamic
     def set_score(self, category, value):
+        """
+        value can be None to indicate 'not rated'
+        """
         if category not in self._scores:
             top = len(self._scores)
 
             label = gtk.Label(category)
+            if value is None:
+                label = gtk.Label(category + ' (unrated)')
+                value = 0.0
             self._score.attach(label, 0, 1, top, top + 1)
             self._scores[category] = label
 
