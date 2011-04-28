@@ -11,8 +11,8 @@ from dad.base import base
 
 from dadgtk.views import views
 
-
-class TrackView(views.GTKView, gobject.GObject):
+# FIXME: move out ?
+class ScorableView(gobject.GObject):
 
     __gsignals__ = {
         'scored': 
@@ -22,30 +22,18 @@ class TrackView(views.GTKView, gobject.GObject):
 
     score_delay = 1 # seconds before emitting scored
 
+    subject_type = None # subclasses should set this
 
     def __init__(self):
         gobject.GObject.__init__(self)
 
-        self._builder = gtk.Builder()
-        path = os.path.join(os.path.dirname(__file__), "track-info.ui") 
-        self._builder.add_from_file(path)
-        self.widget = self._builder.get_object("track_info")
-
-        self._score = self._builder.get_object("track_info_score")
+    def init_score(self):
+        self._score = self._builder.get_object(
+            self.subject_type + "_info_score")
         self._score.foreach(self._score.remove)
         self._scores = {} # category -> widget
         self._timeouts = {} # category -> timeout
  
-
-    
-    def set_title(self, title):
-        entry = self._builder.get_object("track_info_title")
-        entry.set_text(title)
-
-    def set_artist(self, name):
-        entry = self._builder.get_object("track_info_artist")
-        entry.set_text(name)
-
     # scores are dynamic
     def set_score(self, category, value):
         """
@@ -87,6 +75,31 @@ class TrackView(views.GTKView, gobject.GObject):
 
     def _emit_score(self, category, value):
         self.emit('scored', category, value)
+
+
+
+class TrackView(views.GTKView, ScorableView):
+
+    subject_type = 'track'
+
+    def __init__(self):
+        ScorableView.__init__(self)
+
+        self._builder = gtk.Builder()
+        path = os.path.join(os.path.dirname(__file__), "track-info.ui") 
+        self._builder.add_from_file(path)
+        self.widget = self._builder.get_object("track_info")
+
+        self.init_score()
+
+    
+    def set_title(self, title):
+        entry = self._builder.get_object("track_info_title")
+        entry.set_text(title)
+
+    def set_artist(self, name):
+        entry = self._builder.get_object("track_info_artist")
+        entry.set_text(name)
 
 if __name__ == '__main__':
     view = TrackView()
