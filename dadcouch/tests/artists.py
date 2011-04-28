@@ -17,6 +17,7 @@ import gtk
 from dad.base import base
 from dad.extern.log import log
 from dad.controller import selector
+from dad.controller import track as trackc
 
 from dadcouch.model import daddb
 from dadcouch.selecter import couch
@@ -96,8 +97,7 @@ def main():
 
 
         model = daddb.TrackModel(db)
-        import track
-        controller = track.TrackController(model)
+        controller = trackc.TrackController(model)
         controller.addView(view)
         # FIXME: don't hardcode
         options.user = 'thomas'

@@ -1,6 +1,12 @@
 2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* tests/artists.py:
+	* tests/track.py:
+	  Move TrackController to core.
+
+2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* tests/artists.py:
 	  Filter track selector view on artist when selected.
 
 2011-04-27  Thomas Vander Stichele  <thomas at apestaart dot org>
