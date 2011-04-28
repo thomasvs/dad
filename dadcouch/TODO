@@ -23,3 +23,4 @@
   to start
 * filter track selector view by artist/album/search
 * show number of ratings in track view
+* add change notifier and update track scores with a highlight
