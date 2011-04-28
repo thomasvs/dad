@@ -1,5 +1,10 @@
 2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/scheduler.py:
+	  Allow setting artist ids on track view.
+
+2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/views.py:
 	  Unicode checks/fixes.
 

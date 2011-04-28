@@ -12,11 +12,12 @@ from dad.extern.log import log
 (
     COLUMN_SCHEDULED,
     COLUMN_ARTISTS,
+    COLUMN_ARTIST_IDS,
     COLUMN_TITLE,
     COLUMN_PATH,
     COLUMN_START,
     COLUMN_END
-) = range(6)
+) = range(7)
 
 class TracksUI(gtk.VBox, log.Loggable):
     logCategory = 'tracksui'
@@ -26,6 +27,8 @@ class TracksUI(gtk.VBox, log.Loggable):
             (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (object, ))
     }
 
+    _artist_ids = None
+
     def __init__(self, first=False):
         gtk.VBox.__init__(self)
 
@@ -33,6 +36,7 @@ class TracksUI(gtk.VBox, log.Loggable):
         self._first_iter = None
         self._count = 0
 
+        self._filter_count = 0
         self._create_store()
 
         self._treeview = gtk.TreeView(self._store)
@@ -48,11 +52,36 @@ class TracksUI(gtk.VBox, log.Loggable):
 
         self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
 
+        # filtering
+        def match_artist_ids(model, iter):
+            self._filter_count += 1
+            # the first iter always should be shown, as it gives totals
+            if model.get_path(iter) == (0, ):
+                return True
+
+            # if no album_ids filter is set, everything should be shown
+            if self._artist_ids is None:
+                return True
+
+            # only show tracks matching the current selection
+            value = model.get_value(iter, COLUMN_ARTIST_IDS)
+            for v in value or []:
+                if v in self._artist_ids:
+                    return True
+
+            self._filter_count -= 1
+            return False
+
+        self._filter = self._store.filter_new(root=None)
+        self._filter.set_visible_func(match_artist_ids)
+        self._treeview.set_model(self._filter)
+
 
     def _create_store(self):
         self._store = gtk.ListStore(
             object,
             gobject.TYPE_STRING,
+            object,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
@@ -64,14 +93,15 @@ class TracksUI(gtk.VBox, log.Loggable):
             self._first_iter = self._store.append()
             self._show_count()
 
-    def _show_count(self):
+    def _show_count(self, tracks=None):
+        count = tracks or self._count
         self._store.set(self._first_iter,
-            COLUMN_TITLE, "All %d tracks" % self._count)
+            COLUMN_TITLE, "All %d tracks" % count)
 
     def _scheduled_cb(self, scheduler, scheduled):
         self.add_scheduled(scheduled)
 
-    def add_item(self, item, artists, title, path, start, end):
+    def add_item(self, item, artists, artist_ids, title, path, start, end):
         """
         """
         #self.debug('add: adding %r', item)
@@ -79,12 +109,13 @@ class TracksUI(gtk.VBox, log.Loggable):
         self._store.set(iter,
             COLUMN_SCHEDULED, item,
             COLUMN_ARTISTS, "\n".join(artists),
+            COLUMN_ARTIST_IDS, artist_ids,
             COLUMN_TITLE, title,
             COLUMN_PATH, path,
             COLUMN_START, start,
             COLUMN_END, end
         )
-        self._treeview.set_model(self._store)
+        # self._treeview.set_model(self._store)
         self._treerowrefs[item] = gtk.TreeRowReference(
             self._store, self._store.get_path(iter))
 
@@ -115,12 +146,36 @@ class TracksUI(gtk.VBox, log.Loggable):
         # self._treeview.append_column(column)
  
     def _treeview_clicked_cb(self, tv, path, column):
-        iter = self._store.get_iter(path)
-        item = self._store.get_value(iter, COLUMN_SCHEDULED)
+        iter = self._filter.get_iter(path)
+        item = self._filter.get_value(iter, COLUMN_SCHEDULED)
         self.emit('clicked', item)
 
     def throb(self, active=True):
         print 'THOMAS: FIXME: throb', active
+
+    def set_artist_ids(self, ids):
+        """
+        Filter the view with tracks only from the given artists.
+        """
+        for i in ids:
+            assert type(i) is unicode, "artist id %r is not unicode" % i
+
+        # used when an artist is selected and only its tracks
+        self.debug('set_artist_ids: %r', ids)
+        self._artist_ids = ids
+        self._filter_count = 0
+        self._filter.refilter()
+
+        if ids is None:
+            # all selected
+            self._show_count()
+        else:
+            # update count to show filtered results
+            # FIXME: this formula determined by experimentation
+            self._show_count((self._filter_count -1) / 2)
+
+        # reselect the first
+        # self._selection.select_path((0, ))        
 
 class SchedulerUI(TracksUI):
     logCategory = 'schedulerui'
@@ -150,7 +205,7 @@ class SchedulerUI(TracksUI):
         import gst
         self.debug('add_scheduled: adding %r', scheduled)
         self.add_item(scheduled, scheduled.artists,
-            scheduled.title or scheduled.description,
+            [], scheduled.title or scheduled.description,
             scheduled.path,
             gst.TIME_ARGS(scheduled.start),
             gst.TIME_ARGS(scheduled.start + scheduled.duration))
