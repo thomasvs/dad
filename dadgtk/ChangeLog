@@ -1,5 +1,11 @@
 2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/artist-info.ui (added):
+	* dadgtk/views/artist.py (added):
+	  Add a view for an artist, so we can rate them.
+
+2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/track.py:
 	  Split off the scorable part of the view in a base class.
 
