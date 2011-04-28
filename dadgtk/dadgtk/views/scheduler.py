@@ -14,6 +14,7 @@ from dad.extern.log import log
     COLUMN_ARTISTS,
     COLUMN_ARTIST_IDS,
     COLUMN_TITLE,
+    COLUMN_SORT,
     COLUMN_PATH,
     COLUMN_START,
     COLUMN_END
@@ -29,10 +30,12 @@ class TracksUI(gtk.VBox, log.Loggable):
 
     _artist_ids = None
 
+    def __init__(self, selector=False):
+
     def __init__(self, first=False):
         gtk.VBox.__init__(self)
 
-        self._first = first
+        self._selector = selector
         self._first_iter = None
         self._count = 0
 
@@ -86,17 +89,19 @@ class TracksUI(gtk.VBox, log.Loggable):
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
             )
 
 
-        if self._first:
+        if self._selector:
             self._first_iter = self._store.append()
             self._show_count()
 
     def _show_count(self, tracks=None):
         count = tracks or self._count
         self._store.set(self._first_iter,
-            COLUMN_TITLE, "All %d tracks" % count)
+            COLUMN_TITLE, "All %d tracks" % count,
+            COLUMN_SORT, "")
 
     def _scheduled_cb(self, scheduler, scheduled):
         self.add_scheduled(scheduled)
@@ -111,6 +116,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             COLUMN_ARTISTS, "\n".join(artists),
             COLUMN_ARTIST_IDS, artist_ids,
             COLUMN_TITLE, title,
+            COLUMN_SORT, title,
             COLUMN_PATH, path,
             COLUMN_START, start,
             COLUMN_END, end
@@ -120,7 +126,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             self._store, self._store.get_path(iter))
 
         self._count += 1
-        if self._first:
+        if self._selector:
             self._show_count()
 
     def _add_columns(self):
@@ -131,6 +137,9 @@ class TracksUI(gtk.VBox, log.Loggable):
         column = gtk.TreeViewColumn('Title', gtk.CellRendererText(),
                                     text=COLUMN_TITLE)
         self._treeview.append_column(column)
+        # this may be a bit slow ?
+        #if self._selector:
+        #    self._store.set_sort_column_id(COLUMN_SORT, gtk.SORT_ASCENDING)
 
         # do not show path now that we have artist and title
         # column = gtk.TreeViewColumn('Path', gtk.CellRendererText(),
