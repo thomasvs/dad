@@ -70,6 +70,11 @@ class TrackView(views.GTKView, gobject.GObject):
 
             self._score.show_all()
         
+    def _highlight_score(self, category):
+        style = self._scores[category]
+        style.bg[gtk.STATE_NORMAL] = gdk.Color.parse('#0A0A6A')
+        style.fg[gtk.STATE_NORMAL] = gdk.Color.parse('#FFFFFF')
+
     def _score_changed_cb(self, sb, category):
         value = sb.get_value()
 
