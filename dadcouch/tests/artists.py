@@ -82,6 +82,8 @@ def main():
         album_ids = albumModel.get_artists_albums(ids)
         albumView.set_album_ids(album_ids)
 
+        trackView.set_artist_ids(ids)
+
     artistView.connect('selected', artist_selected_cb)
 
     def track_selected_cb(self, trackObj):

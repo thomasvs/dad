@@ -1,9 +1,21 @@
+2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* tests/artists.py:
+	  Filter track selector view on artist when selected.
+
 2011-04-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
 	  Add getCategories to TrackModel.
 	* tests/track.py:
 	  Fill in categories that are not scored.
+
+2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	reviewed by: <delete if not using a buddy>
+	patch by: <delete if not someone else's patch>
+
+	* python/dadcouch/test/test_model_daddb.py:
 
 2011-04-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
