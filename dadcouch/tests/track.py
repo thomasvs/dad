@@ -25,7 +25,7 @@ from dadcouch.selecter import couch as scouch
 
 from dadcouch.extern.paisley import client
 
-from dadgtk.views import track as trackv
+from dadgtk.views import track as trackv, app as appv
 from dad.controller import track as trackc
 
 def main():
@@ -54,22 +54,18 @@ def main():
     dbName = options.database
     db = daddb.DADDB(server, dbName)
 
-    window = gtk.Window()
-    window.connect('destroy', lambda _: reactor.stop())
+    aview = appv.GTKAppView()
+    aview.widget.connect('destroy', lambda _: reactor.stop())
 
     view = trackv.TrackView()
 
-    window.add(view.widget)
+    aview.add(view)
 
 
     model = daddb.TrackModel(db)
     controller = trackc.TrackController(model)
     controller.addView(view)
 
-
-    window.set_default_size(640, 480)
-
-    window.show_all()
 
     # start loading artists and albums
 
