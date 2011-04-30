@@ -14,9 +14,9 @@ import optparse
 import gtk
 
 from twisted.internet import defer
-from twisted.python import failure
+from twisted.python import failure, reflect
 
-from dad.base import base
+from dad.base import base, app
 from dad.extern.log import log
 
 from dadcouch.model import daddb
@@ -50,22 +50,33 @@ def main():
     except:
         title = 'Love'
 
+    # FIXME: allow customizing model and/or view(s)
+    modelType = 'Couch'
+    viewTypes = ['GTK', ]
+
     server = client.CouchDB(host=options.host, port=options.port)
     dbName = options.database
     db = daddb.DADDB(server, dbName)
 
-    aview = appv.GTKAppView()
+    modelModule = 'dad%s.models.app.%sAppModel' % (modelType.lower(), modelType)
+    amodel = reflect.namedAny(modelModule)(db)
+
+    acontroller = app.AppController(amodel)
+
+    for viewType in viewTypes:
+        viewModule = 'dad%s.views.app.%sAppView' % (viewType.lower(), viewType)
+        aview = reflect.namedAny(viewModule)()
+        acontroller.addView(aview)
+
+    # FIXME: gtk-specific
     aview.widget.connect('destroy', lambda _: reactor.stop())
 
+    controller, model, views = acontroller.getTriad('Track')
+
     view = trackv.TrackView()
+    view = views[0]
 
     aview.add(view)
-
-
-    model = daddb.TrackModel(db)
-    controller = trackc.TrackController(model)
-    controller.addView(view)
-
 
     # start loading artists and albums
 

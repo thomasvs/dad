@@ -1,5 +1,10 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/track.py:
+	  Use the App stuff.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/models (added):
 	* python/dadcouch/models/__init__.py (added):
 	* python/dadcouch/models/app.py (added):
