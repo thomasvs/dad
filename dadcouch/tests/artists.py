@@ -14,7 +14,9 @@ import optparse
 
 import gtk
 
-from dad.base import base
+from twisted.python import reflect
+
+from dad.base import base, app
 from dad.extern.log import log
 from dad.controller import selector
 from dad.controller import track as trackc
@@ -40,6 +42,10 @@ def main():
     parser.add_options(couch.couchdb_option_list)
     options, args = parser.parse_args()
 
+    # FIXME: allow customizing model and/or view(s)
+    modelType = 'Couch'
+    viewTypes = ['GTK', ]
+
     # this rebinds and makes it break in views
     # db = client.CouchDB('localhost', dbName='dad')
     cache = client.MemoryCache()
@@ -47,8 +53,24 @@ def main():
     dbName = options.database
     db = daddb.DADDB(server, dbName)
 
-    window = gtk.Window()
-    window.connect('destroy', lambda _: reactor.stop())
+
+    server = client.CouchDB(host=options.host, port=options.port)
+    dbName = options.database
+    db = daddb.DADDB(server, dbName)
+
+    modelModule = 'dad%s.models.app.%sAppModel' % (modelType.lower(), modelType)
+    amodel = reflect.namedAny(modelModule)(db)
+
+    acontroller = app.AppController(amodel)
+
+    for viewType in viewTypes:
+        viewModule = 'dad%s.views.app.%sAppView' % (viewType.lower(), viewType)
+        aview = reflect.namedAny(viewModule)()
+        acontroller.addView(aview)
+
+    # FIXME: gtk-specific
+    aview.widget.connect('destroy', lambda _: reactor.stop())
+
 
     vbox = gtk.VBox()
 
@@ -56,26 +78,31 @@ def main():
 
     vbox.add(hbox)
 
-    window.add(vbox)
+    aview.widget.add(vbox)
 
     artistView = views.ArtistSelectorView()
     artistModel = daddb.ArtistSelectorModel(db)
     artistController = selector.ArtistSelectorController(artistModel)
     artistController.addView(artistView)
+    acontroller.add(artistController)
     hbox.pack_start(artistView)
 
     albumView = views.AlbumSelectorView()
     albumModel = daddb.AlbumSelectorModel(db)
     albumController = selector.AlbumSelectorController(albumModel)
     albumController.addView(albumView)
+    acontroller.add(albumController)
     hbox.pack_start(albumView)
 
-    trackView = scheduler.TracksUI(first=True)
+    trackView = scheduler.TracksUI(selector=True)
     trackModel = daddb.TrackSelectorModel(db)
     trackController = selector.TrackSelectorController(trackModel)
+    acontroller.add(trackController)
     trackController.addView(trackView)
 
     vbox.add(trackView)
+
+    aview.widget.show_all()
 
 
     # listen to changes on artist selection so we can filter the albums view
@@ -111,10 +138,6 @@ def main():
  
 
     trackView.connect('clicked', track_selected_cb)
-
-    window.set_default_size(640, 480)
-
-    window.show_all()
 
     # start loading artists and albums
 

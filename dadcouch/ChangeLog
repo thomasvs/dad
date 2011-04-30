@@ -1,5 +1,10 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/artists.py:
+	  Use new App stuff.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	  Use new view for checking if we already scored.
 
