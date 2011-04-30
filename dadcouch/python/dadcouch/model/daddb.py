@@ -514,8 +514,9 @@ class DADDB(log.Loggable):
         yield self.db.map(self.dbName, unicode(subject.id), couch.Score)
 
 
-        scores = yield self.viewDocs('track-score', couch.Score,
-                include_docs=True, key=[category.id, user.id, subject.id])
+        scores = yield self.viewDocs('score', couch.Score,
+                include_docs=True,
+                key=[category.id, user.id, subject.id, subject.type])
         scores = list(scores)
 
         if len(scores) == 0:
