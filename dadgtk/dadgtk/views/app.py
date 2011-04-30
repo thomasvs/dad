@@ -4,6 +4,8 @@
 import gobject
 import gtk
 
+from twisted.python import reflect
+
 from dad.base import app
 
 class GTKAppView(app.AppView):
@@ -18,5 +20,11 @@ class GTKAppView(app.AppView):
         self.widget = window
 
     def add(self, view):
+        self.debug('adding view %r with widget %r', view, view.widget)
         self.widget.add(view.widget)
         
+    def getView(self, what):
+        name = 'dadgtk.views.%s.%sView' % (what.lower(), what)
+        view = reflect.namedAny(name)()
+        return view
+

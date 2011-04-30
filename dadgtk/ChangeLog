@@ -1,5 +1,10 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/app.py:
+	  Add getView() method.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/app.py (added):
 	  Add an app view creating a window.
 
