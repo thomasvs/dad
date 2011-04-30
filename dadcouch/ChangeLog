@@ -1,5 +1,11 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/score (added):
+	* couchdb/views/score/map.js (added):
+	  Adding a view for scores.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* tests/track.py:
 	  Use the App stuff.
 
