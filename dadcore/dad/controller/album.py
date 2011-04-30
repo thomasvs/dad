@@ -6,7 +6,7 @@ from twisted.internet import defer
 from dad.controller import subject
 
 
-class ArtistController(subject.SubjectController):
+class AlbumController(subject.SubjectController):
 
     @defer.inlineCallbacks
     def populate(self, subjectId, userName=None):
