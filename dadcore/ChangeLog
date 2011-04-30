@@ -1,5 +1,14 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/base/app.py:
+	  Handle reflection exceptions.
+	* dad/controller/track.py:
+	* dad/controller/subject.py (added):
+	* dad/controller/artist.py (added):
+	  Factor out a subject controller that can be scored.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/base.py:
 	  Give each view its controller.
 	  Allow controllers to have a parent controller.

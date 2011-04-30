@@ -36,7 +36,10 @@ class AppController(base.Controller):
         #            dadgtk.views.track.TrackView
         model = self._model.getModel(what)
         cklazz = 'dad.controller.%s.%sController' % (what.lower(), what)
-        controller = reflect.namedAny(cklazz)(model)
+        try:
+            controller = reflect.namedAny(cklazz)(model)
+        except AttributeError:
+            raise AttributeError("Could not reflect %r" % cklazz)
         views = []
         for v in self._views:
             view = v.getView(what)
