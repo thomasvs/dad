@@ -1,5 +1,10 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/base/app.py:
+	  Add a getTriad method for an AppController class.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/app.py (added):
 	  Add base application classes.
 
