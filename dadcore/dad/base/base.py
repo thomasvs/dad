@@ -22,6 +22,8 @@ class View(log.Loggable):
     I am a base class for views.
     """
 
+    controller = None
+
     # FIXME: error ?
 
 class SelectorView(View):
@@ -44,20 +46,35 @@ class SelectorView(View):
 
 class Controller(log.Loggable):
 
+    parent = None
+
     def __init__(self, model):
         self._model = model
         self._views = []
+        self._controllers = []
 
     ### base class methods
 
     def addView(self, view):
         self._views.append(view)
+        view.controller = self
         self.viewAdded(view)
 
     def doViews(self, method, *args, **kwargs):
         for view in self._views:
             m = getattr(view, method)
             m(*args, **kwargs)
+
+    def add(self, controller):
+        self._controllers.append(controller)
+        controller.parent = self
+
+    def getRoot(self):
+        parent = self.parent
+        while parent.parent:
+            parent = parent.parent
+
+        return parent
 
     ### subclass methods
 

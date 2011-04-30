@@ -1,5 +1,12 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/base/base.py:
+	  Give each view its controller.
+	  Allow controllers to have a parent controller.
+	  Add a getRoot() method to get the root controller.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/app.py:
 	  Add a getTriad method for an AppController class.
 
