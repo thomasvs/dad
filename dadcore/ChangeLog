@@ -1,3 +1,8 @@
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/base/app.py (added):
+	  Add base application classes.
+
 2011-04-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/controller/track.py (added):
