@@ -18,7 +18,7 @@ from dad.extern.log import log
     COLUMN_PATH,
     COLUMN_START,
     COLUMN_END
-) = range(7)
+) = range(8)
 
 class TracksUI(gtk.VBox, log.Loggable):
     logCategory = 'tracksui'
@@ -31,8 +31,6 @@ class TracksUI(gtk.VBox, log.Loggable):
     _artist_ids = None
 
     def __init__(self, selector=False):
-
-    def __init__(self, first=False):
         gtk.VBox.__init__(self)
 
         self._selector = selector

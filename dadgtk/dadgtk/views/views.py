@@ -113,6 +113,9 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         self._selection = sel
 
         self._treeview.set_headers_visible(False)
+        self._treeview.connect("popup-menu", self._on_popup_menu_cb)
+        self._treeview.connect("button-press-event",
+            self._on_button_press_event_cb)
 
         sw.add(self._treeview)
 
@@ -125,7 +128,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             gobject.TYPE_STRING,
             gobject.TYPE_INT)
         self._store.set_sort_column_id(COLUMN_SORT, gtk.SORT_ASCENDING)
-        
+
     def _add_columns(self):
         # column for display of artist
         column = gtk.TreeViewColumn(self.title, gtk.CellRendererText(),
@@ -146,6 +149,64 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             assert type(ids[-1]) is unicode, 'artist id %r is not unicode' % ids[-1]
 
         self.emit('selected', ids)
+
+    def _on_button_press_event_cb(self, treeview, event):
+        # single click with the right mouse button?
+        if event.type == gtk.gdk.BUTTON_PRESS and event.button == 3:
+            x = int(event.x)
+            y = int(event.y)
+            time = event.time
+            pthinfo = treeview.get_path_at_pos(x, y)
+            if pthinfo is not None:
+                path, col, cellx, celly = pthinfo
+                treeview.grab_focus()
+                treeview.set_cursor(path, col, 0)
+                print "Single right click on the tree view.\n"
+                self._view_popup_menu(event)
+
+            return True
+
+        return False
+
+    def _on_popup_menu_cb(self, widget):
+        print 'ouchies'
+        self._view_popup_menu(None)
+
+    def _view_popup_menu(self, event):
+        print 'view popup'
+        sel = self._treeview.get_selection()
+        model, paths = sel.get_selected_rows()
+        ids = []
+
+        for p in paths:
+            i = self._store.get_iter(p)
+            # FIXME: getting id back from store is a non-unicode str ?
+            ids.append(unicode(self._store.get_value(i, COLUMN_ID)))
+            assert type(ids[-1]) is unicode, 'artist id %r is not unicode' % ids[-1]
+
+        for i in ids:
+            menu = gtk.Menu()
+            item = gtk.MenuItem(label='_Info')
+            menu.add(item)
+            item.connect('activate', self._show_artist_info, i)
+            menu.popup(None, None, None, event and event.button or None, event.get_time() or 0.0)
+            menu.show_all()
+
+    def _show_artist_info(self, item, artist_id):
+        # FIXME: the view should probably ask its model/controller to show up ?
+        print 'show artist info', artist_id
+
+        controller, model, views = self.controller.getRoot().getTriad('Track')
+        w = gtk.Window()
+        w.add(views[0].widget)
+
+        # FIXME: don't hardcode
+        d = controller.populate(artist_id, userName='thomas')
+        d.addCallback(lambda _: w.set_title(model.track.name))
+
+        w.show_all()
+
+        
 
     def _show_count(self, albums=None, tracks=None):
         if albums is None:
