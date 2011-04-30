@@ -146,7 +146,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             i = self._store.get_iter(p)
             # FIXME: getting id back from store is a non-unicode str ?
             ids.append(unicode(self._store.get_value(i, COLUMN_ID)))
-            assert type(ids[-1]) is unicode, 'artist id %r is not unicode' % ids[-1]
+            assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
 
         self.emit('selected', ids)
 
@@ -161,7 +161,6 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
                 path, col, cellx, celly = pthinfo
                 treeview.grab_focus()
                 treeview.set_cursor(path, col, 0)
-                print "Single right click on the tree view.\n"
                 self._view_popup_menu(event)
 
             return True
@@ -169,11 +168,9 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         return False
 
     def _on_popup_menu_cb(self, widget):
-        print 'ouchies'
         self._view_popup_menu(None)
 
     def _view_popup_menu(self, event):
-        print 'view popup'
         sel = self._treeview.get_selection()
         model, paths = sel.get_selected_rows()
         ids = []
@@ -196,13 +193,13 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         # FIXME: the view should probably ask its model/controller to show up ?
         print 'show artist info', artist_id
 
-        controller, model, views = self.controller.getRoot().getTriad('Track')
+        controller, model, views = self.controller.getRoot().getTriad(self.what)
         w = gtk.Window()
         w.add(views[0].widget)
 
         # FIXME: don't hardcode
         d = controller.populate(artist_id, userName='thomas')
-        d.addCallback(lambda _: w.set_title(model.track.name))
+        d.addCallback(lambda _: w.set_title(model.artist.name))
 
         w.show_all()
 
@@ -250,11 +247,13 @@ class ArtistSelectorView(GTKSelectorView):
 
     title = 'Artists'
     first = 'All %d artists'
+    what = 'Artist'
 
 class AlbumSelectorView(GTKSelectorView):
 
     title = 'Albums'
     first = 'All %d albums'
+    what = 'Album'
 
     _album_ids = None
 

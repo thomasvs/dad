@@ -1,5 +1,11 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/artist.py:
+	* dadgtk/views/views.py:
+	  Clean up.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/scheduler.py:
 	* dadgtk/views/views.py:
 	  Add a right-click Info pop-up menu for the artist view so

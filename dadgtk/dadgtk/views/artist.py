@@ -27,7 +27,7 @@ class ArtistView(views.GTKView, track.ScorableView):
 
         self.init_score()
     
-    def set_artist(self, name):
+    def set_name(self, name):
         entry = self._builder.get_object("artist_info_name")
         entry.set_text(name)
 
