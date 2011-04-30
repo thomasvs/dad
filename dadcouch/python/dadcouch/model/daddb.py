@@ -870,24 +870,12 @@ class TrackSelectorModel(CouchDBModel):
         d.callback(None)
         return d
 
-class TrackModel(CouchDBModel):
+class ScorableModel(CouchDBModel):
     """
-    I represent a track in a CouchDB database.
+    I represent a subject in a CouchDB database that can be scored.
     """
-    def get(self, trackId):
-        """
-        Get a track by id and resolve its artists.
 
-        @returns: a deferred firing a L{couch.Track} object.
-        """
-        d = self._daddb.db.map(self._daddb.dbName, trackId, couch.Track)
-        d.addCallback(lambda track:
-            self._daddb.resolveIds(track, 'artist_ids', 'artists',
-            couch.Artist))
-
-        d.addCallback(lambda track: setattr(self, 'track', track))
-        d.addCallback(lambda _, s: s.track, self)
-        return d
+    subjectType = 'none'
 
     def getCategories(self):
         return self._daddb.getCategories()
@@ -905,7 +893,7 @@ class TrackModel(CouchDBModel):
             user.Id = unicode(user.id)
 
 
-        scores = yield self._daddb.getScores(self.track)
+        scores = yield self._daddb.getScores(getattr(self, self.subjectType))
 
         scores = list(scores)
         kept = []
@@ -935,3 +923,42 @@ class TrackModel(CouchDBModel):
     def score(self, subject, userName, categoryName, score):
         self._daddb.score(subject, userName, categoryName, score)
 
+class TrackModel(ScorableModel):
+    """
+    I represent a track in a CouchDB database.
+    """
+
+    subjectType = 'track'
+
+    def get(self, trackId):
+        """
+        Get a track by id and resolve its artists.
+
+        @returns: a deferred firing a L{couch.Track} object.
+        """
+        d = self._daddb.db.map(self._daddb.dbName, trackId, couch.Track)
+        d.addCallback(lambda track:
+            self._daddb.resolveIds(track, 'artist_ids', 'artists',
+            couch.Artist))
+
+        d.addCallback(lambda track: setattr(self, 'track', track))
+        d.addCallback(lambda _, s: s.track, self)
+        return d
+
+class ArtistModel(ScorableModel):
+    """
+    I represent a track in a CouchDB database.
+    """
+    subjectType = 'artist'
+
+    def get(self, artistId):
+        """
+        Get an artist by id.
+
+        @returns: a deferred firing a L{couch.Artist} object.
+        """
+        d = self._daddb.db.map(self._daddb.dbName, artistId, couch.Artist)
+
+        d.addCallback(lambda artist: setattr(self, 'artist', artist))
+        d.addCallback(lambda _, s: s.artist, self)
+        return d

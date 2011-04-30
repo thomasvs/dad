@@ -15,6 +15,10 @@ class CouchAppModel(app.AppModel):
         # FIXME: move
         if what == 'Track':
             name = 'dadcouch.model.daddb.TrackModel'
+        elif what == 'Artist':
+            name = 'dadcouch.model.daddb.ArtistModel'
+        elif what == 'Album':
+            name = 'dadcouch.model.daddb.AlbumModel'
         model = reflect.namedAny(name)(self._daddb)
         return model
 

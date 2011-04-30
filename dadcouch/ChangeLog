@@ -1,5 +1,11 @@
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/models/app.py:
+	  Factor out Artist and Track model.
+
+2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* tests/artists.py:
 	  Use new App stuff.
 
