@@ -1,3 +1,10 @@
+2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
+	  clean up.
+	* tests/artists.py:
+	  Put cache back.
+
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:

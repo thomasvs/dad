@@ -54,9 +54,13 @@ def main():
     db = daddb.DADDB(server, dbName)
 
 
-    server = client.CouchDB(host=options.host, port=options.port)
-    dbName = options.database
-    db = daddb.DADDB(server, dbName)
+    # cache artists
+    from dadcouch.model import couch as mcouch
+    d = db.viewDocs('artists', mcouch.Artist)
+    def cacheCb(_):
+        print 'THOMAS: cache: hits %r lookups %r' % (
+            db.db._cache.hits, db.db._cache.lookups)
+    d.addCallback(cacheCb)
 
     modelModule = 'dad%s.models.app.%sAppModel' % (modelType.lower(), modelType)
     amodel = reflect.namedAny(modelModule)(db)
@@ -107,7 +111,10 @@ def main():
 
     # listen to changes on artist selection so we can filter the albums view
     def artist_selected_cb(self, ids):
-        album_ids = albumModel.get_artists_albums(ids)
+        album_ids = []
+        if ids:
+            print 'THOMAS: selected artist ids', ids
+            album_ids = albumModel.get_artists_albums(ids)
         albumView.set_album_ids(album_ids)
 
         trackView.set_artist_ids(ids)
@@ -146,6 +153,7 @@ def main():
     d.addCallback(lambda _: artistController.populate())
     d.addCallback(lambda _: albumController.populate())
     d.addCallback(lambda _: trackController.populate())
+    d.addCallback(cacheCb)
 
     d.callback(None)
 

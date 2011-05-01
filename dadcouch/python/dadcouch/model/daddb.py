@@ -947,7 +947,7 @@ class TrackModel(ScorableModel):
 
 class ArtistModel(ScorableModel):
     """
-    I represent a track in a CouchDB database.
+    I represent an artist in a CouchDB database.
     """
     subjectType = 'artist'
 
@@ -961,4 +961,22 @@ class ArtistModel(ScorableModel):
 
         d.addCallback(lambda artist: setattr(self, 'artist', artist))
         d.addCallback(lambda _, s: s.artist, self)
+        return d
+
+class AlbumModel(ScorableModel):
+    """
+    I represent an album in a CouchDB database.
+    """
+    subjectType = 'album'
+
+    def get(self, albumId):
+        """
+        Get an artist by id.
+
+        @returns: a deferred firing a L{couch.Artist} object.
+        """
+        d = self._daddb.db.map(self._daddb.dbName, albumId, couch.Album)
+
+        d.addCallback(lambda album: setattr(self, 'album', album))
+        d.addCallback(lambda _, s: s.album, self)
         return d
