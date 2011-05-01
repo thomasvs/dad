@@ -173,33 +173,40 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     def _view_popup_menu(self, event):
         sel = self._treeview.get_selection()
         model, paths = sel.get_selected_rows()
+        print 'THOMAS: model', model
         ids = []
 
         for p in paths:
-            i = self._store.get_iter(p)
+            i = self._treeview.get_model().get_iter(p)
             # FIXME: getting id back from store is a non-unicode str ?
-            ids.append(unicode(self._store.get_value(i, COLUMN_ID)))
-            assert type(ids[-1]) is unicode, 'artist id %r is not unicode' % ids[-1]
+            ids.append(unicode(self._treeview.get_model().get_value(i, COLUMN_ID)))
+            assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
 
         for i in ids:
             menu = gtk.Menu()
             item = gtk.MenuItem(label='_Info')
             menu.add(item)
-            item.connect('activate', self._show_artist_info, i)
+            item.connect('activate', self._show_info, i)
             menu.popup(None, None, None, event and event.button or None, event.get_time() or 0.0)
             menu.show_all()
 
-    def _show_artist_info(self, item, artist_id):
-        # FIXME: the view should probably ask its model/controller to show up ?
-        print 'show artist info', artist_id
+    def _show_info(self, item, subject_id):
+        print 'show subject info', subject_id
 
         controller, model, views = self.controller.getRoot().getTriad(self.what)
         w = gtk.Window()
         w.add(views[0].widget)
 
         # FIXME: don't hardcode
-        d = controller.populate(artist_id, userName='thomas')
-        d.addCallback(lambda _: w.set_title(model.artist.name))
+        d = controller.populate(subject_id, userName='thomas')
+
+        def cb(_):
+            if self.what == 'Artist':
+                title = model.artist.name
+            else:
+                title = model.album.name
+            w.set_title(title)
+        d.addCallback(cb)
 
         w.show_all()
 

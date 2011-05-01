@@ -1,3 +1,11 @@
+2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/track.py:
+	* dadgtk/views/views.py:
+	* dadgtk/views/album-info.ui (added):
+	* dadgtk/views/album.py (added):
+	  Add view for album info.
+
 2011-04-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/artist.py:

@@ -30,6 +30,7 @@ class ScorableView(gobject.GObject):
     def init_score(self):
         self._score = self._builder.get_object(
             self.subject_type + "_info_score")
+        assert self._score, "Could not load _info_score widget"
         self._score.foreach(self._score.remove)
         self._scores = {} # category -> widget
         self._timeouts = {} # category -> timeout
