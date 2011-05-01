@@ -196,7 +196,9 @@ def main():
     selecter = CouchSelecter(opts)
 
     def output(selected):
-        print selected.path, selected.artists, selected.title
+        print selected.path.encode('utf-8'), \
+            " & ".join(selected.artists).encode('utf-8'), \
+            selected.title.encode('utf-8')
         sys.stdout.flush()
 
     d = selecter.setup()
