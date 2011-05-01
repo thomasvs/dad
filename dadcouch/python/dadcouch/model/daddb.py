@@ -405,6 +405,10 @@ class DADDB(log.Loggable):
                         res.append((track, trackScore.score, trackScore.userId))
 
                 #res.sort(key=lambda r: r[0].id)
+                if random:
+                    import random as rm
+                    rm.shuffle(res)
+
                 return res
             d.addCallback(loaded)
             return d

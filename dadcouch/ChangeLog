@@ -1,6 +1,8 @@
 2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/selecter/couch.py:
+	  print as utf-8
+	* python/dadcouch/model/daddb.py:
 	  Random full playlists too if asked.
 
 2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
