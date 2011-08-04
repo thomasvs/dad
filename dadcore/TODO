@@ -103,6 +103,13 @@ Successfully analyzed file '/opt/davedina/audio/albums/Sly And The Family Stone 
 AttributeError: 'module' object has no attribute 'option_parser_class'
   Instead, make it list classes in that module
 
+- use case: festival preparation
+  - get a list of bands playing
+  - look them all up
+  - filter the ones you like/care about/want to know
+  - download/buy their music
+  - from the ones you don't know, download a few too
+
 - don't fail on an empty or non-existing category
 
 - create dad/base/track which groups the TrackController and base class for view and model
