@@ -89,7 +89,8 @@ def main():
         db.viewDocs('tracks', couch.Track, include_docs=True,
             startkey=title, endkey=title + 'Z'))
     def eb(failure):
-        print 'FAILURE: ', failure
+        log.warningFailure(failure)
+        print 'track.py: FAILURE: ', failure
         reactor.stop()
     d.addCallback(lambda g: list(g)[0].id)
     d.addCallback(lambda t: controller.populate(t, userName=options.user))
