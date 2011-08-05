@@ -1,5 +1,10 @@
 2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/command/main.py:
+	  Add analyze subcommand from dadgst module.
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* bin/dad.in (svn:executable):
 	* bin/dad (svn:special):
 	* dad/common/logcommand.py (added):

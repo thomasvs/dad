@@ -8,8 +8,14 @@ from dad.common import logcommand
 
 from dad.extern.command import command
 
+
 def main(argv):
+    # add plugins; FIXME: make this dynamic
+    from dadgst.command import plugin
+    plugin.plugin(Dad)
+
     c = Dad()
+
     try:
         ret = c.parse(argv)
     except SystemError, e:
