@@ -5,6 +5,7 @@
 
 import os
 
+from dad.audio import common
 from dad.common import logcommand
 
 class Level(logcommand.LogCommand):
@@ -15,6 +16,7 @@ class Level(logcommand.LogCommand):
         pygst.require('0.10')
         import gobject
         gobject.threads_init()
+        import gst
 
         from dadgst.gstreamer import leveller
 
@@ -28,12 +30,24 @@ class Level(logcommand.LogCommand):
             success = leveller.run(level)
 
             if success:
-                print 'Successfully analyzed file.'
-                rms = level.get_rms_dB()
-                print rms
-
+                self.stdout.write('Successfully analyzed file %s.\n' %
+                    path)
                 mixes = level.get_track_mixes()
-                print '%d slices' % len(mixes)
+                self.stdout.write('%d fragment(s)\n' % len(mixes))
+
+                for i, m in enumerate(mixes):
+                    self.stdout.write('- fragment %d: %s - %s\n' % (
+                        i, gst.TIME_ARGS(m.start), gst.TIME_ARGS(m.end)))
+                    self.stdout.write('  - peak              %02.3f dB (%03.3f %%)\n' % (
+                        m.peak, common.decibelToRaw(m.peak) * 100.0))
+                    self.stdout.write('  - rms               %r dB\n' % m.rms)
+                    self.stdout.write('  - peak rms          %r dB\n' % m.rmsPeak)
+                    self.stdout.write('  - 95 percentile rms %r dB\n' % m.rmsPercentile)
+                    self.stdout.write('  - weighted rms      %r dB\n' % m.rmsWeighted)
+                    start = m.attack.get(m.rmsPeak - 9)
+                    end = m.decay.get(m.rmsPeak - 9)
+                    self.stdout.write('  - weighted from %s to %s\n' % (
+                        gst.TIME_ARGS(start), gst.TIME_ARGS(end)))
 
             level.clean()
 
