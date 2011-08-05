@@ -222,6 +222,7 @@ class Leveller(gst.Pipeline):
             # initialize if this is the first message
             if not self._channels:
                 self._channels = len(s["rms"])
+                self.debug("got %d channels" % self._channels)
                 self.rmsdBs = [level.Level(scale=level.SCALE_DECIBEL)
                     for c in range(self._channels)]
                 self.peakdBs = [level.Level(scale=level.SCALE_DECIBEL)
@@ -237,6 +238,7 @@ class Leveller(gst.Pipeline):
             for channel, value in enumerate(tuple(s["decay"])):
                 self.decaydBs[channel].append((endtime, value))
         elif message.type == gst.MESSAGE_EOS:
+            self.debug("EOS, done")
             # whole pipeline eos'd, so we're done
             self.emit('done', sources.EOS)
 
@@ -307,18 +309,8 @@ class Leveller(gst.Pipeline):
 
 gobject.type_register(Leveller)
 
-if __name__ == "__main__":
-    # this call is always necessary if we're going to have callbacks from
-    # threads
-    gobject.threads_init()
+def run(leveller):
 
-    #main = gobject.MainLoop()
-
-    try:
-        leveller = Leveller(sys.argv[1])
-    except IndexError:
-        sys.stderr.write("Please give a file to calculate level of\n")
-        sys.exit(1)
     gst.debug('leveller refcount on creation: %d' % leveller.__grefcount__)
 
     bus = leveller.get_bus()
@@ -352,8 +344,29 @@ if __name__ == "__main__":
         del message
         utils.gc_collect('deleted message %s' % m)
 
+
+    bus.remove_signal_watch()
+    del bus
+    utils.gc_collect('deleted bus')
     leveller.stop()
-    leveller.clean()
+
+
+    return success
+
+if __name__ == "__main__":
+    # this call is always necessary if we're going to have callbacks from
+    # threads
+    gobject.threads_init()
+
+    #main = gobject.MainLoop()
+
+    try:
+        leveller = Leveller(sys.argv[1])
+    except IndexError:
+        sys.stderr.write("Please give a file to calculate level of\n")
+        sys.exit(1)
+
+    success = run(leveller)
 
     if success:
         print 'Successfully analyzed file.'
@@ -366,9 +379,7 @@ if __name__ == "__main__":
             handle.close()
             print 'Dumped RMS dB pickle to %s' % path
 
-    bus.remove_signal_watch()
-    del bus
-    utils.gc_collect('deleted bus')
+    leveller.clean()
 
     assert leveller.__grefcount__ == 1, "There is a leak in leveller's refcount"
     gst.debug('deleting leveller, verify objects are freed')
