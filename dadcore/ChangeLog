@@ -1,3 +1,16 @@
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* bin/dad.in (svn:executable):
+	* bin/dad (svn:special):
+	* dad/common/logcommand.py (added):
+	* dad/command (added):
+	* dad/command/__init__.py (added):
+	* dad/command/main.py (added):
+	* bin (added):
+	* bin/dad (added):
+	* bin/dad.in (added):
+	  Add a dad command.
+
 2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/controller/artist.py:
