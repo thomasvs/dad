@@ -1,5 +1,12 @@
 2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgst/command (added):
+	* dadgst/command/plugin.py (added):
+	* dadgst/command/__init__.py (added):
+	  Add a plugin for the dad command that can analyze files.
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgst/gstreamer/leveller.py:
 	  Rewrite to be able to call functionality from the outside.
 
