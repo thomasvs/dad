@@ -8,6 +8,10 @@ import os
 from dad.audio import common
 from dad.common import logcommand
 
+from dadgst.task import level
+
+from dadgst.extern.task import task
+
 class Level(logcommand.LogCommand):
     description = """Shows levels for audio files."""
 
@@ -18,21 +22,23 @@ class Level(logcommand.LogCommand):
         gobject.threads_init()
         import gst
 
-        from dadgst.gstreamer import leveller
+        from dadgst.task import level
+
+        runner = task.SyncRunner()
 
         for path in args:
+            path = path.decode('utf-8')
             if not os.path.exists(path):
-                self.stderr.write('Could not find %s\n', path)
+                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
                 continue
 
-            level = leveller.Leveller(path)
+            t = level.LevellerTask(path)
+            runner.run(t)
 
-            success = leveller.run(level)
-
-            if success:
+            if t.done:
                 self.stdout.write('Successfully analyzed file %s.\n' %
-                    path)
-                mixes = level.get_track_mixes()
+                    path.encode('utf-8'))
+                mixes = t.get_track_mixes()
                 self.stdout.write('%d fragment(s)\n' % len(mixes))
 
                 for i, m in enumerate(mixes):
@@ -48,12 +54,41 @@ class Level(logcommand.LogCommand):
                     end = m.decay.get(m.rmsPeak - 9)
                     self.stdout.write('  - weighted from %s to %s\n' % (
                         gst.TIME_ARGS(start), gst.TIME_ARGS(end)))
+            else:
+                self.stderr.write('Could not level %s\n' %
+                    path.encode('utf-8'))
 
-            level.clean()
+            t.clean()
 
         
 class Metadata(logcommand.LogCommand):
     description = """Shows metadata for audio files."""
+
+    def do(self, args):
+        import gobject
+        gobject.threads_init()
+
+        import gst
+
+        runner = task.SyncRunner()
+
+        for path in args:
+            path = path.decode('utf-8')
+            if not os.path.exists(path):
+                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
+                continue
+
+            t = level.TagReadTask(path)
+            runner.run(t)
+
+            self.stderr.write('%s:\n' % path.encode('utf-8'))
+            for name, tag in [
+                ('Artist', gst.TAG_ARTIST),
+                ('Title', gst.TAG_TITLE),
+                ('Album', gst.TAG_ALBUM),
+            ]:
+                if tag in t.taglist:
+                    self.stdout.write('- %s: %s\n' % (name, t.taglist[tag]))
 
 class Analyze(logcommand.LogCommand):
     description = """Analyzes audio files."""

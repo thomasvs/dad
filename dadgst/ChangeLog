@@ -1,5 +1,16 @@
 2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgst/task (added):
+	* dadgst/task/__init__.py (added):
+	* dadgst/task/level.py (added):
+	  Add LevellerTask.
+	* dadgst/gstreamer/leveller.py:
+	  Deprecate the old Leveller.
+	* dadgst/command/plugin.py:
+	  Use the new leveller task in dad analyze level
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgst/command/plugin.py:
 	  Show more output.
 

@@ -35,6 +35,7 @@ from gst.extend import sources, utils, pygobject
 
 from dad.audio import level, mixing
 
+# FIXME: deprecate in favor of task-based leveller
 class Leveller(gst.Pipeline):
     """
     I am a pipeline that calculates RMS/decay/peak values for each channel.
