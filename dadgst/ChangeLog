@@ -1,5 +1,10 @@
 2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgst/gstreamer/leveller.py:
+	  Fix docs.
+
+2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgst/command (added):
 	* dadgst/command/plugin.py (added):
 	* dadgst/command/__init__.py (added):

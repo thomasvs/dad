@@ -45,12 +45,12 @@ class Leveller(gst.Pipeline):
     If I signaled EOS, then the arrays of RMS/decay/peak values can be
     retrieved from me.
 
-    @ivar  rmsdB:   list of (time, tuple of rms values per channel)
-    @type  rmsdB:   list of (long, [tuple of float])
-    @ivar  peakdB:  list of (time, tuple of peak values per channel)
-    @type  peakdB:  list of (long, [tuple of float])
-    @ivar  decaydB: list of (time, tuple of decay values per channel)
-    @type  decaydB: list of (long, [tuple of float])
+    @ivar  rmsdBs:   list of (time, tuple of rms values per channel)
+    @type  rmsdBs:   list of L{level.Level}
+    @ivar  peakdBs:  list of (time, tuple of peak values per channel)
+    @type  peakdBs:  list of L{level.Level}
+    @ivar  decaydBs: list of (time, tuple of decay values per channel)
+    @type  decaydBs: list of L{level.Level}
     """
 
     pygobject.gsignal('done', str)
@@ -157,6 +157,9 @@ class Leveller(gst.Pipeline):
 
         @param channel: channel number to get peak values for, starting from 0
         @type  channel: int or None
+
+        @returns: the peak level graph
+        @rtype:   L{level.Level}
         """
         return self.get_peak_dB(channel).convert(level.SCALE_RAW)
 
