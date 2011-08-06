@@ -1,3 +1,12 @@
+2011-08-06  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/task/fingerprint.py (added):
+	  Add a task for TRM fingerprinting.
+	* dadgst/task/level.py:
+	  Add getting streaminfo.
+	* dadgst/command/plugin.py:
+	  Add dad analyze trm and streaminfo.
+
 2011-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgst/task (added):

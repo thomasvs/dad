@@ -8,7 +8,7 @@ import os
 from dad.audio import common
 from dad.common import logcommand
 
-from dadgst.task import level
+from dadgst.task import level, fingerprint
 
 from dadgst.extern.task import task
 
@@ -81,7 +81,7 @@ class Metadata(logcommand.LogCommand):
             t = level.TagReadTask(path)
             runner.run(t)
 
-            self.stderr.write('%s:\n' % path.encode('utf-8'))
+            self.stdout.write('%s:\n' % path.encode('utf-8'))
             for name, tag in [
                 ('Artist', gst.TAG_ARTIST),
                 ('Title', gst.TAG_TITLE),
@@ -90,10 +90,34 @@ class Metadata(logcommand.LogCommand):
                 if tag in t.taglist:
                     self.stdout.write('- %s: %s\n' % (name, t.taglist[tag]))
 
+class TRM(logcommand.LogCommand):
+    description = """Calculates TRM fingerprint."""
+
+    def do(self, args):
+        import gobject
+        gobject.threads_init()
+
+        import gst
+
+        runner = task.SyncRunner()
+
+        for path in args:
+            path = path.decode('utf-8')
+            if not os.path.exists(path):
+                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
+                continue
+
+            t = fingerprint.TRMTask(path)
+            runner.run(t)
+
+            self.stdout.write('%s:\n' % path.encode('utf-8'))
+            self.stdout.write('TRM %s\n' % t.trm)
+
+
 class Analyze(logcommand.LogCommand):
     description = """Analyzes audio files."""
 
-    subCommandClasses = [ Level, Metadata, ]
+    subCommandClasses = [ Level, Metadata, TRM, ]
 
 
 # called by main command code before instantiating the class

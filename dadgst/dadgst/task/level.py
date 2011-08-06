@@ -84,7 +84,7 @@ class LevellerTask(log.Loggable, gstreamer.GstPipelineTask):
         self.debug('__init__ end: source refcount: %d' % self._source.__grefcount__)
 
     def parsed(self):
-        self._bus.connect('sync-message::element', self._message_element_cb)
+        self.bus.connect('sync-message::element', self._message_element_cb)
         
     def paused(self):
         # get duration
@@ -323,6 +323,69 @@ class TagReadTask(gstreamer.GstPipelineTask):
             decodebin name=decoder !
             fakesink''' % (
                 gstreamer.quoteParse(self._path).encode('utf-8'))
+
+    def bus_eos_cb(self, bus, message):
+        self.debug('eos, scheduling stop')
+        self.schedule(0, self.stop)
+
+    def bus_tag_cb(self, bus, message):
+        taglist = message.parse_tag()
+        # FIXME: merge tags ?
+
+        # as soon as we have at least ARTIST, we consider we're done
+        if self.gst.TAG_ARTIST in taglist:
+            self.taglist = taglist
+            # FIXME: stop doesn't actually wait for pipeline to go to
+            # paused, so messages may still come from a thread as
+            # we're throwing things away
+            self.schedule(0, self.stop)
+
+class StreamInfoTask(gstreamer.GstPipelineTask):
+    """
+    I am a task that reads streaminfo.
+
+    @ivar  samplerate: samplerate
+    @type  length:     length in samples
+    """
+
+    description = 'Reading stream info'
+
+    samplerate = None
+    length = None
+
+    def __init__(self, path):
+        """
+        """
+        assert type(path) is unicode, "path %r is not unicode" % path
+        
+        self._path = path
+
+    def getPipelineDesc(self):
+        return '''
+            filesrc location="%s" !
+            decodebin name=decoder !
+            fakesink''' % (
+                gstreamer.quoteParse(self._path).encode('utf-8'))
+
+    def paused(self):
+        # get duration
+        self.debug('query duration')
+        try:
+            duration, qformat = self._level.query_duration(self.gst.FORMAT_DEFAULT)
+        except self.gst.QueryError, e:
+            self.setException(e)
+            # schedule it, otherwise runner can get set to None before
+            # we're done starting
+            self.schedule(0, self.stop)
+            return
+
+        # wavparse 0.10.14 returns in bytes
+        if qformat == self.gst.FORMAT_BYTES:
+            self.debug('query returned in BYTES format')
+            duration /= 4
+        self.debug('total duration: %r', duration)
+        self.length = duration
+
 
     def bus_eos_cb(self, bus, message):
         self.debug('eos, scheduling stop')
