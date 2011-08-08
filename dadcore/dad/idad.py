@@ -3,12 +3,20 @@
 
 from zope import interface
 
+"""
+Interfaces for functionality provided by add-on modules.
+"""
+
 class ICommand(interface.Interface):
     def addCommands(commandClass):
         pass
 
-class IDatabaseProvider(interface.Interface):
-    pass
+class IDatabase(interface.Interface):
+    def lookupPath(path):
+        """
+        @type path: unicode
+        """
+        pass
 
 class IAnalyzer(interface.Interface):
     pass
