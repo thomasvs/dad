@@ -14,6 +14,10 @@ def main(argv):
     from dadgst.command import plugin
     plugin.plugin(Dad)
 
+    from dadcouch.command import plugin
+    plugin.plugin(Dad)
+
+
     c = Dad()
 
     try:
