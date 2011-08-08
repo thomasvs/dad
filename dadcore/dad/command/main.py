@@ -14,17 +14,12 @@ from dad.extern.command import command
 
 
 def main(argv):
+
+    # import command plugins
+
     from dad import plugins
     for commander in plugin.getPlugins(idad.ICommand, plugins):
         commander.addCommands(Dad)
-
-    # add plugins; FIXME: make this dynamic
-    #from dadgst.command import plugin as p
-    #p.plugin(Dad)
-
-    from dadcouch.command import plugin as p
-    p.plugin(Dad)
-
 
     c = Dad()
 

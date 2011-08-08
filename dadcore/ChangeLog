@@ -1,5 +1,10 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/command/main.py:
+	  Remove dadcouch hardcoded plugin.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/plugins (added):
 	* dad/plugins/__init__.py (added):
 	* dad/idad.py (added):
