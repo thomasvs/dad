@@ -1,3 +1,13 @@
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad (added):
+	* dad/plugins (added):
+	* dad/plugins/pdadgst.py (added):
+	* dadgst/command (deleted):
+	* dadgst/command/plugin.py (deleted):
+	* dadgst/command/__init__.py (deleted):
+	  Rewrite as twisted-using command plugin.
+
 2011-08-07  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgst/command/plugin.py:
