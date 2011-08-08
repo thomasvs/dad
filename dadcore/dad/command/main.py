@@ -5,12 +5,17 @@ import sys
 
 from twisted import plugin
 
+from twisted.internet import reactor
+
 from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
 
+from dad.task import md5task
+
 from dad.extern.command import command
+from dad.extern.task import task
 
 
 def main(argv):
@@ -41,6 +46,31 @@ def main(argv):
 
     return ret
 
+
+class MD5(logcommand.LogCommand):
+
+    def do(self, args):
+
+        def later():
+            d = self.doLater(args)
+            # d.addCallback(lambda _: reactor.stop())
+
+        reactor.callLater(0, later)
+
+        reactor.run()
+
+    def doLater(self, args):
+        runner = task.SyncRunner()
+
+        for path in args:
+            path = path.decode('utf-8')
+            t = md5task.MD5Task(path)
+            runner.run(t)
+            self.stdout.write('%s %s\n' % (t.md5sum, path.encode('utf-8')))
+
+        reactor.stop()
+
+
 class Dad(logcommand.LogCommand):
     usage = "%prog %command"
     description = """DAD is a digital audio database.
@@ -49,7 +79,7 @@ DAD gives you a tree of subcommands to work with.
 You can get help on subcommands by using the -h option to the subcommand.
 """
 
-    subCommandClasses = []
+    subCommandClasses = [MD5, ]
 
     def addOptions(self):
         # FIXME: is this the right place ?

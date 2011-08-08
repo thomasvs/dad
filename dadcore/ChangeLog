@@ -1,5 +1,13 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/task (added):
+	* dad/task/md5task.py (added):
+	  Add task for md5sum using twisted consumer/producer
+	* dad/command/main.py:
+	  Add dad md5 command.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/idad.py:
 	  Update interface for database provider.
 
