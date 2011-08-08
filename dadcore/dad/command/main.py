@@ -3,6 +3,10 @@
 
 import sys
 
+from twisted import plugin
+
+from dad import idad
+
 from dad.common import log
 from dad.common import logcommand
 
@@ -10,12 +14,16 @@ from dad.extern.command import command
 
 
 def main(argv):
-    # add plugins; FIXME: make this dynamic
-    from dadgst.command import plugin
-    plugin.plugin(Dad)
+    from dad import plugins
+    for commander in plugin.getPlugins(idad.ICommand, plugins):
+        commander.addCommands(Dad)
 
-    from dadcouch.command import plugin
-    plugin.plugin(Dad)
+    # add plugins; FIXME: make this dynamic
+    #from dadgst.command import plugin as p
+    #p.plugin(Dad)
+
+    from dadcouch.command import plugin as p
+    p.plugin(Dad)
 
 
     c = Dad()
@@ -68,3 +76,4 @@ You can get help on subcommands by using the -h option to the subcommand.
     def parse(self, argv):
         log.debug("dad", "dad %s" % " ".join(argv))
         logcommand.LogCommand.parse(self, argv)
+

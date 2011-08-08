@@ -1,5 +1,13 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/plugins (added):
+	* dad/plugins/__init__.py (added):
+	* dad/idad.py (added):
+	* dad/command/main.py:
+	  Use twisted plugins system.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/command/main.py:
 	  Allow dadcouch to plugin too.
 
