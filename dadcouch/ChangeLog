@@ -1,5 +1,11 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-md5sum (added):
+	* couchdb/views/view-md5sum/map.js (added):
+	  Add a view for md5sums.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/command/lookup.py (deleted):
 	* python/dadcouch/command/couchdb.py:
 	  Move command into couchdb.
