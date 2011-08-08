@@ -6,6 +6,56 @@ import math
 
 from dadcouch.extern.paisley import mapping
 
+# new documents
+class Track(mapping.Document):
+    type = mapping.TextField(default="track")
+
+    name = mapping.TextField()
+
+    artist_ids = mapping.ListField(mapping.TextField())
+
+    added = mapping.DateTimeField(default=datetime.datetime.now)
+    
+    fragments = mapping.ListField(
+        mapping.DictField(mapping.Mapping.build(
+            files = mapping.ListField(
+                mapping.DictField(mapping.Mapping.build(
+                    # each file is on a host
+                    host = mapping.TextField(),
+                    # and on a volume and path on that host
+                    volume = mapping.TextField(),
+                    volume_path = mapping.TextField(),
+                    path = mapping.TextField(),
+            ))),
+
+            mtime = mapping.DateTimeField(),
+            size = mapping.IntegerField(),
+            md5sum = mapping.TextField(),
+
+            samplerate = mapping.IntegerField(),
+            duration = mapping.IntegerField(),
+            audio_md5sum = mapping.TextField(),
+
+            # fingerprints
+            trm = mapping.TextField(),
+
+            # fragment info
+
+            start = mapping.LongField(), # in samples
+            end = mapping.LongField(), # in samples
+            peak = mapping.FloatField(),
+            rms = mapping.FloatField(),
+            rms_percentile = mapping.FloatField(),
+            rms_peak = mapping.FloatField(),
+            rms_weighted = mapping.FloatField(),
+            attack = mapping.ListField(mapping.TupleField((
+                mapping.FloatField, mapping.LongField))),
+            decay = mapping.ListField(mapping.TupleField((
+                mapping.FloatField, mapping.LongField)))
+        ))
+    )
+
+# old documents
 class Category(mapping.Document):
     type = mapping.TextField(default="category")
 
@@ -102,7 +152,7 @@ class Directory(mapping.Document):
     mtime = mapping.DateTimeField()
     inode = mapping.IntegerField()
 
-class Track(mapping.Document):
+class OldTrack(mapping.Document):
     type = mapping.TextField(default="track")
 
     name = mapping.TextField()
