@@ -1,5 +1,12 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-host-path (added):
+	* couchdb/views/host-path (deleted):
+	* couchdb/views/host-path/map.js (deleted):
+	  rename view to make easier to grep.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/host-path/map.js:
 	  Add volume path.
 	* python/dadcouch/command/plugin.py:
