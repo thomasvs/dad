@@ -35,7 +35,8 @@ from dadcouch.model import couch, daddb
 
 _DEFAULT_HOST = 'localhost'
 _DEFAULT_PORT = 5984
-_DEFAULT_DB = 'dad'
+# temporarily change for rewrite
+_DEFAULT_DB = 'dadrewrite'
 _DEFAULT_ABOVE = 0.7
 _DEFAULT_BELOW = 1.0
 _DEFAULT_CATEGORY = 'Good'

@@ -1,5 +1,17 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/host-path/map.js:
+	  Add volume path.
+	* python/dadcouch/command/plugin.py:
+	  Add lookup command.
+	  Add couchdb options.
+	* python/dadcouch/selecter/couch.py:
+	  Default to dadrewrite database.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Get a row back.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/command (added):
 	* python/dadcouch/command/plugin.py (added):
 	* python/dadcouch/command/__init__.py (added):

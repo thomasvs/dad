@@ -6,6 +6,7 @@ import commands
 
 from twisted.internet import defer
 
+from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley.test import test_util
 
 from dadcouch.model import daddb, couch
@@ -31,6 +32,12 @@ class DADDBTestCase(test_util.CouchDBTestCase):
             "%s http://localhost:%d/dadtest/" % (couchPath, self.wrapper.port))
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
+class Row:
+    def fromDict(self, d):
+        self.id = d['id']
+        self.key = d['key']
+        self.value = d['value']
+
 class SimpleTestCase(DADDBTestCase):
 
     @defer.inlineCallbacks
@@ -41,18 +48,15 @@ class SimpleTestCase(DADDBTestCase):
                 {
                     'files': [{
                         'host': 'localhost',
-                        'volume': 'root',
-                        'volume_path': '/',
-                        #'path': '/tmp/hitme.flac',
+                        'path': '/tmp/hitme.flac',
                     }],
                 }]
         )
         stored = yield self.db.saveDoc('dadtest', track._data)
-        ret = yield self.daddb.viewDocs('host-path', None)
+        ret = yield self.daddb.viewDocs('host-path', Row)
 
-        print list(ret)
+        print [r.key for r in ret]
         
- 
 class OldSimpleTestCase: # old test cases (DADDBTestCase):
 
     @defer.inlineCallbacks

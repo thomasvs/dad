@@ -8,9 +8,15 @@ import os
 from dad.audio import common
 from dad.common import logcommand
 
+from dadcouch.selecter import couch
+
+
 class Lookup(logcommand.LogCommand):
     description = """Look up audio files in the database."""
 
+    def addOptions(self):
+        self.parser.add_options(couch.couchdb_option_list)
+    
     def do(self, args):
         for path in args:
             path = path.decode('utf-8')

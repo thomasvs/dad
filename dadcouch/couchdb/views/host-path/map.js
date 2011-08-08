@@ -1,9 +1,13 @@
 function(doc) {
     if (doc.type == 'track') {
-	for (fragment in doc.fragments) {
-	    for (file in fragment.files) {
-                emit([file.volume_path, file.path], 1);
+        doc.fragments.forEach(
+            function(fragment) {
+                fragment.files.forEach(
+                    function(file) {
+                        emit([file.host, file.path], 1);
+                    }
+                )
             }
-        }
+        )
     }
 }
