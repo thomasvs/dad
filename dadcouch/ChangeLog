@@ -1,5 +1,12 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dad (added):
+	* python/dad/plugins (added):
+	* python/dad/plugins/pdadcouch.py (added):
+	  Add dadcouch twisted plugin.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  Fix addFragments.
 	* python/dadcouch/model/daddb.py:
