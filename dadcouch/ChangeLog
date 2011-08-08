@@ -1,5 +1,11 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/command/lookup.py (added):
+	* python/dadcouch/command/plugin.py (deleted):
+	  Rename command.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dad (added):
 	* python/dad/plugins (added):
 	* python/dad/plugins/pdadcouch.py (added):
