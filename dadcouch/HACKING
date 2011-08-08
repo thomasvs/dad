@@ -10,3 +10,7 @@ Testing
 - selecter:
   python python/dadcouch/selecter/couch.py -h
 
+CouchDB
+-------
+- views:
+  - name all of them view-smth-smth so they are easier to grep for in code
