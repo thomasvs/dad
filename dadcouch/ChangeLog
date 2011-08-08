@@ -1,5 +1,13 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/command/couchdb.py (added):
+	* python/dad/plugins/pdadcouch.py:
+	* python/dadcouch/command/lookup.py:
+	  Create a couchdb command.
+	  Add an add command to add audiofiles to the database.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/command/lookup.py:
 	  Handle lookup of track, works on tracks not in database.
 

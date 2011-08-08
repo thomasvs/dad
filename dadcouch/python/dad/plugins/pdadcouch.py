@@ -6,14 +6,14 @@ from twisted import plugin
 
 from dad import idad
 
-from dadcouch.command import lookup
+from dadcouch.command import couchdb
 
 # twisted.plugin interface
 class CommandAppender(object):
     interface.implements(plugin.IPlugin, idad.ICommand)
 
     def addCommands(self, commandClass):
-        commandClass.subCommandClasses.append(lookup.Lookup)
+        commandClass.subCommandClasses.append(couchdb.CouchDB)
 
 
 # instantiate twisted plugins
