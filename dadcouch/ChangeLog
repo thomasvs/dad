@@ -1,3 +1,10 @@
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/command (added):
+	* python/dadcouch/command/plugin.py (added):
+	* python/dadcouch/command/__init__.py (added):
+	  Add plugin for dad command.
+
 2011-08-07  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/couch.py:
