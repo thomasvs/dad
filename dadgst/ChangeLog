@@ -1,5 +1,14 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgst/command (added):
+	* dadgst/command/__init__.py (added):
+	* dadgst/command/analyze.py (added):
+	  Re-add command subclass.
+	* dad/plugins/pdadgst.py:
+	  Separate twisted plugin code from command code.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad (added):
 	* dad/plugins (added):
 	* dad/plugins/pdadgst.py (added):
