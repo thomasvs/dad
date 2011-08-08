@@ -13,7 +13,6 @@ from dad.common import logcommand
 
 from dadcouch.model import daddb, couch
 from dadcouch.selecter import couch as scouch
-from dadcouch.command import lookup
 
 from dadcouch.extern.paisley import client
 
