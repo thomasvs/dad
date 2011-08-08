@@ -1,5 +1,10 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/command/couchdb.py:
+	  Extract a common CouchDB command base class.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-md5sum (added):
 	* couchdb/views/view-md5sum/map.js (added):
 	  Add a view for md5sums.
