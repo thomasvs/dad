@@ -12,3 +12,7 @@ pep8:
 	find python/dadcouch -name '*.py' | grep -v paisley/mapping.py | xargs scripts/pep8.py --repeat
 
 check: trial pep8
+
+doc: python/dadcouch Makefile
+	@mkdir -p doc
+	epydoc -o doc/html dad dadgst dadcouch
