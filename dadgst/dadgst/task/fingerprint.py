@@ -117,3 +117,93 @@ class TRMTask(log.Loggable, gstreamer.GstPipelineTask):
 
     def stopped(self):
         self.trm = self._trm
+
+CHROMAPRINT_DURATION = 60
+
+class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
+    """
+    I calculate an acoustid fingerprint using chromaprint.
+
+    @ivar fingerprint: the resulting fingerprint
+    """
+
+    fingerprint = None
+    description = 'Calculating acoustid fingerprint'
+
+    def __init__(self, path):
+        assert type(path) is unicode, "path %r is not unicode" % path
+
+        self._path = path
+
+    def getPipelineDesc(self):
+        return '''
+            filesrc location="%s" !
+            decodebin ! audioconvert ! audio/x-raw-int !
+            chromaprint name=chromaprint duration=%d !
+            appsink name=sink sync=False emit-signals=True''' % (
+                gstreamer.quoteParse(self._path).encode('utf-8'),
+                CHROMAPRINT_DURATION)
+
+    ### base class implementations
+
+    def parsed(self):
+        sink = self.pipeline.get_by_name('sink')
+        sink.connect('new-buffer', self._new_buffer_cb)
+
+    def paused(self):
+        self.gst.debug('query duration')
+
+        self._length, qformat = self.pipeline.query_duration(self.gst.FORMAT_TIME)
+        self.gst.debug('total length: %r' % self._length)
+        self.gst.debug('scheduling setting to play')
+        # since set_state returns non-False, adding it as timeout_add
+        # will repeatedly call it, and block the main loop; so
+        #   gobject.timeout_add(0L, self.pipeline.set_state, gst.STATE_PLAYING)
+        # would not work.
+
+
+    # FIXME: can't move this to base class because it triggers too soon
+    # in the case of checksum
+    def bus_eos_cb(self, bus, message):
+        self.gst.debug('eos, scheduling stop')
+        self.schedule(0, self.stop)
+
+
+    def bus_tag_cb(self, bus, message):
+        taglist = message.parse_tag()
+        if 'musicbrainz-trmid' in taglist.keys():
+            self._trm = taglist['musicbrainz-trmid']
+
+    def _new_buffer_cb(self, sink):
+        # this is just for counting progress
+        buf = sink.emit('pull-buffer')
+        position = buf.timestamp
+        self._position = position
+        if buf.duration != self.gst.CLOCK_TIME_NONE:
+            position += buf.duration
+        self.setProgress(float(position) / min(
+            CHROMAPRINT_DURATION * self.gst.SECOND, self._length))
+
+        if position > CHROMAPRINT_DURATION * self.gst.SECOND:
+            self.debug('duration reached, scheduling stop')
+            self.done = True
+            self.schedule(0, self.stop)
+
+    def bus_tag_cb(self, bus, message):
+        self.log("got message %r" % message)
+        taglist = message.parse_tag()
+        if 'musicbrainz-trmid' not in taglist:
+            return
+        self._trm = taglist['musicbrainz-trmid']
+        self.debug('got TRM, scheduling stop')
+
+        self.schedule(0, self.stop)
+
+    def bus_eos_cb(self, bus, message):
+        self.debug('eos, scheduling stop')
+        self.done = True
+        self.schedule(0, self.stop)
+
+    def stopped(self):
+        element = self.pipeline.get_by_name('chromaprint')
+        self.fingerprint = element.get_property('fingerprint')

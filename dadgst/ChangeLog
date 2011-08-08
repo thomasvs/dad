@@ -1,3 +1,9 @@
+2011-08-07  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/command/plugin.py:
+	* dadgst/task/fingerprint.py:
+	  Add chromaprint fingerprinting
+
 2011-08-06  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgst/task/fingerprint.py (added):

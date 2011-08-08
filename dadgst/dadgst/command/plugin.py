@@ -12,6 +12,30 @@ from dadgst.task import level, fingerprint
 
 from dadgst.extern.task import task
 
+class ChromaPrint(logcommand.LogCommand):
+    description = """Calculates acoustid chromaprint fingerprint."""
+
+    def do(self, args):
+        import gobject
+        gobject.threads_init()
+
+        import gst
+
+        runner = task.SyncRunner()
+
+        for path in args:
+            path = path.decode('utf-8')
+            if not os.path.exists(path):
+                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
+                continue
+
+            t = fingerprint.ChromaPrintTask(path)
+            runner.run(t)
+
+            self.stdout.write('%s:\n' % path.encode('utf-8'))
+            self.stdout.write('chromaprint:\n%s\n' % t.fingerprint)
+
+
 class Level(logcommand.LogCommand):
     description = """Shows levels for audio files."""
 
@@ -117,7 +141,7 @@ class TRM(logcommand.LogCommand):
 class Analyze(logcommand.LogCommand):
     description = """Analyzes audio files."""
 
-    subCommandClasses = [ Level, Metadata, TRM, ]
+    subCommandClasses = [ ChromaPrint, Level, Metadata, TRM, ]
 
 
 # called by main command code before instantiating the class
