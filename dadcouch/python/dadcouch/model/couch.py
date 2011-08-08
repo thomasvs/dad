@@ -31,11 +31,11 @@ class Track(mapping.Document):
                     volume = mapping.TextField(),
                     volume_path = mapping.TextField(),
                     path = mapping.TextField(),
+                    mtime = mapping.DateTimeField(),
+                    size = mapping.IntegerField(),
+                    md5sum = mapping.TextField(),
             ))),
 
-            mtime = mapping.DateTimeField(),
-            size = mapping.IntegerField(),
-            md5sum = mapping.TextField(),
 
             samplerate = mapping.IntegerField(),
             duration = mapping.IntegerField(),
@@ -60,11 +60,12 @@ class Track(mapping.Document):
         ))
     )
 
-    def addFragment(self, host, path):
+    def addFragment(self, host, path, md5sum):
         self.fragments.append({
             'files': [{
                 'host': host,
                 'path': path,
+                'md5sum': md5sum,
             }, ],
         })
 

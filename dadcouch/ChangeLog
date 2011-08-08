@@ -1,5 +1,10 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  These parameters are tied to a file, not to a track.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/command/couchdb.py:
 	  Extract a common CouchDB command base class.
 
