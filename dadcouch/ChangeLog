@@ -1,3 +1,9 @@
+2011-08-07  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* couchdb/views/host-path (added):
+	* couchdb/views/host-path/map.js (added):
+	  Add a view for tracks on hosts with paths.
+
 2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/selecter/couch.py:
