@@ -1,5 +1,13 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  Fix addFragments.
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/test/test_model_daddb.py:
+	  Fix add and test.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-host-path (added):
 	* couchdb/views/host-path (deleted):
 	* couchdb/views/host-path/map.js (deleted):

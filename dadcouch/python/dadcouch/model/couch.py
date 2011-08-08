@@ -6,6 +6,11 @@ import math
 
 from dadcouch.extern.paisley import mapping
 
+"""
+Document mappings from CouchDB to python.
+"""
+
+
 # new documents
 class Track(mapping.Document):
     type = mapping.TextField(default="track")
@@ -54,6 +59,14 @@ class Track(mapping.Document):
                 mapping.FloatField, mapping.LongField)))
         ))
     )
+
+    def addFragment(self, host, path):
+        self.fragments.append({
+            'files': [{
+                'host': host,
+                'path': path,
+            }, ],
+        })
 
 # old documents
 class Category(mapping.Document):

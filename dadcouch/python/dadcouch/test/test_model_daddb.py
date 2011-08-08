@@ -14,6 +14,11 @@ from dadcouch.model import daddb, couch
 
 class DADDBTestCase(test_util.CouchDBTestCase):
 
+    """
+    @type db:    L{paisley.client.CouchDB}
+    @type daddb: L{daddb.DADDB}
+    """
+
     @defer.inlineCallbacks
     def setUp(self):
         test_util.CouchDBTestCase.setUp(self)
@@ -32,31 +37,79 @@ class DADDBTestCase(test_util.CouchDBTestCase):
             "%s http://localhost:%d/dadtest/" % (couchPath, self.wrapper.port))
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
-class Row:
-    def fromDict(self, d):
-        self.id = d['id']
-        self.key = d['key']
-        self.value = d['value']
-
 class SimpleTestCase(DADDBTestCase):
 
     @defer.inlineCallbacks
-    def test_addTrack(self):
+    def test_addTrackSimple(self):
+        host = u'localhost'
+        path = u'/tmp/hitme.flac'
+
         track = couch.Track(
             name='Hit Me',
             fragments=[
                 {
                     'files': [{
-                        'host': 'localhost',
-                        'path': '/tmp/hitme.flac',
+                        'host': host,
+                        'path': path,
                     }],
                 }]
         )
-        stored = yield self.db.saveDoc('dadtest', track._data)
-        ret = yield self.daddb.viewDocs('host-path', Row)
 
-        print [r.key for r in ret]
-        
+        stored = yield self.daddb.saveDoc(track)
+
+        # look up
+        ret = yield self.daddb.getTrackByHostPath(host, path)
+
+        results = list(ret)
+        self.assertEquals(len(results), 1)
+        self.assertEquals(results[0].key[0], host)
+        self.assertEquals(results[0].key[1], path)
+
+    @defer.inlineCallbacks
+    def test_addTrackComposite(self):
+        host = u'localhost'
+        path = u'/tmp/hitme.flac'
+
+        track = couch.Track(name='Hit Me')
+        track.addFragment(host=host, path=path)
+
+        stored = yield self.daddb.saveDoc(track)
+
+
+        # look up
+        ret = yield self.daddb.viewDocs('view-host-path', daddb.GenericRow)
+
+        results = list(ret)
+        self.assertEquals(len(results), 1)
+        self.assertEquals(results[0].key[0], host)
+        self.assertEquals(results[0].key[1], path)
+
+    @defer.inlineCallbacks
+    def test_addTrackCompositeMultiHost(self):
+        host = u'localhost'
+        path = u'/tmp/hitme.flac'
+
+        track = couch.Track(name='Hit Me')
+        track.addFragment(host=host, path=path)
+
+        stored = yield self.daddb.saveDoc(track)
+
+        track = couch.Track(name='Hit Me')
+        track.addFragment(host=host + '-2', path=path)
+
+        stored = yield self.daddb.saveDoc(track)
+
+
+        # look up
+        ret = yield self.daddb.getTrackByHostPath(host, path)
+
+        results = list(ret)
+        self.assertEquals(len(results), 1)
+        self.assertEquals(results[0].key[0], host)
+        self.assertEquals(results[0].key[1], path)
+
+
+          
 class OldSimpleTestCase: # old test cases (DADDBTestCase):
 
     @defer.inlineCallbacks

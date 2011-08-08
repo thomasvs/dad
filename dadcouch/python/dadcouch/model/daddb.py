@@ -19,6 +19,14 @@ from dadcouch.model import couch
 # FIXME: something better; with unicode ?
 ENDKEY_STRING = "z"
 
+# generic row mapping
+class GenericRow:
+    def fromDict(self, d):
+        self.id = d['id']
+        self.key = d['key']
+        self.value = d['value']
+
+
 # map track-score view
 class TrackScore(mapping.Document):
     categoryId = mapping.TextField()
@@ -81,6 +89,11 @@ class AlbumsByArtist:
 
 
 class DADDB(log.Loggable):
+    """
+    @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
+    @type  dbName: str
+    """
+
     logCategory = 'daddb'
 
     def __init__(self, db, dbName):
@@ -95,6 +108,11 @@ class DADDB(log.Loggable):
             self.db.host, self.db.port)
 
     ### generic helper methods
+
+    # FIXME: work around having to poke at doc._data
+    def saveDoc(self, doc, docId=None):
+        return self.db.saveDoc(self.dbName, doc._data, docId=docId)
+
     def viewDocs(self, viewName, klazz, *args, **kwargs):
         """
         Load the given view including Docs, and map to objects of the given
@@ -174,6 +192,35 @@ class DADDB(log.Loggable):
         return self.resolveIds(obj, idAttr, objAttr, klazz,
             getter=dict.__getitem__, setter=dict.__setitem__)
 
+    ### data-specific methods
+    @defer.inlineCallbacks
+    def getTrackByHostPath(self, host, path):
+        """
+        Look up tracks by path.
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+
+        @type  host: unicode
+        @type  path: unicode
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        """
+        assert type(host) is unicode, \
+            'host is type %r, not unicode' % type(host)
+        assert type(path) is unicode, \
+            'host is type %r, not unicode' % type(path)
+
+        self.debug('get track for host %r and path %r', host, path)
+
+        ret = yield self.viewDocs('view-host-path', GenericRow,
+            key=[host, path])
+
+        defer.returnValue(ret)
+
+### FIXME: old methods that should be reworked
+class NoWayJose:
     ### data-specific methods
     def getPlaylist(self, userName, categoryName, above, below, limit=None,
         random=False):
