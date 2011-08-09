@@ -14,8 +14,32 @@ from dadgst.extern.task import task
 
 CHROMAPRINT_APIKEY = 'pmla1DI5' # for DAD 0.0.0
 
+def filterFiles(outer, args):
+    paths = []
+
+    for path in args:
+        path = path.decode('utf-8')
+
+        if not os.path.exists(path):
+            outer.stderr.write('Could not find %s.\n' % path.encode('utf-8'))
+            continue
+
+        if os.path.isdir(path):
+            outer.stderr.write('%s is a directory.\n' % path.encode('utf-8'))
+            continue
+
+        paths.append(path)
+
+    return paths
+
+ 
 class ChromaPrint(logcommand.LogCommand):
     description = """Calculates acoustid chromaprint fingerprint."""
+
+    def addOptions(self):
+        self.parser.add_option('-L', '--no-lookup',
+            action="store_true", dest="no_lookup",
+            help="don't look up the fingerprint, only show it")
 
     def do(self, args):
         import gobject
@@ -23,17 +47,14 @@ class ChromaPrint(logcommand.LogCommand):
 
         runner = task.SyncRunner()
 
-        for path in args:
-            path = path.decode('utf-8')
-            if not os.path.exists(path):
-                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
-                continue
-
+        for path in filterFiles(self, args):
             t = fingerprint.ChromaPrintTask(path)
             runner.run(t)
 
             self.stdout.write('%s:\n' % path.encode('utf-8'))
-            self.stdout.write('chromaprint:\n%s\n' % t.fingerprint)
+            if self.options.no_lookup:
+                self.stdout.write('chromaprint:\n%s\n' % t.fingerprint)
+                continue
 
             # now look it up
             # FIXME: translate to twisted-y code
@@ -91,11 +112,7 @@ class Level(logcommand.LogCommand):
 
         runner = task.SyncRunner()
 
-        for path in args:
-            path = path.decode('utf-8')
-            if not os.path.exists(path):
-                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
-                continue
+        for path in filterFiles(self, args):
 
             t = level.LevellerTask(path)
             runner.run(t)
@@ -137,11 +154,7 @@ class Metadata(logcommand.LogCommand):
 
         runner = task.SyncRunner()
 
-        for path in args:
-            path = path.decode('utf-8')
-            if not os.path.exists(path):
-                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
-                continue
+        for path in filterFiles(self, args):
 
             t = level.TagReadTask(path)
             runner.run(t)
@@ -164,11 +177,7 @@ class TRM(logcommand.LogCommand):
 
         runner = task.SyncRunner()
 
-        for path in args:
-            path = path.decode('utf-8')
-            if not os.path.exists(path):
-                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
-                continue
+        for path in filterFiles(self, args):
 
             t = fingerprint.TRMTask(path)
             runner.run(t)
