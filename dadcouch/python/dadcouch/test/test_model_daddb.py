@@ -115,15 +115,17 @@ class MD5TestCase(DADDBTestCase):
         path = u'/tmp/hitme.flac'
         md5sum = u'deadbeef'
 
+        # add track
         track = couch.Track(name='Hit Me')
         track.addFragment(host=host, path=path, md5sum=md5sum)
 
         stored = yield self.daddb.saveDoc(track)
 
+        # add a fragment to it for same file on different host
         yield self.daddb.trackAddFragmentFile(
             stored['id'], host=host + '-2', path=path, md5sum=md5sum)
 
-        # look up both
+        # look up track through first fragment file
         ret = yield self.daddb.getTrackByHostPath(host, path)
 
         results = list(ret)
@@ -139,16 +141,19 @@ class MD5TestCase(DADDBTestCase):
         self.assertEquals(len(results), 1)
         self.assertEquals(results[0].id, stored['id'])
 
-        return
-        self.assertEquals(results, list(ret))
+        # add a third one 
+
+        ret = yield self.daddb.getTrackByHostPath(host, path)
+        yield self.daddb.trackAddFragmentFile(
+            stored['id'], host=host + '-3', path=path, md5sum=md5sum)
+
+        # look up third and make sure the id is the same
+        ret = yield self.daddb.getTrackByHostPath(host + '-3', path)
         results = list(ret)
+
         self.assertEquals(len(results), 1)
-        self.assertEquals(results[0].key[0], host)
-        self.assertEquals(results[0].key[1], path)
         self.assertEquals(results[0].id, stored['id'])
 
-
- 
           
 class OldSimpleTestCase: # old test cases (DADDBTestCase):
 

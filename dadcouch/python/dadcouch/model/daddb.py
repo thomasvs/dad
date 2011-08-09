@@ -258,6 +258,9 @@ class DADDB(log.Loggable):
                         'md5sum': md5sum
                     })
                     found = True
+                    break
+            if found:
+                break
 
                        
         yield self.saveDoc(track)
