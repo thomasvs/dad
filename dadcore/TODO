@@ -113,3 +113,8 @@ AttributeError: 'module' object has no attribute 'option_parser_class'
 - don't fail on an empty or non-existing category
 
 - create dad/base/track which groups the TrackController and base class for view and model
+
+- figure out chromaprint/musicbrainz error on Citi Soleil:
+http://www.last.fm/music/Various+Artists/Rolling+Stone%3A+New+Voices,+Volume+25
+http://musicbrainz.org/release/f2ef784f-3ea9-45e3-a673-ad3c410f2cf2
+That track looks like it's 5:06 and thus citi soleil
