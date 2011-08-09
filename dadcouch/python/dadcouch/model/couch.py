@@ -42,7 +42,16 @@ class Track(mapping.Document):
             audio_md5sum = mapping.TextField(),
 
             # fingerprints
-            trm = mapping.TextField(),
+            chroma = mapping.DictField(mapping.Mapping.build(
+                    chromaprint = mapping.TextField(),
+                    duration = mapping.TextField(),
+                    # looked up on musicbrainz
+                    mbid = mapping.TextField(),
+                    artist = mapping.TextField(),
+                    title = mapping.TextField(),
+                    lookedup = mapping.DateTimeField(),
+            ))),
+
 
             # fragment info
 
