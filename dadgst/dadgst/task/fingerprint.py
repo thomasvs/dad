@@ -20,14 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with morituri.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import math
-import urllib
-
-import gobject
-
-from dad.audio import level, mixing
-
 from dad.extern.log import log
 from dadgst.extern.task import gstreamer
 
@@ -154,7 +146,8 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         self.gst.debug('query duration')
 
         self._length, qformat = self.pipeline.query_duration(self.gst.FORMAT_TIME)
-        self.gst.debug('total length: %r' % self._length)
+        self.gst.debug('total length: %r, format %r' % (
+            self._length, qformat))
         self.gst.debug('scheduling setting to play')
         # since set_state returns non-False, adding it as timeout_add
         # will repeatedly call it, and block the main loop; so
@@ -168,15 +161,11 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         self.gst.debug('eos, scheduling stop')
         self.schedule(0, self.stop)
 
-
-    def bus_tag_cb(self, bus, message):
-        taglist = message.parse_tag()
-        if 'musicbrainz-trmid' in taglist.keys():
-            self._trm = taglist['musicbrainz-trmid']
-
     def _new_buffer_cb(self, sink):
         # this is just for counting progress
         buf = sink.emit('pull-buffer')
+        self.gst.debug('received buffer, timestamp %r, duration %r' % (
+            buf.timestamp, buf.duration))
         position = buf.timestamp
         self._position = position
         if buf.duration != self.gst.CLOCK_TIME_NONE:
@@ -184,20 +173,15 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         self.setProgress(float(position) / min(
             CHROMAPRINT_DURATION * self.gst.SECOND, self._length))
 
-        if position > CHROMAPRINT_DURATION * self.gst.SECOND:
-            self.debug('duration reached, scheduling stop')
-            self.done = True
-            self.schedule(0, self.stop)
-
-    def bus_tag_cb(self, bus, message):
-        self.log("got message %r" % message)
-        taglist = message.parse_tag()
-        if 'musicbrainz-trmid' not in taglist:
-            return
-        self._trm = taglist['musicbrainz-trmid']
-        self.debug('got TRM, scheduling stop')
-
-        self.schedule(0, self.stop)
+        # add a margin, flac for example seems to need a bit more
+        if position > CHROMAPRINT_DURATION * self.gst.SECOND * 1.1:
+            element = self.pipeline.get_by_name('chromaprint')
+            if not element.get_property('fingerprint'):
+                self.warning('Duration reached, but no fingerprint')
+            else:
+                self.debug('duration reached, scheduling stop')
+                self.done = True
+                self.schedule(0, self.stop)
 
     def bus_eos_cb(self, bus, message):
         self.debug('eos, scheduling stop')
