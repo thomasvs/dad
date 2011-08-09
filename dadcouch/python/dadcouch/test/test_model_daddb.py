@@ -108,7 +108,47 @@ class SimpleTestCase(DADDBTestCase):
         self.assertEquals(results[0].key[0], host)
         self.assertEquals(results[0].key[1], path)
 
+class MD5TestCase(DADDBTestCase):
+    @defer.inlineCallbacks
+    def test_addSameSumDifferentHost(self):
+        host = u'localhost'
+        path = u'/tmp/hitme.flac'
+        md5sum = u'deadbeef'
 
+        track = couch.Track(name='Hit Me')
+        track.addFragment(host=host, path=path, md5sum=md5sum)
+
+        stored = yield self.daddb.saveDoc(track)
+
+        yield self.daddb.trackAddFragmentFile(
+            stored['id'], host=host + '-2', path=path, md5sum=md5sum)
+
+        # look up both
+        ret = yield self.daddb.getTrackByHostPath(host, path)
+
+        results = list(ret)
+        self.assertEquals(len(results), 1)
+        self.assertEquals(results[0].key[0], host)
+        self.assertEquals(results[0].key[1], path)
+        self.assertEquals(results[0].id, stored['id'])
+
+        # look up second and make sure the id is the same
+        ret = yield self.daddb.getTrackByHostPath(host + '-2', path)
+        results = list(ret)
+
+        self.assertEquals(len(results), 1)
+        self.assertEquals(results[0].id, stored['id'])
+
+        return
+        self.assertEquals(results, list(ret))
+        results = list(ret)
+        self.assertEquals(len(results), 1)
+        self.assertEquals(results[0].key[0], host)
+        self.assertEquals(results[0].key[1], path)
+        self.assertEquals(results[0].id, stored['id'])
+
+
+ 
           
 class OldSimpleTestCase: # old test cases (DADDBTestCase):
 

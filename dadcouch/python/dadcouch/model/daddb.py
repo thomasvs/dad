@@ -219,6 +219,50 @@ class DADDB(log.Loggable):
 
         defer.returnValue(ret)
 
+    @defer.inlineCallbacks
+    def getTrackByMD5Sum(self, md5sum):
+        """
+        Look up tracks by md5sum
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        """
+        self.debug('get track for md5sum %r', md5sum)
+
+        ret = yield self.viewDocs('view-md5sum', GenericRow,
+            key=md5sum)
+
+        defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentFile(self, trackId, host, path, md5sum):
+        """
+        Add the given host/path with the given md5sum to the
+        track with the given id.
+        """
+        self.debug('get track for trackId %r', trackId)
+
+        track = yield self.db.map(self.dbName, trackId, couch.Track)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.md5sum == md5sum:
+                    fragment.files.append({
+                        'host': host,
+                        'path': path,
+                        'md5sum': md5sum
+                    })
+                    found = True
+
+                       
+        yield self.saveDoc(track)
+
+
 ### FIXME: old methods that should be reworked
 class NoWayJose:
     ### data-specific methods

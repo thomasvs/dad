@@ -79,6 +79,27 @@ class Add(CouchDBCommand):
             t = md5task.MD5Task(path)
             runner.run(t)
 
+            # check if any tracks have a file with this md5sum
+            ret = yield self.daddb.getTrackByMD5Sum(t.md5sum)
+            ret = list(ret)
+
+            if ret:
+                for row in ret:
+                    self.stdout.write('Adding to track with id %r\n' %
+                        row.id)
+                    yield self.daddb.trackAddFragmentFile(row.id,
+                        self.hostname(), path,
+                        t.md5sum)
+
+            return
+
+            if len(ret) > 0:
+                if not self.options.force:
+                    self.stderr.write('already in database\n')
+                    continue
+
+
+
             track = couch.Track()
             track.addFragment(host=self.hostname(), path=path,
                 md5sum=t.md5sum)

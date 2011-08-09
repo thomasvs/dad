@@ -60,7 +60,7 @@ class Track(mapping.Document):
         ))
     )
 
-    def addFragment(self, host, path, md5sum):
+    def addFragment(self, host, path, md5sum=None):
         self.fragments.append({
             'files': [{
                 'host': host,

@@ -1,5 +1,14 @@
 2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/command/couchdb.py:
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/test/test_model_daddb.py:
+	  Make it possible to add a file to existing tracks if the md5sum
+	  matches.
+
+2011-08-08  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  These parameters are tied to a file, not to a track.
 
