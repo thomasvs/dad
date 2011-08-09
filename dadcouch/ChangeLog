@@ -1,5 +1,11 @@
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-md5sum/map.js:
+	  For each document, emit each md5sum only once, to avoid duplicate
+	  merging.
+
+2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	* python/dadcouch/test/test_model_daddb.py:
 	  Add a file only once to a track/fragment.
