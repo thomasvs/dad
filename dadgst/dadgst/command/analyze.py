@@ -7,6 +7,7 @@ import os
 
 from dad.audio import common
 from dad.common import logcommand
+from dad.base import data
 
 from dadgst.task import level, fingerprint
 
@@ -58,7 +59,7 @@ class ChromaPrint(logcommand.LogCommand):
 
             # now look it up
             # FIXME: translate to twisted-y code
-            data = {
+            lookup = {
                 'client': CHROMAPRINT_APIKEY,
                 'meta':   '2',
                 'duration': str(t.duration),
@@ -67,9 +68,11 @@ class ChromaPrint(logcommand.LogCommand):
             import urllib
             import urllib2
 
-            resp = urllib2.urlopen('http://api.acoustid.org/v2/lookup',
-                urllib.urlencode(data))
+            url = 'http://api.acoustid.org/v2/lookup'
+            resp = urllib2.urlopen(url, urllib.urlencode(lookup))
+
             import simplejson
+
             decoded = simplejson.load(resp)
 
             if decoded['status'] == 'ok':
@@ -93,6 +96,11 @@ class ChromaPrint(logcommand.LogCommand):
                             # these all ought to contain the same info,
                             # since it's the same musicbrainz id
                             break
+
+                fp = data.ChromaPrint()
+                fp.fromResults(results)
+                print fp.metadata
+
             else:
                 print 'ERROR:', result
 
