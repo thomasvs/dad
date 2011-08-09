@@ -1,5 +1,11 @@
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgst/command/analyze.py:
+	* dadgst/task/fingerprint.py:
+	  Make chromaprint example also look up musicbrainz info.
+
+2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgst/task/fingerprint.py:
 	  Fix up chromaprint fingerprinting for flac, which needs to
 	  run a bit longer to get a fingerprint.

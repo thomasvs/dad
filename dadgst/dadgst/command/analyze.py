@@ -5,13 +5,14 @@
 
 import os
 
-from dad import idad
 from dad.audio import common
 from dad.common import logcommand
 
 from dadgst.task import level, fingerprint
 
 from dadgst.extern.task import task
+
+CHROMAPRINT_APIKEY = 'pmla1DI5' # for DAD 0.0.0
 
 class ChromaPrint(logcommand.LogCommand):
     description = """Calculates acoustid chromaprint fingerprint."""
@@ -33,6 +34,47 @@ class ChromaPrint(logcommand.LogCommand):
 
             self.stdout.write('%s:\n' % path.encode('utf-8'))
             self.stdout.write('chromaprint:\n%s\n' % t.fingerprint)
+
+            # now look it up
+            # FIXME: translate to twisted-y code
+            data = {
+                'client': CHROMAPRINT_APIKEY,
+                'meta':   '2',
+                'duration': str(t.duration),
+                'fingerprint': t.fingerprint
+            }
+            import urllib
+            import urllib2
+
+            resp = urllib2.urlopen('http://api.acoustid.org/v2/lookup',
+                urllib.urlencode(data))
+            import simplejson
+            decoded = simplejson.load(resp)
+
+            if decoded['status'] == 'ok':
+                results = decoded['results']
+                self.stdout.write('Found %d results\n' % len(results))
+
+                for result in results:
+                    recordings = result['recordings']
+                    self.stdout.write('- Found %d recordings.\n' %
+                        len(recordings))
+                    for recording in recordings:
+                        self.stdout.write('  - musicbrainz id: %s\n' %
+                            recording['id'])
+                        for track in recording['tracks']:
+                            for artist in track['artists']:
+                                self.stdout.write('    - artist: %s\n' %
+                                    artist['name'])
+                            self.stdout.write('    - title: %s\n' %
+                                track['title'])
+
+                            # these all ought to contain the same info,
+                            # since it's the same musicbrainz id
+                            break
+            else:
+                print 'ERROR:', result
+
 
 
 class Level(logcommand.LogCommand):

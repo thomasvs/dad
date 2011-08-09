@@ -117,9 +117,12 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
     I calculate an acoustid fingerprint using chromaprint.
 
     @ivar fingerprint: the resulting fingerprint
+    @type fingerprint: str
+    @type duration:    int
     """
 
     fingerprint = None
+    duration = None # in seconds, for submitting
     description = 'Calculating acoustid fingerprint'
 
     def __init__(self, path):
@@ -153,6 +156,7 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         # will repeatedly call it, and block the main loop; so
         #   gobject.timeout_add(0L, self.pipeline.set_state, gst.STATE_PLAYING)
         # would not work.
+        self.duration = self._length / self.gst.SECOND 
 
 
     # FIXME: can't move this to base class because it triggers too soon
