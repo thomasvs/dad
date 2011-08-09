@@ -111,6 +111,7 @@ class TRMTask(log.Loggable, gstreamer.GstPipelineTask):
         self.trm = self._trm
 
 CHROMAPRINT_DURATION = 60
+FUDGE = 1.1
 
 class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
     """
@@ -175,10 +176,10 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         if buf.duration != self.gst.CLOCK_TIME_NONE:
             position += buf.duration
         self.setProgress(float(position) / min(
-            CHROMAPRINT_DURATION * self.gst.SECOND, self._length))
+            CHROMAPRINT_DURATION * self.gst.SECOND, self._length) / FUDGE)
 
         # add a margin, flac for example seems to need a bit more
-        if position > CHROMAPRINT_DURATION * self.gst.SECOND * 1.1:
+        if position > CHROMAPRINT_DURATION * self.gst.SECOND * FUDGE:
             element = self.pipeline.get_by_name('chromaprint')
             if not element.get_property('fingerprint'):
                 self.warning('Duration reached, but no fingerprint')
