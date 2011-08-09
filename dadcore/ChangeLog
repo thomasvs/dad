@@ -1,5 +1,11 @@
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/base/data.py:
+	* dad/test/test_base_data.py:
+	  Handle case where there are no results.
+
+2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/test/test_base_data.py (added):
 	* dad/base/data.py (added):
 	  Add classes for Chromaprint info.

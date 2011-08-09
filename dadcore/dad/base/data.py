@@ -32,6 +32,10 @@ class ChromaPrint:
         frequencies = count.items()
         ordered = sorted(frequencies, key=lambda x: -x[1])
 
+        if not ordered:
+            # no results
+            return
+
         mbid, artists, title = ordered[0][0]
 
         self.metadata = TrackMetadata()
