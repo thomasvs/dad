@@ -50,7 +50,7 @@ class Track(mapping.Document):
                     artist = mapping.TextField(),
                     title = mapping.TextField(),
                     lookedup = mapping.DateTimeField(),
-            ))),
+            )),
 
 
             # fragment info
