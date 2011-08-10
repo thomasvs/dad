@@ -1,6 +1,11 @@
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgst/command/analyze.py:
+	  Print musicbrainz url.
+
+2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/command/analyze.py:
 	  Make chromaprint command also use the new data class.
 
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>

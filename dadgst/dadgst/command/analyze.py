@@ -70,6 +70,8 @@ class ChromaPrint(logcommand.LogCommand):
 
             url = 'http://api.acoustid.org/v2/lookup'
             resp = urllib2.urlopen(url, urllib.urlencode(lookup))
+            # uncomment for a quick debug that you can paste in tests
+            # print resp.read()
 
             import simplejson
 
@@ -86,6 +88,10 @@ class ChromaPrint(logcommand.LogCommand):
                     for recording in recordings:
                         self.stdout.write('  - musicbrainz id: %s\n' %
                             recording['id'])
+                        self.stdout.write(
+                            '  - URL: http://musicbrainz.org/recording/%s\n' %
+                                recording['id'])
+
                         for track in recording['tracks']:
                             for artist in track['artists']:
                                 self.stdout.write('    - artist: %s\n' %
