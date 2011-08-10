@@ -2,6 +2,12 @@
 
 	* dad/base/data.py:
 	* dad/test/test_base_data.py:
+	  Add another result to parse.
+
+2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/base/data.py:
+	* dad/test/test_base_data.py:
 	  Handle case where there are no results.
 
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>

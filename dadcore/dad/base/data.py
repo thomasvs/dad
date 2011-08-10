@@ -19,6 +19,7 @@ class ChromaPrint:
 
 
         for result in results:
+            # highest-scoring result comes first ?
             recordings = result['recordings']
             for recording in recordings:
                 for track in recording['tracks']:
