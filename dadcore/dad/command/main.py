@@ -18,6 +18,7 @@ from dad.common import log
 from dad.common import logcommand
 
 from dad.task import md5task
+from dad.logic import database
 
 from dad.extern.command import command
 from dad.extern.task import task
@@ -50,6 +51,11 @@ def main(argv):
         return 0
 
     return ret
+
+def _hostname():
+    import socket
+    return unicode(socket.gethostname())
+
 
 class List(logcommand.LogCommand):
 
@@ -91,6 +97,60 @@ class TwistedCommand(logcommand.LogCommand):
         raise NotImplementedError
 
 
+class Add(TwistedCommand):
+    """
+    @type hostname: unicode
+    """
+
+    description = """Add audio files to the database."""
+    hostname = None
+
+    def addOptions(self):
+        self.parser.add_option('-H', '--hostname',
+                          action="store", dest="hostname",
+                          default=_hostname(),
+                          help="override hostname (%default)")
+
+    def handleOptions(self, options):
+        self.hostname = options.hostname.decode('utf-8')
+
+    @defer.inlineCallbacks
+    def doLater(self, args):
+        if not args:
+            self.stderr.write('Please give paths to add.\n')
+            defer.returnValue(3)
+            return
+
+        interactor = database.DatabaseInteractor(self.parentCommand.database)
+
+        for path in args:
+            path = path.decode('utf-8')
+            if not os.path.exists(path):
+                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
+                continue
+        
+            self.stdout.write('%s\n' % path)
+            try:
+                res = yield interactor.add(path, hostname=self.hostname)
+            except error.Error, e:
+                if e.status == 404:
+                    self.stderr.write('Database or view does not exist.\n')
+                    reactor.stop()
+                    defer.returnValue(3)
+                    return
+
+            if res:
+                existing, new = res
+                if existing:
+                    self.stdout.write('Added to %d existing tracks.\n' %
+                        len(existing))
+                if new:
+                    self.stdout.write('Created %d new tracks.\n' %
+                        len(new))
+            else:
+                self.stdout.write('Audio file already in database.\n')
+
+
 class Lookup(TwistedCommand):
     description = """Look up audio files in the database."""
 
@@ -110,7 +170,7 @@ class Lookup(TwistedCommand):
         
             self.stdout.write('%s\n' % path)
             try:
-                ret = yield self.parentCommand.database.getTrackByHostPath(self.hostname(), path)
+                ret = yield self.parentCommand.database.getTrackByHostPath(_hostname(), path)
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
@@ -124,10 +184,6 @@ class Lookup(TwistedCommand):
             else:
                 self.stdout.write('In database in %d tracks.\n' % len(ret))
  
-    def hostname(self):
-        import socket
-        return unicode(socket.gethostname())
-
 
 class Database(logcommand.LogCommand):
 
@@ -136,7 +192,7 @@ class Database(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [List, Lookup, ]
+    subCommandClasses = [Add, List, Lookup, ]
 
     database = None
 

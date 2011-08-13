@@ -38,14 +38,34 @@ class IDatabase(interface.Interface):
     I am an interface for databases.
     """
 
+    def new():
+        """
+        Return a new track data object that can be handed to calls.
+        """
+
+    def save(track):
+        """
+        Save the given track in the database.
+        """
+        return self.daddb.saveDoc(track)
+
     def getTrackByHostPath(host, path):
         """
+        Look up all tracks for the given host and path.
+
         @type  host: unicode
         @param host: the host on which the file lives
         @type  path: unicode
         @param path: the path where the file lives
+
+        @returns: a generator returning opaque track objects for the
+                  given file.
         """
-        pass
+
+    def trackAddFragment(track, host, path, md5sum):
+        """
+        Add a file on given host and path with given md5sum to the track.
+        """
 
 class IAnalyzer(interface.Interface):
     pass

@@ -1,5 +1,18 @@
 2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/idad.py:
+	  Add new, save, trackAddFragment
+	* dad/logic (added):
+	* dad/logic/__init__.py (added):
+	  Add new module.
+	* dad/logic/database.py (added):
+	  Add a database interactor so we can share logic between command
+	  line and final app.
+	* dad/command/main.py:
+	  Add Add command here to add tracks.
+
+2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/command/main.py:
 	  Add database list to list possible database options.
 	  Add support for pluggable databases.
