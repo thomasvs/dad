@@ -113,18 +113,16 @@ class TRMTask(log.Loggable, gstreamer.GstPipelineTask):
 CHROMAPRINT_DURATION = 60
 FUDGE = 1.1
 
-class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
+class FingerPrintTask(log.Loggable, gstreamer.GstPipelineTask):
     """
-    I calculate an acoustid fingerprint using chromaprint.
+    I calculate a fingerprint using an element with the fingerprint
+    property.
 
     @ivar fingerprint: the resulting fingerprint
     @type fingerprint: str
-    @type duration:    int
     """
 
     fingerprint = None
-    duration = None # in seconds, for submitting
-    description = 'Calculating acoustid fingerprint'
 
     def __init__(self, path):
         assert type(path) is unicode, "path %r is not unicode" % path
@@ -132,13 +130,7 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         self._path = path
 
     def getPipelineDesc(self):
-        return '''
-            filesrc location="%s" !
-            decodebin ! audioconvert ! audio/x-raw-int !
-            chromaprint name=chromaprint duration=%d !
-            appsink name=sink sync=False emit-signals=True''' % (
-                gstreamer.quoteParse(self._path).encode('utf-8'),
-                CHROMAPRINT_DURATION)
+        raise NotImplementedError
 
     ### base class implementations
 
@@ -180,7 +172,7 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
 
         # add a margin, flac for example seems to need a bit more
         if position > CHROMAPRINT_DURATION * self.gst.SECOND * FUDGE:
-            element = self.pipeline.get_by_name('chromaprint')
+            element = self.pipeline.get_by_name('fingerprinter')
             if not element.get_property('fingerprint'):
                 self.warning('Duration reached, but no fingerprint')
             else:
@@ -194,5 +186,47 @@ class ChromaPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         self.schedule(0, self.stop)
 
     def stopped(self):
-        element = self.pipeline.get_by_name('chromaprint')
+        element = self.pipeline.get_by_name('fingerprinter')
         self.fingerprint = element.get_property('fingerprint')
+
+class ChromaPrintTask(FingerPrintTask):
+    """
+    I calculate an acoustid fingerprint using chromaprint.
+
+    @ivar fingerprint: the resulting fingerprint
+    @type fingerprint: str
+    @type duration:    int
+    """
+
+    duration = None # in seconds, for submitting
+    description = 'Calculating acoustid fingerprint'
+
+    def getPipelineDesc(self):
+        return '''
+            filesrc location="%s" !
+            decodebin ! audioconvert ! audio/x-raw-int !
+            chromaprint name=fingerprinter duration=%d !
+            appsink name=sink sync=False emit-signals=True''' % (
+                gstreamer.quoteParse(self._path).encode('utf-8'),
+                CHROMAPRINT_DURATION)
+
+class OFAPrintTask(FingerPrintTask):
+    """
+    I calculate an OFA/MusicIP fingerprint.
+
+    @ivar fingerprint: the resulting fingerprint
+    @type fingerprint: str
+    @type duration:    int
+    """
+
+    duration = None # in seconds, for submitting
+    description = 'Calculating OFA fingerprint'
+
+    def getPipelineDesc(self):
+        return '''
+            filesrc location="%s" !
+            decodebin ! audioconvert ! audio/x-raw-int !
+            ofa name=fingerprinter !
+            appsink name=sink sync=False emit-signals=True''' % (
+                gstreamer.quoteParse(self._path).encode('utf-8'))
+

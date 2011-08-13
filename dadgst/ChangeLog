@@ -1,3 +1,10 @@
+2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/command/analyze.py:
+	* dadgst/task/fingerprint.py:
+	  Add OFA fingerprinting.
+	  Add dad analyze ofa command.
+
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgst/command/analyze.py:

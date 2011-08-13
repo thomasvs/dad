@@ -111,6 +111,25 @@ class ChromaPrint(logcommand.LogCommand):
                 print 'ERROR:', result
 
 
+class OFAPrint(logcommand.LogCommand):
+
+    description = """Calculates OFA/MusicIP fingerprint."""
+
+    def do(self, args):
+        import gobject
+        gobject.threads_init()
+
+        runner = task.SyncRunner()
+
+        for path in filterFiles(self, args):
+            t = fingerprint.OFAPrintTask(path)
+            runner.run(t)
+
+            self.stdout.write('%s:\n' % path.encode('utf-8'))
+            if self.options.no_lookup:
+                self.stdout.write('ofa print:\n%s\n' % t.fingerprint)
+                continue
+
 
 class Level(logcommand.LogCommand):
     description = """Shows levels for audio files."""
@@ -203,4 +222,4 @@ class TRM(logcommand.LogCommand):
 class Analyze(logcommand.LogCommand):
     description = """Analyzes audio files."""
 
-    subCommandClasses = [ ChromaPrint, Level, Metadata, TRM, ]
+    subCommandClasses = [ ChromaPrint, OFAPrint, Level, Metadata, TRM, ]
