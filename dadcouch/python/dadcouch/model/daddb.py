@@ -200,6 +200,17 @@ class DADDB(log.Loggable):
     ### data-specific methods
 
     ## idad.IDatabase interface
+    def new(self):
+        return couch.Track()
+
+    @defer.inlineCallbacks
+    def save(self, track):
+        stored = yield self.saveDoc(track)
+        # FIXME: for now, look it up again to maintain the track illusion
+        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
+        defer.returnValue(track)
+
+
     @defer.inlineCallbacks
     def getTrackByHostPath(self, host, path):
         """
@@ -225,6 +236,9 @@ class DADDB(log.Loggable):
             key=[host, path])
 
         defer.returnValue(ret)
+
+    def trackAddFragment(self, track, host, path, md5sum):
+        return track.addFragment(host, path, md5sum)
 
     @defer.inlineCallbacks
     def getTrackByMD5Sum(self, md5sum):
