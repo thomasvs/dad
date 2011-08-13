@@ -1,11 +1,16 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import os
 import sys
+import optparse
 
 from twisted import plugin
 
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
+
+# FIXME: database-specific, should be replaced by more generic things
+from twisted.web import error
 
 from dad import idad
 
@@ -31,20 +36,167 @@ def main(argv):
     try:
         ret = c.parse(argv)
     except SystemError, e:
-        sys.stderr.write('rip: error: %s\n' % e.args)
+        sys.stderr.write('dad: error: %s\n' % e.args)
         return 255
     except ImportError, e:
         # FIXME: decide how to handle
         raise
         # deps.handleImportError(e)
     except command.CommandError, e:
-        sys.stderr.write('rip: error: %s\n' % e.output)
+        sys.stderr.write('dad: error: %s\n' % e.output)
         return e.status
 
     if ret is None:
         return 0
 
     return ret
+
+class List(logcommand.LogCommand):
+
+    def do(self, args):
+        
+        from dad import plugins
+        for provider in plugin.getPlugins(idad.IDatabaseProvider, plugins):
+            self.stdout.write('- %s:\n' % provider.name)
+
+            formatter = optparse.IndentedHelpFormatter()
+            formatter.indent()
+
+            parser = optparse.OptionParser(
+                formatter=formatter, add_help_option=False)
+            parser.add_options(provider.getOptions())
+
+            print parser.format_option_help()
+            import code; code.interact(local=locals())
+            parser.print_help()
+
+            print 'database provider plugin', provider
+            print provider.getOptions()
+            print type(provider.getOptions())
+
+
+# FIXME: move this to a base class
+class TwistedCommand(logcommand.LogCommand):
+
+    def do(self, args):
+        def later():
+            d = self.doLater(args)
+            d.addCallback(lambda _: reactor.stop())
+
+        reactor.callLater(0, later)
+
+        reactor.run()
+
+    def doLater(self):
+        raise NotImplementedError
+
+
+class Lookup(TwistedCommand):
+    description = """Look up audio files in the database."""
+
+    @defer.inlineCallbacks
+    def doLater(self, args):
+        if not args:
+            self.stderr.write('Please give paths to look up.\n')
+            defer.returnValue(3)
+            return
+
+
+        for path in args:
+            path = path.decode('utf-8')
+            if not os.path.exists(path):
+                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
+                continue
+        
+            self.stdout.write('%s\n' % path)
+            try:
+                ret = yield self.parentCommand.database.getTrackByHostPath(self.hostname(), path)
+            except error.Error, e:
+                if e.status == 404:
+                    self.stderr.write('Database or view does not exist.\n')
+                    reactor.stop()
+                    defer.returnValue(3)
+                    return
+
+            ret = list(ret)
+            if len(ret) == 0:
+                self.stdout.write('Not in database.\n')
+            else:
+                self.stdout.write('In database in %d tracks.\n' % len(ret))
+ 
+    def hostname(self):
+        import socket
+        return unicode(socket.gethostname())
+
+
+class Database(logcommand.LogCommand):
+
+    """
+    @type database: an implementor of L{idad.Database}
+    @ivar database: the database selected
+    """
+
+    subCommandClasses = [List, Lookup, ]
+
+    database = None
+
+    def _getProviders(self):
+        from dad import plugins
+
+        providers = {}
+        for provider in plugin.getPlugins(idad.IDatabaseProvider, plugins):
+            providers[provider.name] = provider
+        return providers
+
+
+    def addOptions(self):
+        self.parser.add_option('-d', '--database',
+                          action="store", dest="database",
+                          default="couchdb", # FIXME: don't hardcode?
+                          help="select database and arguments (from %s)" % (
+                            ", ".join(self._getProviders().keys())))
+
+    def handleOptions(self, options):
+        
+        providers = self._getProviders()
+
+        args = []
+        dbName = options.database
+
+        if ':' in dbName:
+            dbName, line = options.database.split(':', 1)
+            args = line.split(':')
+
+        if dbName not in providers.keys():
+            self.stderr.write('Please choose an existing database.\n')
+            self.stderr.write('Possible choices: %s\n' %
+                ', '.join(providers.keys()))
+            return
+
+        provider = providers[dbName]
+
+        parser = optparse.OptionParser()
+        parser.usage = "-D %s:[option]:[option]:..." % dbName
+        parser.add_options(provider.getOptions())
+
+        if 'help' in args:
+            self.stdout.write('Options for database %s:\n' % dbName)
+            self.stdout.write(parser.format_option_help())
+            return -3
+
+
+        options, rest = parser.parse_args(args)
+
+        if rest:
+            self.stderr.write(
+                "WARNING: make sure you specify options with dashes.\n")
+            self.stderr.write("Did not parse %r\n" % rest)
+
+        self.debug('Creating database %r with args %r',
+            dbName, args)
+
+        database = provider.getDatabase(options)
+        self.database = database
 
 
 class MD5(logcommand.LogCommand):
@@ -79,7 +231,7 @@ DAD gives you a tree of subcommands to work with.
 You can get help on subcommands by using the -h option to the subcommand.
 """
 
-    subCommandClasses = [MD5, ]
+    subCommandClasses = [Database, MD5, ]
 
     def addOptions(self):
         # FIXME: is this the right place ?
