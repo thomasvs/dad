@@ -19,3 +19,20 @@ class CommandAppender(object):
 # instantiate twisted plugins
 _ca = CommandAppender()
 
+
+class CouchDBDatabaseProvider(object):
+    interface.implements(plugin.IPlugin, idad.IDatabaseProvider)
+
+    name = 'couchdb'
+
+    def getOptions(self):
+        from dadcouch.selecter import couch
+        return couch.couchdb_option_list
+
+    def getDatabase(self, options):
+        from dadcouch.model import daddb
+        from dadcouch.extern.paisley import client
+        db = client.CouchDB(options.host, int(options.port))
+        return daddb.DADDB(db, options.database)
+
+_dp = CouchDBDatabaseProvider()

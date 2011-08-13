@@ -7,8 +7,11 @@ import time
 
 from twisted.internet import defer
 
+from zope import interface
+
 from dadcouch.extern.paisley import views, mapping
 
+from dad import idad
 from dad.base import base
 from dad.common import log
 
@@ -93,6 +96,8 @@ class DADDB(log.Loggable):
     @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
     @type  dbName: str
     """
+
+    interface.implements(idad.IDatabase)
 
     logCategory = 'daddb'
 
@@ -193,6 +198,8 @@ class DADDB(log.Loggable):
             getter=dict.__getitem__, setter=dict.__setitem__)
 
     ### data-specific methods
+
+    ## idad.IDatabase interface
     @defer.inlineCallbacks
     def getTrackByHostPath(self, host, path):
         """

@@ -1,3 +1,10 @@
+2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dad/plugins/pdadcouch.py:
+	  Add plugin for IDatabaseProvider.
+	* python/dadcouch/model/daddb.py:
+	  implements the IDatabase interface.
+
 2011-08-09  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/couch.py:
