@@ -48,9 +48,10 @@ class SimpleTest(unittest.TestCase):
                 d.addCallback(lambda r: result.append(r))
 
             def checkCb(_):
-                for path, tm in result:
-                    self.failUnless(path in self._tracks.keys())
-                    self.assertEquals(self._tracks[path][0], tm)
+                for selected in result:
+                    self.failUnless(selected.path in self._tracks.keys())
+                    self.assertEquals(self._tracks[selected.path][0],
+                        selected.trackmix)
 
 
             d.addCallback(checkCb)

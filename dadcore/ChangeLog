@@ -1,5 +1,10 @@
 2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/test/test_common_selecter.py:
+	  Fix stray test gone awry.
+
+2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/idad.py:
 	  Add new, save, trackAddFragment
 	* dad/logic (added):
