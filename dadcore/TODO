@@ -122,3 +122,9 @@ That track looks like it's 5:06 and thus citi soleil
 
 - fix mess with tasks subclassing from log.Loggable; the stubs don't work
   very well, better to just integrate completely
+
+- decide on name clash between TrackMix and level
+- decide on name clash between camelCase for vars and snake_case for couchdb
+  properties
+- fix audio codec not being found for mp3
+- add samplerate, duration, ... so we have bitrate for files
