@@ -114,3 +114,20 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         defer.returnValue(([], [track, ]))
         yield
+
+
+class TrackMetadata:
+    """
+    A class for collecting a file's metadata.
+    """
+
+    artist = None
+    title = None
+    album = None
+    trackNumber = None
+
+    # musicbrainz
+    mbTrackId = None
+    mbArtistId = None
+    mbAlbumId = None
+    mbAlbumArtistId = None
