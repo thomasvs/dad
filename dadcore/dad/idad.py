@@ -91,10 +91,14 @@ class IDatabase(interface.Interface):
         @param metadata: L{dad.logic.database.TrackMetadata}
         """
 
-    def trackAddFragmentFileByMD5Sum(track, host, path, md5sum, metadata=None):
+    def trackAddFragmentFileByMD5Sum(track, info, metadata=None):
         """
         Add the given file to each fragment with a file with the same md5sum.
+
+        @type  info:     L{database.FileInfo}
+        @type  metadata: L{database.TrackMetadata}
         """
+
     def trackAddFragmentFileByMBTrackId(track, host, path, md5sum, metadata):
         """
         Add the given file to the right fragment according to the musicbrainz

@@ -1,6 +1,15 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/idad.py:
+	  Use FileInfo everywhere.
+	* dad/logic/database.py:
+	  Fill FileInfo in here, including md5sum.
+	* dad/command/main.py:
+	  Give runner to interactor.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/idad.py:
 	  Add getting track by md5sum and musicbrainz track id.
 	  Add adding fragment file by md5sum and track id.
 	* dad/logic/database.py:

@@ -119,7 +119,9 @@ class Add(TwistedCommand):
             defer.returnValue(3)
             return
 
-        interactor = database.DatabaseInteractor(self.parentCommand.database)
+        interactor = database.DatabaseInteractor(
+            self.parentCommand.database,
+            self.parentCommand.runner)
 
         for path in args:
             path = path.decode('utf-8')
@@ -129,20 +131,8 @@ class Add(TwistedCommand):
         
             self.stdout.write('%s\n' % path.encode('utf-8'))
 
-            # get metadata
-            # FIXME: choose ?
-            from dad import plugins
-            getter = None
-            for getter in plugin.getPlugins(idad.IMetadataGetter, plugins):
-                continue
-
-            metadata = getter.getMetadata(path,
-                runner=self.parentCommand.runner)
-            self.debug('Got metadata: %r', metadata)
-
             try:
-                res = yield interactor.add(path, hostname=self.hostname,
-                    metadata=metadata)
+                res = yield interactor.add(path, hostname=self.hostname)
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
