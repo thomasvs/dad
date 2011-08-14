@@ -1,6 +1,10 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+"""
+The main entry point for the 'dad' command-line application.
+"""
+
 import os
 import sys
 import optparse
