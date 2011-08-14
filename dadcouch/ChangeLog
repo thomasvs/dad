@@ -1,5 +1,15 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Actually return tracks by including docs when looking up by
+	  md5sum or mb track id.
+	  Implement methods to merge into track by mbid.
+	* python/dadcouch/model/couch.py:
+	  Comment Track more.
+	  Extract filesAppend method on Track.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-artists (added):
 	* couchdb/views/view-artists/map.js (added):
 	  Add a view for all artists.

@@ -22,8 +22,12 @@ class Track(mapping.Document):
 
     added = mapping.DateTimeField(default=datetime.datetime.now)
     
+    # a track is represented by one or more fragments of files
     fragments = mapping.ListField(
         mapping.DictField(mapping.Mapping.build(
+            # multiple files can share fragment info; for example
+            # the same file on different computers, or the same encoding
+            # with similar audio properties
             files = mapping.ListField(
                 mapping.DictField(mapping.Mapping.build(
                     # each file is on a host
@@ -55,9 +59,10 @@ class Track(mapping.Document):
                     )),
             ))),
 
-
+            # each fragment shares some properties
             samplerate = mapping.IntegerField(),
             duration = mapping.IntegerField(),
+            # FIXME: this would be different for different encodings ?
             audio_md5sum = mapping.TextField(),
 
             # fingerprints
@@ -73,7 +78,6 @@ class Track(mapping.Document):
 
 
             # fragment info
-
             start = mapping.LongField(), # in samples
             end = mapping.LongField(), # in samples
             peak = mapping.FloatField(),
@@ -102,16 +106,35 @@ class Track(mapping.Document):
 
             print md
 
+        files = []
+        self.filesAppend(files, host, path, md5sum, metadata)
         fragment = {
-            'files': [{
-                'host': host,
-                'path': path,
-                'md5sum': md5sum,
-                'metadata': md,
-            }, ],
+            'files': files
         }
 
         self.fragments.append(fragment)
+
+    def filesAppend(self, files, host, path, md5sum=None, metadata=None):
+        md = {}
+
+        if metadata:
+            # FIXME: better way to get fields ?
+            for field in Track.fragments.field.mapping.files.field.mapping.metadata.mapping._fields.keys():
+                parts = field.split('_')
+                for i, part in enumerate(parts[1:], start=1):
+                    parts[i] = part[0].upper() + part[1:]
+                camel = ''.join(parts)
+                md[field] = getattr(metadata, camel)
+
+            print md
+
+        files.append({
+            'host': host,
+            'path': path,
+            'md5sum': md5sum,
+            'metadata': md,
+            })
+
 
 # old documents
 class Category(mapping.Document):

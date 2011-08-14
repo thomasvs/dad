@@ -252,17 +252,35 @@ class DADDB(log.Loggable):
         """
         self.debug('get track for md5sum %r', md5sum)
 
-        ret = yield self.viewDocs('view-md5sum', GenericRow,
-            key=md5sum)
+        ret = yield self.viewDocs('view-md5sum', couch.Track,
+            include_docs=True, key=md5sum)
 
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFile(self, trackId, host, path, md5sum):
+    def getTrackByMBTrackId(self, mbTrackId):
         """
-        Add the given host/path with the given md5sum to the
-        track with the given id.
+        Look up tracks by musicbrainz track id.
+
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing list of L{couch.Track}
         """
+        self.debug('get track for mb track id %r', mbTrackId)
+
+        ret = yield self.viewDocs('view-mbtrackid', couch.Track,
+            include_docs=True, key=mbTrackId)
+
+        defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentFileByMD5Sum(self, track, host, path, md5sum, metadata=None):
+        """
+        Add the given file to each fragment with a file with the same md5sum.
+        """
+        trackId = track.id
         self.debug('get track for trackId %r', trackId)
 
         track = yield self.db.map(self.dbName, trackId, couch.Track)
@@ -273,11 +291,39 @@ class DADDB(log.Loggable):
         for fragment in track.fragments:
             for f in fragment.files:
                 if f.md5sum == md5sum:
-                    fragment.files.append({
-                        'host': host,
-                        'path': path,
-                        'md5sum': md5sum
-                    })
+                    self.debug('Appending to fragment %r', fragment)
+                    track.filesAppend(fragment.files, host, path,
+                        md5sum, metadata)
+                    found = True
+                    break
+            if found:
+                break
+
+                       
+        yield self.saveDoc(track)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentFileByMBTrackId(self, track, host, path, md5sum, metadata):
+        """
+        Add the given file to each fragment with a file with the same md5sum.
+        """
+        trackId = track.id
+        self.debug('get track for trackId %r', trackId)
+
+        track = yield self.db.map(self.dbName, trackId, couch.Track)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        if len(track.fragments) > 1:
+            self.warning('Not yet implemented finding the right fragment to add by mbid')
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
+                    self.debug('Appending to fragment %r', fragment)
+                    track.filesAppend(fragment.files, host, path,
+                        md5sum, metadata)
                     found = True
                     break
             if found:
