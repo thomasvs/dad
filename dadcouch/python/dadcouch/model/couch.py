@@ -102,9 +102,6 @@ class Track(mapping.Document):
 
             print md
 
-            import code; code.interact(local=locals())
-
-
         fragment = {
             'files': [{
                 'host': host,
