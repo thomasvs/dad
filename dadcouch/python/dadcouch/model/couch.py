@@ -79,42 +79,46 @@ class Track(mapping.Document):
             )),
 
 
-            # fragment info
-            start = mapping.LongField(), # in samples
-            end = mapping.LongField(), # in samples
-            peak = mapping.FloatField(),
-            rms = mapping.FloatField(),
-            rms_percentile = mapping.FloatField(),
-            rms_peak = mapping.FloatField(),
-            rms_weighted = mapping.FloatField(),
-            attack = mapping.ListField(mapping.TupleField((
-                mapping.FloatField, mapping.LongField))),
-            decay = mapping.ListField(mapping.TupleField((
-                mapping.FloatField, mapping.LongField)))
+            # fragment level info
+            level = mapping.DictField(mapping.Mapping.build(
+                start = mapping.LongField(), # in samples
+                end = mapping.LongField(), # in samples
+                peak = mapping.FloatField(),
+                rms = mapping.FloatField(),
+                rms_percentile = mapping.FloatField(),
+                rms_peak = mapping.FloatField(),
+                rms_weighted = mapping.FloatField(),
+                attack = mapping.ListField(mapping.TupleField((
+                    mapping.FloatField, mapping.LongField))),
+                decay = mapping.ListField(mapping.TupleField((
+                    mapping.FloatField, mapping.LongField)))
+            ))
         ))
     )
 
-    def addFragment(self, info, metadata=None):
-        md = {}
+    def _camelCaseFields(self, fieldName):
+        """
+        Return camel case variant of dashed field names.
+        """
+        parts = fieldName.split('_')
+        for i, part in enumerate(parts[1:], start=1):
+            parts[i] = part[0].upper() + part[1:]
+        camel = ''.join(parts)
 
-        if metadata:
-            # FIXME: better way to get fields ?
-            for field in Track.fragments.field.mapping.files.field.mapping.metadata.mapping._fields.keys():
-                parts = field.split('_')
-                for i, part in enumerate(parts[1:], start=1):
-                    parts[i] = part[0].upper() + part[1:]
-                camel = ''.join(parts)
-                md[field] = getattr(metadata, camel)
-
-            print md
-
+        return camel
+ 
+    def addFragment(self, info, metadata=None, mix=None):
         files = []
         self.filesAppend(files, info, metadata)
         fragment = {
             'files': files
         }
 
+        if mix:
+            self.fragmentSetMix(fragment, mix)
+
         self.fragments.append(fragment)
+
 
     def filesAppend(self, files, info, metadata=None):
         md = {}
@@ -122,13 +126,9 @@ class Track(mapping.Document):
         if metadata:
             # FIXME: better way to get fields ?
             for field in Track.fragments.field.mapping.files.field.mapping.metadata.mapping._fields.keys():
-                parts = field.split('_')
-                for i, part in enumerate(parts[1:], start=1):
-                    parts[i] = part[0].upper() + part[1:]
-                camel = ''.join(parts)
+                camel = self._camelCaseFields(field)
                 md[field] = getattr(metadata, camel)
 
-            print md
 
         files.append({
             'host':     info.host,
@@ -143,6 +143,47 @@ class Track(mapping.Document):
             })
 
 
+    def fragmentSetMix(self, fragment, mix):
+        m = {}
+
+        for key in [
+            'start', 'end', 'peak', 'rms',
+            'rms_percentile', 'rms_peak', 'rms_weighted', 'attack', 'decay']:
+            camel = self._camelCaseFields(key)
+            m[key] = getattr(mix, camel)
+
+        fragment['level'] = m
+
+    def getArtists(self):
+        if self.artists:
+            return self.artists
+
+        # FIXME: better ? faster ? stronger ?
+        if not self.fragments:
+            return
+        if not self.fragments[0].files:
+            return
+        if not self.fragments[0].files[0].metadata:
+            return
+        return [self.fragments[0].files[0].metadata.artist, ]
+
+    def getTitle(self):
+        if self.name:
+            return self.name
+
+        # FIXME: better ? faster ? stronger ?
+        if not self.fragments:
+            return
+        if not self.fragments[0].files:
+            return
+        if not self.fragments[0].files[0].metadata:
+            return
+        return self.fragments[0].files[0].metadata.title
+
+
+    def __repr__(self):
+        return '<Track %r for %r - %r>' % (self.id, self.getArtists(),
+            self.getTitle())
 # old documents
 class Category(mapping.Document):
     type = mapping.TextField(default="category")

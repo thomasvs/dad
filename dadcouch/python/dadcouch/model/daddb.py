@@ -237,8 +237,8 @@ class DADDB(log.Loggable):
 
         defer.returnValue(ret)
 
-    def trackAddFragment(self, track, info, metadata=None):
-        return track.addFragment(info, metadata)
+    def trackAddFragment(self, track, info, metadata=None, mix=None):
+        return track.addFragment(info, metadata, mix)
 
     @defer.inlineCallbacks
     def getTrackByMD5Sum(self, md5sum):
@@ -276,7 +276,7 @@ class DADDB(log.Loggable):
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None):
+    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None):
         """
         Add the given file to each fragment with a file with the same md5sum.
         """
@@ -303,7 +303,7 @@ class DADDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFileByMBTrackId(self, track, info, metadata):
+    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None):
         self.debug('get track for track id %r', track.id)
 
         track = yield self.db.map(self.dbName, track.id, couch.Track)

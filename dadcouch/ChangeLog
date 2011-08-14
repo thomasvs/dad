@@ -1,6 +1,12 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	  Put all level info in a level dict.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/couch.py:
 	  Add additional file arguments.
 	* python/dadcouch/model/daddb.py:
 	  Adapt to new interface using fileinfo.
