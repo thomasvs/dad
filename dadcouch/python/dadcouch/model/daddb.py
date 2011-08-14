@@ -237,8 +237,8 @@ class DADDB(log.Loggable):
 
         defer.returnValue(ret)
 
-    def trackAddFragment(self, track, host, path, md5sum, metadata=None):
-        return track.addFragment(host, path, md5sum, metadata)
+    def trackAddFragment(self, track, info, metadata=None):
+        return track.addFragment(info, metadata)
 
     @defer.inlineCallbacks
     def getTrackByMD5Sum(self, md5sum):
@@ -276,41 +276,37 @@ class DADDB(log.Loggable):
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFileByMD5Sum(self, track, host, path, md5sum, metadata=None):
+    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None):
         """
         Add the given file to each fragment with a file with the same md5sum.
         """
-        trackId = track.id
-        self.debug('get track for trackId %r', trackId)
+        self.debug('get track for track %r', track.id)
 
-        track = yield self.db.map(self.dbName, trackId, couch.Track)
+        track = yield self.db.map(self.dbName, track.id, couch.Track)
 
         # FIXME: possibly raise if we don't find it ?
         found = False
 
         for fragment in track.fragments:
             for f in fragment.files:
-                if f.md5sum == md5sum:
+                if f.md5sum == info.md5sum:
                     self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, host, path,
-                        md5sum, metadata)
+                    track.filesAppend(fragment.files, info, metadata)
                     found = True
                     break
             if found:
                 break
 
-                       
-        yield self.saveDoc(track)
+        stored = yield self.saveDoc(track)
+
+        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
+        defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFileByMBTrackId(self, track, host, path, md5sum, metadata):
-        """
-        Add the given file to each fragment with a file with the same md5sum.
-        """
-        trackId = track.id
-        self.debug('get track for trackId %r', trackId)
+    def trackAddFragmentFileByMBTrackId(self, track, info, metadata):
+        self.debug('get track for track id %r', track.id)
 
-        track = yield self.db.map(self.dbName, trackId, couch.Track)
+        track = yield self.db.map(self.dbName, track.id, couch.Track)
 
         # FIXME: possibly raise if we don't find it ?
         found = False
@@ -322,15 +318,16 @@ class DADDB(log.Loggable):
             for f in fragment.files:
                 if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
                     self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, host, path,
-                        md5sum, metadata)
+                    track.filesAppend(fragment.files, info, metadata)
                     found = True
                     break
             if found:
                 break
 
-                       
-        yield self.saveDoc(track)
+        stored = yield self.saveDoc(track)
+
+        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
+        defer.returnValue(track)
 
 
 ### FIXME: old methods that should be reworked

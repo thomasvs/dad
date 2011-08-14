@@ -1,5 +1,12 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  Add additional file arguments.
+	* python/dadcouch/model/daddb.py:
+	  Adapt to new interface using fileinfo.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-mbtrackid (added):
 	* couchdb/views/view-mbtrackid/map.js (added):
 	  Add lookup by mb track id.

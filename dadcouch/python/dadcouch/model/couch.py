@@ -33,12 +33,14 @@ class Track(mapping.Document):
                     # each file is on a host
                     host = mapping.TextField(),
                     # and on a volume and path on that host
-                    volume = mapping.TextField(),
-                    volume_path = mapping.TextField(),
+                    # volume = mapping.TextField(),
+                    # volume_path = mapping.TextField(),
                     path = mapping.TextField(),
-                    mtime = mapping.DateTimeField(),
-                    size = mapping.IntegerField(),
                     md5sum = mapping.TextField(),
+                    mtime = mapping.DateTimeField(),
+                    device = mapping.IntegerField(),
+                    inode = mapping.IntegerField(),
+                    size = mapping.IntegerField(),
 
                     # and has metadata
                     metadata = mapping.DictField(mapping.Mapping.build(
@@ -92,7 +94,7 @@ class Track(mapping.Document):
         ))
     )
 
-    def addFragment(self, host, path, md5sum=None, metadata=None):
+    def addFragment(self, info, metadata=None):
         md = {}
 
         if metadata:
@@ -107,14 +109,14 @@ class Track(mapping.Document):
             print md
 
         files = []
-        self.filesAppend(files, host, path, md5sum, metadata)
+        self.filesAppend(files, info, metadata)
         fragment = {
             'files': files
         }
 
         self.fragments.append(fragment)
 
-    def filesAppend(self, files, host, path, md5sum=None, metadata=None):
+    def filesAppend(self, files, info, metadata=None):
         md = {}
 
         if metadata:
@@ -129,9 +131,14 @@ class Track(mapping.Document):
             print md
 
         files.append({
-            'host': host,
-            'path': path,
-            'md5sum': md5sum,
+            'host':     info.host,
+            'path':     info.path,
+            'md5sum':   info.md5sum,
+            'mtime':    datetime.datetime.fromtimestamp(info.mtime),
+            'device':   info.device,
+            'inode':    info.inode,
+            'size':     info.size,
+
             'metadata': md,
             })
 
