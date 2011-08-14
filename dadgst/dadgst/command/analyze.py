@@ -193,6 +193,9 @@ class Metadata(logcommand.LogCommand):
             runner.run(t)
 
             self.stdout.write('%s:\n' % path.encode('utf-8'))
+
+            keys = []
+
             for name, tag in [
                 ('Artist', gst.TAG_ARTIST),
                 ('Title', gst.TAG_TITLE),
@@ -200,6 +203,10 @@ class Metadata(logcommand.LogCommand):
             ]:
                 if tag in t.taglist:
                     self.stdout.write('- %s: %s\n' % (name, t.taglist[tag]))
+
+            for tag in t.taglist.keys():
+                self.stdout.write('- %s: %s\n' % (tag, t.taglist[tag]))
+
 
 class TRM(logcommand.LogCommand):
     description = """Calculates TRM fingerprint."""

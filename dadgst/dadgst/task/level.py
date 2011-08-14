@@ -31,7 +31,25 @@ from dad.audio import level, mixing
 from dad.extern.log import log
 from dadgst.extern.task import gstreamer
 
-class LevellerTask(log.Loggable, gstreamer.GstPipelineTask):
+class GstLogPipelineTask(log.Loggable, gstreamer.GstPipelineTask):
+
+    def error(self, message, *args):
+        log.Loggable.doLog(self, log.ERROR, -2, message, *args)
+
+    def warning(self, message, *args):
+        log.Loggable.doLog(self, log.WARNING, -2, message, *args)
+
+    def info(self, message, *args):
+        log.Loggable.doLog(self, log.INFO, -2, message, *args)
+
+    def debug(self, message, *args):
+        log.Loggable.doLog(self, log.DEBUG, -2, message, *args)
+
+    def log(self, message, *args):
+        log.Loggable.doLog(self, log.LOG, -2, message, *args)
+
+
+class LevellerTask(GstLogPipelineTask):
     """
     I am a task that calculates levels on an input file.
     """
@@ -296,7 +314,7 @@ class LevellerTask(log.Loggable, gstreamer.GstPipelineTask):
         else:
             self.warning('No peak found, something went wrong!')
 
-class TagReadTask(gstreamer.GstPipelineTask):
+class TagReadTask(GstLogPipelineTask):
     """
     I am a task that reads tags.
 
@@ -325,7 +343,7 @@ class TagReadTask(gstreamer.GstPipelineTask):
                 gstreamer.quoteParse(self._path).encode('utf-8'))
 
     def bus_eos_cb(self, bus, message):
-        self.debug('eos, scheduling stop')
+        self.debug('eos, schedule stop()')
         self.schedule(0, self.stop)
 
     def bus_tag_cb(self, bus, message):
@@ -334,13 +352,23 @@ class TagReadTask(gstreamer.GstPipelineTask):
 
         # as soon as we have at least ARTIST, we consider we're done
         if self.gst.TAG_ARTIST in taglist:
+            self.debug('got a taglist with artist in it, schedule stop()')
             self.taglist = taglist
             # FIXME: stop doesn't actually wait for pipeline to go to
             # paused, so messages may still come from a thread as
             # we're throwing things away
             self.schedule(0, self.stop)
 
-class StreamInfoTask(gstreamer.GstPipelineTask):
+    # FIXME: possibly add a done attribute to base class to signal that
+    # the task has reached its objective ?
+    def paused(self):
+        if self.taglist:
+            self.debug('Got taglist in PAUSED, done')
+            return True
+
+        return False
+
+class StreamInfoTask(GstLogPipelineTask):
     """
     I am a task that reads streaminfo.
 

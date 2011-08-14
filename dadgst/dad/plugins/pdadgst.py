@@ -8,6 +8,7 @@ import os
 from zope import interface
 from twisted import plugin
 
+from dadgst.task import level
 from dad import idad
 
 from dadgst.command import analyze
@@ -20,5 +21,47 @@ class CommandAppender(object):
         commandClass.subCommandClasses.append(analyze.Analyze)
 
 
+class GstMetadataGetter(object):
+    interface.implements(plugin.IPlugin, idad.IMetadataGetter)
+
+    def getMetadata(self, path, runner=None):
+        if not runner:
+            runner = task.SyncRunner()
+
+        import gobject
+        gobject.threads_init()
+
+        t = level.TagReadTask(path)
+        runner.run(t)
+
+        from dad.logic import database
+        metadata = database.TrackMetadata()
+
+        import gst
+        mapping = {
+            gst.TAG_ARTIST:              'artist',
+            gst.TAG_TITLE:               'title',
+            gst.TAG_ALBUM:               'album',
+            gst.TAG_TRACK_NUMBER:        'trackNumber',
+            gst.TAG_AUDIO_CODEC:         'audioCodec',
+            'musicbrainz-trackid':       'mbTrackId',
+            'musicbrainz-artistid':      'mbArtistId',
+            'musicbrainz-albumid':       'mbAlbumId',
+            'musicbrainz-albumartistid': 'mbAlbumArtistId',
+        }
+
+        for key, value in mapping.items():
+            if key in t.taglist:
+                setattr(metadata, value, t.taglist[key])
+
+        # date handling: we have GstDate with .date, .month, .year 
+        if gst.TAG_DATE in t.taglist:
+            for key in ['year', 'month', 'day']:
+                setattr(metadata, key, getattr(t.taglist[gst.TAG_DATE], key))
+
+        return metadata
+    
+
 # instantiate twisted plugins
 _ca = CommandAppender()
+_gmg = GstMetadataGetter()
