@@ -61,7 +61,7 @@ class MD5Task(log.Loggable, task.Task):
     """
 
     md5sum = None
-    description = 'Calculating TRM fingerprint'
+    description = 'Calculating MD5 checksum'
 
     def __init__(self, path):
         assert type(path) is unicode, "path %r is not unicode" % path
