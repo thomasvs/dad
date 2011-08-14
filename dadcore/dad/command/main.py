@@ -76,13 +76,7 @@ class List(logcommand.LogCommand):
                 formatter=formatter, add_help_option=False)
             parser.add_options(provider.getOptions())
 
-            print parser.format_option_help()
-            import code; code.interact(local=locals())
-            parser.print_help()
-
-            print 'database provider plugin', provider
-            print provider.getOptions()
-            print type(provider.getOptions())
+            self.stdout.write(parser.format_option_help())
 
 
 # FIXME: move this to a base class
@@ -133,7 +127,7 @@ class Add(TwistedCommand):
                 self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
                 continue
         
-            self.stdout.write('%s\n' % path)
+            self.stdout.write('%s\n' % path.encode('utf-8'))
 
             # get metadata
             # FIXME: choose ?
