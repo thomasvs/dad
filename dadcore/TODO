@@ -119,3 +119,6 @@ http://www.last.fm/music/Various+Artists/Rolling+Stone%3A+New+Voices,+Volume+25
 http://musicbrainz.org/release/f2ef784f-3ea9-45e3-a673-ad3c410f2cf2
 That track looks like it's 5:06 and thus citi soleil
 - add an sqlite3 IDatabase implementer.
+
+- fix mess with tasks subclassing from log.Loggable; the stubs don't work
+  very well, better to just integrate completely

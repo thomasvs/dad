@@ -62,13 +62,26 @@ class IDatabase(interface.Interface):
                   given file.
         """
 
-    def trackAddFragment(track, host, path, md5sum):
+    def trackAddFragment(track, host, path, md5sum, metadata=None):
         """
         Add a file on given host and path with given md5sum to the track.
+
+        @param metadata: L{dad.logic.database.TrackMetadata}
         """
 
-class MetadataGetter(interface.Interface):
-    pass
+    def trackAddFragmentFile(track):
+        # FIXME: TODO, see logic.database
+        pass
+
+class IMetadataGetter(interface.Interface):
+    def getMetadata(path, runner=None):
+        """
+        Get metadata from the given path.
+
+        @type path: C{unicode}
+
+        @rtype: L{dad.logic.database.TrackMetadata}
+        """
 
 class IAnalyzer(interface.Interface):
     pass

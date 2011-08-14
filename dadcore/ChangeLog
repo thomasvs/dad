@@ -1,3 +1,17 @@
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* TODO:
+	  Add todo item.
+	* dad/idad.py:
+	  Add metadata to trackAddFragment interface.
+	  Add IMetadataGetter interface.
+	* dad/logic/database.py:
+	  Add metadata arg to add.
+	  Add FileInfo class for later use.
+	  Add more fields to TrackMetadata.
+	* dad/command/main.py:
+	  Get and add metadata.
+
 2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/test/test_common_selecter.py:

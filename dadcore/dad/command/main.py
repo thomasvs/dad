@@ -134,8 +134,21 @@ class Add(TwistedCommand):
                 continue
         
             self.stdout.write('%s\n' % path)
+
+            # get metadata
+            # FIXME: choose ?
+            from dad import plugins
+            getter = None
+            for getter in plugin.getPlugins(idad.IMetadataGetter, plugins):
+                continue
+
+            metadata = getter.getMetadata(path,
+                runner=self.parentCommand.runner)
+            self.debug('Got metadata: %r', metadata)
+
             try:
-                res = yield interactor.add(path, hostname=self.hostname)
+                res = yield interactor.add(path, hostname=self.hostname,
+                    metadata=metadata)
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
@@ -258,6 +271,7 @@ class Database(logcommand.LogCommand):
         database = provider.getDatabase(options)
         self.database = database
 
+        self.runner = task.SyncRunner()
 
 class MD5(logcommand.LogCommand):
 

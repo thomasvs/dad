@@ -43,9 +43,11 @@ class DatabaseInteractor(logcommand.LogCommand):
 
 
     @defer.inlineCallbacks
-    def add(self, path, hostname=None, force=False):
+    def add(self, path, hostname=None, metadata=None, force=False):
         """
-        @type  path: unicode
+        @type  path:     C{unicode}
+        @type  metadata: L{dad.logic.database.TrackMetadata)
+
 
         @returns:
           - None if it was already in the database.
@@ -88,7 +90,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                     row.id)
                 track = yield self.database.trackAddFragmentFile(row.id,
                     hostname, path,
-                    t.md5sum)
+                    t.md5sum, metadata=metadata)
                 ret.append(track)
 
             defer.returnValue((ret, []))
@@ -99,7 +101,7 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         track = self.database.new()
         self.database.trackAddFragment(track, host=hostname,
-            path=path, md5sum=t.md5sum)
+            path=path, md5sum=t.md5sum, metadata=metadata)
 
         try:
             stored = yield self.database.save(track)
@@ -116,6 +118,17 @@ class DatabaseInteractor(logcommand.LogCommand):
         yield
 
 
+class FileInfo:
+    """
+    A class for collecting information about a file.
+    """
+    md5sum = None
+    mtime = None  # epoch seconds
+    device = None # int; result st_dev from stat
+    inode = None  # int; result st_ino from stat
+    size = None   # int; result st_size from stat
+
+
 class TrackMetadata:
     """
     A class for collecting a file's metadata.
@@ -126,8 +139,17 @@ class TrackMetadata:
     album = None
     trackNumber = None
 
+    audioCodec = None
+    year = None
+    month = None
+    day = None
+
     # musicbrainz
     mbTrackId = None
     mbArtistId = None
     mbAlbumId = None
     mbAlbumArtistId = None
+
+    def __repr__(self):
+        return "<TrackMetadata for %s - %s>" % (
+            self.artist or None, self.title or None)
