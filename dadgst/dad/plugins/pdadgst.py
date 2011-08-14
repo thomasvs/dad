@@ -62,6 +62,23 @@ class GstMetadataGetter(object):
         return metadata
     
 
+class GstLeveller(object):
+    interface.implements(plugin.IPlugin, idad.ILeveller)
+
+    def getTrackMixes(self, path, runner=None):
+        if not runner:
+            runner = task.SyncRunner()
+
+        import gobject
+        gobject.threads_init()
+
+        t = level.LevellerTask(path)
+        runner.run(t)
+
+        return t.get_track_mixes()
+    
+
 # instantiate twisted plugins
 _ca = CommandAppender()
 _gmg = GstMetadataGetter()
+_gl = GstLeveller()

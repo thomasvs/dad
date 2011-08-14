@@ -58,14 +58,15 @@ class LevellerTask(GstLogPipelineTask):
 
     description = 'Calculating levels'
 
+    done = None
+
+    _duration = None
+    _channels = None
+
     def __init__(self, inpath):
         assert type(inpath) is unicode, "inpath %r is not unicode" % inpath
 
         self._inpath = inpath
-
-        self._channels = None
-
-        self.done = None
 
     ### source callbacks
 
@@ -79,7 +80,7 @@ class LevellerTask(GstLogPipelineTask):
 
         self._source = self.gst.element_factory_make('uridecodebin')
         # FIXME: we probably need to encode the uri better
-        self._source.props.uri = 'file://' + urllib.quote(self._inpath)
+        self._source.props.uri = 'file://' + urllib.quote(self._inpath.encode('utf-8'))
         self.debug('__init__: source refcount: %d' % self._source.__grefcount__)
 
         self._level = self.gst.element_factory_make("level")

@@ -202,10 +202,10 @@ class Metadata(logcommand.LogCommand):
                 ('Album', gst.TAG_ALBUM),
             ]:
                 if tag in t.taglist:
-                    self.stdout.write('- %s: %s\n' % (name, t.taglist[tag]))
+                    self.stdout.write('- %s: %r\n' % (name, t.taglist[tag]))
 
             for tag in t.taglist.keys():
-                self.stdout.write('- %s: %s\n' % (tag, t.taglist[tag]))
+                self.stdout.write('- %s: %r\n' % (tag, t.taglist[tag]))
 
 
 class TRM(logcommand.LogCommand):

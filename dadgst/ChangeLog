@@ -1,5 +1,14 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/plugins/pdadgst.py:
+	  Add ILeveller plugin.
+	* dadgst/command/analyze.py:
+	  Fix up output in case of utf-8
+	* dadgst/task/level.py:
+	  Fix up levelling.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgst/task/level.py:
 	  Extract out GstLogPipelineTask to fix logging.
 	  Improve on logging.
