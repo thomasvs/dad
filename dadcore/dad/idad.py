@@ -67,6 +67,9 @@ class IDatabase(interface.Interface):
         Add a file on given host and path with given md5sum to the track.
         """
 
+class MetadataGetter(interface.Interface):
+    pass
+
 class IAnalyzer(interface.Interface):
     pass
 
