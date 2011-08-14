@@ -62,6 +62,28 @@ class IDatabase(interface.Interface):
                   given file.
         """
 
+    def getTrackByMD5Sum(md5sum):
+        """
+        Look up tracks by md5sum
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing opaque track objects.
+        """
+
+
+    def getTrackByMBTrackId(mbTrackId):
+        """
+        Look up all tracks for the musicbrainz id.
+
+        @type  mbTrackId: unicode
+
+        @returns: a generator returning opaque track objects for the
+                  given file.
+        """
+
+
     def trackAddFragment(track, host, path, md5sum, metadata=None):
         """
         Add a file on given host and path with given md5sum to the track.
@@ -69,9 +91,16 @@ class IDatabase(interface.Interface):
         @param metadata: L{dad.logic.database.TrackMetadata}
         """
 
-    def trackAddFragmentFile(track):
-        # FIXME: TODO, see logic.database
-        pass
+    def trackAddFragmentFileByMD5Sum(track, host, path, md5sum, metadata=None):
+        """
+        Add the given file to each fragment with a file with the same md5sum.
+        """
+    def trackAddFragmentFileByMBTrackId(track, host, path, md5sum, metadata):
+        """
+        Add the given file to the right fragment according to the musicbrainz
+        track id.
+        """
+
 
 class IMetadataGetter(interface.Interface):
     def getMetadata(path, runner=None):

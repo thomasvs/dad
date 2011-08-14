@@ -77,25 +77,52 @@ class DatabaseInteractor(logcommand.LogCommand):
         t = md5task.MD5Task(path)
         self._runner.run(t)
 
+
         # check if any tracks have a file with this md5sum
         res = yield self.database.getTrackByMD5Sum(t.md5sum)
         res = list(res)
 
         if res:
+            self.debug('Got tracks by md5sum: %r', res)
             ret = []
 
             # FIXME: rewrite to use tracks instead of id
-            for row in res:
+            for track in res:
                 self.debug('Adding to track with id %r\n' %
-                    row.id)
-                track = yield self.database.trackAddFragmentFile(row.id,
-                    hostname, path,
+                    track)
+                added = yield self.database.trackAddFragmentFileByMD5Sum(
+                    track, hostname, path,
                     t.md5sum, metadata=metadata)
-                ret.append(track)
+                ret.append(added)
 
             defer.returnValue((ret, []))
 
             return
+
+        # check if any tracks have a file with this musicbrainz id
+        if metadata and metadata.mbTrackId:
+            res = yield self.database.getTrackByMBTrackId(metadata.mbTrackId)
+            res = list(res)
+
+            if res:
+                self.debug('found %d tracks with same mbid', len(res))
+                ret = []
+
+                for track in res:
+                    self.debug('Adding to track with id %r\n' %
+                        track.id)
+                    track = yield self.database.trackAddFragmentFileByMBTrackId(
+                        track, hostname, path,
+                        t.md5sum, metadata=metadata)
+                    ret.append(track)
+
+
+                print 'appended', ret
+                defer.returnValue((ret, []))
+
+                return
+
+
 
         # no tracks with this md5sum, so add it
 

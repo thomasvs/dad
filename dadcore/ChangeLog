@@ -1,5 +1,13 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/idad.py:
+	  Add getting track by md5sum and musicbrainz track id.
+	  Add adding fragment file by md5sum and track id.
+	* dad/logic/database.py:
+	  Add merging track by mb id.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/command/main.py:
 	  Remove prints.
 
