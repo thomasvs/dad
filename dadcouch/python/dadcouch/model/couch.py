@@ -18,6 +18,7 @@ class Track(mapping.Document):
     name = mapping.TextField()
 
     artist_ids = mapping.ListField(mapping.TextField())
+    artists = mapping.ListField(mapping.TextField())
 
     added = mapping.DateTimeField(default=datetime.datetime.now)
     
@@ -34,6 +35,24 @@ class Track(mapping.Document):
                     mtime = mapping.DateTimeField(),
                     size = mapping.IntegerField(),
                     md5sum = mapping.TextField(),
+
+                    # and has metadata
+                    metadata = mapping.DictField(mapping.Mapping.build(
+                        artist = mapping.TextField(),
+                        title = mapping.TextField(),
+                        album = mapping.TextField(),
+                        track_number = mapping.IntegerField(),
+                        audio_codec = mapping.TextField(),
+                        year = mapping.IntegerField(),
+                        month = mapping.IntegerField(),
+                        day = mapping.IntegerField(),
+
+                        # and musicbrainz metadata
+                        mb_artist_id = mapping.TextField(),
+                        mb_track_id = mapping.TextField(),
+                        mb_album_id = mapping.TextField(),
+                        mb_album_artist_id = mapping.TextField(),
+                    )),
             ))),
 
 
@@ -69,14 +88,33 @@ class Track(mapping.Document):
         ))
     )
 
-    def addFragment(self, host, path, md5sum=None):
-        self.fragments.append({
+    def addFragment(self, host, path, md5sum=None, metadata=None):
+        md = {}
+
+        if metadata:
+            # FIXME: better way to get fields ?
+            for field in Track.fragments.field.mapping.files.field.mapping.metadata.mapping._fields.keys():
+                parts = field.split('_')
+                for i, part in enumerate(parts[1:], start=1):
+                    parts[i] = part[0].upper() + part[1:]
+                camel = ''.join(parts)
+                md[field] = getattr(metadata, camel)
+
+            print md
+
+            import code; code.interact(local=locals())
+
+
+        fragment = {
             'files': [{
                 'host': host,
                 'path': path,
                 'md5sum': md5sum,
+                'metadata': md,
             }, ],
-        })
+        }
+
+        self.fragments.append(fragment)
 
 # old documents
 class Category(mapping.Document):

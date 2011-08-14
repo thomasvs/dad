@@ -1,3 +1,15 @@
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* README:
+	  Remove wrong couchapp push command.
+	* python/dad/plugins/pdadcouch.py:
+	  Move around stuff.
+	* python/dadcouch/model/couch.py:
+	  Add artists field.
+	  Add metadata to addFragment.
+	* python/dadcouch/model/daddb.py:
+	  Add metadata argument to trackAddFragment.
+
 2011-08-14  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:

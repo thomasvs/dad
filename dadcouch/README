@@ -14,7 +14,6 @@ load:
 	couchdb-load  http://localhost:5984/dadtest < /tmp/dad-partial.dump 
 
 push:
-	couchapp push couchdb dad http://thomas:pass@localhost:5984/dadtest
 	couchapp push --docid _design/dad couchdb http://localhost:5984/dadtest
 
 

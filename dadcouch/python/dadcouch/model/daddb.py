@@ -237,8 +237,8 @@ class DADDB(log.Loggable):
 
         defer.returnValue(ret)
 
-    def trackAddFragment(self, track, host, path, md5sum):
-        return track.addFragment(host, path, md5sum)
+    def trackAddFragment(self, track, host, path, md5sum, metadata=None):
+        return track.addFragment(host, path, md5sum, metadata)
 
     @defer.inlineCallbacks
     def getTrackByMD5Sum(self, md5sum):

@@ -16,10 +16,6 @@ class CommandAppender(object):
         commandClass.subCommandClasses.append(couchdb.CouchDB)
 
 
-# instantiate twisted plugins
-_ca = CommandAppender()
-
-
 class CouchDBDatabaseProvider(object):
     interface.implements(plugin.IPlugin, idad.IDatabaseProvider)
 
@@ -35,4 +31,6 @@ class CouchDBDatabaseProvider(object):
         db = client.CouchDB(options.host, int(options.port))
         return daddb.DADDB(db, options.database)
 
+# instantiate twisted plugins
+_ca = CommandAppender()
 _dp = CouchDBDatabaseProvider()
