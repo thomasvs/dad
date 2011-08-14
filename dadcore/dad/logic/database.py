@@ -133,11 +133,8 @@ class DatabaseInteractor(logcommand.LogCommand):
                     self.debug('Adding to track %r\n' % track)
                     added = yield self.database.trackAddFragmentFileByMBTrackId(
                         track, info, metadata=metadata)
-                    print 'THOMAS: added', added
                     ret.append(added)
 
-
-                print 'appended', ret
                 defer.returnValue((ret, []))
 
                 return
