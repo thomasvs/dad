@@ -84,22 +84,23 @@ class IDatabase(interface.Interface):
         """
 
 
-    def trackAddFragment(track, host, path, md5sum, metadata=None):
+    def trackAddFragment(track, host, path, md5sum, metadata=None, mix=None):
         """
         Add a file on given host and path with given md5sum to the track.
 
         @param metadata: L{dad.logic.database.TrackMetadata}
         """
 
-    def trackAddFragmentFileByMD5Sum(track, info, metadata=None):
+    def trackAddFragmentFileByMD5Sum(track, info, metadata=None, mix=None):
         """
         Add the given file to each fragment with a file with the same md5sum.
 
         @type  info:     L{database.FileInfo}
         @type  metadata: L{database.TrackMetadata}
+        @type  mix:      L{dad.audio.mix.TrackMix}
         """
 
-    def trackAddFragmentFileByMBTrackId(track, host, path, md5sum, metadata):
+    def trackAddFragmentFileByMBTrackId(track, info, metadata=None, mix=None):
         """
         Add the given file to the right fragment according to the musicbrainz
         track id.
@@ -116,6 +117,12 @@ class IMetadataGetter(interface.Interface):
         @rtype: L{dad.logic.database.TrackMetadata}
         """
 
-class IAnalyzer(interface.Interface):
-    pass
+class ILeveller(interface.Interface):
+    def getTrackMixes(path, runner=None):
+        """
+        Get track mixes from the given path.
 
+        @type path: C{unicode}
+
+        @rtype: list of L{dad.audio.mix.TrackMix}
+        """

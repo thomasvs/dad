@@ -51,6 +51,7 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         @returns:
           - None if it was already in the database.
+          list of
           - ([existing], [new]) tracks for this path
         """
         self.debug('Adding %s', path)
@@ -72,6 +73,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                 return
 
         # doesn't exist, so add it
+        ret = []
 
         # get metadata
         # FIXME: choose ?
@@ -80,8 +82,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         for getter in plugin.getPlugins(idad.IMetadataGetter, plugins):
             continue
 
-        metadata = getter.getMetadata(path,
-            runner=self._runner)
+        metadata = getter.getMetadata(path, runner=self._runner)
         self.debug('Got metadata: %r', metadata)
 
         # get fileinfo
@@ -99,66 +100,78 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         self.debug('Got fileinfo: %r', info)
         
+        leveller = None
+        for leveller in plugin.getPlugins(idad.ILeveller, plugins):
+            continue
 
-        # check if any tracks have a file with this md5sum
-        res = yield self.database.getTrackByMD5Sum(info.md5sum)
-        res = list(res)
+        if not leveller:
+            self.error('Please make sure you have a leveller plugin installed.')
+        trackMixes = leveller.getTrackMixes(path, runner=self._runner)
+        self.debug('Got track mixes: %r', trackMixes)
 
-        if res:
-            self.debug('Got tracks by md5sum: %r', res)
-            ret = []
+        self.debug('File has %d fragments', len(trackMixes))
 
-            # FIXME: rewrite to use tracks instead of id
-            for track in res:
-                self.debug('Adding to track with id %r\n' %
-                    track)
-                added = yield self.database.trackAddFragmentFileByMD5Sum(
-                    track, info, metadata=metadata)
-                ret.append(added)
+        for mix in trackMixes:
 
-            defer.returnValue((ret, []))
-
-            return
-
-        # check if any tracks have a file with this musicbrainz id
-        if metadata and metadata.mbTrackId:
-            res = yield self.database.getTrackByMBTrackId(metadata.mbTrackId)
+            # check if any tracks have a file with this md5sum
+            res = yield self.database.getTrackByMD5Sum(info.md5sum)
             res = list(res)
 
             if res:
-                self.debug('found %d tracks with same mbid', len(res))
-                ret = []
+                self.debug('Got tracks by md5sum: %r', res)
+                retVal = []
 
+                # FIXME: rewrite to use tracks instead of id
                 for track in res:
-                    self.debug('Adding to track %r\n' % track)
-                    added = yield self.database.trackAddFragmentFileByMBTrackId(
-                        track, info, metadata=metadata)
-                    ret.append(added)
+                    self.debug('Adding to track with id %r\n' %
+                        track)
+                    added = yield self.database.trackAddFragmentFileByMD5Sum(
+                        track, info, metadata=metadata, mix=mix)
+                    retVal.append(added)
 
-                defer.returnValue((ret, []))
+                ret.append((retVal, []))
 
-                return
+                continue
+
+            # check if any tracks have a file with this musicbrainz id
+            if metadata and metadata.mbTrackId:
+                res = yield self.database.getTrackByMBTrackId(metadata.mbTrackId)
+                res = list(res)
+
+                if res:
+                    self.debug('found %d tracks with same mbid', len(res))
+                    retVal = []
+
+                    for track in res:
+                        self.debug('Adding to track %r\n' % track)
+                        added = yield self.database.trackAddFragmentFileByMBTrackId(
+                            track, info, metadata=metadata, mix=mix)
+                        retVal.append(added)
+
+                    ret.append(retVal)
+                    continue
 
 
 
-        # no tracks with this md5sum, so add it
+            # no tracks with this md5sum, so add it
 
-        track = self.database.new()
-        self.database.trackAddFragment(track, info, metadata=metadata)
+            track = self.database.new()
+            self.database.trackAddFragment(track, info, metadata=metadata, mix=mix)
 
-        try:
-            stored = yield self.database.save(track)
-        except error.Error, e:
-            if e.status == 404:
-                self.warning('Database or view does not exist.\n')
-                yield e
-                return
+            try:
+                stored = yield self.database.save(track)
+            except error.Error, e:
+                if e.status == 404:
+                    self.warning('Database or view does not exist.\n')
+                    yield e
+                    continue
 
-        self.debug('Stored in database as %r\n' %
-             stored)
+            self.debug('Stored in database as %r\n' % stored)
 
-        defer.returnValue(([], [track, ]))
-        yield
+            ret.append(([], [track, ]))
+            yield
+
+        defer.returnValue((ret, []))
 
 
 class FileInfo:

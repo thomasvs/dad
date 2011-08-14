@@ -1,6 +1,13 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/idad.py:
+	* dad/logic/database.py:
+	  Add Leveller plugin.
+	  Add track mix data.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/idad.py:
 	  Use FileInfo everywhere.
 	* dad/logic/database.py:
 	  Fill FileInfo in here, including md5sum.
