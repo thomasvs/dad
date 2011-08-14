@@ -1,5 +1,11 @@
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-artists (added):
+	* couchdb/views/view-artists/map.js (added):
+	  Add a view for all artists.
+
+2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* README:
 	  Remove wrong couchapp push command.
 	* python/dad/plugins/pdadcouch.py:
