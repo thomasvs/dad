@@ -128,3 +128,5 @@ That track looks like it's 5:06 and thus citi soleil
   properties
 - fix audio codec not being found for mp3
 - add samplerate, duration, ... so we have bitrate for files
+
+- make an inmemory database (possibly pickling) which will be good for tests
