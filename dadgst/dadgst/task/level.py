@@ -328,6 +328,9 @@ class TagReadTask(GstLogPipelineTask):
     description = 'Reading tags'
 
     taglist = None
+    length = None
+    rate = None
+    channels = None
 
     def __init__(self, path):
         """
@@ -335,36 +338,58 @@ class TagReadTask(GstLogPipelineTask):
         assert type(path) is unicode, "path %r is not unicode" % path
         
         self._path = path
+        self._taglist = None
 
     def getPipelineDesc(self):
         return '''
             filesrc location="%s" !
             decodebin name=decoder !
-            fakesink''' % (
+            fakesink name=sink''' % (
                 gstreamer.quoteParse(self._path).encode('utf-8'))
 
     def bus_eos_cb(self, bus, message):
         self.debug('eos, schedule stop()')
+        self.taglist = self._taglist
         self.schedule(0, self.stop)
 
     def bus_tag_cb(self, bus, message):
         taglist = message.parse_tag()
-        # FIXME: merge tags ?
+        if not self._taglist:
+            self.debug('Received first taglist %r', dict(taglist))
+            self._taglist = taglist
+        else:
+            self.debug('Merging additional taglist %r', dict(taglist))
+            self._taglist = self._taglist.merge(taglist, self.gst.TAG_MERGE_APPEND)
 
-        # as soon as we have at least ARTIST, we consider we're done
-        if self.gst.TAG_ARTIST in taglist:
-            self.debug('got a taglist with artist in it, schedule stop()')
-            self.taglist = taglist
-            # FIXME: stop doesn't actually wait for pipeline to go to
-            # paused, so messages may still come from a thread as
-            # we're throwing things away
-            self.schedule(0, self.stop)
+        # as soon as we have at least ARTIST and AUDIO_CODEC,
+        # we consider we're done
+        if self.gst.TAG_ARTIST in self._taglist and \
+                self.gst.TAG_AUDIO_CODEC in self._taglist:
+            self.debug('got a taglist with artist/codec in it, schedule stop()')
+            if not self.taglist:
+                self.taglist = self._taglist
+                # FIXME: stop doesn't actually wait for pipeline to go to
+                # paused, so messages may still come from a thread as
+                # we're throwing things away
+                self.schedule(0, self.stop)
 
     # FIXME: possibly add a done attribute to base class to signal that
     # the task has reached its objective ?
     def paused(self):
+        decoder = self.pipeline.get_by_name('decoder')
+        self.length = self.query_length(self.pipeline)
+        self.debug('Length in samples: %r', self.length)
+
+        sink = self.pipeline.get_by_name('sink')
+        caps = sink.get_pad('sink').get_negotiated_caps()
+        self.rate = caps[0]['rate']
+        self.channels = caps[0]['channels']
+        self.debug('Sample rate: %d Hz', self.rate)
+        self.debug('Channels: %d', self.channels)
+
         if self.taglist:
             self.debug('Got taglist in PAUSED, done')
+            self.setProgress(1.0)
             return True
 
         return False

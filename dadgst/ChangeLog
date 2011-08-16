@@ -1,3 +1,12 @@
+2011-08-17  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgst/task/level.py:
+	  Also query length, rate, channels.
+	  Merge tags to get complete tag list with at least artist
+	  and audio codec.
+	* dad/plugins/pdadgst.py:
+	  Copy over channels/rate/length.
+
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/plugins/pdadgst.py:

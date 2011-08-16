@@ -59,6 +59,10 @@ class GstMetadataGetter(object):
             for key in ['year', 'month', 'day']:
                 setattr(metadata, key, getattr(t.taglist[gst.TAG_DATE], key))
 
+        metadata.channels = t.channels
+        metadata.rate = t.rate
+        metadata.length = t.length
+
         return metadata
     
 
