@@ -1,3 +1,10 @@
+2011-08-17  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/logic/database.py:
+	  Enumerate mixes so we can number the fragments we save.
+	* dad/idad.py:
+	  Update iface with fragment number.
+
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/idad.py:

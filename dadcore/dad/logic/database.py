@@ -68,7 +68,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         self.debug('Looked up: %r', res)
         if len(res) > 0:
             if not force:
-                self.debug('%s already in database', path)
+                self.debug('%s already in database: %r', path, res[0])
                 defer.returnValue(None)
                 return
 
@@ -111,7 +111,7 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         self.debug('File has %d fragments', len(trackMixes))
 
-        for mix in trackMixes:
+        for i, mix in enumerate(trackMixes):
 
             # check if any tracks have a file with this md5sum
             res = yield self.database.getTrackByMD5Sum(info.md5sum)
@@ -126,7 +126,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                     self.debug('Adding to track with id %r\n' %
                         track)
                     added = yield self.database.trackAddFragmentFileByMD5Sum(
-                        track, info, metadata=metadata, mix=mix)
+                        track, info, metadata=metadata, mix=mix, number=i + 1)
                     retVal.append(added)
 
                 ret.append((retVal, []))
@@ -145,7 +145,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                     for track in res:
                         self.debug('Adding to track %r\n' % track)
                         added = yield self.database.trackAddFragmentFileByMBTrackId(
-                            track, info, metadata=metadata, mix=mix)
+                            track, info, metadata=metadata, mix=mix, number=i + 1)
                         retVal.append(added)
 
                     ret.append(retVal)
@@ -156,7 +156,8 @@ class DatabaseInteractor(logcommand.LogCommand):
             # no tracks with this md5sum, so add it
 
             track = self.database.new()
-            self.database.trackAddFragment(track, info, metadata=metadata, mix=mix)
+            self.debug('Adding new track %r, number %r', track, i + 1)
+            self.database.trackAddFragment(track, info, metadata=metadata, mix=mix, number=i + 1)
 
             try:
                 stored = yield self.database.save(track)
@@ -201,6 +202,8 @@ class TrackMetadata:
     trackNumber = None
 
     audioCodec = None
+    sampleRate = None
+    length = None
     year = None
     month = None
     day = None
