@@ -58,12 +58,18 @@ class Track(mapping.Document):
                         mb_track_id = mapping.TextField(),
                         mb_album_id = mapping.TextField(),
                         mb_album_artist_id = mapping.TextField(),
+
+                        # and stream info
+                        length = mapping.IntegerField(), # in samples
                     )),
+
+                    # the fragment number in this file
+                    number = mapping.IntegerField(),
             ))),
 
             # each fragment shares some properties
-            samplerate = mapping.IntegerField(),
-            duration = mapping.IntegerField(),
+            rate = mapping.IntegerField(),
+            channels = mapping.IntegerField(),
             # FIXME: this would be different for different encodings ?
             audio_md5sum = mapping.TextField(),
 
@@ -107,11 +113,13 @@ class Track(mapping.Document):
 
         return camel
  
-    def addFragment(self, info, metadata=None, mix=None):
+    def addFragment(self, info, metadata=None, mix=None, number=None):
         files = []
-        self.filesAppend(files, info, metadata)
+        self.filesAppend(files, info, metadata, number)
         fragment = {
-            'files': files
+            'files': files,
+            'channels': metadata.channels,
+            'rate': metadata.rate,
         }
 
         if mix:
@@ -120,7 +128,7 @@ class Track(mapping.Document):
         self.fragments.append(fragment)
 
 
-    def filesAppend(self, files, info, metadata=None):
+    def filesAppend(self, files, info, metadata=None, number=None):
         md = {}
 
         if metadata:
@@ -130,7 +138,7 @@ class Track(mapping.Document):
                 md[field] = getattr(metadata, camel)
 
 
-        files.append({
+        d = {
             'host':     info.host,
             'path':     info.path,
             'md5sum':   info.md5sum,
@@ -140,7 +148,11 @@ class Track(mapping.Document):
             'size':     info.size,
 
             'metadata': md,
-            })
+        }
+        if number:
+            d['number'] = number
+
+        files.append(d)
 
 
     def fragmentSetMix(self, fragment, mix):
@@ -182,7 +194,8 @@ class Track(mapping.Document):
 
 
     def __repr__(self):
-        return '<Track %r for %r - %r>' % (self.id, self.getArtists(),
+        return '<Track %r for %r - %r>' % (self.id, 
+            " & ".join(self.getArtists() or ""),
             self.getTitle())
 # old documents
 class Category(mapping.Document):

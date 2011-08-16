@@ -232,13 +232,13 @@ class DADDB(log.Loggable):
 
         self.debug('get track for host %r and path %r', host, path)
 
-        ret = yield self.viewDocs('view-host-path', GenericRow,
-            key=[host, path])
+        ret = yield self.viewDocs('view-host-path', couch.Track,
+            include_docs=True, key=[host, path])
 
         defer.returnValue(ret)
 
-    def trackAddFragment(self, track, info, metadata=None, mix=None):
-        return track.addFragment(info, metadata, mix)
+    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
+        return track.addFragment(info, metadata, mix, number)
 
     @defer.inlineCallbacks
     def getTrackByMD5Sum(self, md5sum):
@@ -276,7 +276,7 @@ class DADDB(log.Loggable):
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None):
+    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
         """
         Add the given file to each fragment with a file with the same md5sum.
         """
@@ -291,7 +291,7 @@ class DADDB(log.Loggable):
             for f in fragment.files:
                 if f.md5sum == info.md5sum:
                     self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata)
+                    track.filesAppend(fragment.files, info, metadata, number)
                     found = True
                     break
             if found:
@@ -303,7 +303,7 @@ class DADDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None):
+    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
         self.debug('get track for track id %r', track.id)
 
         track = yield self.db.map(self.dbName, track.id, couch.Track)
@@ -318,7 +318,7 @@ class DADDB(log.Loggable):
             for f in fragment.files:
                 if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
                     self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata)
+                    track.filesAppend(fragment.files, info, metadata, number)
                     found = True
                     break
             if found:

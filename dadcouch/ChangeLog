@@ -1,3 +1,10 @@
+2011-08-17  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	  Add fragment number in model and API.
+	  Add rate, channels.
+
 2011-08-15  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/couch.py:
