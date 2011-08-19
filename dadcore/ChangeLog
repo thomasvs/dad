@@ -1,3 +1,9 @@
+2011-08-19  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/command/main.py:
+	* dad/logic/database.py:
+	  Clean up logic telling us what was changed.
+
 2011-08-17  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/logic/database.py:

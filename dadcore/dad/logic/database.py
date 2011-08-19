@@ -51,9 +51,10 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         @returns:
           - None if it was already in the database.
-          list of
           - ([existing], [new]) tracks for this path
         """
+        ret = ([], [])
+
         self.debug('Adding %s', path)
         if not os.path.exists(path):
             raise PathError(path)
@@ -69,11 +70,10 @@ class DatabaseInteractor(logcommand.LogCommand):
         if len(res) > 0:
             if not force:
                 self.debug('%s already in database: %r', path, res[0])
-                defer.returnValue(None)
+                defer.returnValue(ret)
                 return
 
         # doesn't exist, so add it
-        ret = []
 
         # get metadata
         # FIXME: choose ?
@@ -82,7 +82,14 @@ class DatabaseInteractor(logcommand.LogCommand):
         for getter in plugin.getPlugins(idad.IMetadataGetter, plugins):
             continue
 
-        metadata = getter.getMetadata(path, runner=self._runner)
+        try:
+            metadata = getter.getMetadata(path, runner=self._runner)
+        except task.TaskException, e:
+            print 'ERROR:', log.getExceptionMessage(e)
+            print 'skipping', path.encode('utf-8')
+            return
+
+
         self.debug('Got metadata: %r', metadata)
 
         # get fileinfo
@@ -129,7 +136,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                         track, info, metadata=metadata, mix=mix, number=i + 1)
                     retVal.append(added)
 
-                ret.append((retVal, []))
+                ret[0].extend(retVal)
 
                 continue
 
@@ -148,7 +155,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                             track, info, metadata=metadata, mix=mix, number=i + 1)
                         retVal.append(added)
 
-                    ret.append(retVal)
+                    ret[0].extend(retVal)
                     continue
 
 
@@ -169,10 +176,10 @@ class DatabaseInteractor(logcommand.LogCommand):
 
             self.debug('Stored in database as %r\n' % stored)
 
-            ret.append(([], [track, ]))
+            ret[1].append(track)
             yield
 
-        defer.returnValue((ret, []))
+        defer.returnValue(ret)
 
 
 class FileInfo:

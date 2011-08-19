@@ -143,10 +143,10 @@ class Add(TwistedCommand):
             if res:
                 existing, new = res
                 if existing:
-                    self.stdout.write('Added to %d existing tracks.\n' %
+                    self.stdout.write('Added to %d existing track(s).\n' %
                         len(existing))
                 if new:
-                    self.stdout.write('Created %d new tracks.\n' %
+                    self.stdout.write('Created %d new track(s).\n' %
                         len(new))
             else:
                 self.stdout.write('Audio file already in database.\n')
