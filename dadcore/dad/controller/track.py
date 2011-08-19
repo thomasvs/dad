@@ -4,6 +4,8 @@
 from twisted.internet import defer
 from twisted.python import failure
 
+from dad.extern.log import log
+
 from dad.controller import subject
 
 
@@ -17,10 +19,11 @@ class TrackController(subject.SubjectController):
         try:
             self.debug('populating')
             self.doViews('set_artist', " & ".join(
-                [a.name for a in self.subject.artists]))
-            self.doViews('set_title', self.subject.name)
+                self.subject.getArtists()))
+            self.doViews('set_title', self.subject.getTitle())
             self.debug('populated')
         except Exception, e:
+            self.warning('Exception %r', log.getExceptionMessage(e, frame=-1))
             self.warningFailure(failure.Failure(e))
             self.doViews('error', "failed to populate",
                 "%r: %r" % (e, e.args))

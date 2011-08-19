@@ -62,13 +62,13 @@ class SubjectController(base.Controller):
         # scores: list of couch.Score with resolutions
         res = {} # category name -> score
         for category in categories:
-            res[category.name] = None
+            res[category] = None
 
         for couchScore in scores:
             for scoreDict in couchScore.scores:
                 # scoreDict is DictField of category_id/score/category
                 # FIXME: user
-                res[scoreDict['category'].name] = scoreDict['score']
+                res[scoreDict['category']] = scoreDict['score']
 
         for categoryName, score in res.items():
             self.doViews('set_score', categoryName, score)
