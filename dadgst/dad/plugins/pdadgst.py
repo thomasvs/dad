@@ -8,6 +8,7 @@ import os
 from zope import interface
 from twisted import plugin
 
+from dad.common import log
 from dadgst.task import level
 from dad import idad
 
@@ -21,7 +22,7 @@ class CommandAppender(object):
         commandClass.subCommandClasses.append(analyze.Analyze)
 
 
-class GstMetadataGetter(object):
+class GstMetadataGetter(log.Loggable):
     interface.implements(plugin.IPlugin, idad.IMetadataGetter)
 
     def getMetadata(self, path, runner=None):
@@ -50,6 +51,14 @@ class GstMetadataGetter(object):
             'musicbrainz-albumartistid': 'mbAlbumArtistId',
         }
 
+        metadata.channels = t.channels
+        metadata.rate = t.rate
+        metadata.length = t.length
+
+        if not t.taglist:
+            self.warning('no tags found at all')
+            return
+
         for key, value in mapping.items():
             if key in t.taglist:
                 setattr(metadata, value, t.taglist[key])
@@ -59,9 +68,6 @@ class GstMetadataGetter(object):
             for key in ['year', 'month', 'day']:
                 setattr(metadata, key, getattr(t.taglist[gst.TAG_DATE], key))
 
-        metadata.channels = t.channels
-        metadata.rate = t.rate
-        metadata.length = t.length
 
         return metadata
     
