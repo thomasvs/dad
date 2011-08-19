@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     window.show()
 
-    view.set_artist('Salt n Pepa')
+    view.set_name('Salt n Pepa')
 
     view.set_score('Good', 0.8)
     view.set_score('Party', 0.7)

@@ -1,3 +1,8 @@
+2011-08-19  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/artist.py:
+	  Fix method name.
+
 2011-05-01  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/track.py:
