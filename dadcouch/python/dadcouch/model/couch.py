@@ -101,7 +101,23 @@ class Track(mapping.Document):
             ))
         ))
     )
-
+    # scores given by users to this track
+    scores = mapping.ListField(
+        mapping.DictField(mapping.Mapping.build(
+            user = mapping.TextField(),
+            category = mapping.TextField(),
+            score = mapping.FloatField(), # between 0.0 and 1.0
+        ))
+     )
+    # scores calculated from track/artist/album
+    calculated_scores = mapping.ListField(
+        mapping.DictField(mapping.Mapping.build(
+            user = mapping.TextField(),
+            category = mapping.TextField(),
+            score = mapping.FloatField(), # between 0.0 and 1.0
+        ))
+    )
+ 
     def _camelCaseFields(self, fieldName):
         """
         Return camel case variant of dashed field names.
@@ -118,9 +134,12 @@ class Track(mapping.Document):
         self.filesAppend(files, info, metadata, number)
         fragment = {
             'files': files,
-            'channels': metadata.channels,
-            'rate': metadata.rate,
         }
+        if metadata:
+            fragment.update({
+                'channels': metadata.channels,
+                'rate': metadata.rate,
+            })
 
         if mix:
             self.fragmentSetMix(fragment, mix)
@@ -177,6 +196,9 @@ class Track(mapping.Document):
             return
         if not self.fragments[0].files[0].metadata:
             return
+        if not self.fragments[0].files[0].metadata.artist:
+            return
+
         return [self.fragments[0].files[0].metadata.artist, ]
 
     def getTitle(self):
@@ -195,7 +217,7 @@ class Track(mapping.Document):
 
     def __repr__(self):
         return '<Track %r for %r - %r>' % (self.id, 
-            " & ".join(self.getArtists() or ""),
+            " & ".join(self.getArtists() or []),
             self.getTitle())
 # old documents
 class Category(mapping.Document):

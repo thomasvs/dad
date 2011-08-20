@@ -1,3 +1,24 @@
+2011-08-20  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* couchdb/views/view-categories (added):
+	* couchdb/views/view-categories/reduce.js (added):
+	* couchdb/views/view-categories/map.js (added):
+	* couchdb/views/view-scores-by-subject (added):
+	* couchdb/views/view-scores-by-subject/map.js (added):
+	* couchdb/views/view-tracks-title (added):
+	* couchdb/views/view-tracks-title/map.js (added):
+	  Add more views.
+	* couchdb/views/view-artists/reduce.js:
+	  Fix count.
+	* python/dadcouch/model/couch.py:
+	  Add scores.
+	* python/dadcouch/model/daddb.py:
+	  Add GenericRow and GenericIdRow.
+	  Add ScoreRow.
+	  Add getCategories and score methods.
+	* tests/track.py:
+	  Make test work again to show track and scores.
+
 2011-08-17  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/couch.py:

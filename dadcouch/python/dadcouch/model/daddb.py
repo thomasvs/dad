@@ -22,10 +22,15 @@ from dadcouch.model import couch
 # FIXME: something better; with unicode ?
 ENDKEY_STRING = "z"
 
-# generic row mapping
-class GenericRow:
+# generic row mapping, with id
+class GenericIdRow:
     def fromDict(self, d):
         self.id = d['id']
+        self.key = d['key']
+        self.value = d['value']
+
+class GenericRow:
+    def fromDict(self, d):
         self.key = d['key']
         self.value = d['value']
 
@@ -52,6 +57,19 @@ class TrackRow(mapping.Document):
         self.id = d['id']
         self.name = d['key']
         self.artist_ids = d['value']
+
+# map score view results
+class ScoreRow(mapping.Document):
+    id = mapping.TextField()
+    user = mapping.TextField()
+    category = mapping.TextField()
+    score = mapping.FloatField()
+
+    def fromDict(self, d):
+        self.id = d['id']
+        self.name = d['key']
+        self.user, self.category, self.score = d['value']
+
 
 class ItemTracks:
     # map tracks-by-album and tracks-by-artist
@@ -134,6 +152,7 @@ class DADDB(log.Loggable):
 
         self.debug('loading %s->%r using view %r, args %r, kwargs %r',
             self.dbName, klazz, viewName, args, kwargs)
+        self.doLog(log.DEBUG, where=-2, format='loading for')
 
         v = views.View(self.db, self.dbName, 'dad', viewName, klazz,
             *args, **kwargs)
@@ -210,6 +229,30 @@ class DADDB(log.Loggable):
         track = yield self.db.map(self.dbName, stored['id'], couch.Track)
         defer.returnValue(track)
 
+    @defer.inlineCallbacks
+    def getCategories(self):
+        rows = yield self.viewDocs('view-categories', GenericRow,
+            group_level=1)
+        rows = list(rows)
+        categories = [row.key for row in rows]
+        defer.returnValue(categories)
+
+    @defer.inlineCallbacks
+    def getScores(self, subject):
+        # get all scores for this subject
+        scores = yield self.viewDocs('view-scores-by-subject', ScoreRow,
+            key=subject.id)
+
+        scores = list(scores)
+
+        if not scores:
+            self.debug('No scores for %r', subject.id)
+            defer.returnValue([])
+            return
+
+        print list(scores)
+        self.debug('%d scores for %r', len(scores), subject.id)
+        defer.returnValue([])
 
     @defer.inlineCallbacks
     def getTrackByHostPath(self, host, path):
@@ -329,6 +372,37 @@ class DADDB(log.Loggable):
         track = yield self.db.map(self.dbName, stored['id'], couch.Track)
         defer.returnValue(track)
 
+    @defer.inlineCallbacks
+    def score(self, subject, userName, categoryName, score):
+        """
+        Score the given subject.
+        """
+        self.debug('asked to score subject %r '
+            'for user %r and category %r to score %r',
+            subject, userName, categoryName, score)
+
+        found = False
+        ret = None
+
+        for i, score in enumerate(subject.scores):
+            if score.user == userName and score.category == categoryName:
+                self.debug('Updating score for %r in %r from %r to %r',
+                    userName, categoryName, score.score, score)
+                subject.scores[i].score = score
+                ret = yield self.save(subject)
+                found = True
+
+        if not found:
+            self.debug('Setting score for %r in %r to %r',
+                userName, categoryName, score)
+            subject.scores.append({
+                'user': userName,
+                'category': categoryName,
+                'score': score
+            })
+            ret = yield self.save(subject)
+
+        defer.returnValue(ret)
 
 ### FIXME: old methods that should be reworked
 class NoWayJose:
@@ -657,51 +731,7 @@ class NoWayJose:
             startkey=startkey, endkey=endkey)
         return d
 
-    def getScores(self, subject):
-        # get all scores for this subject
-        return self.viewDocs('scores-by-subject', couch.Score,
-            key=subject.id, include_docs=True)
 
-    @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
-        """
-        Score the given subject.
-        """
-        self.debug('asked to score subject %r '
-            'for user %r and category %r to score %r',
-            subject, userName, categoryName, score)
-
-        user = yield self.getOrAddUser(userName)
-        category = yield self.getCategory(categoryName)
-        yield self.db.map(self.dbName, unicode(subject.id), couch.Score)
-
-
-        scores = yield self.viewDocs('score', couch.Score,
-                include_docs=True,
-                key=[category.id, user.id, subject.id, subject.type])
-        scores = list(scores)
-
-        if len(scores) == 0:
-            # no score yet, we're the first
-            s = couch.Score(subject_id=subject.id,
-                subject_type=subject.type,
-                user_id=user.id,
-                scores=[{
-                    'category_id': category.id,
-                    'score': score,
-                }, ])
-        else:
-            s = scores[0]
-            if len(scores) != 1:
-                print 'THOMAS: WARNING: not 1 score', scores
-
-            cid = category.id
-            for d in s.scores:
-                if cid == d['category_id']:
-                    d['score'] = score
-
-        # FIXME: why is data private ?
-        yield self.db.saveDoc(self.dbName, s._data)
 
     # filter out the track id's that don't match the score requested
     def filterTrackScores(self, trackScores, above, below):
@@ -1055,7 +1085,9 @@ class ScorableModel(CouchDBModel):
             user.Id = unicode(user.id)
 
 
-        scores = yield self._daddb.getScores(getattr(self, self.subjectType))
+        subject = getattr(self, self.subjectType)
+        self.debug('Getting scores for %r', subject)
+        scores = yield self._daddb.getScores(subject)
 
         scores = list(scores)
         kept = []

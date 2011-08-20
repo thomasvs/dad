@@ -86,7 +86,7 @@ def main():
     
     # FIXME: add an exception for a missing view
     d.addCallback(lambda _:
-        db.viewDocs('tracks', couch.Track, include_docs=True,
+        db.viewDocs('view-tracks-title', couch.Track, include_docs=True,
             startkey=title, endkey=title + 'Z'))
     def eb(failure):
         log.warningFailure(failure)
