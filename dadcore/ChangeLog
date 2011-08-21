@@ -1,5 +1,11 @@
 2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/database/memory.py (added):
+	* dad/database/__init__.py (added):
+	  Add memory database.
+
+2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/controller/subject.py:
 	* dad/base/base.py:
 	  Document.
