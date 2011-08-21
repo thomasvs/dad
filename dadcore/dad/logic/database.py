@@ -194,6 +194,11 @@ class FileInfo:
     inode = None  # int; result st_ino from stat
     size = None   # int; result st_size from stat
 
+    def __init__(self, host, path, md5sum=None):
+        self.host = host
+        self.path = path
+        self.md5sum = md5sum
+
     def __repr__(self):
         return "<FileInfo for %s on %s (%d bytes)>" % (
             self.path or None, self.host or None, self.size or -1)

@@ -48,7 +48,12 @@ class Controller(log.Loggable):
 
     parent = None
 
+    # FIXME: self._model is used in subclasses
+
     def __init__(self, model):
+        """
+        @type  model: L{Model}
+        """
         self._model = model
         self._views = []
         self._controllers = []

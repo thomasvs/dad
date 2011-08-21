@@ -23,22 +23,24 @@ from dadgtk.views import track
 
 
 # match to scorable
+# FIXME; model should not be couchdb-specific
 class SubjectController(base.Controller):
 
+    """
+    I am a controller for scorable models like
+    L{dadcouch.model.daddb.ScorableModel}
+    """
     subject = None
-
-    # FIXME: push to base class
-    def __init__(self, model):
-        base.Controller.__init__(self, model)
 
     def viewAdded(self, view):
         view.connect('scored', self._scored)
 
+    @defer.inlineCallbacks
     def _scored(self, view, category, score):
-        print 'THOMAS: scored', category, score
         # FIXME: user ?
         # FIXME: make interface for this model
-        self._model.score(self.subject, 'thomas', category, score)
+        self.subject = yield self._model.score(
+            self.subject, 'thomas', category, score)
 
     def populate(self, subjectId, userName=None):
         return self.populateScore(subjectId, username)
@@ -59,16 +61,13 @@ class SubjectController(base.Controller):
 
         categories = yield self._model.getCategories()
         scores = yield self._model.getScores(userName=userName)
-        # scores: list of couch.Score with resolutions
+        # scores: list of data.Score
         res = {} # category name -> score
         for category in categories:
             res[category] = None
 
         for couchScore in scores:
-            for scoreDict in couchScore.scores:
-                # scoreDict is DictField of category_id/score/category
-                # FIXME: user
-                res[scoreDict['category']] = scoreDict['score']
+                res[couchScore.category] = couchScore.score
 
         for categoryName, score in res.items():
             self.doViews('set_score', categoryName, score)

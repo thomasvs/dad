@@ -51,3 +51,19 @@ class TrackMetadata:
     def __repr__(self):
         return '<TrackMetadata for %s - %s>' % (
             " & ".join(self.artists), self.title)
+
+class Score:
+    """
+    I represent a score given to a subject by a user in a category.
+
+    @type  subject:  object
+    @type  user:     unicode
+    @type  category: unicode
+    @param score:    a score between 0.0 and 1.0
+    @type  score:    float
+    """
+
+    subject = None
+    user = None
+    category = None
+    score = None
