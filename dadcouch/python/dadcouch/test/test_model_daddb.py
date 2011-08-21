@@ -6,6 +6,10 @@ import commands
 
 from twisted.internet import defer
 
+from dad.logic import database
+
+from dad.test import test_database_memory
+
 from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley.test import test_util
 
@@ -28,6 +32,7 @@ class DADDBTestCase(test_util.CouchDBTestCase):
         yield self.db.createDB('dadtest')
 
         self.daddb = daddb.DADDB(self.db, 'dadtest')
+        self.testdb = self.daddb
 
         thisDir = os.path.dirname(__file__)
         couchPath = os.path.abspath(
@@ -36,6 +41,12 @@ class DADDBTestCase(test_util.CouchDBTestCase):
             "couchapp push --docid _design/dad " + \
             "%s http://localhost:%d/dadtest/" % (couchPath, self.wrapper.port))
         self.failIf(status, "Could not execute couchapp: %s" % output)
+
+
+class DADDBTest(test_database_memory.DBTest, DADDBTestCase):
+    pass
+
+
 
 class SimpleTestCase(DADDBTestCase):
 
@@ -62,16 +73,21 @@ class SimpleTestCase(DADDBTestCase):
 
         results = list(ret)
         self.assertEquals(len(results), 1)
-        self.assertEquals(results[0].key[0], host)
-        self.assertEquals(results[0].key[1], path)
+
+        track = results[0]
+        fragment = track.fragments[0]
+        file = fragment.files[0]
+        self.assertEquals(file.host, host)
+        self.assertEquals(file.path, path)
 
     @defer.inlineCallbacks
     def test_addTrackComposite(self):
         host = u'localhost'
         path = u'/tmp/hitme.flac'
+        info = database.FileInfo(host=host, path=path)
 
         track = couch.Track(name='Hit Me')
-        track.addFragment(host=host, path=path)
+        track.addFragment(info)
 
         stored = yield self.daddb.saveDoc(track)
 
@@ -88,14 +104,16 @@ class SimpleTestCase(DADDBTestCase):
     def test_addTrackCompositeMultiHost(self):
         host = u'localhost'
         path = u'/tmp/hitme.flac'
+        info = database.FileInfo(host=host, path=path)
 
         track = couch.Track(name='Hit Me')
-        track.addFragment(host=host, path=path)
+        track.addFragment(info)
 
         stored = yield self.daddb.saveDoc(track)
 
+        info = database.FileInfo(host=host + '-2', path=path)
         track = couch.Track(name='Hit Me')
-        track.addFragment(host=host + '-2', path=path)
+        track.addFragment(info)
 
         stored = yield self.daddb.saveDoc(track)
 
@@ -105,8 +123,13 @@ class SimpleTestCase(DADDBTestCase):
 
         results = list(ret)
         self.assertEquals(len(results), 1)
-        self.assertEquals(results[0].key[0], host)
-        self.assertEquals(results[0].key[1], path)
+
+        track = results[0]
+        fragment = track.fragments[0]
+        file = fragment.files[0]
+        self.assertEquals(file.host, host)
+        self.assertEquals(file.path, path)
+
 
 class MD5TestCase(DADDBTestCase):
     @defer.inlineCallbacks
@@ -115,44 +138,52 @@ class MD5TestCase(DADDBTestCase):
         path = u'/tmp/hitme.flac'
         md5sum = u'deadbeef'
 
+        info = database.FileInfo(host=host, path=path, md5sum=md5sum)
+
         # add track
         track = couch.Track(name='Hit Me')
-        track.addFragment(host=host, path=path, md5sum=md5sum)
+        track.addFragment(info)
 
-        stored = yield self.daddb.saveDoc(track)
+        stored = yield self.daddb.save(track)
 
         # add a fragment to it for same file on different host
-        yield self.daddb.trackAddFragmentFile(
-            stored['id'], host=host + '-2', path=path, md5sum=md5sum)
+        info = database.FileInfo(host=host + '-2', path=path, md5sum=md5sum)
+
+        yield self.daddb.trackAddFragmentFileByMD5Sum(stored, info)
 
         # look up track through first fragment file
         ret = yield self.daddb.getTrackByHostPath(host, path)
 
         results = list(ret)
         self.assertEquals(len(results), 1)
-        self.assertEquals(results[0].key[0], host)
-        self.assertEquals(results[0].key[1], path)
-        self.assertEquals(results[0].id, stored['id'])
+
+        track = results[0]
+        fragment = track.fragments[0]
+        file = fragment.files[0]
+        self.assertEquals(file.host, host)
+        self.assertEquals(file.path, path)
+        self.assertEquals(file.md5sum, md5sum)
+
 
         # look up second and make sure the id is the same
         ret = yield self.daddb.getTrackByHostPath(host + '-2', path)
         results = list(ret)
 
         self.assertEquals(len(results), 1)
-        self.assertEquals(results[0].id, stored['id'])
+        self.assertEquals(results[0].id, stored.id)
 
         # add a third one 
 
         ret = yield self.daddb.getTrackByHostPath(host, path)
-        yield self.daddb.trackAddFragmentFile(
-            stored['id'], host=host + '-3', path=path, md5sum=md5sum)
+        info = database.FileInfo(host=host + '-3', path=path, md5sum=md5sum)
+        yield self.daddb.trackAddFragmentFileByMD5Sum(stored, info)
 
         # look up third and make sure the id is the same
         ret = yield self.daddb.getTrackByHostPath(host + '-3', path)
         results = list(ret)
 
         self.assertEquals(len(results), 1)
-        self.assertEquals(results[0].id, stored['id'])
+        self.assertEquals(results[0].id, stored.id)
 
           
 class OldSimpleTestCase: # old test cases (DADDBTestCase):

@@ -3,7 +3,7 @@ function(doc) {
     if (doc.type == 'track' && doc.scores) {
         doc.scores.forEach(
             function(score) {
-    	        emit(doc.id, score.user, score.category, score.score);
+    	        emit(doc._id, [score.user, score.category, score.score]);
             }
         )
     }

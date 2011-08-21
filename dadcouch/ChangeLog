@@ -1,3 +1,14 @@
+2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/test/test_model_daddb.py:
+	  Reuse inmemory tests.
+	* python/dadcouch/model/daddb.py:
+	  Document.
+	* python/dadcouch/model/couch.py:
+	  mtime optional.
+	* couchdb/views/view-scores-by-subject/map.js:
+	  Fix.
+
 2011-08-20  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* couchdb/views/view-categories (added):

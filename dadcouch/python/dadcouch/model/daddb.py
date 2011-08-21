@@ -12,7 +12,7 @@ from zope import interface
 from dadcouch.extern.paisley import views, mapping
 
 from dad import idad
-from dad.base import base
+from dad.base import base, data
 from dad.common import log
 
 from dadcouch.common import manydef
@@ -239,20 +239,32 @@ class DADDB(log.Loggable):
 
     @defer.inlineCallbacks
     def getScores(self, subject):
+        """
+        @returns: deferred firing list of L{data.Score}
+        """
+
         # get all scores for this subject
-        scores = yield self.viewDocs('view-scores-by-subject', ScoreRow,
+        rows = yield self.viewDocs('view-scores-by-subject', ScoreRow,
             key=subject.id)
 
-        scores = list(scores)
+        rows = list(rows)
 
-        if not scores:
+        if not rows:
             self.debug('No scores for %r', subject.id)
             defer.returnValue([])
             return
 
-        print list(scores)
+        scores = []
+        for row in rows:
+            score = data.Score()
+            score.subject = subject
+            score.user = row.user
+            score.category = row.category
+            score.score = row.score
+            scores.append(score)
+
         self.debug('%d scores for %r', len(scores), subject.id)
-        defer.returnValue([])
+        defer.returnValue(scores)
 
     @defer.inlineCallbacks
     def getTrackByHostPath(self, host, path):
@@ -384,10 +396,10 @@ class DADDB(log.Loggable):
         found = False
         ret = None
 
-        for i, score in enumerate(subject.scores):
-            if score.user == userName and score.category == categoryName:
+        for i, s in enumerate(subject.scores):
+            if s.user == userName and s.category == categoryName:
                 self.debug('Updating score for %r in %r from %r to %r',
-                    userName, categoryName, score.score, score)
+                    userName, categoryName, s.score, score)
                 subject.scores[i].score = score
                 ret = yield self.save(subject)
                 found = True
@@ -395,6 +407,8 @@ class DADDB(log.Loggable):
         if not found:
             self.debug('Setting score for %r in %r to %r',
                 userName, categoryName, score)
+            if not subject.scores:
+                subject.scores = []
             subject.scores.append({
                 'user': userName,
                 'category': categoryName,
@@ -1076,6 +1090,8 @@ class ScorableModel(CouchDBModel):
     def getScores(self, userName=None):
         """
         Get a track's scores and resolve their user and category.
+
+        @rtype: list of user, category, score
         """
 
         userId = None
@@ -1090,39 +1106,21 @@ class ScorableModel(CouchDBModel):
         scores = yield self._daddb.getScores(subject)
 
         scores = list(scores)
-        kept = []
-
-        self.debug('Got %d scores for all users', len(scores))
-
-        for score in scores:
-            if userId:
-                if unicode(score.user_id) != userId:
-                    continue
-                score.user = user
-            else:
-                yield self._daddb.resolveIds(score, 'user_id', 'user',
-                    couch.User)
-
-            kept.append(score)
-            for line in score.scores:
-                # line looks like a dict but is an AnonymousStruct
-                yield self._daddb.resolveIds(line, 'category_id', 'category',
-                couch.Category,
-                getter=line.__class__.__getitem__,
-                setter=line.__class__.__setitem__)
-
-        self.debug('Kept %d scores', len(kept))
-        defer.returnValue(kept)
+        defer.returnValue(scores)
 
     def score(self, subject, userName, categoryName, score):
-        self._daddb.score(subject, userName, categoryName, score)
+        return self._daddb.score(subject, userName, categoryName, score)
 
 class TrackModel(ScorableModel):
     """
     I represent a track in a CouchDB database.
+
+    @ivar track: a track as returned by the database.
     """
 
     subjectType = 'track'
+
+    track = None
 
     def get(self, trackId):
         """

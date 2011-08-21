@@ -161,13 +161,14 @@ class Track(mapping.Document):
             'host':     info.host,
             'path':     info.path,
             'md5sum':   info.md5sum,
-            'mtime':    datetime.datetime.fromtimestamp(info.mtime),
             'device':   info.device,
             'inode':    info.inode,
             'size':     info.size,
 
             'metadata': md,
         }
+        if info.mtime:
+            d['mtime'] = datetime.datetime.fromtimestamp(info.mtime)
         if number:
             d['number'] = number
 
