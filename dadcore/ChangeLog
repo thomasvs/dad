@@ -1,5 +1,11 @@
 2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* misc/show-coverage.py (added):
+	* Makefile:
+	  Add coverage.
+
+2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/test/test_database_memory.py (added):
 	  Add test for in-memory database.
 
