@@ -1,5 +1,16 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/command/test.py (added):
+	  Add a dad test command.
+	* dad/command/tcommand.py (added):
+	  Add a separate module for TwistedCommand.
+	* dad/command/main.py:
+	* dad/logic/database.py:
+	  Make sure we don't accidentally import reactor before we get
+	  a chance to install a gtk2 reactor.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/controller/selector.py:
 	  Document addItem.
 	  Use the documented methods to access the model.

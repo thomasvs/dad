@@ -6,15 +6,14 @@ Interaction with the database.
 """
 
 import os
+import sys
 
 from twisted import plugin
 
-from twisted.internet import reactor
 from twisted.internet import defer
-from twisted.web import error
 
 from dad.extern.task import task
-from dadcouch.extern.paisley import client
+
 
 from dad import idad
 from dad.common import log
@@ -168,6 +167,8 @@ class DatabaseInteractor(logcommand.LogCommand):
             self.debug('Adding new track %r, number %r', track, i + 1)
             self.database.trackAddFragment(track, info, metadata=metadata, mix=mix, number=i + 1)
 
+            # imports reactor
+            from twisted.web import error
             try:
                 stored = yield self.database.save(track)
             except error.Error, e:

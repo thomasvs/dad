@@ -11,16 +11,14 @@ import optparse
 
 from twisted import plugin
 
-from twisted.internet import reactor, defer
+from twisted.internet import defer
 
-# FIXME: database-specific, should be replaced by more generic things
-from twisted.web import error
 
 from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
-
+from dad.command import test, tcommand
 from dad.task import md5task
 from dad.logic import database
 
@@ -33,7 +31,11 @@ def main(argv):
     # import command plugins
 
     from dad import plugins
+
+    # no reactor yet
+    # from twisted.internet import glib2reactor; glib2reactor.install(); sys.exit(0)
     for commander in plugin.getPlugins(idad.ICommand, plugins):
+        print commander
         commander.addCommands(Dad)
 
     c = Dad()
@@ -61,22 +63,7 @@ def _hostname():
     return unicode(socket.gethostname())
 
 
-# FIXME: move this to a base class
-class TwistedCommand(logcommand.LogCommand):
-
-    def do(self, args):
-        def later():
-            d = self.doLater(args)
-            d.addCallback(lambda _: reactor.stop())
-
-        reactor.callLater(0, later)
-
-        reactor.run()
-
-    def doLater(self):
-        raise NotImplementedError
-
-class List(TwistedCommand):
+class List(tcommand.TwistedCommand):
 
     @defer.inlineCallbacks
     def doLater(self, args):
@@ -87,7 +74,7 @@ class List(TwistedCommand):
                 " & ".join(track.getArtists()), track.getName()))
 
 
-class Add(TwistedCommand):
+class Add(tcommand.TwistedCommand):
     """
     @type hostname: unicode
     """
@@ -115,6 +102,10 @@ class Add(TwistedCommand):
             self.parentCommand.database,
             self.parentCommand.runner)
 
+        # FIXME: database-specific, should be replaced by more generic things
+        # FIXME: imports reactor
+        from twisted.web import error
+
         for path in args:
             path = path.decode('utf-8')
             if not os.path.exists(path):
@@ -128,7 +119,7 @@ class Add(TwistedCommand):
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
-                    reactor.stop()
+                    self.reactor.stop()
                     defer.returnValue(3)
                     return
 
@@ -144,7 +135,7 @@ class Add(TwistedCommand):
                 self.stdout.write('Audio file already in database.\n')
 
 
-class Lookup(TwistedCommand):
+class Lookup(tcommand.TwistedCommand):
     description = """Look up audio files in the database."""
 
     @defer.inlineCallbacks
@@ -167,7 +158,7 @@ class Lookup(TwistedCommand):
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
-                    reactor.stop()
+                    self.reactor.stop()
                     defer.returnValue(3)
                     return
 
@@ -257,11 +248,11 @@ class MD5(logcommand.LogCommand):
 
         def later():
             d = self.doLater(args)
-            # d.addCallback(lambda _: reactor.stop())
+            # d.addCallback(lambda _: self.reactor.stop())
 
-        reactor.callLater(0, later)
+        self.reactor.callLater(0, later)
 
-        reactor.run()
+        self.reactor.run()
 
     def doLater(self, args):
         runner = task.SyncRunner()
@@ -272,7 +263,7 @@ class MD5(logcommand.LogCommand):
             runner.run(t)
             self.stdout.write('%s %s\n' % (t.md5sum, path.encode('utf-8')))
 
-        reactor.stop()
+        self.reactor.stop()
 
 
 class Dad(logcommand.LogCommand):
@@ -283,7 +274,7 @@ DAD gives you a tree of subcommands to work with.
 You can get help on subcommands by using the -h option to the subcommand.
 """
 
-    subCommandClasses = [Database, MD5, ]
+    subCommandClasses = [Database, MD5, test.Test, ]
 
     def addOptions(self):
         # FIXME: is this the right place ?
