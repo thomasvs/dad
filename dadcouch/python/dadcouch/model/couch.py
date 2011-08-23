@@ -216,6 +216,10 @@ class Track(mapping.Document):
 
         return [self.fragments[0].files[0].metadata.artist, ]
 
+    # FIXME: standardize
+    def getName(self):
+        return self.getTitle()
+
     def getTitle(self):
         if self.name:
             return self.name

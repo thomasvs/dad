@@ -91,68 +91,15 @@ def main():
     acontroller.add(artistController)
     hbox.pack_start(artistView)
 
-    albumView = views.AlbumSelectorView()
-    albumModel = daddb.AlbumSelectorModel(db)
-    albumController = selector.AlbumSelectorController(albumModel)
-    albumController.addView(albumView)
-    acontroller.add(albumController)
-    hbox.pack_start(albumView)
-
-    trackView = scheduler.TracksUI(selector=True)
-    trackModel = daddb.TrackSelectorModel(db)
-    trackController = selector.TrackSelectorController(trackModel)
-    acontroller.add(trackController)
-    trackController.addView(trackView)
-
-    vbox.add(trackView)
 
     aview.widget.show_all()
 
-
-    # listen to changes on artist selection so we can filter the albums view
-    def artist_selected_cb(self, ids):
-        album_ids = []
-        if ids:
-            print 'THOMAS: selected artist ids', ids
-            album_ids = albumModel.get_artists_albums(ids)
-        albumView.set_album_ids(album_ids)
-
-        trackView.set_artist_ids(ids)
-
-    artistView.connect('selected', artist_selected_cb)
-
-    def track_selected_cb(self, trackObj):
-        w = gtk.Window()
-
-        from dadgtk.views import track
-        view = track.TrackView()
-
-        w.add(view.widget)
-
-
-        model = daddb.TrackModel(db)
-        controller = trackc.TrackController(model)
-        controller.addView(view)
-        # FIXME: don't hardcode
-        options.user = 'thomas'
-        d = controller.populate(trackObj.id, userName=options.user)
-        d.addCallback(lambda _: w.set_title(trackObj.name))
-
-        w.show_all()
-
-
-
- 
-
-    trackView.connect('clicked', track_selected_cb)
 
     # start loading artists and albums
 
     d = defer.Deferred()
 
     d.addCallback(lambda _: artistController.populate())
-    d.addCallback(lambda _: albumController.populate())
-    d.addCallback(lambda _: trackController.populate())
     d.addCallback(cacheCb)
 
     d.callback(None)

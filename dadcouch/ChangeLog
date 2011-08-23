@@ -1,5 +1,16 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Add getTracks.
+	* python/dadcouch/model/couch.py:
+	  Add getName.
+	* python/dadcouch/command/couchdb.py:
+	  Add description so we see the commands.
+	* tests/artists.py:
+	  Keep only the artist view.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-tracks-title-artistid (added):
 	* couchdb/views/view-tracks-title-artistid/map.js (added):
 	* couchdb/views/view-tracks-by-album (added):

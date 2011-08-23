@@ -268,6 +268,14 @@ class DADDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
+    def getTracks(self):
+        ret = yield self.viewDocs('view-tracks-title', couch.Track,
+            include_docs=True)
+
+        defer.returnValue(list(ret))
+
+
+    @defer.inlineCallbacks
     def getCategories(self):
         rows = yield self.viewDocs('view-categories', GenericRow,
             group_level=1)
@@ -619,6 +627,7 @@ class NoWayJose:
 
         return d
 
+    # FIXME: new method in interface, no params
     def getTracks(self, userName, categoryName, above, below, limit=None,
                   random=False):
         """

@@ -21,6 +21,7 @@ from dadcouch.extern.paisley import client
 
 
 class CouchDBCommand(logcommand.LogCommand):
+
     def addOptions(self):
         self.parser.add_options(scouch.couchdb_option_list)
 
@@ -151,6 +152,9 @@ class Lookup(CouchDBCommand):
                 self.stdout.write('In database in %d tracks.\n' % len(ret))
  
 class CouchDB(logcommand.LogCommand):
+
     summary = """Interact with CouchDB backend."""
+    description = 'Interact with CouchDB backend'
+
 
     subCommandClasses = [Add, Lookup]
