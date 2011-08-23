@@ -148,7 +148,6 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             itemId = self._store.get_value(i, COLUMN_ID)
             if itemId:
                 ids.append(itemId)
-                print type(itemId)
                 assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
 
         self.emit('selected', ids)
