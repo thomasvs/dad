@@ -123,7 +123,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
 
     def _create_store(self):
         self._store = gtk.ListStore(
-            gobject.TYPE_STRING,
+            object, # best choice for unicode ?
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_INT)
@@ -145,8 +145,11 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         for p in paths:
             i = self._store.get_iter(p)
             # FIXME: getting id back from store is a non-unicode str ?
-            ids.append(unicode(self._store.get_value(i, COLUMN_ID)))
-            assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
+            itemId = self._store.get_value(i, COLUMN_ID)
+            if itemId:
+                ids.append(itemId)
+                print type(itemId)
+                assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
 
         self.emit('selected', ids)
 
@@ -225,7 +228,8 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
 
     ### SelectorView implementations
     def add_row(self, i, display, sort, tracks):
-        assert type(i) is unicode, 'artist id %r is not unicode' % i
+        if i:
+            assert type(i) is unicode, 'artist id %r is not unicode' % i
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_ID, i,

@@ -13,7 +13,12 @@ from dadgtk.views import views, track
 
 
 class ArtistView(views.GTKView, track.ScorableView):
+    """
+    I am a view on an artist.
 
+    My controller is L{dad.controller.artist.ArtistController}
+    """
+    
     subject_type = 'artist'
 
     def __init__(self):

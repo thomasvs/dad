@@ -80,6 +80,11 @@ class ScorableView(gobject.GObject):
 
 
 class TrackView(views.GTKView, ScorableView):
+    """
+    I am a view on a track.
+
+    My controller is L{dad.controller.track.TrackController}
+    """
 
     subject_type = 'track'
 
@@ -95,6 +100,9 @@ class TrackView(views.GTKView, ScorableView):
 
     
     def set_title(self, title):
+        """
+        @type  title: unicode
+        """
         entry = self._builder.get_object("track_info_title")
         entry.set_text(title)
 

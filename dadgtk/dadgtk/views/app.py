@@ -24,7 +24,8 @@ class GTKAppView(app.AppView):
         self.widget.add(view.widget)
         
     def getView(self, what):
-        name = 'dadgtk.views.%s.%sView' % (what.lower(), what)
+        # name = 'dadgtk.views.%s.%sView' % (what.lower(), what)
+        name = 'dadgtk.views.views.%sView' % (what, )
         view = reflect.namedAny(name)()
         return view
 

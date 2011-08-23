@@ -1,3 +1,12 @@
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/app.py:
+	* dadgtk/views/artist.py:
+	* dadgtk/views/track.py:
+	* dadgtk/views/views.py:
+	  Document.
+	  Adapt to unicode.
+
 2011-08-19  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/artist.py:
