@@ -4,6 +4,7 @@
 import os
 import sys
 import time
+import pickle
 
 from twisted.internet import defer
 
@@ -41,12 +42,20 @@ class MemoryDB(log.Loggable):
 
     logCategory = 'memorydb'
 
-    def __init__(self):
+    def __init__(self, path=None):
         self._tracks = {}
         self._categories = {}
 
         self._hostPath = {} # dict of host -> (dict of path -> track)
         self._id = 0
+
+        self._path = path
+        if self._path:
+            try:
+                self.__dict__ = pickle.load(open(self._path))
+            except EOFError:
+                # probably empty
+                pass
 
     ### idad.IDatabase interface
     def new(self):
@@ -71,6 +80,9 @@ class MemoryDB(log.Loggable):
                     self._hostPath[host][path] = []
                 self._hostPath[host][path].append(track)
 
+        if self._path:
+            handle = open(self._path, 'w')
+            pickle.dump(self.__dict__, handle, 2)
             
         return defer.succeed(track)
 

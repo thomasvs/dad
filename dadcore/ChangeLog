@@ -1,3 +1,9 @@
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/database/memory.py:
+	* dad/test/test_database_memory.py:
+	  Make MemoryDB pickle-able.
+
 2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* misc/show-coverage.py (added):
