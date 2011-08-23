@@ -1,5 +1,10 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* tests/artists.py (deleted):
+	  Folded into dad test artist.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dad/plugins/pdadcouch.py:
 	* python/dadcouch/command/couchdb.py:
 	* python/dadcouch/common/manydef.py:
