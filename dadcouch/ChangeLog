@@ -1,3 +1,19 @@
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* couchdb/views/view-tracks-title-artistid (added):
+	* couchdb/views/view-tracks-title-artistid/map.js (added):
+	* couchdb/views/view-tracks-by-album (added):
+	* couchdb/views/view-tracks-by-album/map.js (added):
+	* couchdb/views/view-albums-by-artist (added):
+	* couchdb/views/view-albums-by-artist/reduce.js (added):
+	* couchdb/views/view-albums-by-artist/map.js (added):
+	* couchdb/views/view-tracks-by-artist (added):
+	* couchdb/views/view-tracks-by-artist/map.js (added):
+	* TODO:
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	  Make tests/artists.py work again with new schema.
+
 2011-08-21  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/test/test_model_daddb.py:

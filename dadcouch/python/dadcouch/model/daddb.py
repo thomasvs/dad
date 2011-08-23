@@ -52,11 +52,18 @@ class TrackScore(mapping.Document):
 class TrackRow(mapping.Document):
     id = mapping.TextField()
     name = mapping.TextField()
+    artist_ids = mapping.ListField(mapping.TextField())
 
+    artist = mapping.DictField(mapping.Mapping.build(
+            name = mapping.TextField(),
+            sortname = mapping.TextField(),
+            id = mapping.TextField(),
+    ))
+ 
     def fromDict(self, d):
         self.id = d['id']
         self.name = d['key']
-        self.artist_ids = d['value']
+        self.artists = d['value']
 
 # map score view results
 class ScoreRow(mapping.Document):
@@ -69,6 +76,37 @@ class ScoreRow(mapping.Document):
         self.id = d['id']
         self.name = d['key']
         self.user, self.category, self.score = d['value']
+
+
+class ItemTracksByArtist:
+
+    tracks = 0 # int
+
+    # map tracks-by-artist
+    def fromDict(self, d):
+        self.name, self.sortname, self.id = d['key']
+
+        self.trackId = d['value']
+
+class ItemAlbumsByArtist:
+
+    tracks = 0 # int
+    artistName = None
+    artistSortname = None
+    artistId = None
+
+    # of album
+    name = None
+    sortname = None
+    id = None
+
+    # map view-albums-by-artist
+    # key: artist name, sortname, id; album name, sortname, id
+    # value: track count
+    def fromDict(self, d):
+        self.artistName, self.artistSortname, self.artistId, self.name, self.sortname, self.id = d['key']
+
+        self.tracks = d['value']
 
 
 class ItemTracks:
@@ -872,8 +910,8 @@ class ArtistSelectorModel(CouchDBModel):
         start = time.time()
         self.debug('get')
         v = views.View(self._daddb.db, self._daddb.dbName,
-            'dad', 'tracks-by-artist',
-            ItemTracks)
+            'dad', 'view-tracks-by-artist',
+            ItemTracksByArtist)
         try:
             d = v.queryView()
         except Exception, e:
@@ -881,18 +919,16 @@ class ArtistSelectorModel(CouchDBModel):
             return defer.fail(e)
 
         def cb(itemTracks):
-            # convert list of ordered itemTracks of mixed type
-            # into a list of only artist itemTracks with their track count
-            ret = []
+            # convert list of ordered itemTracks
+            # into a list of ItemTracks with track counts
+            artists = {} # artist sortname -> name, id, count
 
-            artist = None
+            for item in itemTracks:
+                if item.sortname not in artists:
+                    artists[item.sortname] = item
+                artists[item.sortname].tracks += 1
 
-            for i in itemTracks:
-                if i.type == 0:
-                    artist = i
-                    ret.append(artist)
-                else:
-                    artist.tracks += 1
+            ret = artists.values()
 
             self.debug('get: got %d artists in %d seconds',
                 len(ret), time.time() - start)
@@ -906,13 +942,14 @@ class ArtistSelectorModel(CouchDBModel):
 
         return d
 
+# FIXME: convert to inline deferreds
 class AlbumSelectorModel(CouchDBModel):
 
     artistAlbums = None # artist id -> album ids
 
     def get(self):
         """
-        @returns: a deferred firing a list of L{ItemTracks} objects
+        @returns: a deferred firing a list of L{ItemAlbumsByArtist} objects
                   representing only albums and their track count.
         """
         self.debug('get')
@@ -921,60 +958,26 @@ class AlbumSelectorModel(CouchDBModel):
 
         # first, load a mapping of artists to albums
         view = views.View(self._daddb.db, self._daddb.dbName,
-            'dad', 'albums-by-artist',
-            AlbumsByArtist)
+            'dad', 'view-albums-by-artist',
+            ItemAlbumsByArtist, group=True)
         d.addCallback(lambda _, v: v.queryView(), view)
-
-        def cb(items):
-            self.debug('parsing albums-by-artist')
-            # convert list of ordered AlbumsByArtist of mixed type
-            # into a list of only album itemTracks with their track count
-            artists = []
-
-            album = None
-
-            for i in items:
-                if i.type == 0:
-                    artist = i
-                    artists.append(artist)
-                else:
-                    artist.albums.append(i)
-
+        
+        def cb(result):
             self.artistAlbums = {}
 
-            for artist in artists:
-                self.artistAlbums[artist.id] = [a.albumId for a in artist.albums]
+            result = list(result)
+            self.debug('Got %d artist/albums combos', len(result))
 
-            return None
-
+            for item in result:
+                if item.artistId not in self.artistAlbums:
+                    self.artistAlbums[item.artistId] = []
+                self.artistAlbums[item.artistId].append(item.id)
+            return result
         d.addCallback(cb)
+                    
 
-        # now, load the tracks per album, and aggregate and return
-        view = views.View(self._daddb.db, self._daddb.dbName,
-            'dad', 'tracks-by-album',
-            ItemTracks)
-        d.addCallback(lambda _, v: v.queryView(), view)
-
-        def cb(itemTracks):
-            self.debug('parsing tracks-by-album')
-            # convert list of ordered itemTracks of mixed type
-            # into a list of only album itemTracks with their track count
-            ret = []
-
-            album = None
-            for i in itemTracks:
-                if i.type == 0:
-                    album = i
-                    ret.append(album)
-                else:
-                    album.tracks += 1
-
-            return ret
-
-        d.addCallback(cb)
 
         d.callback(None)
-
         return d
 
     def get_artists_albums(self, artist_ids):
@@ -985,6 +988,7 @@ class AlbumSelectorModel(CouchDBModel):
         # returns None if the first total row is selected, ie all artists
         ret = {}
 
+        self.debug('Getting album ids for artist ids %r', artist_ids)
         # first row has totals, and [None}
         if None in artist_ids:
             return None
@@ -1009,23 +1013,8 @@ class TrackSelectorModel(CouchDBModel):
         start = last[0]
 
 
-        # get artists cached
-        def cache(_):
-            v = views.View(self._daddb.db, self._daddb.dbName,
-                'dad', 'artists', couch.Artist, include_docs=True)
-            return v.queryView()
-        d.addCallback(cache)
-
-
-        def loadTracks(artists):
-            if artists:
-                self.debug('get: %r artists cached in %.3f seconds',
-                    len(list(artists)), time.time() - last[0])
-            last[0] = time.time()
-            # FIXME: include_docs makes this last forever
-            # v = views.View(self._daddb.db, self._daddb.dbName, 'dad', 'tracks',
-            #    couch.Track, include_docs=True)
-            vd = self._daddb.viewDocs('tracks', TrackRow)
+        def loadTracks(_):
+            vd = self._daddb.viewDocs('view-tracks-title-artistid', TrackRow)
             def eb(f):
                 print 'THOMAS: failure', f
                 return f
@@ -1042,14 +1031,13 @@ class TrackSelectorModel(CouchDBModel):
             last[0] = time.time()
 
             dls = manydef.DeferredListSpaced()
-            dls.DELAY = 0.05
+            dls.DELAY = 0.005
 
             class O(object):
                 name = 'Unknown'
             o = O()
 
             for track in trackList:
-                track.artists = [o, ]
                 # FIXME: THOMAS: speed this up
                 dls.addCallable(self._daddb.resolveIds, track,
                     'artist_ids', 'artists', couch.Artist)

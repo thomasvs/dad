@@ -17,8 +17,22 @@ class Track(mapping.Document):
 
     name = mapping.TextField()
 
-    artist_ids = mapping.ListField(mapping.TextField())
-    artists = mapping.ListField(mapping.TextField())
+    artists = mapping.ListField(
+        mapping.DictField(mapping.Mapping.build(
+            name = mapping.TextField(),
+            sortname = mapping.TextField(),
+            id = mapping.TextField())))
+
+    albums = mapping.ListField(
+        mapping.DictField(mapping.Mapping.build(
+            name = mapping.TextField(),
+            sortname = mapping.TextField(),
+            id = mapping.TextField(),
+            number = mapping.IntegerField(),
+            # tracks can be fragments of album numbers, so count them
+            fragment = mapping.IntegerField(),
+    )))
+
 
     added = mapping.DateTimeField(default=datetime.datetime.now)
     

@@ -24,3 +24,6 @@
 * filter track selector view by artist/album/search
 * show number of ratings in track view
 * add change notifier and update track scores with a highlight
+* use Model classes for data exchange
+* Convert Database interface to return Model objects everywhere.
+* Add notification to Model classes so we can make changes work.
