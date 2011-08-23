@@ -63,13 +63,18 @@ class ArtistSelectorController(SelectorController):
     logCategory = 'artistSC'
 
     def addItem(self, item):
+        """
+        @type  item: subclass of L{dad.model.artist.ArtistModel}
+        """
+
         # tracks can be 0 for Various Artists for example, which own albums
         # but no tracks
-        if item.tracks == 0:
+        if item.getTrackCount() == 0:
             return
 
-        self.doViews('add_row', item.id, "%s (%d)" % (item.name, item.tracks),
-            item.sortname, item.tracks)
+        self.doViews('add_row', item.getId(),
+            "%s (%d)" % (item.getName(), item.getTrackCount()),
+            item.getSortName(), item.getTrackCount())
 
 class AlbumSelectorController(SelectorController):
 

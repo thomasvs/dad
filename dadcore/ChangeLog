@@ -1,5 +1,14 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/controller/selector.py:
+	  Document addItem.
+	  Use the documented methods to access the model.
+	* dad/model/artist.py:
+	  add getSortName and getTrackCount 
+	  Add ArtistSelectorModel.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/model/artist.py (added):
 	  Add ArtistModel.
 
