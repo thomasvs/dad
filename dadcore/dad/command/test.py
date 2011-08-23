@@ -13,6 +13,7 @@ import optparse
 
 from dad import idad
 
+from dad.base import app
 from dad.common import log
 from dad.common import logcommand
 from dad.logic import database
@@ -35,24 +36,11 @@ class Artist(tcommand.TwistedCommand):
         self._doneDeferred.callback(None)
 
     def doLater(self, args):
-        import os
-        import sys
-        import optparse
 
+        # FIXME: view-specific
         import gtk
 
         from twisted.python import reflect
-
-        from dad.base import base, app
-        from dad.controller import selector
-        from dad.controller import track as trackc
-
-        from dadcouch.model import daddb
-        from dadcouch.selecter import couch
-
-
-        from dadgtk.views import views, scheduler
-
         from twisted.internet import defer
         defer.Deferred.debug = 1
 
