@@ -59,22 +59,15 @@ class Artist(tcommand.TwistedCommand):
         self._doneDeferred = defer.Deferred()
 
         # FIXME: allow customizing model and/or view(s)
-        modelType = 'Couch'
         viewTypes = ['GTK', ]
 
         db = self.parentCommand.getDatabase()
+        self.debug('Database: %r', db)
 
 
-        # cache artists
-        # from dadcouch.model import couch as mcouch
-        # d = db.viewDocs('artists', mcouch.Artist)
-        # def cacheCb(_):
-        #     print 'THOMAS: cache: hits %r lookups %r' % (
-        #         db.db._cache.hits, db.db._cache.lookups)
-        # d.addCallback(cacheCb)
-
-        modelModule = 'dad%s.models.app.%sAppModel' % (modelType.lower(), modelType)
-        amodel = reflect.namedAny(modelModule)(db)
+        # get the model
+        amodel = self.parentCommand.getAppModel()
+        self.debug('App model: %r', amodel)
 
         acontroller = app.AppController(amodel)
 
@@ -194,3 +187,6 @@ class Test(logcommand.LogCommand):
             self.database = self._provider.getDatabase(self._dbOptions)
 
         return self.database
+
+    def getAppModel(self):
+        return self._provider.getAppModel(self.getDatabase())

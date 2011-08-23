@@ -1,5 +1,15 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/models (added):
+	* dad/models/__init__.py (added):
+	* dad/models/app.py (added):
+	* dad/command/test.py:
+	* dad/plugins/pdad.py:
+	  Make sure we can start dad test --database memory artist.
+	  Doesn't work yet though.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/command/test.py (added):
 	  Add a dad test command.
 	* dad/command/tcommand.py (added):

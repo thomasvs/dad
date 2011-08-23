@@ -19,5 +19,9 @@ class CoreDatabaseProvider(object):
     def getDatabase(self, options):
         return memory.MemoryDB(options.path)
 
+    def getAppModel(self, database):
+        from dad.models import app
+        return app.MemoryAppModel(database)
+
 # instantiate twisted plugins
 _dp = CoreDatabaseProvider()
