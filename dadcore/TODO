@@ -129,6 +129,7 @@ That track looks like it's 5:06 and thus citi soleil
 - fix audio codec not being found for mp3
 - add samplerate, duration, ... so we have bitrate for files
 
-- make an inmemory database (possibly pickling) which will be good for tests
 - use blkid on device to get UUID instead of st_dev, which can change
   see http://stackoverflow.com/questions/2800798/how-to-find-the-file-system-type-in-python
+
+- make inmemory database work for dad test artist
