@@ -1,5 +1,13 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/controller/artist.py:
+	* dad/model/track.py:
+	  Document.
+	* dad/base/app.py:
+	  Find ArtistSelector controller.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/model (added):
 	* dad/model/__init__.py (added):
 	* dad/model/track.py (added):

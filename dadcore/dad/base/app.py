@@ -35,6 +35,16 @@ class AppView(base.View):
 
     # FIXME: error ?
 
+    def getView(self, what):
+        """
+        Get a view from the application for the given item.
+
+        @type  what: str
+        @param what: one of Track, Artist, Album
+        """
+        raise NotImplementedError
+
+
 class AppController(base.Controller):
 
     def getTriad(self, what):
@@ -42,7 +52,14 @@ class AppController(base.Controller):
         #            dad.controller.trackTrackController
         #            dadgtk.views.track.TrackView
         model = self._model.getModel(what)
+
+        whats = {
+            'ArtistSelector': 'selector.ArtistSelectorController'
+        }
         cklazz = 'dad.controller.%s.%sController' % (what.lower(), what)
+        if what in whats:
+            cklazz = 'dad.controller.%s' % whats[what]
+
         try:
             controller = reflect.namedAny(cklazz)(model)
         except AttributeError:

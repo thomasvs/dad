@@ -13,13 +13,25 @@ class TrackModel(base.Model):
     @ivar scores: list of L{data.Score}
     """
 
+    # FIXME: scores ?
+
+    id = None
+
     def addFragment(self, info, metadata=None, mix=None, number=None):
         raise NotImplementedError
     
     def getName(self):
+        """
+        Return the name of the track, suitable for display.
+
+        @rtype: C{unicode}
+        """
         raise NotImplementedError
 
     def getArtists(self):
+        """
+        @rtype: list of C{unicode}
+        """
         raise NotImplementedError
 
     def __repr__(self):
