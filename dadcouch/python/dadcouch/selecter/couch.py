@@ -30,7 +30,7 @@ from dad.audio import mixing, level
 from dad.common import log
 from dad.common import selecter
 
-from dadcouch.extern.paisley import client, views, mapping
+from dadcouch.extern.paisley import views, mapping
 from dadcouch.model import couch, daddb
 
 _DEFAULT_HOST = 'localhost'
@@ -94,6 +94,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
     #    above=0.7, below=1.0, random=False, loops=-1):
 
         self.debug('Creating selecter, for %d loops', options.loops)
+        from dadcouch.extern.paisley import client
         self._cache = client.MemoryCache()
         self._db = client.CouchDB(options.host, int(options.port),
             cache=self._cache)

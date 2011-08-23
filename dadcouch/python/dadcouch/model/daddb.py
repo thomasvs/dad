@@ -9,7 +9,8 @@ from twisted.internet import defer
 
 from zope import interface
 
-from dadcouch.extern.paisley import views, mapping
+from dadcouch.extern.paisley import mapping
+from dadcouch.extern.paisley import views
 
 from dad import idad
 from dad.base import base, data

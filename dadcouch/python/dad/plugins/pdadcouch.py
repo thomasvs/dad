@@ -8,6 +8,7 @@ from dad import idad
 
 from dadcouch.command import couchdb
 
+
 # twisted.plugin interface
 class CommandAppender(object):
     interface.implements(plugin.IPlugin, idad.ICommand)

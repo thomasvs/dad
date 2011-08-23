@@ -3,7 +3,7 @@
 
 import sys
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer
 from twisted.python import failure
 
 class DeferredListSpaced(defer.Deferred):
@@ -28,6 +28,8 @@ class DeferredListSpaced(defer.Deferred):
         # (cb, cbArgs, cbKWArgs,     def test_DLS(self):
         self._callables = []
         
+        from twisted.internet import reactor
+        self._reactor = reactor
 
     def addCallable(self, callable, *args, **kwargs):
         self._callables.append((callable, args, kwargs, []))
@@ -60,7 +62,7 @@ class DeferredListSpaced(defer.Deferred):
                     print 'THOMAS: oops', e
                     mydef.errback(failure.Failure(e))
             d = defer.Deferred()
-            reactor.callLater(self.DELAY, l, d, args)
+            self._reactor.callLater(self.DELAY, l, d, args)
             return d
 
         # we call the callbacks before updating internal state and possibly
@@ -129,6 +131,6 @@ class DeferredListSpaced(defer.Deferred):
             left = count > self.SPACE and self.SPACE or count
             count -= left
 
-            reactor.callLater(0, self._blockSerialize, index, left)
+            self._reactor.callLater(0, self._blockSerialize, index, left)
 
             index += left

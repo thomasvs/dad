@@ -5,9 +5,7 @@
 
 import os
 
-from twisted.internet import reactor
 from twisted.internet import defer
-from twisted.web import error
 
 from dad.common import logcommand
 from dad.task import md5task
@@ -15,17 +13,18 @@ from dad.task import md5task
 from dad.extern.task import task
 
 from dadcouch.model import daddb, couch
-from dadcouch.selecter import couch as scouch
-
-from dadcouch.extern.paisley import client
 
 
 class CouchDBCommand(logcommand.LogCommand):
 
     def addOptions(self):
+        # FIXME: move these options to a place where they don't import reactor
+        from dadcouch.selecter import couch as scouch
         self.parser.add_options(scouch.couchdb_option_list)
 
     def do(self, args):
+        from twisted.internet import reactor
+        from dadcouch.extern.paisley import client
         self.db = client.CouchDB(self.options.host, int(self.options.port))
         self.daddb = daddb.DADDB(self.db, self.options.database)
 
@@ -105,6 +104,7 @@ class Add(CouchDBCommand):
             track.addFragment(host=self.hostname(), path=path,
                 md5sum=t.md5sum)
 
+            from twisted.web import error
             try:
                 stored = yield self.daddb.saveDoc(track)
             except error.Error, e:
