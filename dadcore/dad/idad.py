@@ -47,7 +47,14 @@ class IDatabase(interface.Interface):
         """
         Save the given track in the database.
         """
-        return self.daddb.saveDoc(track)
+
+    def getTracks():
+        """
+        Look up all tracks.
+
+        @returns: a generator returning opaque track objects.
+        """
+
 
     def getTrackByHostPath(host, path):
         """

@@ -65,6 +65,9 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         res = yield self.database.getTrackByHostPath(
             hostname, path)
+        if not res:
+            res = []
+
         res = list(res)
         self.debug('Looked up: %r', res)
         if len(res) > 0:
@@ -93,12 +96,11 @@ class DatabaseInteractor(logcommand.LogCommand):
         self.debug('Got metadata: %r', metadata)
 
         # get fileinfo
-        info = FileInfo()
         t = md5task.MD5Task(path)
         self._runner.run(t)
-        info.host = hostname
-        info.path = path
-        info.md5sum = t.md5sum
+
+        info = FileInfo(hostname, path, md5sum=t.md5sum)
+
         stat = os.stat(path)
         info.size = stat.st_size
         info.inode = stat.st_ino

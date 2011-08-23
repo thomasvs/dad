@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import pickle
+import optparse
 
 from twisted.internet import defer
 
@@ -14,9 +15,20 @@ from dad import idad
 from dad.base import base, data
 from dad.common import log
 
+_DEFAULT_PATH = 'dad.pickle'
+
+memorydb_option_list = [
+        optparse.Option('-p', '--path',
+            action="store", dest="path",
+            help="database pickle path (defaults to %default)",
+            default=_DEFAULT_PATH),
+]
+
+
+# FIXME: we probably want this gone and reuse the FileModel
 class File(object):
-    host = None
-    path = None
+    info = None
+    metadata = None
 
 class Fragment(object):
     def __init__(self):
@@ -32,7 +44,31 @@ class Track(object):
         self.id = id
         self.scores = []
         self.fragments = []
+        self.name = None
 
+
+    def addFragment(self, info, metadata=None, mix=None, number=None):
+        fragment = Fragment()
+        file = File()
+        file.info = info
+        file.metadata = metadata
+        fragment.files.append(file)
+        self.fragments.append(fragment)
+    
+    def getName(self):
+        if self.name:
+            return self.name
+
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if file.metadata:
+                    return file.metadata.title
+
+    def getArtists(self):
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if file.metadata:
+                    return [file.metadata.artist, ]
 
 class MemoryDB(log.Loggable):
     """
@@ -47,14 +83,16 @@ class MemoryDB(log.Loggable):
         self._categories = {}
 
         self._hostPath = {} # dict of host -> (dict of path -> track)
+        self._md5sums = {} # dict of md5sum -> track
+
         self._id = 0
 
         self._path = path
         if self._path:
             try:
                 self.__dict__ = pickle.load(open(self._path))
-            except EOFError:
-                # probably empty
+            except (EOFError, IOError):
+                # probably empty or nonexistent
                 pass
 
     ### idad.IDatabase interface
@@ -71,8 +109,8 @@ class MemoryDB(log.Loggable):
 
         for fragment in track.fragments:
             for file in fragment.files:
-                host = file.host
-                path = file.path
+                host = file.info.host
+                path = file.info.path
 
                 if not host in self._hostPath.keys():
                     self._hostPath[host] = {}
@@ -80,11 +118,18 @@ class MemoryDB(log.Loggable):
                     self._hostPath[host][path] = []
                 self._hostPath[host][path].append(track)
 
+                if not file.info.md5sum in self._md5sums.keys():
+                    self._md5sums[file.info.md5sum] = []
+                self._md5sums[file.info.md5sum].append(track)
+
         if self._path:
             handle = open(self._path, 'w')
             pickle.dump(self.__dict__, handle, 2)
             
         return defer.succeed(track)
+
+    def getTracks(self):
+        return self._tracks.values()
 
     def getCategories(self):
         return defer.succeed(self._categories.keys())
@@ -97,7 +142,6 @@ class MemoryDB(log.Loggable):
         self.debug('%d scores for %r', len(scores), subject.id)
         return defer.succeed(scores)
 
-    @defer.inlineCallbacks
     def getTrackByHostPath(self, host, path):
         """
         Look up tracks by path.
@@ -128,11 +172,6 @@ class MemoryDB(log.Loggable):
 
         return defer.succeed(self._hostPath[host][path])
 
-    # TOPORT
-    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
-        return track.addFragment(info, metadata, mix, number)
-
-    @defer.inlineCallbacks
     def getTrackByMD5Sum(self, md5sum):
         """
         Look up tracks by md5sum
@@ -142,12 +181,12 @@ class MemoryDB(log.Loggable):
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{couch.Track}
         """
-        self.debug('get track for md5sum %r', md5sum)
+        return defer.succeed(self._md5sums.get('md5sum', []))
 
-        ret = yield self.viewDocs('view-md5sum', couch.Track,
-            include_docs=True, key=md5sum)
 
-        defer.returnValue(ret)
+    # TOPORT
+    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
+        return track.addFragment(info, metadata, mix, number)
 
     @defer.inlineCallbacks
     def getTrackByMBTrackId(self, mbTrackId):

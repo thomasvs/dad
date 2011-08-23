@@ -1,5 +1,19 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/plugins/pdad.py (added):
+	  Add a plugin so we provide the memory database.
+	* dad/database/memory.py:
+	  Add options.
+	  Add Track interface.
+	  Hash md5sum's.
+	* dad/idad.py:
+	  add getTracks.
+	* dad/logic/database.py:
+	* dad/command/main.py:
+	  Implement dad database list properly.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/database/memory.py:
 	* dad/test/test_database_memory.py:
 	  Make MemoryDB pickle-able.

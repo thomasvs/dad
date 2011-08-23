@@ -61,24 +61,6 @@ def _hostname():
     return unicode(socket.gethostname())
 
 
-class List(logcommand.LogCommand):
-
-    def do(self, args):
-        
-        from dad import plugins
-        for provider in plugin.getPlugins(idad.IDatabaseProvider, plugins):
-            self.stdout.write('- %s:\n' % provider.name)
-
-            formatter = optparse.IndentedHelpFormatter()
-            formatter.indent()
-
-            parser = optparse.OptionParser(
-                formatter=formatter, add_help_option=False)
-            parser.add_options(provider.getOptions())
-
-            self.stdout.write(parser.format_option_help())
-
-
 # FIXME: move this to a base class
 class TwistedCommand(logcommand.LogCommand):
 
@@ -93,6 +75,16 @@ class TwistedCommand(logcommand.LogCommand):
 
     def doLater(self):
         raise NotImplementedError
+
+class List(TwistedCommand):
+
+    @defer.inlineCallbacks
+    def doLater(self, args):
+        db = self.parentCommand.database
+        res = yield db.getTracks()
+        for track in res:
+            self.stdout.write('%s - %s\n' % (
+                " & ".join(track.getArtists()), track.getName()))
 
 
 class Add(TwistedCommand):
@@ -194,6 +186,8 @@ class Database(logcommand.LogCommand):
     """
 
     subCommandClasses = [Add, List, Lookup, ]
+
+    description = 'Interact with database backend.'
 
     database = None
 
