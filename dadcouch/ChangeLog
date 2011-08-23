@@ -1,5 +1,10 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-albums-by-artist/reduce.js:
+	  Remove stray colon.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* tests/artists.py (deleted):
 	  Folded into dad test artist.
 
