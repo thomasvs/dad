@@ -1,5 +1,18 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/model (added):
+	* dad/model/__init__.py (added):
+	* dad/model/track.py (added):
+	  Add a TrackModel base class.
+	* dad/controller/subject.py:
+	* dad/controller/track.py:
+	  Document.
+	  getTitle -> getName.
+	* dad/database/memory.py:
+	  Subclass from TrackModel.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/plugins/pdad.py (added):
 	  Add a plugin so we provide the memory database.
 	* dad/database/memory.py:

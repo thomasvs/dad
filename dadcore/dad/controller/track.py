@@ -10,6 +10,14 @@ from dad.controller import subject
 
 
 class TrackController(subject.SubjectController):
+    """
+    I am a controller for a track.
+
+    I mediate between the track model and the views on it.
+
+    The model is a subclass of L{dad.model.track.TrackModel}
+    A sample view is L{dadgtk.dadgtk.views.track.TrackView}
+    """
 
     @defer.inlineCallbacks
     def populate(self, subjectId, userName=None):
@@ -20,7 +28,7 @@ class TrackController(subject.SubjectController):
             self.debug('populating')
             self.doViews('set_artist', " & ".join(
                 self.subject.getArtists()))
-            self.doViews('set_title', self.subject.getTitle())
+            self.doViews('set_title', self.subject.getName())
             self.debug('populated')
         except Exception, e:
             self.warning('Exception %r', log.getExceptionMessage(e, frame=-1))

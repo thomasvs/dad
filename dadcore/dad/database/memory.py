@@ -14,6 +14,7 @@ from zope import interface
 from dad import idad
 from dad.base import base, data
 from dad.common import log
+from dad.model import track
 
 _DEFAULT_PATH = 'dad.pickle'
 
@@ -34,9 +35,9 @@ class Fragment(object):
     def __init__(self):
         self.files = []
 
-class Track(object):
+class MemoryTrack(track.TrackModel):
     """
-    @ivar id: id of the track
+    @ivar id:     id of the track
     @ivar scores: list of L{data.Score}
     """
 
@@ -46,6 +47,7 @@ class Track(object):
         self.fragments = []
         self.name = None
 
+    # base class implementations
 
     def addFragment(self, info, metadata=None, mix=None, number=None):
         fragment = Fragment()
@@ -98,7 +100,7 @@ class MemoryDB(log.Loggable):
     ### idad.IDatabase interface
     def new(self):
         self._id += 1
-        return Track(self._id)
+        return MemoryTrack(self._id)
 
     def save(self, track):
         self._tracks[track.id] = track
@@ -178,8 +180,7 @@ class MemoryDB(log.Loggable):
         Can return multiple tracks for a path; for example, multiple
         fragments.
 
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        @rtype: L{defer.Deferred} firing list of L{MemoryTrack}
         """
         return defer.succeed(self._md5sums.get('md5sum', []))
 

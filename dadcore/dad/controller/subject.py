@@ -25,10 +25,12 @@ from dadgtk.views import track
 # match to scorable
 # FIXME; model should not be couchdb-specific
 class SubjectController(base.Controller):
-
+    # FIXME: decide subject type
     """
     I am a controller for scorable models like
     L{dadcouch.model.daddb.ScorableModel}
+
+    @ivar  subject: the subject this is a controller for
     """
     subject = None
 
