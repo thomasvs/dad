@@ -18,7 +18,14 @@ class AppModel(base.Model):
 
     logCategory = 'appmodel'
 
-    pass
+    def getModel(self, what):
+        """
+        Get a model from the application for the given item.
+
+        @type  what: str
+        @param what: one of Track, Artist, Album
+        """
+        raise NotImplementedError
 
 
 class AppView(base.View):
