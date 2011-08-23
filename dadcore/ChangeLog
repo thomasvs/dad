@@ -1,5 +1,10 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/model/artist.py (added):
+	  Add ArtistModel.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/controller/artist.py:
 	* dad/model/track.py:
 	  Document.
