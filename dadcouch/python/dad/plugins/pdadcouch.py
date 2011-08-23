@@ -32,6 +32,10 @@ class CouchDBDatabaseProvider(object):
         db = client.CouchDB(options.host, int(options.port))
         return daddb.DADDB(db, options.database)
 
+    def getAppModel(self, database):
+        from dadcouch.models import app
+        return app.CouchAppModel(database)
+
 # instantiate twisted plugins
 _ca = CommandAppender()
 _dp = CouchDBDatabaseProvider()
