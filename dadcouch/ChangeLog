@@ -1,5 +1,11 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/models/app.py:
+	* tests/artists.py:
+	  Use getTriad()
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  Subclass from TrackModel.
 

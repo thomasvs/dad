@@ -17,6 +17,8 @@ class CouchAppModel(app.AppModel):
             name = 'dadcouch.model.daddb.TrackModel'
         elif what == 'Artist':
             name = 'dadcouch.model.daddb.ArtistModel'
+        elif what == 'ArtistSelector':
+            name = 'dadcouch.model.daddb.ArtistSelectorModel'
         elif what == 'Album':
             name = 'dadcouch.model.daddb.AlbumModel'
         model = reflect.namedAny(name)(self._daddb)

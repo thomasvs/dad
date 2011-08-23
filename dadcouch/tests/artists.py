@@ -84,12 +84,9 @@ def main():
 
     aview.widget.add(vbox)
 
-    artistView = views.ArtistSelectorView()
-    artistModel = daddb.ArtistSelectorModel(db)
-    artistController = selector.ArtistSelectorController(artistModel)
-    artistController.addView(artistView)
-    acontroller.add(artistController)
-    hbox.pack_start(artistView)
+    asController, asModel, asViews = acontroller.getTriad('ArtistSelector')
+
+    hbox.pack_start(asViews[0])
 
 
     aview.widget.show_all()
@@ -99,7 +96,7 @@ def main():
 
     d = defer.Deferred()
 
-    d.addCallback(lambda _: artistController.populate())
+    d.addCallback(lambda _: asController.populate())
     d.addCallback(cacheCb)
 
     d.callback(None)
