@@ -14,6 +14,7 @@ from dadcouch.extern.paisley import views, mapping
 from dad import idad
 from dad.base import base, data
 from dad.common import log
+from dad.model import artist
 
 from dadcouch.common import manydef
 from dadcouch.model import couch
@@ -78,9 +79,12 @@ class ScoreRow(mapping.Document):
         self.user, self.category, self.score = d['value']
 
 
-class ItemTracksByArtist:
+# FIXME: rename
+class ItemTracksByArtist(artist.ArtistModel):
 
     tracks = 0 # int
+    id = None
+    trackId = None
 
     # map tracks-by-artist
     def fromDict(self, d):
@@ -88,6 +92,18 @@ class ItemTracksByArtist:
 
         self.trackId = d['value']
 
+    def getId(self):
+        return self.id
+
+    def getName(self):
+        return self.name
+
+    def getSortName(self):
+        return self.sortname
+
+    def getTrackCount(self):
+        return self.tracks
+    
 class ItemAlbumsByArtist:
 
     tracks = 0 # int
@@ -910,11 +926,11 @@ class CouchDBModel(base.Model):
     def __init__(self, daddb):
         self._daddb = daddb
 
-class ArtistSelectorModel(CouchDBModel):
+class ArtistSelectorModel(artist.ArtistSelectorModel, CouchDBModel):
     def get(self):
         """
-        @returns: a deferred firing a list of L{daddb.ItemTracks} objects
-                  representing only artists and their track count.
+        @returns: a deferred firing a list of L{daddb.ItemTracksByArtist}
+                  objects representing only artists and their track count.
         """
         start = time.time()
         self.debug('get')
@@ -939,7 +955,7 @@ class ArtistSelectorModel(CouchDBModel):
 
             ret = artists.values()
 
-            self.debug('get: got %d artists in %d seconds',
+            self.debug('get: got %d artists in %.3f seconds',
                 len(ret), time.time() - start)
             return ret
         d.addCallback(cb)

@@ -55,12 +55,12 @@ def main():
 
 
     # cache artists
-    from dadcouch.model import couch as mcouch
-    d = db.viewDocs('artists', mcouch.Artist)
-    def cacheCb(_):
-        print 'THOMAS: cache: hits %r lookups %r' % (
-            db.db._cache.hits, db.db._cache.lookups)
-    d.addCallback(cacheCb)
+    # from dadcouch.model import couch as mcouch
+    # d = db.viewDocs('artists', mcouch.Artist)
+    # def cacheCb(_):
+    #     print 'THOMAS: cache: hits %r lookups %r' % (
+    #         db.db._cache.hits, db.db._cache.lookups)
+    # d.addCallback(cacheCb)
 
     modelModule = 'dad%s.models.app.%sAppModel' % (modelType.lower(), modelType)
     amodel = reflect.namedAny(modelModule)(db)
@@ -95,9 +95,9 @@ def main():
     # start loading artists and albums
 
     d = defer.Deferred()
+    d.addCallback(lambda _: log.debug('test', 'asking controller to populate'))
 
     d.addCallback(lambda _: asController.populate())
-    d.addCallback(cacheCb)
 
     d.callback(None)
 
