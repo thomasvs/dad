@@ -4,6 +4,8 @@
 import datetime
 import math
 
+from dad.model import track
+
 from dadcouch.extern.paisley import mapping
 
 """
@@ -12,7 +14,7 @@ Document mappings from CouchDB to python.
 
 
 # new documents
-class Track(mapping.Document):
+class Track(mapping.Document, track.TrackModel):
     type = mapping.TextField(default="track")
 
     name = mapping.TextField()
@@ -216,11 +218,7 @@ class Track(mapping.Document):
 
         return [self.fragments[0].files[0].metadata.artist, ]
 
-    # FIXME: standardize
     def getName(self):
-        return self.getTitle()
-
-    def getTitle(self):
         if self.name:
             return self.name
 
@@ -234,10 +232,6 @@ class Track(mapping.Document):
         return self.fragments[0].files[0].metadata.title
 
 
-    def __repr__(self):
-        return '<Track %r for %r - %r>' % (self.id, 
-            " & ".join(self.getArtists() or []),
-            self.getTitle())
 # old documents
 class Category(mapping.Document):
     type = mapping.TextField(default="category")

@@ -1,5 +1,10 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  Subclass from TrackModel.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	  Add getTracks.
 	* python/dadcouch/model/couch.py:
