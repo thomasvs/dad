@@ -15,4 +15,4 @@ check: trial pep8
 
 doc: python/dadcouch Makefile
 	@mkdir -p doc
-	epydoc -o doc/html dad dadgst dadcouch
+	epydoc -o doc/html dad dadgst dadcouch dadgtk
