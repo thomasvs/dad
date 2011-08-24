@@ -1,5 +1,10 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Debug some more.  Return the correctly updated track.
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  Rename finfo to info.
 

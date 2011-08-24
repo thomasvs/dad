@@ -410,14 +410,14 @@ class DADDB(log.Loggable):
                 if f.md5sum == info.md5sum:
                     self.debug('Appending to fragment %r', fragment)
                     track.filesAppend(fragment.files, info, metadata, number)
+                    self.debug('fragment %r now has %r files', fragment,
+                        len(fragment.files))
                     found = True
                     break
             if found:
                 break
 
-        stored = yield self.saveDoc(track)
-
-        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
+        track = yield self.save(track)
         defer.returnValue(track)
 
     @defer.inlineCallbacks
