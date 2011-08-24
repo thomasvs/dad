@@ -14,7 +14,7 @@ from zope import interface
 from dad import idad
 from dad.base import base, data
 from dad.common import log
-from dad.model import track
+from dad.model import track, artist
 
 _DEFAULT_PATH = 'dad.pickle'
 
@@ -35,7 +35,38 @@ class Fragment(object):
     def __init__(self):
         self.files = []
 
-class MemoryTrack(track.TrackModel):
+class MemoryModel(base.Model):
+    def __init__(self, memorydb):
+        self._db = memorydb
+
+class MemoryArtistModel(artist.ArtistModel):
+    """
+    @ivar id:     id of the artist
+    @ivar name:   name of the artist
+    @type tracks: int
+    """
+    id = None
+    name = None
+
+    tracks = 0
+
+    def getId(self):
+        if self.id:
+            return self.id
+
+        return self.name
+
+    def getName(self):
+        return self.name
+
+    def getSortName(self):
+        return self.name
+
+    def getTrackCount(self):
+        return self.tracks
+
+
+class MemoryTrackModel(track.TrackModel):
     """
     @ivar id:     id of the track
     @ivar scores: list of L{data.Score}
@@ -72,6 +103,11 @@ class MemoryTrack(track.TrackModel):
                 if file.metadata:
                     return [file.metadata.artist, ]
 
+class MemoryArtistSelectorModel(artist.ArtistSelectorModel, MemoryModel):
+    def get(self):
+        return defer.succeed(self._db._artists.values())
+    
+
 class MemoryDB(log.Loggable):
     """
     """
@@ -81,8 +117,10 @@ class MemoryDB(log.Loggable):
     logCategory = 'memorydb'
 
     def __init__(self, path=None):
-        self._tracks = {}
+        self._tracks = {} # id -> track
+        self._artists = {} # dict of artist name -> (MemoryArtistModel, count)
         self._categories = {}
+        self._mbTrackIds = {} # mb track id -> track
 
         self._hostPath = {} # dict of host -> (dict of path -> track)
         self._md5sums = {} # dict of md5sum -> track
@@ -100,7 +138,7 @@ class MemoryDB(log.Loggable):
     ### idad.IDatabase interface
     def new(self):
         self._id += 1
-        return MemoryTrack(self._id)
+        return MemoryTrackModel(self._id)
 
     def save(self, track):
         self._tracks[track.id] = track
@@ -124,9 +162,26 @@ class MemoryDB(log.Loggable):
                     self._md5sums[file.info.md5sum] = []
                 self._md5sums[file.info.md5sum].append(track)
 
+                if file.metadata and file.metadata.mbTrackId:
+                    mb = file.metadata.mbTrackId
+                    if not mb in self._mbTrackIds:
+                        self._mbTrackIds[mb] = track
+
+
+        for artist in track.getArtists():
+            if not artist in self._artists:
+                am = MemoryArtistModel()
+                am.name = artist
+                am.tracks = 1
+                self._artists[artist] = am
+            else:
+                self._artists[artist].tracks += 1
+
+        # save to disk
         if self._path:
             handle = open(self._path, 'w')
             pickle.dump(self.__dict__, handle, 2)
+
             
         return defer.succeed(track)
 
@@ -184,12 +239,6 @@ class MemoryDB(log.Loggable):
         """
         return defer.succeed(self._md5sums.get('md5sum', []))
 
-
-    # TOPORT
-    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
-        return track.addFragment(info, metadata, mix, number)
-
-    @defer.inlineCallbacks
     def getTrackByMBTrackId(self, mbTrackId):
         """
         Look up tracks by musicbrainz track id.
@@ -201,11 +250,40 @@ class MemoryDB(log.Loggable):
         @rtype: L{defer.Deferred} firing list of L{couch.Track}
         """
         self.debug('get track for mb track id %r', mbTrackId)
+        if mbTrackId in self._mbTrackIds:
+            return defer.succeed(self._mbTrackIds[mbTrackId])
 
-        ret = yield self.viewDocs('view-mbtrackid', couch.Track,
-            include_docs=True, key=mbTrackId)
+        return defer.succeed([])
 
-        defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
+        self.debug('get track for track id %r', track.id)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        if len(track.fragments) > 1:
+            self.warning('Not yet implemented finding the right fragment to add by mbid')
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
+                    self.debug('Appending to fragment %r', fragment)
+                    track.filesAppend(fragment.files, info, metadata, number)
+                    found = True
+                    break
+            if found:
+                break
+
+        stored = yield self.save(track)
+
+        defer.returnValue(track)
+
+
+    # TOPORT
+    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
+        return track.addFragment(info, metadata, mix, number)
 
     @defer.inlineCallbacks
     def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
@@ -222,33 +300,6 @@ class MemoryDB(log.Loggable):
         for fragment in track.fragments:
             for f in fragment.files:
                 if f.md5sum == info.md5sum:
-                    self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata, number)
-                    found = True
-                    break
-            if found:
-                break
-
-        stored = yield self.saveDoc(track)
-
-        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
-        defer.returnValue(track)
-
-    @defer.inlineCallbacks
-    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
-        self.debug('get track for track id %r', track.id)
-
-        track = yield self.db.map(self.dbName, track.id, couch.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
-
-        if len(track.fragments) > 1:
-            self.warning('Not yet implemented finding the right fragment to add by mbid')
-
-        for fragment in track.fragments:
-            for f in fragment.files:
-                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
                     self.debug('Appending to fragment %r', fragment)
                     track.filesAppend(fragment.files, info, metadata, number)
                     found = True

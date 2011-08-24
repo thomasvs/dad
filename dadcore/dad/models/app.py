@@ -14,11 +14,11 @@ class MemoryAppModel(app.AppModel):
         name = 'dad.models.%s.%sModel' % (what.lower(), what)
         # FIXME: move
         if what == 'Track':
-            name = 'dadcouch.model.daddb.TrackModel'
+            name = 'dad.database.memory.MemoryTrackModel'
         elif what == 'Artist':
-            name = 'dadcouch.model.daddb.ArtistModel'
+            name = 'dad.database.memory.MemoryArtistModel'
         elif what == 'ArtistSelector':
-            name = 'dadcouch.model.daddb.ArtistSelectorModel'
+            name = 'dad.database.memory.MemoryArtistSelectorModel'
         elif what == 'Album':
             name = 'dadcouch.model.daddb.AlbumModel'
         model = reflect.namedAny(name)(self._memorydb)

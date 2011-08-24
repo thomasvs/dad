@@ -14,7 +14,7 @@ class SelectorController(base.Controller):
         self._reactor = reactor
 
     def populate(self):
-        self.debug('populate()')
+        self.debug('populate() using model %r', self._model)
         self.doViews('throb', True)
 
         # populate with the iterable we get from the model

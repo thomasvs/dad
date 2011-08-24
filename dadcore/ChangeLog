@@ -1,5 +1,12 @@
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/controller/selector.py:
+	* dad/database/memory.py:
+	* dad/models/app.py:
+	  Make dad test artist work with memory database too.
+
+2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/models (added):
 	* dad/models/__init__.py (added):
 	* dad/models/app.py (added):
