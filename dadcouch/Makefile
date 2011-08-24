@@ -1,8 +1,10 @@
 trial:
 	trial dadcouch.test
 
-coverage: python/dadcouch
+_trial_temp/coverage: python/dadcouch python/dadcouch/*.py python/dadcouch/*/*.py
 	trial --coverage dadcouch.test
+
+coverage: _trial_temp/coverage
 	find _trial_temp/coverage -name 'dadcouch.*.cover' | grep -v dadcouch.test | grep -v paisley.mapping | xargs scripts/show-coverage.py
 
 clean:
