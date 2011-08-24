@@ -3,19 +3,38 @@
 
 from dad.base import base
 
+class FileModel(base.Model):
+
+    finfo = None
+    metadata = None
+
+class FragmentModel(base.Model):
+    """
+    @type files: list of subclass of L{FileModel}
+    """
+
+    def __init__(self):
+        self.files = []
+
 class TrackModel(base.Model):
     """
     I am a model for a track.
 
     My controller is L{dad.controller.track.TrackController}
 
-    @ivar id:     id of the track
-    @ivar scores: list of L{data.Score}
+    @ivar id:        id of the track
+    @type scores:    list of L{data.Score}
+    @type fragments: list of subclasses of L{FragmentModel}
+
     """
 
     # FIXME: scores ?
 
     id = None
+
+    def __init__(self):
+        self.fragments = []
+
 
     # FIXME: what does it mean if mix is None ? How does that identify
     # a fragment ?
@@ -45,6 +64,12 @@ class TrackModel(base.Model):
     def getArtists(self):
         """
         @rtype: list of C{unicode}
+        """
+        raise NotImplementedError
+
+    def getFragments(self):
+        """
+        @rtype: list of subclasses of L{FragmentModel}
         """
         raise NotImplementedError
 

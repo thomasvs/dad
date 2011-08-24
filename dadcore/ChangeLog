@@ -1,6 +1,21 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/test/test_database_memory.py:
+	  Add more tests.
+	* dad/idad.py:
+	  Fix docstring.
+	* dad/logic/database.py:
+	  Remove unused imports.
+	* dad/model/track.py:
+	  Add models for File and Fragment.
+	* dad/database/memory.py:
+	  Use the models.
+	  Make sure we return generators, even if they generate empty lists,
+	  where applicable.
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/test/test_database_memory.py:
 	  Document the DBTest class.
 	  Ask to set provider too so we can get ArtistSelectorModel.
 	* dad/test/common.py:

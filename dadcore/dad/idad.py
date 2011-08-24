@@ -80,8 +80,8 @@ class IDatabase(interface.Interface):
         @type  path: unicode
         @param path: the path where the file lives
 
-        @returns: a generator returning opaque track objects for the
-                  given file.
+        @rtype: a L{defer.Deferred} firing a generator
+                returning subclasses of L{track.TrackModel}
         """
 
     def getTrackByMD5Sum(md5sum):

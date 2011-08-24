@@ -20,10 +20,6 @@ from dad.common import log
 from dad.common import logcommand
 from dad.task import md5task
 
-from dadcouch.model import daddb, couch
-from dadcouch.selecter import couch as scouch
-
-
 class PathError(Exception):
     pass
 

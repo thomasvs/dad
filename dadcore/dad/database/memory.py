@@ -26,15 +26,6 @@ memorydb_option_list = [
 ]
 
 
-# FIXME: we probably want this gone and reuse the FileModel
-class File(object):
-    info = None
-    metadata = None
-
-class Fragment(object):
-    def __init__(self):
-        self.files = []
-
 class MemoryModel(base.Model):
     def __init__(self, memorydb):
         self._db = memorydb
@@ -81,9 +72,10 @@ class MemoryTrackModel(track.TrackModel):
     # base class implementations
 
     def addFragment(self, info, metadata=None, mix=None, number=None):
-        fragment = Fragment()
-        file = File()
-        file.info = info
+        fragment = track.FragmentModel()
+        file = track.FileModel()
+        # FIXME: rename finfo
+        file.finfo = info
         file.metadata = metadata
         fragment.files.append(file)
         self.fragments.append(fragment)
@@ -105,6 +97,9 @@ class MemoryTrackModel(track.TrackModel):
 
         return []
 
+    def getFragments(self):
+        return self.fragments
+        
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, MemoryModel):
     def get(self):
         return defer.succeed(self._db._artists.values())
@@ -157,8 +152,8 @@ class MemoryDB(log.Loggable):
 
         for fragment in track.fragments:
             for file in fragment.files:
-                host = file.info.host
-                path = file.info.path
+                host = file.finfo.host
+                path = file.finfo.path
 
                 if not host in self._hostPath.keys():
                     self._hostPath[host] = {}
@@ -166,9 +161,9 @@ class MemoryDB(log.Loggable):
                     self._hostPath[host][path] = []
                 self._hostPath[host][path].append(track)
 
-                if not file.info.md5sum in self._md5sums.keys():
-                    self._md5sums[file.info.md5sum] = []
-                self._md5sums[file.info.md5sum].append(track)
+                if not file.finfo.md5sum in self._md5sums.keys():
+                    self._md5sums[file.finfo.md5sum] = []
+                self._md5sums[file.finfo.md5sum].append(track)
 
                 if file.metadata and file.metadata.mbTrackId:
                     mb = file.metadata.mbTrackId
@@ -225,13 +220,14 @@ class MemoryDB(log.Loggable):
 
         if not host in self._hostPath.keys():
             self.debug('host %r not in database', host)
-            return defer.succeed(None)
+            return defer.succeed(xrange(0))
 
         if not path in self._hostPath[host].keys():
             self.debug('path %r on host %r not in database', path, host)
-            return defer.succeed(None)
+            return defer.succeed(xrange(0))
 
-        return defer.succeed(self._hostPath[host][path])
+        # FIXME: does returning a list count as a generator ?
+        return defer.succeed(t for t in self._hostPath[host][path])
 
     def getTrackByMD5Sum(self, md5sum):
         """
@@ -241,7 +237,7 @@ class MemoryDB(log.Loggable):
 
         @rtype: L{defer.Deferred} firing list of L{MemoryTrack}
         """
-        return defer.succeed(self._md5sums.get('md5sum', []))
+        return defer.succeed(self._md5sums.get(md5sum, []))
 
     def getTrackByMBTrackId(self, mbTrackId):
         """
