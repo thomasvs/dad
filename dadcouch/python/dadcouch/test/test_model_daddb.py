@@ -10,6 +10,8 @@ from dad.logic import database
 
 from dad.test import test_database_memory
 
+from dad.plugins import pdadcouch
+
 from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley.test import test_util
 
@@ -44,7 +46,11 @@ class DADDBTestCase(test_util.CouchDBTestCase):
 
 
 class DADDBTest(test_database_memory.DBTest, DADDBTestCase):
-    pass
+
+    @defer.inlineCallbacks
+    def setUp(self):
+        yield DADDBTestCase.setUp(self)
+        self.provider = pdadcouch.CouchDBDatabaseProvider()
 
 
 

@@ -1,3 +1,12 @@
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
+	  Cleanup.
+	* python/dadcouch/model/couch.py:
+	  Allow metadata without channels or rate.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Set provider.
+
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* couchdb/views/view-albums-by-artist/reduce.js:

@@ -313,7 +313,7 @@ class DADDB(log.Loggable):
         rows = list(rows)
 
         if not rows:
-            self.debug('No scores for %r', subject.id)
+            self.debug('No scores for %r', subject)
             defer.returnValue([])
             return
 
@@ -449,9 +449,8 @@ class DADDB(log.Loggable):
 
     @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
-        """
-        Score the given subject.
-        """
+        # FIXME: maybe we should first get the most recent version,
+        #        then update, to avoid conflicts ?
         self.debug('asked to score subject %r '
             'for user %r and category %r to score %r',
             subject, userName, categoryName, score)

@@ -152,10 +152,12 @@ class Track(mapping.Document, track.TrackModel):
             'files': files,
         }
         if metadata:
-            fragment.update({
-                'channels': metadata.channels,
-                'rate': metadata.rate,
-            })
+            d = {}
+            if metadata.channels:
+                d['channels'] = metadata.channels
+            if metadata.sampleRate:
+                d['rate'] = metadata.sampleRate
+            fragment.update(d)
 
         if mix:
             self.fragmentSetMix(fragment, mix)
