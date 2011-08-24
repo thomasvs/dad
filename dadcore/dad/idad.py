@@ -55,6 +55,21 @@ class IDatabase(interface.Interface):
         @returns: a generator returning opaque track objects.
         """
 
+    def getCategories():
+        """
+        Get a list of all categories.
+
+        @returns: a deferred firing a generator of category names.
+        @rtype:   L{twisted.internet.defer.Deferred} firing C{list} of
+                  C{unicode}
+        """
+
+    def getScores(subject):
+        """
+        @type  subject: a subclass of L{dad.model.artist.TrackModel} or others
+
+        @returns: deferred firing list of L{dad.base.data.Score}
+        """
 
     def getTrackByHostPath(host, path):
         """
@@ -102,8 +117,8 @@ class IDatabase(interface.Interface):
         """
         Add the given file to each fragment with a file with the same md5sum.
 
-        @type  info:     L{database.FileInfo}
-        @type  metadata: L{database.TrackMetadata}
+        @type  info:     L{dad.logic.database.FileInfo}
+        @type  metadata: L{dad.logic.database.TrackMetadata}
         @type  mix:      L{dad.audio.mix.TrackMix}
         """
 
@@ -113,7 +128,23 @@ class IDatabase(interface.Interface):
         track id.
         """
 
+    def score(subject, userName, categoryName, score):
+        """
+        Score the given subject.
+        The database backend should store the score and related information.
+        For example, the category should exist and be retrievable with
+        getCategories() after this call.
 
+        @type  subject:      subclass of L{dad.model.track.TrackModel} or others
+        @type  userName:     C{unicode}
+        @type  categoryName: C{unicode}
+        @param score:        A score between 0.0 and 1.0
+        @type  score:        C{float}
+
+        @rtype: a L{twisted.internet.defer.Deferred} firing a subclass of the
+                update L{dad.model.track.TrackModel} or other
+        """
+ 
 class IMetadataGetter(interface.Interface):
     def getMetadata(path, runner=None):
         """

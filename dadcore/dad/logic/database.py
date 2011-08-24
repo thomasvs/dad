@@ -208,20 +208,23 @@ class FileInfo:
 
 class TrackMetadata:
     """
-    A class for collecting a file's metadata.
+    A class for collecting a file's metadata and stream information.
     """
 
     artist = None
     title = None
     album = None
     trackNumber = None
-
-    audioCodec = None
-    sampleRate = None
-    length = None
     year = None
     month = None
     day = None
+
+    # stream information
+    audioCodec = None
+    sampleRate = None
+    channels = None
+    length = None
+
 
     # musicbrainz
     mbTrackId = None

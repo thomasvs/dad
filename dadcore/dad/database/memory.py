@@ -103,6 +103,8 @@ class MemoryTrackModel(track.TrackModel):
                 if file.metadata:
                     return [file.metadata.artist, ]
 
+        return []
+
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, MemoryModel):
     def get(self):
         return defer.succeed(self._db._artists.values())
@@ -135,6 +137,16 @@ class MemoryDB(log.Loggable):
                 # probably empty or nonexistent
                 pass
 
+    # private methods
+    def _save(self):
+        # save to disk
+        if self._path:
+            self.debug('persisting to disk')
+            handle = open(self._path, 'w')
+            pickle.dump(self.__dict__, handle, 2)
+            handle.close()
+
+ 
     ### idad.IDatabase interface
     def new(self):
         self._id += 1
@@ -142,10 +154,6 @@ class MemoryDB(log.Loggable):
 
     def save(self, track):
         self._tracks[track.id] = track
-
-        for score in track.scores:
-            if not score.category in self._categories:
-                self._categories[score.category] = True
 
         for fragment in track.fragments:
             for file in fragment.files:
@@ -177,11 +185,7 @@ class MemoryDB(log.Loggable):
             else:
                 self._artists[artist].tracks += 1
 
-        # save to disk
-        if self._path:
-            handle = open(self._path, 'w')
-            pickle.dump(self.__dict__, handle, 2)
-
+        self._save()
             
         return defer.succeed(track)
 
@@ -280,7 +284,43 @@ class MemoryDB(log.Loggable):
 
         defer.returnValue(track)
 
+    @defer.inlineCallbacks
+    def score(self, subject, userName, categoryName, score):
+        self.debug('asked to score subject %r '
+            'for user %r and category %r to score %r',
+            subject, userName, categoryName, score)
 
+        found = False
+        ret = None
+
+        if not categoryName in self._categories:
+            self.debug('Adding category %r', categoryName)
+            self._categories[categoryName] = True
+
+        for i, s in enumerate(subject.scores):
+            if s.user == userName and s.category == categoryName:
+                self.debug('Updating score for %r in %r from %r to %r',
+                    userName, categoryName, s.score, score)
+                subject.scores[i].score = score
+                ret = yield self.save(subject)
+                found = True
+
+        if not found:
+            self.debug('Setting score for %r in %r to %r',
+                userName, categoryName, score)
+            if not subject.scores:
+                subject.scores = []
+            s = data.Score()
+            s.subject = subject
+            s.user = userName
+            s.category = categoryName
+            s.score = score
+            subject.scores.append(s)
+            ret = yield self.save(subject)
+
+        self._save()
+
+        defer.returnValue(ret)
     # TOPORT
     def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
         return track.addFragment(info, metadata, mix, number)
@@ -312,38 +352,4 @@ class MemoryDB(log.Loggable):
         track = yield self.db.map(self.dbName, stored['id'], couch.Track)
         defer.returnValue(track)
 
-    @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
-        """
-        Score the given subject.
-        """
-        self.debug('asked to score subject %r '
-            'for user %r and category %r to score %r',
-            subject, userName, categoryName, score)
 
-        found = False
-        ret = None
-
-        for i, s in enumerate(subject.scores):
-            if s.user == userName and s.category == categoryName:
-                self.debug('Updating score for %r in %r from %r to %r',
-                    userName, categoryName, s.score, score)
-                subject.scores[i].score = score
-                ret = yield self.save(subject)
-                found = True
-
-        if not found:
-            self.debug('Setting score for %r in %r to %r',
-                userName, categoryName, score)
-            if not subject.scores:
-                subject.scores = []
-            s = data.Score()
-            s.subject = subject
-            s.user = userName
-            s.category = categoryName
-            s.score = score
-            subject.scores.append(s)
-            print subject.scores
-            ret = yield self.save(subject)
-
-        defer.returnValue(ret)

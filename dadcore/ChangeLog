@@ -1,3 +1,22 @@
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/test/test_database_memory.py:
+	  Document the DBTest class.
+	  Ask to set provider too so we can get ArtistSelectorModel.
+	* dad/test/common.py:
+	  Make sure we have logs for tests.
+	* dad/idad.py:
+	  Add getCategories and getScores and score.
+	* dad/logic/database.py:
+	  Rearrange; add channels.
+	* dad/model/track.py:
+	  Document.
+	* dad/database/memory.py:
+	  Return an empty list if we have no artists.
+	  Make sure we _save to disk every time we score.
+	* dad/base/data.py:
+	  Add a Score repr. 
+
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/controller/selector.py:

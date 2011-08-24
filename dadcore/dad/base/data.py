@@ -67,3 +67,7 @@ class Score:
     user = None
     category = None
     score = None
+
+    def __repr__(self):
+        return "<Score %.3f for user %r in category %r for %r>" % (
+            self.score, self.user, self.category, self.subject)
