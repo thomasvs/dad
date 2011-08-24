@@ -198,7 +198,7 @@ class DADDB(log.Loggable):
         Specify include_docs=True if you want to load full docs (and
         allow them to get cached)
 
-        @type  db:       L{client.CouchDB}
+        @type  db:       L{dadcouch.extern.paisley.client.CouchDB}
         @type  dbName:   str
         @param klazz:    the class to instantiate objects from
         @param viewName: name of the view to load objects from
@@ -1102,21 +1102,23 @@ class ScorableModel(CouchDBModel):
     @defer.inlineCallbacks
     def getScores(self, userName=None):
         """
-        Get a track's scores and resolve their user and category.
+        Get a subject's scores and resolve their user and category.
 
         @rtype: list of user, category, score
         """
 
         userId = None
-        if userName:
-            user = yield self._daddb.getOrAddUser(userName)
-            # FIXME: unicode
-            user.Id = unicode(user.id)
+        # for now, skip adding actual User docs
+        # if userName:
+        #     user = yield self._daddb.getOrAddUser(userName)
+        #     # FIXME: unicode
+        #     user.Id = unicode(user.id)
 
-
-        subject = getattr(self, self.subjectType)
-        self.debug('Getting scores for %r', subject)
-        scores = yield self._daddb.getScores(subject)
+        # FIXME: the subject controller has .subject, not .track or .artist?
+        # subject = getattr(self, self.subjectType)
+        # self.debug('Getting scores for %r', subject)
+        # scores = yield self._daddb.getScores(subject)
+        scores = yield self._daddb.getScores(self.subject)
 
         scores = list(scores)
         defer.returnValue(scores)

@@ -1,5 +1,13 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* Makefile:
+	  Fix up epydoc generation.
+	* python/dadcouch/model/daddb.py:
+	  Don't add user for now.
+	  Fix up docstrings.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/command/couchdb.py:
 	  Add dad couchdb replicate command.
 
