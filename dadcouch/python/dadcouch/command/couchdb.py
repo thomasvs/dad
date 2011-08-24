@@ -66,7 +66,7 @@ class Add(CouchDBCommand):
             self.stdout.write('%s:\n' % path.encode('utf-8'))
 
             # look up first
-            ret = yield self.daddb.getTrackByHostPath(self.hostname(), path)
+            ret = yield self.daddb.getTracksByHostPath(self.hostname(), path)
             ret = list(ret)
             if len(ret) > 0:
                 if not self.options.force:
@@ -80,7 +80,7 @@ class Add(CouchDBCommand):
             runner.run(t)
 
             # check if any tracks have a file with this md5sum
-            ret = yield self.daddb.getTrackByMD5Sum(t.md5sum)
+            ret = yield self.daddb.getTracksByMD5Sum(t.md5sum)
             ret = list(ret)
 
             if ret:
@@ -137,7 +137,7 @@ class Lookup(CouchDBCommand):
         
             self.stdout.write('%s\n' % path)
             try:
-                ret = yield self.daddb.getTrackByHostPath(self.hostname(), path)
+                ret = yield self.daddb.getTracksByHostPath(self.hostname(), path)
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')

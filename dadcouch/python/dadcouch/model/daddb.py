@@ -330,7 +330,7 @@ class DADDB(log.Loggable):
         defer.returnValue(scores)
 
     @defer.inlineCallbacks
-    def getTrackByHostPath(self, host, path):
+    def getTracksByHostPath(self, host, path):
         """
         Look up tracks by path.
         Can return multiple tracks for a path; for example, multiple
@@ -359,7 +359,7 @@ class DADDB(log.Loggable):
         return track.addFragment(info, metadata, mix, number)
 
     @defer.inlineCallbacks
-    def getTrackByMD5Sum(self, md5sum):
+    def getTracksByMD5Sum(self, md5sum):
         """
         Look up tracks by md5sum
         Can return multiple tracks for a path; for example, multiple
@@ -376,7 +376,7 @@ class DADDB(log.Loggable):
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def getTrackByMBTrackId(self, mbTrackId):
+    def getTracksByMBTrackId(self, mbTrackId):
         """
         Look up tracks by musicbrainz track id.
 

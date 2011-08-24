@@ -75,7 +75,7 @@ class SimpleTestCase(DADDBTestCase):
         stored = yield self.daddb.saveDoc(track)
 
         # look up
-        ret = yield self.daddb.getTrackByHostPath(host, path)
+        ret = yield self.daddb.getTracksByHostPath(host, path)
 
         results = list(ret)
         self.assertEquals(len(results), 1)
@@ -125,7 +125,7 @@ class SimpleTestCase(DADDBTestCase):
 
 
         # look up
-        ret = yield self.daddb.getTrackByHostPath(host, path)
+        ret = yield self.daddb.getTracksByHostPath(host, path)
 
         results = list(ret)
         self.assertEquals(len(results), 1)
@@ -158,7 +158,7 @@ class MD5TestCase(DADDBTestCase):
         yield self.daddb.trackAddFragmentFileByMD5Sum(stored, info)
 
         # look up track through first fragment file
-        ret = yield self.daddb.getTrackByHostPath(host, path)
+        ret = yield self.daddb.getTracksByHostPath(host, path)
 
         results = list(ret)
         self.assertEquals(len(results), 1)
@@ -172,7 +172,7 @@ class MD5TestCase(DADDBTestCase):
 
 
         # look up second and make sure the id is the same
-        ret = yield self.daddb.getTrackByHostPath(host + '-2', path)
+        ret = yield self.daddb.getTracksByHostPath(host + '-2', path)
         results = list(ret)
 
         self.assertEquals(len(results), 1)
@@ -180,12 +180,12 @@ class MD5TestCase(DADDBTestCase):
 
         # add a third one 
 
-        ret = yield self.daddb.getTrackByHostPath(host, path)
+        ret = yield self.daddb.getTracksByHostPath(host, path)
         info = database.FileInfo(host=host + '-3', path=path, md5sum=md5sum)
         yield self.daddb.trackAddFragmentFileByMD5Sum(stored, info)
 
         # look up third and make sure the id is the same
-        ret = yield self.daddb.getTrackByHostPath(host + '-3', path)
+        ret = yield self.daddb.getTracksByHostPath(host + '-3', path)
         results = list(ret)
 
         self.assertEquals(len(results), 1)
