@@ -151,10 +151,68 @@ class Lookup(CouchDBCommand):
             else:
                 self.stdout.write('In database in %d tracks.\n' % len(ret))
  
+
+class Add(CouchDBCommand):
+    summary = "Add another database to replicate with"
+    usage = "[host]"
+
+    def do(self, args):
+        import socket
+        import httplib
+        import cjson as json
+
+        # FIXME: this hardcodes our own port/server
+        conn = httplib.HTTPConnection('%s:%d' % (self.options.host,
+            int(self.options.port)))
+
+        try:
+            jane = args[0]
+        except IndexError:
+            self.stdout.write('Please give a database to replicate with.\n')
+            return
+
+        if ':' not in jane:
+            jane += ':%d' % self.options.port
+
+        dbs = [
+          self.options.database,
+          "http://%s/%s" % (jane, self.options.database),
+        ]
+
+        for source, target in [(dbs[0], dbs[1]), (dbs[1], dbs[0])]:
+            s = json.encode({
+              "source": source,
+              "target": target,
+              "continuous": True})
+            self.debug('json string: %s', s)
+            try:
+                conn.request('POST', '/_replicate', s,
+                    {"Content-Type": "application/json"})
+            except socket.error:
+                self.stdout.write('FAILED: local server failed for source %s\n' % source)
+                self.stdout.write('Is the server running ?\n')
+                return
+            try:
+                r = conn.getresponse()
+            except httplib.ResponseNotReady:
+                self.stdout.write('FAILED: local server failed for source %s\n' % source)
+                return
+
+            if r.status / 100 == 2:
+                self.stdout.write("%r\n" % json.decode(r.read()))
+            else:
+                self.stdout.write('FAILED: status code %r\n' % r.status)
+                return
+
+class Replicate(logcommand.LogCommand):
+    description = """Manage replication.
+"""
+
+    subCommandClasses = [Add, ]
+
 class CouchDB(logcommand.LogCommand):
 
     summary = """Interact with CouchDB backend."""
     description = 'Interact with CouchDB backend'
 
-
-    subCommandClasses = [Add, Lookup]
+    subCommandClasses = [Add, Lookup, Replicate]

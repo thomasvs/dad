@@ -1,3 +1,8 @@
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/command/couchdb.py:
+	  Add dad couchdb replicate command.
+
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
