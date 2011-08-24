@@ -179,7 +179,7 @@ class DBTest:
         info = database.FileInfo(u'localhost', u'/tmp/first.flac',
             md5sum=u'deadbeef')
         t.addFragment(info)
-        yield self.testdb.save(t)
+        t = yield self.testdb.save(t)
 
         # get the right track
         gen = yield self.testdb.getTracksByMD5Sum(u'deadbeef')
@@ -199,7 +199,72 @@ class DBTest:
 
         tracks = list(gen)
         self.assertEquals(len(tracks), 0)
-  
+
+        # add another fragment for the same md5sum
+        info = database.FileInfo(u'localhost', u'/tmp/milezisdead.flac',
+            md5sum=u'deadbeef')
+
+        metadata = database.TrackMetadata()
+        metadata.artist = u'The Afghan Whigs'
+        mb = u'9b9b333e-8278-401b-8361-700c14096228'
+        metadata.mbTrackId = mb
+
+        t = yield self.testdb.trackAddFragmentFileByMD5Sum(t, 
+            info, metadata)
+
+        fragments = yield t.getFragments()
+        self.assertEquals(len(fragments), 1)
+        f = fragments[0]
+        self.assertEquals(len(f.files), 2)
+
+
+    @defer.inlineCallbacks
+    def testGetTracksByMBTrackId(self):
+        t = self.testdb.new()
+        t.name = u'first'
+        info = database.FileInfo(u'localhost', u'/tmp/milez.flac',
+            md5sum=u'deadbeef')
+
+        metadata = database.TrackMetadata()
+        metadata.artist = u'The Afghan Whigs'
+        mb = u'9b9b333e-8278-401b-8361-700c14096228'
+        metadata.mbTrackId = mb
+
+        t.addFragment(info, metadata=metadata)
+        t = yield self.testdb.save(t)
+ 
+        # get the right track
+        gen = yield self.testdb.getTracksByMBTrackId(mb)
+
+        tracks = list(gen)
+        self.assertEquals(len(tracks), 1)
+
+        fragments = tracks[0].getFragments()
+        # FIXME: should we try and make sure the same FileInfo objects
+        # passed in get returned ?
+        # FIXME: if not, should we implement comparison functions ?
+        #self.assertEquals(fragments[0].files[0].info, info)
+        self.assertEquals(fragments[0].files[0].info.path, info.path)
+
+        # get a non-existing mb id
+        gen = yield self.testdb.getTracksByMD5Sum(u'notrackid')
+
+        tracks = list(gen)
+        self.assertEquals(len(tracks), 0)
+   
+        # add another fragment for the same track
+        info = database.FileInfo(u'localhost', u'/tmp/milez.ogg',
+            md5sum=u'deadbabe')
+
+        metadata = database.TrackMetadata()
+        metadata.artist = u'The Afghan Whigs'
+        mb = u'9b9b333e-8278-401b-8361-700c14096228'
+        metadata.mbTrackId = mb
+
+        yield self.testdb.trackAddFragmentFileByMBTrackId(t, 
+            info, metadata)
+
+
 class MemoryDBDatabaseTest(DBTest, unittest.TestCase):
 
     def setUp(self):

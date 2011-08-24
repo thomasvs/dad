@@ -76,6 +76,7 @@ class MemoryTrackModel(track.TrackModel):
         file = track.FileModel()
         file.info = info
         file.metadata = metadata
+
         fragment.files.append(file)
         self.fragments.append(fragment)
     
@@ -99,6 +100,16 @@ class MemoryTrackModel(track.TrackModel):
     def getFragments(self):
         return self.fragments
         
+    # specific methods
+    # FIXME: handle this better in both models
+    def filesAppend(self, files, info, metadata=None, number=None):
+        file = track.FileModel()
+        file.info = info
+        file.metadata = metadata
+        file.number = number
+
+        files.append(file)
+
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, MemoryModel):
     def get(self):
         return defer.succeed(self._db._artists.values())
@@ -167,7 +178,8 @@ class MemoryDB(log.Loggable):
                 if file.metadata and file.metadata.mbTrackId:
                     mb = file.metadata.mbTrackId
                     if not mb in self._mbTrackIds:
-                        self._mbTrackIds[mb] = track
+                        self._mbTrackIds[mb] = []
+                    self._mbTrackIds[mb].append(track)
 
 
         for artist in track.getArtists():
@@ -254,6 +266,30 @@ class MemoryDB(log.Loggable):
 
         return defer.succeed([])
 
+    @defer.inlineCallbacks
+    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
+        """
+        Add the given file to each fragment with a file with the same md5sum.
+        """
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.info.md5sum == info.md5sum:
+                    self.debug('Appending to fragment %r', fragment)
+                    track.filesAppend(fragment.files, info, metadata, number)
+                    found = True
+                    break
+            if found:
+                break
+
+        if not found:
+            self.debug('MD5 sum %r not found on track', info.md5sum)
+        else:
+            track = yield self.save(track)
+
+        defer.returnValue(track)
 
     @defer.inlineCallbacks
     def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
@@ -267,7 +303,7 @@ class MemoryDB(log.Loggable):
 
         for fragment in track.fragments:
             for f in fragment.files:
-                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
+                if f.metadata and f.metadata.mbTrackId == metadata.mbTrackId:
                     self.debug('Appending to fragment %r', fragment)
                     track.filesAppend(fragment.files, info, metadata, number)
                     found = True
@@ -319,32 +355,5 @@ class MemoryDB(log.Loggable):
     # TOPORT
     def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
         return track.addFragment(info, metadata, mix, number)
-
-    @defer.inlineCallbacks
-    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
-        """
-        Add the given file to each fragment with a file with the same md5sum.
-        """
-        self.debug('get track for track %r', track.id)
-
-        track = yield self.db.map(self.dbName, track.id, couch.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
-
-        for fragment in track.fragments:
-            for f in fragment.files:
-                if f.md5sum == info.md5sum:
-                    self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata, number)
-                    found = True
-                    break
-            if found:
-                break
-
-        stored = yield self.saveDoc(track)
-
-        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
-        defer.returnValue(track)
 
 

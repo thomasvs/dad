@@ -1,5 +1,14 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/database/memory.py:
+	  Add filesAppend for now, but should probably be redone.
+	  Fix mb track id storing.
+	  Fix up adding by md5sum.
+	* dad/test/test_database_memory.py:
+	  Add tests for adding to fragments by mb id and md5sum.
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/base.py:
 	  Don't subclass Model from Loggable, so we can use info as attribute.
 	* dad/models/app.py:
