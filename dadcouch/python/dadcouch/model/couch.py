@@ -5,12 +5,33 @@ import datetime
 import math
 
 from dad.model import track
+from dad.logic import database
 
 from dadcouch.extern.paisley import mapping
 
 """
 Document mappings from CouchDB to python.
 """
+
+# helper models
+
+class File(track.FileModel):
+    def __init__(self, file):
+        """
+        @param file: one of the files on a L{Track}
+        """
+        self.finfo = database.FileInfo(file.host, file.path, md5sum=file.md5sum)
+        # FIXME: more
+
+class Fragment(track.FragmentModel):
+    def __init__(self, fragment):
+        """
+        @param fragment: one of the fragments on a L{Track}
+        """
+        self.files = []
+
+        for file in fragment.files:
+            self.files.append(File(file))
 
 
 # new documents
@@ -86,7 +107,7 @@ class Track(mapping.Document, track.TrackModel):
             # each fragment shares some properties
             rate = mapping.IntegerField(),
             channels = mapping.IntegerField(),
-            # FIXME: this would be different for different encodings ?
+            # FIXME: this would be different foragmentr different encodings ?
             audio_md5sum = mapping.TextField(),
 
             # fingerprints
@@ -233,6 +254,8 @@ class Track(mapping.Document, track.TrackModel):
             return
         return self.fragments[0].files[0].metadata.title
 
+    def getFragments(self):
+        return [Fragment(f) for f in self.fragments]
 
 # old documents
 class Category(mapping.Document):
@@ -277,16 +300,6 @@ class Album(mapping.Document):
     artist_ids = mapping.ListField(mapping.TextField())
 
     added = mapping.DateTimeField(default=datetime.datetime.now)
-
-class File(mapping.Document):
-    type = mapping.TextField(default="file")
-
-    directory_id = mapping.TextField()
-
-    name = mapping.TextField()
-    mtime = mapping.DateTimeField()
-    size = mapping.IntegerField()
-    md5sum = mapping.TextField()
 
 class AudioFile(File):
     type = mapping.TextField(default="audiofile")

@@ -1,5 +1,11 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  Implement getFragments()
+	  Remove old File mapping.
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	  Cleanup.
 	* python/dadcouch/model/couch.py:
