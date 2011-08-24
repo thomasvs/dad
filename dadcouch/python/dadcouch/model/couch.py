@@ -20,7 +20,7 @@ class File(track.FileModel):
         """
         @param file: one of the files on a L{Track}
         """
-        self.finfo = database.FileInfo(file.host, file.path, md5sum=file.md5sum)
+        self.info = database.FileInfo(file.host, file.path, md5sum=file.md5sum)
         # FIXME: more
 
 class Fragment(track.FragmentModel):

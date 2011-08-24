@@ -1,5 +1,10 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/couch.py:
+	  Rename finfo to info.
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/command/couchdb.py:
 	* python/dadcouch/model/daddb.py:
 	* python/dadcouch/test/test_model_daddb.py:
