@@ -198,7 +198,7 @@ class MemoryDB(log.Loggable):
         self.debug('%d scores for %r', len(scores), subject.id)
         return defer.succeed(scores)
 
-    def getTrackByHostPath(self, host, path):
+    def getTracksByHostPath(self, host, path):
         """
         Look up tracks by path.
         Can return multiple tracks for a path; for example, multiple
@@ -229,7 +229,7 @@ class MemoryDB(log.Loggable):
         # FIXME: does returning a list count as a generator ?
         return defer.succeed(t for t in self._hostPath[host][path])
 
-    def getTrackByMD5Sum(self, md5sum):
+    def getTracksByMD5Sum(self, md5sum):
         """
         Look up tracks by md5sum
         Can return multiple tracks for a path; for example, multiple
@@ -239,7 +239,7 @@ class MemoryDB(log.Loggable):
         """
         return defer.succeed(self._md5sums.get(md5sum, []))
 
-    def getTrackByMBTrackId(self, mbTrackId):
+    def getTracksByMBTrackId(self, mbTrackId):
         """
         Look up tracks by musicbrainz track id.
 

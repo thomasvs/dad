@@ -154,7 +154,7 @@ class Lookup(tcommand.TwistedCommand):
         
             self.stdout.write('%s\n' % path)
             try:
-                ret = yield self.parentCommand.database.getTrackByHostPath(_hostname(), path)
+                ret = yield self.parentCommand.database.getTracksByHostPath(_hostname(), path)
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')

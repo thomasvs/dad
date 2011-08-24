@@ -1,5 +1,14 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/command/main.py:
+	* dad/database/memory.py:
+	* dad/idad.py:
+	* dad/logic/database.py:
+	* dad/test/test_database_memory.py:
+	  getTrackBy -> getTracksBy
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/test/test_database_memory.py:
 	  Add more tests.
 	* dad/idad.py:

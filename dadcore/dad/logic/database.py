@@ -58,7 +58,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         if not hostname:
             hostname = self._hostname()
 
-        res = yield self.database.getTrackByHostPath(
+        res = yield self.database.getTracksByHostPath(
             hostname, path)
         if not res:
             res = []
@@ -118,7 +118,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         for i, mix in enumerate(trackMixes):
 
             # check if any tracks have a file with this md5sum
-            res = yield self.database.getTrackByMD5Sum(info.md5sum)
+            res = yield self.database.getTracksByMD5Sum(info.md5sum)
             res = list(res)
 
             if res:
@@ -139,7 +139,7 @@ class DatabaseInteractor(logcommand.LogCommand):
 
             # check if any tracks have a file with this musicbrainz id
             if metadata and metadata.mbTrackId:
-                res = yield self.database.getTrackByMBTrackId(metadata.mbTrackId)
+                res = yield self.database.getTracksByMBTrackId(metadata.mbTrackId)
                 res = list(res)
 
                 if res:

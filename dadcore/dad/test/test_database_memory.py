@@ -145,7 +145,7 @@ class DBTest:
         yield self.testdb.save(t)
 
         # get the right track
-        gen = yield self.testdb.getTrackByHostPath(
+        gen = yield self.testdb.getTracksByHostPath(
             u'localhost', u'/tmp/first.flac')
 
         tracks = list(gen)
@@ -159,14 +159,14 @@ class DBTest:
         self.assertEquals(fragments[0].files[0].finfo.path, info.path)
 
         # get the wrong path
-        gen = yield self.testdb.getTrackByHostPath(
+        gen = yield self.testdb.getTracksByHostPath(
             u'localhost', u'/tmp/second.flac')
 
         tracks = list(gen)
         self.assertEquals(len(tracks), 0)
 
         # get the wrong host
-        gen = yield self.testdb.getTrackByHostPath(
+        gen = yield self.testdb.getTracksByHostPath(
             u'localhost-2', u'/tmp/first.flac')
 
         tracks = list(gen)
@@ -182,7 +182,7 @@ class DBTest:
         yield self.testdb.save(t)
 
         # get the right track
-        gen = yield self.testdb.getTrackByMD5Sum(u'deadbeef')
+        gen = yield self.testdb.getTracksByMD5Sum(u'deadbeef')
 
         tracks = list(gen)
         self.assertEquals(len(tracks), 1)
@@ -195,7 +195,7 @@ class DBTest:
         self.assertEquals(fragments[0].files[0].finfo.path, info.path)
 
         # get the wrong md5sum
-        gen = yield self.testdb.getTrackByMD5Sum(u'deadbabe')
+        gen = yield self.testdb.getTracksByMD5Sum(u'deadbabe')
 
         tracks = list(gen)
         self.assertEquals(len(tracks), 0)

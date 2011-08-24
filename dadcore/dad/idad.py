@@ -71,7 +71,7 @@ class IDatabase(interface.Interface):
         @returns: deferred firing list of L{dad.base.data.Score}
         """
 
-    def getTrackByHostPath(host, path):
+    def getTracksByHostPath(host, path):
         """
         Look up all tracks for the given host and path.
 
@@ -84,7 +84,7 @@ class IDatabase(interface.Interface):
                 returning subclasses of L{track.TrackModel}
         """
 
-    def getTrackByMD5Sum(md5sum):
+    def getTracksByMD5Sum(md5sum):
         """
         Look up tracks by md5sum
         Can return multiple tracks for a path; for example, multiple
@@ -95,7 +95,7 @@ class IDatabase(interface.Interface):
         """
 
 
-    def getTrackByMBTrackId(mbTrackId):
+    def getTracksByMBTrackId(mbTrackId):
         """
         Look up all tracks for the musicbrainz id.
 
