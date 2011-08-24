@@ -155,8 +155,8 @@ class DBTest:
         # FIXME: should we try and make sure the same FileInfo objects
         # passed in get returned ?
         # FIXME: if not, should we implement comparison functions ?
-        #self.assertEquals(fragments[0].files[0].finfo, info)
-        self.assertEquals(fragments[0].files[0].finfo.path, info.path)
+        #self.assertEquals(fragments[0].files[0].info, info)
+        self.assertEquals(fragments[0].files[0].info.path, info.path)
 
         # get the wrong path
         gen = yield self.testdb.getTracksByHostPath(
@@ -191,8 +191,8 @@ class DBTest:
         # FIXME: should we try and make sure the same FileInfo objects
         # passed in get returned ?
         # FIXME: if not, should we implement comparison functions ?
-        #self.assertEquals(fragments[0].files[0].finfo, info)
-        self.assertEquals(fragments[0].files[0].finfo.path, info.path)
+        #self.assertEquals(fragments[0].files[0].info, info)
+        self.assertEquals(fragments[0].files[0].info.path, info.path)
 
         # get the wrong md5sum
         gen = yield self.testdb.getTracksByMD5Sum(u'deadbabe')

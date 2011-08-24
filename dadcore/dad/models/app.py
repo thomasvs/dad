@@ -5,7 +5,11 @@ from twisted.python import reflect
 
 from dad.base import app
 
-class MemoryAppModel(app.AppModel):
+from dad.common import log
+
+class MemoryAppModel(app.AppModel, log.Loggable):
+
+    logCategory = 'appmodel'
 
     def __init__(self, memorydb):
         self._memorydb = memorydb

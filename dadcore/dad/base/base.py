@@ -10,10 +10,7 @@ from dad.extern.log import log
 # base class for model
 
 
-class Model(log.Loggable):
-
-    logCategory = 'model'
-
+class Model:
     pass
 
 

@@ -1,5 +1,17 @@
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/base/base.py:
+	  Don't subclass Model from Loggable, so we can use info as attribute.
+	* dad/models/app.py:
+	* dad/model/artist.py:
+	  Do subclass AppModel and ArtistSelectorModel from Loggable.
+	* dad/model/track.py:
+	* dad/database/memory.py:
+	* dad/test/test_database_memory.py:
+	  Rename finfo to info
+
+2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/command/main.py:
 	* dad/database/memory.py:
 	* dad/idad.py:

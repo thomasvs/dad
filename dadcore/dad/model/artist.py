@@ -2,8 +2,10 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 from dad.base import base
+from dad.common import log
 
 class ArtistModel(base.Model):
+
     """
     I am a model for an artist.
 
@@ -34,11 +36,14 @@ class ArtistModel(base.Model):
     def __repr__(self):
         return '<Artist %r>' % (self.getName(), )
 
-class ArtistSelectorModel(base.Model):
+class ArtistSelectorModel(base.Model, log.Loggable):
     """
     I am a base class for a model listing all artists in the database,
     and their track count.
     """
+
+    logCategory = 'artistselectormodel'
+
 
     artists = None
 

@@ -5,7 +5,7 @@ from dad.base import base
 
 class FileModel(base.Model):
 
-    finfo = None
+    info = None
     metadata = None
 
 class FragmentModel(base.Model):

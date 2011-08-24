@@ -74,8 +74,7 @@ class MemoryTrackModel(track.TrackModel):
     def addFragment(self, info, metadata=None, mix=None, number=None):
         fragment = track.FragmentModel()
         file = track.FileModel()
-        # FIXME: rename finfo
-        file.finfo = info
+        file.info = info
         file.metadata = metadata
         fragment.files.append(file)
         self.fragments.append(fragment)
@@ -152,8 +151,8 @@ class MemoryDB(log.Loggable):
 
         for fragment in track.fragments:
             for file in fragment.files:
-                host = file.finfo.host
-                path = file.finfo.path
+                host = file.info.host
+                path = file.info.path
 
                 if not host in self._hostPath.keys():
                     self._hostPath[host] = {}
@@ -161,9 +160,9 @@ class MemoryDB(log.Loggable):
                     self._hostPath[host][path] = []
                 self._hostPath[host][path].append(track)
 
-                if not file.finfo.md5sum in self._md5sums.keys():
-                    self._md5sums[file.finfo.md5sum] = []
-                self._md5sums[file.finfo.md5sum].append(track)
+                if not file.info.md5sum in self._md5sums.keys():
+                    self._md5sums[file.info.md5sum] = []
+                self._md5sums[file.info.md5sum].append(track)
 
                 if file.metadata and file.metadata.mbTrackId:
                     mb = file.metadata.mbTrackId
