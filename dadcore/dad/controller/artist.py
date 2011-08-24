@@ -17,6 +17,6 @@ class ArtistController(subject.SubjectController):
 
     @defer.inlineCallbacks
     def populate(self, subjectId, userName=None):
-        yield self.populateScore(subjectId, userName)
+        yield subject.SubjectController.populate(self, subjectId, userName)
 
         self.doViews('set_name', self.subject.name)

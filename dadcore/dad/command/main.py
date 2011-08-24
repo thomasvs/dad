@@ -35,7 +35,6 @@ def main(argv):
     # no reactor yet
     # from twisted.internet import glib2reactor; glib2reactor.install(); sys.exit(0)
     for commander in plugin.getPlugins(idad.ICommand, plugins):
-        print commander
         commander.addCommands(Dad)
 
     c = Dad()

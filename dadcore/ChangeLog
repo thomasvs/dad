@@ -1,3 +1,18 @@
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/controller/subject.py:
+	* dad/controller/artist.py:
+	* dad/command/test.py:
+	  Remove imports.
+	  Fix up populate.
+	* dad/database/memory.py:
+	* dad/base/base.py:
+	  Doc fixes.
+	* dad/base/app.py:
+	  Parent controllers.
+	* dad/command/main.py:
+	  Remove print.
+
 2011-08-24  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/database/memory.py:

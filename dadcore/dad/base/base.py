@@ -23,6 +23,7 @@ class View(log.Loggable):
 
     # FIXME: error ?
 
+# FIXME: decide on snake case vs camelCase
 class SelectorView(View):
     """
     I am a base class for selector widgets.
@@ -30,6 +31,12 @@ class SelectorView(View):
     title = 'Selector, override me'
 
     def add_row(self, i, display, sort, tracks):
+        """
+        @param i:      an id
+        @type i:       C{unicode}
+        @type display: C{unicode}
+        @type sort:    C{unicode}
+        """
         raise NotImplementedError
 
     def throb(self, active=True):
@@ -42,6 +49,11 @@ class SelectorView(View):
 
 
 class Controller(log.Loggable):
+    """
+    I am a base class for controllers.
+
+    @type: subclass of L{Controller}
+    """
 
     parent = None
 
@@ -72,6 +84,11 @@ class Controller(log.Loggable):
         controller.parent = self
 
     def getRoot(self):
+        """
+        Get the root controller forr this controller.
+
+        @rtype: subclass of L{Controller}
+        """
         parent = self.parent
         while parent.parent:
             parent = parent.parent

@@ -5,23 +5,14 @@
 The entry point for test applications.
 """
 
-import os
-import sys
 import optparse
-
-
 
 from dad import idad
 
 from dad.base import app
 from dad.common import log
 from dad.common import logcommand
-from dad.logic import database
 from dad.command import tcommand
-
-from dad.extern.command import command
-from dad.extern.task import task
-
 
 class Artist(tcommand.TwistedCommand):
 

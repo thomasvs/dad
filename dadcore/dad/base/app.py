@@ -64,6 +64,10 @@ class AppController(base.Controller):
             controller = reflect.namedAny(cklazz)(model)
         except AttributeError:
             raise AttributeError("Could not reflect %r" % cklazz)
+
+        # FIXME: should we set ourselves as the parent or not if not set ?
+        controller.parent = self
+
         views = []
         for v in self._views:
             view = v.getView(what)

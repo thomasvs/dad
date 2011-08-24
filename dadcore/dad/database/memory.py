@@ -246,7 +246,7 @@ class MemoryDB(log.Loggable):
         Can return multiple tracks for a path; for example, multiple
         fragments.
 
-        @rtype: L{defer.Deferred} firing list of L{MemoryTrack}
+        @rtype: L{defer.Deferred} firing list of L{MemoryTrackModel}
         """
         return defer.succeed(self._md5sums.get(md5sum, []))
 
