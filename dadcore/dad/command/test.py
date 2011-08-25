@@ -87,6 +87,114 @@ class Artist(tcommand.TwistedCommand):
 
         return self._doneDeferred
 
+class Selector(tcommand.TwistedCommand):
+
+    description = """Test the whole selector."""
+
+    def installReactor(self):
+        from dadgtk.twisted import gtk2reactor
+        gtk2reactor.install()
+        tcommand.TwistedCommand.installReactor(self)
+
+    def done_cb(self, _):
+        self._doneDeferred.callback(None)
+
+    def doLater(self, args):
+
+        # FIXME: view-specific
+        import gtk
+
+        from twisted.python import reflect
+        from twisted.internet import defer
+        defer.Deferred.debug = 1
+
+        self._doneDeferred = defer.Deferred()
+
+        # FIXME: allow customizing model and/or view(s)
+        viewTypes = ['GTK', ]
+
+        db = self.parentCommand.getDatabase()
+        self.debug('Database: %r', db)
+
+
+        # get the model
+        amodel = self.parentCommand.getAppModel()
+        self.debug('App model: %r', amodel)
+
+        acontroller = app.AppController(amodel)
+
+        for viewType in viewTypes:
+            viewModule = 'dad%s.views.app.%sAppView' % (viewType.lower(), viewType)
+            aview = reflect.namedAny(viewModule)()
+            acontroller.addView(aview)
+
+
+        # FIXME: gtk-specific
+        aview.widget.connect('destroy', self.done_cb)
+
+
+        vbox = gtk.VBox()
+        hbox = gtk.HBox()
+        vbox.add(hbox)
+        aview.widget.add(vbox)
+
+        asController, asModel, asViews = acontroller.getTriad('ArtistSelector')
+
+        hbox.pack_start(asViews[0])
+
+        alsController, alsModel, alsViews = acontroller.getTriad('AlbumSelector')
+        hbox.pack_start(alsViews[0])
+
+        tController, tModel, tViews = acontroller.getTriad('TrackSelector')
+
+        vbox.add(tViews[0])
+
+        aview.widget.show_all()
+
+
+        # listen to changes on artist selection so we can filter the albums view
+        def artist_selected_cb(self, ids):
+            album_ids = []
+            if ids:
+                print 'THOMAS: selected artist ids', ids
+                album_ids = alsModel.get_artists_albums(ids)
+            alsViews[0].set_album_ids(album_ids)
+
+            tViews[0].set_artist_ids(ids)
+
+        asViews[0].connect('selected', artist_selected_cb)
+
+        def track_selected_cb(self, trackObj):
+            w = gtk.Window()
+
+            from dadgtk.views import track
+            view = track.TrackView()
+
+            w.add(view.widget)
+
+            tController, tModel, tViews = acontroller.getTriad('Track')
+
+            # FIXME: don't hardcode
+            user = 'thomas'
+            d = tController.populate(trackObj.id, userName=user)
+            d.addCallback(lambda _: w.set_title(trackObj.name))
+
+            w.show_all()
+     
+
+        tViews[0].connect('clicked', track_selected_cb)
+
+        # start loading artists and albums
+
+        d = defer.Deferred()
+
+        d.addCallback(lambda _: asController.populate())
+        d.addCallback(lambda _: alsController.populate())
+        d.addCallback(lambda _: tController.populate())
+
+        d.callback(None)
+
+        return self._doneDeferred
 
 class Test(logcommand.LogCommand):
 
@@ -95,7 +203,7 @@ class Test(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Artist, ]
+    subCommandClasses = [Artist, Selector, ]
 
     description = 'Run test applications'
     database = None

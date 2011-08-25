@@ -1,5 +1,12 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/base/app.py:
+	  Add more selectors.
+	* dad/command/test.py:
+	  Add dad test selector.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/controller/selector.py:
 	* dad/database/memory.py:
 	* dad/model/track.py:

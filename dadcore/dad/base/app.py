@@ -54,7 +54,9 @@ class AppController(base.Controller):
         model = self._model.getModel(what)
 
         whats = {
-            'ArtistSelector': 'selector.ArtistSelectorController'
+            'ArtistSelector': 'selector.ArtistSelectorController',
+            'AlbumSelector': 'selector.AlbumSelectorController',
+            'TrackSelector': 'selector.TrackSelectorController',
         }
         cklazz = 'dad.controller.%s.%sController' % (what.lower(), what)
         if what in whats:
