@@ -1,3 +1,11 @@
+2011-08-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/command/category.py (added):
+	* dad/command/main.py:
+	  Add dad database category add/list.
+	* dad/idad.py:
+	  Add addCategory.
+
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/model/album.py (added):

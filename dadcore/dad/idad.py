@@ -55,6 +55,13 @@ class IDatabase(interface.Interface):
         @returns: a generator returning opaque track objects.
         """
 
+    def addCategory(name):
+        """
+        @type  name: C{unicode}
+
+        Add a category.
+        """
+
     def getCategories():
         """
         Get a list of all categories.

@@ -18,7 +18,7 @@ from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
-from dad.command import test, tcommand
+from dad.command import test, tcommand, category
 from dad.task import md5task
 from dad.logic import database
 
@@ -175,7 +175,7 @@ class Database(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Add, List, Lookup, ]
+    subCommandClasses = [Add, List, Lookup, category.Category]
 
     description = 'Interact with database backend.'
 
