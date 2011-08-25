@@ -91,8 +91,9 @@ class TrackSelectorController(SelectorController):
 
     def addItem(self, item):
         # add a track
-        self.doViews('add_item', item, [a.name for a in item.artists],
-            [a.id for a in item.artists],
+        self.debug('addItem: %r', item)
+        self.doViews('add_item', item, [a.getName() for a in item.artists],
+            [a.getId() for a in item.artists],
             "%s" % item.name, None, None, None)
 
     def populate(self):

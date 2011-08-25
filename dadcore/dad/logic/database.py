@@ -43,6 +43,8 @@ class DatabaseInteractor(logcommand.LogCommand):
     def add(self, path, hostname=None, force=False):
         """
         @type  path:     C{unicode}
+        @type  hostname: C{unicode}
+        @type  force:    C{bool}
 
         @returns:
           - None if it was already in the database.

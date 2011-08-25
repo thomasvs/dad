@@ -114,7 +114,10 @@ class MemoryArtistSelectorModel(artist.ArtistSelectorModel, MemoryModel):
     def get(self):
         return defer.succeed(self._db._artists.values())
     
-
+class MemoryTrackSelectorModel(track.TrackSelectorModel, MemoryModel):
+    def get(self):
+        return defer.succeed(self._db._tracks.values())
+ 
 class MemoryDB(log.Loggable):
     """
     """

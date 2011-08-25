@@ -15,15 +15,10 @@ class MemoryAppModel(app.AppModel, log.Loggable):
         self._memorydb = memorydb
 
     def getModel(self, what):
-        name = 'dad.models.%s.%sModel' % (what.lower(), what)
+        # name = 'dad.models.%s.%sModel' % (what.lower(), what)
+        name = 'dad.database.memory.Memory%sModel' % (what, )
         # FIXME: move
-        if what == 'Track':
-            name = 'dad.database.memory.MemoryTrackModel'
-        elif what == 'Artist':
-            name = 'dad.database.memory.MemoryArtistModel'
-        elif what == 'ArtistSelector':
-            name = 'dad.database.memory.MemoryArtistSelectorModel'
-        elif what == 'Album':
+        if what == 'Album':
             name = 'dadcouch.model.daddb.AlbumModel'
         model = reflect.namedAny(name)(self._memorydb)
         return model

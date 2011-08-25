@@ -2,6 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 from dad.base import base
+from dad.common import log
 
 class FileModel(base.Model):
 
@@ -77,4 +78,21 @@ class TrackModel(base.Model):
         return '<Track %r for %r - %r>' % (self.id, 
             " & ".join(self.getArtists() or []),
             self.getName())
+
+class TrackSelectorModel(base.Model, log.Loggable):
+    """
+    I am a base class for a model listing all artists in the database,
+    and their track count.
+    """
+
+    logCategory = 'trackselectormodel'
+
+    tracks = None
+
+    def get(self):
+        """
+        @returns: a deferred firing a list of L{dad.model.track.TrackModel}
+                  objects.
+        """
+        raise NotImplementedError
 

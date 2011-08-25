@@ -1,5 +1,20 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/test/test_database_memory.py:
+	  Add a TrackSelectorModel test.
+	* dad/models/app.py:
+	  Make getModel easier.
+	* dad/controller/selector.py:
+	  Add debug.
+	* dad/logic/database.py:
+	  Doc updates.
+	* dad/model/track.py:
+	  Add TrackSelectorModel base class.
+	* dad/database/memory.py:
+	  Add implementation.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/audio/level.py:
 	* dad/audio/mixing.py:
 	* dad/base/base.py:

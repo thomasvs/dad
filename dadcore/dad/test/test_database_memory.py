@@ -11,7 +11,7 @@ from twisted.internet import defer
 from dad.plugins import pdad
 from dad.logic import database
 from dad.database import memory
-from dad.test import common
+
 
 # extract to separate module as base class for all database tests
 class DBTest:
@@ -81,23 +81,40 @@ class DBTest:
         # make sure we get the metadata track name back
         self.assertEquals(t.getName(), u'hit me')
 
-
     @defer.inlineCallbacks
-    def testArtistSelectorModel(self):
-        appModel = self.provider.getAppModel(self.testdb)
-        asModel = appModel.getModel('ArtistSelector')
-
+    def _addFirstTrack(self):
         # add a first track
         t = self.testdb.new()
         yield self.testdb.save(t)
 
         info = database.FileInfo('localhost', '/tmp/first.flac')
         metadata = database.TrackMetadata()
+        metadata.title = u'Milez iz Ded'
         metadata.artist = u'The Afghan Whigs'
 
         t.addFragment(info, metadata=metadata)
-        yield self.testdb.save(t)
-        
+        ret = yield self.testdb.save(t)
+        defer.returnValue(ret)
+ 
+    @defer.inlineCallbacks
+    def testTrackSelectorModel(self):
+        appModel = self.provider.getAppModel(self.testdb)
+        tsModel = appModel.getModel('TrackSelector')
+
+        yield self._addFirstTrack()
+
+        # check the artist selector model
+        tracks = yield tsModel.get()
+        self.assertEquals(len(tracks), 1)
+        self.assertEquals(tracks[0].getName(), u'Milez iz Ded')
+
+    @defer.inlineCallbacks
+    def testArtistSelectorModel(self):
+        appModel = self.provider.getAppModel(self.testdb)
+        asModel = appModel.getModel('ArtistSelector')
+
+        t = yield self._addFirstTrack()
+
         # check the artist selector model
         artists = yield asModel.get()
         self.assertEquals(len(artists), 1)
