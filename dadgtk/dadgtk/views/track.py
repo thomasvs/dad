@@ -40,7 +40,9 @@ class ScorableView(gobject.GObject):
         """
         value can be None to indicate 'not rated'
         """
+        self.debug('set_score: cat %r, value %r', category, value)
         if category not in self._scores:
+            self.debug('set_score: adding widget for cat %r, value %r', category, value)
             top = len(self._scores)
 
             label = gtk.Label(category)
