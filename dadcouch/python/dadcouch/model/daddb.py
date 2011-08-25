@@ -1018,8 +1018,10 @@ class AlbumSelectorModel(CouchDBModel):
             return None
 
         for artist in artist_ids:
-            for album in self.artistAlbums[artist]:
-                ret[album] = 1
+            # artists may not have albums, only tracks
+            if artist in self.artistAlbums:
+                for album in self.artistAlbums[artist]:
+                    ret[album] = 1
 
         return ret.keys()
 

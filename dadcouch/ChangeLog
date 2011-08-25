@@ -1,5 +1,10 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Artists can have no albums.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-tracks-title-artistid/map.js:
 	  emit one list of artists for each track.
 	* python/dadcouch/model/couch.py:
