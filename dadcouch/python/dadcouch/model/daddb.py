@@ -289,6 +289,9 @@ class DADDB(log.Loggable):
 
         defer.returnValue(list(ret))
 
+    def addCategory(self, name):
+        cat = couch.Category(name=name)
+        return self.save(cat)
 
     @defer.inlineCallbacks
     def getCategories(self):
