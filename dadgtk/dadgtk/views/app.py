@@ -8,6 +8,8 @@ from twisted.python import reflect
 
 from dad.base import app
 
+from dadgtk.views import scheduler
+
 class GTKAppView(app.AppView):
 
     def __init__(self):
@@ -24,8 +26,15 @@ class GTKAppView(app.AppView):
         self.widget.add(view.widget)
         
     def getView(self, what):
-        # name = 'dadgtk.views.%s.%sView' % (what.lower(), what)
-        name = 'dadgtk.views.views.%sView' % (what, )
+        if what == 'TrackSelector':
+            return scheduler.TracksUI(selector=True)
+
+        name = 'dadgtk.views.%s.%sView' % (what.lower(), what)
+        # selectors are in views
+        if what.find('elector') > -1:
+            name = 'dadgtk.views.views.%sView' % (what, )
+
+
         view = reflect.namedAny(name)()
         return view
 

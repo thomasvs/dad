@@ -1,3 +1,13 @@
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/app.py:
+	  Add more forwarding.
+	* dadgtk/views/artist.py:
+	  Remove imports.
+	* dadgtk/views/views.py:
+	  Don't accept None id's.
+	  Remove prints.
+
 2011-08-23  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/app.py:

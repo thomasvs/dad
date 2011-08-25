@@ -175,7 +175,6 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     def _view_popup_menu(self, event):
         sel = self._treeview.get_selection()
         model, paths = sel.get_selected_rows()
-        print 'THOMAS: model', model
         ids = []
 
         for p in paths:
@@ -193,13 +192,14 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             menu.show_all()
 
     def _show_info(self, item, subject_id):
-        print 'show subject info', subject_id
+        self.debug('show info in subject with id %r', subject_id)
 
         controller, model, views = self.controller.getRoot().getTriad(self.what)
         w = gtk.Window()
         w.add(views[0].widget)
 
-        # FIXME: don't hardcode
+        # FIXME: don't hardcode username
+        self.debug('asking controller %r to populate', controller)
         d = controller.populate(subject_id, userName='thomas')
 
         def cb(_):
@@ -225,10 +225,10 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             COLUMN_DISPLAY, template % (albums, tracks),
             COLUMN_SORT, None)
 
-    ### SelectorView implementations
+    ### base.SelectorView implementations
     def add_row(self, i, display, sort, tracks):
-        if i:
-            assert type(i) is unicode, 'artist id %r is not unicode' % i
+        assert type(i) is unicode, 'artist id %r is not unicode' % i
+
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_ID, i,

@@ -3,11 +3,7 @@
 
 import os
 
-import glib
-import gobject
 import gtk
-
-from dad.base import base
 
 from dadgtk.views import views, track
 
