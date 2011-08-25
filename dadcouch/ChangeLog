@@ -1,5 +1,15 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/test/test_model_daddb.py:
+	  Move TrackSelectorModel test case to base class.
+	* python/dadcouch/model/daddb.py:
+	  Make models loggable.
+	  Create actual TrackModel instances from get().
+	* python/dadcouch/models/app.py:
+	  Simplify getModel logic.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* misc (added):
 	* misc/epyhelp.py (added):
 	* Makefile:

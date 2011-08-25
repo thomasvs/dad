@@ -920,7 +920,8 @@ class NoWayJose:
 
         return d
 
-class CouchDBModel(base.Model):
+class CouchDBModel(base.Model, log.Loggable):
+
     def __init__(self, daddb):
         self._daddb = daddb
 
@@ -1049,32 +1050,24 @@ class TrackSelectorModel(CouchDBModel):
             # tracks: list of Track
             # import code; code.interact(local=locals())
             trackList = list(tracks)
-            log.debug('playlist', 'got %r tracks in %.3f seconds',
+            self.debug('got %r tracks in %.3f seconds',
                 len(trackList), time.time() - last[0])
             last[0] = time.time()
 
-            dls = manydef.DeferredListSpaced()
-            dls.DELAY = 0.005
+            ret = []
+            for trackRow in trackList:
+                track = couch.Track()
+                d = {
+                    'id': trackRow.id,
+                    'name': trackRow.name,
+                    'artists': trackRow.artists
+                }
+                track.fromDict(d)
+                ret.append(track)
 
-            class O(object):
-                name = 'Unknown'
-            o = O()
+            return ret
 
-            for track in trackList:
-                # FIXME: THOMAS: speed this up
-                dls.addCallable(self._daddb.resolveIds, track,
-                    'artist_ids', 'artists', couch.Artist)
-                if cb:
-                    dls.addCallableCallback(cb, *cbArgs, **cbKWArgs)
 
-            def trackedCb(_, tl):
-                self.debug('get: %r tracks resolved in %.3f seconds',
-                    len(list(tl)), time.time() - last[0])
-                # import code; code.interact(local=locals())
-                return tl
-            dls.addCallback(trackedCb, trackList)
-            dls.start()
-            return dls
         d.addCallback(loadTracksCb)
 
         def eb(failure):

@@ -11,16 +11,8 @@ class CouchAppModel(app.AppModel):
         self._daddb = daddb
 
     def getModel(self, what):
-        name = 'dadcouch.models.%s.%sModel' % (what.lower(), what)
-        # FIXME: move
-        if what == 'Track':
-            name = 'dadcouch.model.daddb.TrackModel'
-        elif what == 'Artist':
-            name = 'dadcouch.model.daddb.ArtistModel'
-        elif what == 'ArtistSelector':
-            name = 'dadcouch.model.daddb.ArtistSelectorModel'
-        elif what == 'Album':
-            name = 'dadcouch.model.daddb.AlbumModel'
+        # name = 'dadcouch.models.%s.%sModel' % (what.lower(), what)
+        name = 'dadcouch.model.daddb.%sModel' % (what, )
         model = reflect.namedAny(name)(self._daddb)
         return model
 

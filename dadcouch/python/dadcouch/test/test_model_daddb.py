@@ -286,43 +286,6 @@ class AdvancedTestCase:#(DADDBTestCase):
         self.assertEquals(res[0].user_id, userId)
 
 
-class TrackSelectorModelTestCase:#(DADDBTestCase):
-
-    @defer.inlineCallbacks
-    def test_get(self):
-
-        model = daddb.TrackSelectorModel(self.daddb)
-
-        artist = couch.Artist(name='ian dury')
-        stored = yield self.db.saveDoc('dadtest', artist._data)
-        artistId = stored['id']
-
-        track = couch.Track(name='hit me', artist_ids=[artistId, ])
-
-        # FIXME: don't poke at _data
-        stored = yield self.db.saveDoc('dadtest', track._data)
-
-        retrieved = yield self.daddb.db.map(self.daddb.dbName, stored['id'],
-            couch.Track)
-        self.assertEquals(retrieved.name, 'hit me')
-
-        def cb(res):
-            self.cbCalled = True
-            self.assertEquals(res.name, 'hit me')
-
-        self.cbCalled = False
-        got = yield model.get(cb=cb)
-        self.failUnless(self.cbCalled)
-
-        # self.assertEquals(type(retrieved), generator)
-
-        first = got[0]
-        artist = yield self.db.map(self.daddb.dbName, artistId, couch.Artist)
-        self.assertEquals(first.name, 'hit me')
-
-        # can't compare two mapped objects directly
-        self.assertEquals(first.artists[0].name, artist.name)
-
 class TrackModelTestCase:#(DADDBTestCase):
 
     @defer.inlineCallbacks
