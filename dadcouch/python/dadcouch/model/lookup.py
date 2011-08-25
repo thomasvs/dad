@@ -193,7 +193,7 @@ def findOrAddAudioFile(db, directory, name, add=True, duration=0):
 
 def load(db, dbName, klazz, viewName):
     """
-    @type  db:       L{couchdb.CouchDB}
+    @type  db:       L{dadcouch.extern.paisley.client.CouchDB}
     @type  dbName:   str
     @param klazz:    the class to instantiate objects from
     @param viewName: name of the view to load objects from
@@ -223,7 +223,7 @@ def load(db, dbName, klazz, viewName):
 def cacheLoad(cache, db, dbName, klazz, viewName):
     """
     @type  cache:    dict of class -> dict of id -> object
-    @type  db:       L{couchdb.CouchDB}
+    @type  db:       L{dadcouch.extern.paisley.client.CouchDB}
     @type  dbName:   str
     @param klazz:    the class to instantiate objects from
     @param viewName: name of the view to load objects from

@@ -198,10 +198,8 @@ class DADDB(log.Loggable):
         Specify include_docs=True if you want to load full docs (and
         allow them to get cached)
 
-        @type  db:       L{dadcouch.extern.paisley.client.CouchDB}
-        @type  dbName:   str
-        @param klazz:    the class to instantiate objects from
         @param viewName: name of the view to load objects from
+        @param klazz:    the class to instantiate objects from
         """
         assert type(viewName) is str
 
