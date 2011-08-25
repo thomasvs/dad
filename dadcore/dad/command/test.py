@@ -152,7 +152,8 @@ class Selector(tcommand.TwistedCommand):
         aview.widget.show_all()
 
 
-        # listen to changes on artist selection so we can filter the albums view
+        # listen to changes on artist selection so we can filter
+        # the albums and tracks selector views
         def artist_selected_cb(self, ids):
             self.debug('artist_selected_cb: ids %r', ids)
 
@@ -168,20 +169,35 @@ class Selector(tcommand.TwistedCommand):
 
         asViews[0].connect('selected', artist_selected_cb)
 
+        # listen to changes on album selection so we can filter
+        # the tracks selector view
+        # FIXME: not finished and hooked up!
+        def album_selected_cb(self, ids):
+            self.debug('album_selected_cb: ids %r', ids)
+
+            # without ids, select everything
+            track_ids = None
+
+            if ids is not None:
+                track_ids = alsModel.get_albums_tracks(ids)
+
+            tViews[0].set_album_ids(ids)
+
+        #alViews[0].connect('selected', album_selected_cb)
+
+
         def track_selected_cb(self, trackObj):
             w = gtk.Window()
 
-            from dadgtk.views import track
-            view = track.TrackView()
 
-            w.add(view.widget)
-
+            self.debug('clicked on track %r', trackObj)
             tController, tModel, tViews = acontroller.getTriad('Track')
 
             # FIXME: don't hardcode
             user = 'thomas'
             d = tController.populate(trackObj.id, userName=user)
             d.addCallback(lambda _: w.set_title(trackObj.name))
+            w.add(tViews[0].widget)
 
             w.show_all()
      

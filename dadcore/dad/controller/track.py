@@ -19,9 +19,11 @@ class TrackController(subject.SubjectController):
     A sample view is L{dadgtk.dadgtk.views.track.TrackView}
     """
 
+    logCategory = 'trackcontroller'
+
     @defer.inlineCallbacks
     def populate(self, subjectId, userName=None):
-        yield self.populateScore(subjectId, userName)
+        yield subject.SubjectController.populate(self, subjectId, userName)
 
         # FIXME: getting it again to avoid poking at internals ?
         try:

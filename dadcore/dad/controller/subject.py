@@ -67,4 +67,5 @@ class SubjectController(base.Controller):
                 res[couchScore.category] = couchScore.score
 
         for categoryName, score in res.items():
+            self.debug('Calling view set_score, %r, %r', categoryName, score)
             self.doViews('set_score', categoryName, score)

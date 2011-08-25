@@ -1,6 +1,15 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/command/test.py:
+	  Make sure we can select and score a track in dad test selector.
+	* dad/controller/subject.py:
+	  More debugging.
+	* dad/controller/track.py:
+	  Chain up.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/command/test.py:
 	  Properly filter albums, even if artist has no albums.
 
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
