@@ -49,7 +49,7 @@ class ArtistSelectorModel(base.Model, log.Loggable):
 
     def get(self):
         """
-        @returns: a deferred firing a list of L{ArtistModel} objects
-                  representing only artists and their track count.
+        @returns: a deferred firing a list of L{dad.model.artist.ArtistModel}
+                  objects representing only artists and their track count.
         """
         raise NotImplementedError

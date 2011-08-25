@@ -22,12 +22,6 @@
 Classes related to mixing calculations.
 """
 
-import os
-import sys
-import math
-
-from dad.audio import common, level
-
 from dad.extern.log import log
 
 class TrackMix(object):
@@ -112,14 +106,17 @@ def fromLevels(rms, peak):
 
     return m
 
+
 class Mix(object, log.Loggable):
+    """
+    @ivar  volume1: volume adjustment for track 1, in dB.
+    """
+
     def __init__(self, trackMix1, trackMix2, rmsTarget=-15):
         """
         Define the mix for from track 1 to track 2.
 
         All time values will be relative to trackMix2.start
-
-        @ivar  volume1: volume adjustment for track 1, in dB.
         """
         THRESHOLD = -9 # where to pick the mix point, relative to rmsTarget
 

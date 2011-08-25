@@ -59,7 +59,7 @@ class Score:
     @type  subject:  object
     @type  user:     unicode
     @type  category: unicode
-    @param score:    a score between 0.0 and 1.0
+    @ivar  score:    a score between 0.0 and 1.0
     @type  score:    float
     """
 

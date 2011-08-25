@@ -19,15 +19,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
-import sys
-import math
 
 import gobject
 
 from gst.extend import pygobject
 
 from dad.extern.log import log
-from dad.audio import mixing, common
+from dad.audio import mixing
 
 SECOND = 1000000000
 SCHEDULE_DURATION = 1800 * SECOND
@@ -120,9 +118,7 @@ class Scheduler(log.Loggable, gobject.GObject):
         """
         Add the given track to the schedule queue.
 
-        @param path:     path to the track to play
-        @type  path:     str
-        @type  trackmix: L{mixing.TrackMix}
+        @param selected: L{Scheduled}
 
         @rtype: the scheduled track's number
         """

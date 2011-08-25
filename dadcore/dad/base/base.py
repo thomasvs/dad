@@ -52,7 +52,7 @@ class Controller(log.Loggable):
     """
     I am a base class for controllers.
 
-    @type: subclass of L{Controller}
+    @type parent: L{Controller}
     """
 
     parent = None

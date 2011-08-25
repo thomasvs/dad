@@ -1,5 +1,17 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/level.py:
+	* dad/audio/mixing.py:
+	* dad/base/base.py:
+	* dad/base/data.py:
+	* dad/common/scheduler.py:
+	* dad/common/selecter.py:
+	* dad/idad.py:
+	* dad/model/artist.py:
+	  Doc and import fixes.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/controller/subject.py:
 	* dad/controller/artist.py:
 	* dad/command/test.py:

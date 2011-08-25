@@ -221,8 +221,8 @@ class SimplePlaylistSelecter(Selecter):
     Each track gets played once.  When all tracks are played, the process
     is repeated.
 
-    @param tracks: dict of path -> list of trackmix
-    @type  tracks: dict of str -> list of L{dad.audio.mixing.TrackMix}
+    @ivar  _tracks: dict of path -> list of trackmix
+    @type  _tracks: dict of str -> list of L{dad.audio.mixing.TrackMix}
     """
 
     option_parser_class = SimplePlaylistOptionParser

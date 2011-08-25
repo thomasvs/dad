@@ -22,8 +22,6 @@
 Dealing with volume envelopes and attack/decay graphs.
 """
 
-import os
-import sys
 import math
 
 from dad.audio import common

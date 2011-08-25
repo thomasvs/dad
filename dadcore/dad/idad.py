@@ -81,7 +81,7 @@ class IDatabase(interface.Interface):
         @param path: the path where the file lives
 
         @rtype: a L{defer.Deferred} firing a generator
-                returning subclasses of L{track.TrackModel}
+                returning subclasses of L{dad.model.track.TrackModel}
         """
 
     def getTracksByMD5Sum(md5sum):
