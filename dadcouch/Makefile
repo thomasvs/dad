@@ -17,4 +17,4 @@ check: trial pep8
 
 doc: python/dadcouch Makefile
 	@mkdir -p doc
-	PYTHONPATH=$$PYTHONPATH:python/dadcouch/extern epydoc -o doc/html --exclude dadcouch.extern.paisley.test dad dadgst dadcouch dadgtk
+	PYTHONPATH=$$PYTHONPATH:python/dadcouch/extern epydoc -v -o doc/html --exclude test.test_ misc/epyhelp.py dad dadgst dadcouch dadgtk

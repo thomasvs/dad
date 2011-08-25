@@ -1,5 +1,12 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* misc (added):
+	* misc/epyhelp.py (added):
+	* Makefile:
+	  Help epydoc over the pygst.require() hurdle.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* Makefile:
 	  Fix up epydoc generation.
 	* python/dadcouch/model/daddb.py:
