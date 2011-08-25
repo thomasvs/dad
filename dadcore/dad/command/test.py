@@ -154,10 +154,14 @@ class Selector(tcommand.TwistedCommand):
 
         # listen to changes on artist selection so we can filter the albums view
         def artist_selected_cb(self, ids):
-            album_ids = []
-            if ids:
-                print 'THOMAS: selected artist ids', ids
+            self.debug('artist_selected_cb: ids %r', ids)
+
+            # without ids, select everything
+            album_ids = None
+
+            if ids is not None:
                 album_ids = alsModel.get_artists_albums(ids)
+
             alsViews[0].set_album_ids(album_ids)
 
             tViews[0].set_artist_ids(ids)

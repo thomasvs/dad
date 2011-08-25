@@ -1,5 +1,10 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/command/test.py:
+	  Properly filter albums, even if artist has no albums.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/app.py:
 	  Add more selectors.
 	* dad/command/test.py:
