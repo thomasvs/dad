@@ -1108,10 +1108,11 @@ class ScorableModel(CouchDBModel):
         #     user.Id = unicode(user.id)
 
         # FIXME: the subject controller has .subject, not .track or .artist?
-        # subject = getattr(self, self.subjectType)
-        # self.debug('Getting scores for %r', subject)
-        # scores = yield self._daddb.getScores(subject)
-        scores = yield self._daddb.getScores(self.subject)
+        subject = getattr(self, self.subjectType)
+        self.debug('Getting scores for %r', subject)
+        scores = yield self._daddb.getScores(subject)
+        #import code; code.interact(local=locals())
+        #scores = yield self._daddb.getScores(self.subject)
 
         scores = list(scores)
         defer.returnValue(scores)
@@ -1137,9 +1138,9 @@ class TrackModel(ScorableModel):
         @returns: a deferred firing a L{couch.Track} object.
         """
         d = self._daddb.db.map(self._daddb.dbName, trackId, couch.Track)
-        d.addCallback(lambda track:
-            self._daddb.resolveIds(track, 'artist_ids', 'artists',
-            couch.Artist))
+        #d.addCallback(lambda track:
+        #    self._daddb.resolveIds(track, 'artist_ids', 'artists',
+        #    couch.Artist))
 
         d.addCallback(lambda track: setattr(self, 'track', track))
         d.addCallback(lambda _, s: s.track, self)
@@ -1150,6 +1151,8 @@ class ArtistModel(ScorableModel):
     I represent an artist in a CouchDB database.
     """
     subjectType = 'artist'
+
+    artist = None
 
     def get(self, artistId):
         """
@@ -1168,6 +1171,8 @@ class AlbumModel(ScorableModel):
     I represent an album in a CouchDB database.
     """
     subjectType = 'album'
+
+    album = None
 
     def get(self, albumId):
         """

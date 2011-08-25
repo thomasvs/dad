@@ -1,6 +1,11 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
+	  Clear up subjectType ambiguity.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
 	  Artists can have no albums.
 
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
