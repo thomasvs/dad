@@ -70,6 +70,11 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
 
     _id_to_tracks = None # dict of id -> track count
 
+    # selected fires with:
+    # - None if the first row (ie everything) is selected
+    # - [] if nothing is selected
+    # - [list of ids] if rows are selected
+
     __gsignals__ = {
         'selected': 
             (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
@@ -140,6 +145,11 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
 
     def _selection_changed_cb(self, sel):
         model, paths = sel.get_selected_rows()
+
+        if not paths:
+            self.debug('Nothing selected, returning empty list')
+            return []
+
         ids = []
 
         for p in paths:
@@ -149,6 +159,10 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             if itemId:
                 ids.append(itemId)
                 assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
+
+        # if the first row is selected, return None
+        if not ids:
+            ids = None
 
         self.emit('selected', ids)
 
@@ -259,6 +273,8 @@ class ArtistSelectorView(GTKSelectorView):
     first = 'All %d artists'
     what = 'Artist'
 
+# FIXME: make base class
+
 class AlbumSelectorView(GTKSelectorView):
 
     title = 'Albums'
@@ -289,6 +305,15 @@ class AlbumSelectorView(GTKSelectorView):
         self._treeview.set_model(self._filter)
 
     def set_album_ids(self, ids):
+        """
+        Set the ids of albums that this selector view should show.
+
+        @param ids: None if all albums should be shown (no selection),
+                    [] if no albums should be shown,
+                    or a list of album ids to show.
+        @type  ids: list of C{unicode} or None
+        """
+
         # used when an artist is selected and only its albums should be shown
         self.debug('set_album_ids: %r', ids)
         self._album_ids = ids

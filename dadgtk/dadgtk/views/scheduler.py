@@ -163,8 +163,13 @@ class TracksUI(gtk.VBox, log.Loggable):
     def set_artist_ids(self, ids):
         """
         Filter the view with tracks only from the given artists.
+
+        @param ids: None if all tracks should be shown (no selection),
+                    [] if no tracks should be shown,
+                    or a list of track ids to show.
+        @type  ids: list of C{unicode} or None
         """
-        for i in ids:
+        for i in ids or []:
             assert type(i) is unicode, "artist id %r is not unicode" % i
 
         # used when an artist is selected and only its tracks

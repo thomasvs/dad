@@ -1,5 +1,12 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dadgtk/views/scheduler.py:
+	* dadgtk/views/views.py:
+	  Properly filter views.
+	  Document.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dadgtk/views/app.py:
 	  Add more forwarding.
 	* dadgtk/views/artist.py:
