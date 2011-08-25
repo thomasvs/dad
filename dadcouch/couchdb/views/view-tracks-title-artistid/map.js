@@ -38,11 +38,13 @@ function(doc) {
             }
         }
 
+        var artistList = [];
+        for (var artist in artists) {
+            artistList.push(artists[artist]);
+        }
 
         if (doc.name) {
-            for (var artist in artists) {
-                emit(doc.name, artists[artist]);
-            }
+            emit (doc.name, artistList);
         } else {
             if (doc.fragments) {
                 doc.fragments.forEach(
@@ -51,9 +53,7 @@ function(doc) {
                             function(file) {
                                 if (file.metadata && file.metadata.title) {
                                     if (!(file.metadata.title in seen)) {
-                                        for (var artist in artists) {
-                                            emit(file.metadata.title, artists[artist]);
-                                        }
+                                        emit (file.metadata.title, artistList);
                                         seen[file.metadata.title] = 1;
                                     }
                                 }

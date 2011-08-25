@@ -1058,7 +1058,7 @@ class TrackSelectorModel(CouchDBModel):
             for trackRow in trackList:
                 track = couch.Track()
                 d = {
-                    'id': trackRow.id,
+                    '_id': trackRow.id,
                     'name': trackRow.name,
                     'artists': trackRow.artists
                 }

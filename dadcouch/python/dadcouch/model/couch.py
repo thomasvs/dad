@@ -226,8 +226,10 @@ class Track(mapping.Document, track.TrackModel):
         fragment['level'] = m
 
     def getArtists(self):
+        # FIXME: artists is a list of dict of ArtistModel ?
         if self.artists:
-            return self.artists
+            # return self.artists
+            return [artist.name for artist in self.artists]
 
         # FIXME: better ? faster ? stronger ?
         if not self.fragments:
@@ -240,6 +242,10 @@ class Track(mapping.Document, track.TrackModel):
             return
 
         return [self.fragments[0].files[0].metadata.artist, ]
+
+    # FIXME: proper artist ids ?
+    def getArtistIds(self):
+        return self.getArtists()
 
     def getName(self):
         if self.name:

@@ -1,5 +1,13 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-tracks-title-artistid/map.js:
+	  emit one list of artists for each track.
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	  Adapt to model behaviour.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/test/test_model_daddb.py:
 	  Move TrackSelectorModel test case to base class.
 	* python/dadcouch/model/daddb.py:
