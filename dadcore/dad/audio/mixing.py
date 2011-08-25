@@ -24,6 +24,9 @@ Classes related to mixing calculations.
 
 from dad.extern.log import log
 
+from dad.audio import level
+
+
 class TrackMix(object):
     """
     I am an object holding all relevant data for mixing.

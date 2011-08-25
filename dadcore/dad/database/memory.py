@@ -1,9 +1,6 @@
 # -*- Mode: Python; test_case_name: dad.test.test_database_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-import os
-import sys
-import time
 import pickle
 import optparse
 
@@ -14,7 +11,7 @@ from zope import interface
 from dad import idad
 from dad.base import base, data
 from dad.common import log
-from dad.model import track, artist
+from dad.model import track, artist, album
 
 _DEFAULT_PATH = 'dad.pickle'
 
@@ -104,6 +101,10 @@ class MemoryTrackModel(track.TrackModel):
     def getFragments(self):
         return self.fragments
         
+    # FIXME: need more ?
+    def get(self, subjectId):
+        return defer.succeed(self)
+
     # specific methods
     # FIXME: handle this better in both models
     def filesAppend(self, files, info, metadata=None, number=None):
@@ -117,7 +118,13 @@ class MemoryTrackModel(track.TrackModel):
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, MemoryModel):
     def get(self):
         return defer.succeed(self._db._artists.values())
-    
+
+class MemoryAlbumSelectorModel(album.AlbumSelectorModel, MemoryModel):
+    def get(self):
+        # FIXME: implement
+        return defer.succeed([])
+        return defer.succeed(self._db._artists.values())
+     
 class MemoryTrackSelectorModel(track.TrackSelectorModel, MemoryModel):
     def get(self):
         return defer.succeed(self._db._tracks.values())

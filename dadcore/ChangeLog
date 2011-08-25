@@ -1,5 +1,13 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/audio/mixing.py:
+	  Fix import.
+	* dad/database/memory.py:
+	* dad/model/artist.py:
+	  Implement get()
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/command/test.py:
 	  Make sure we can select and score a track in dad test selector.
 	* dad/controller/subject.py:
