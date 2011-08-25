@@ -62,11 +62,19 @@ class TrackModel(base.Model):
         """
         raise NotImplementedError
 
+    # FIXME: make this return ArtistModel ?
     def getArtists(self):
         """
         @rtype: list of C{unicode}
         """
         raise NotImplementedError
+
+    def getArtistIds(self):
+        """
+        @rtype: list of C{unicode}
+        """
+        raise NotImplementedError
+
 
     def getFragments(self):
         """

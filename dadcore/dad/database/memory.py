@@ -97,6 +97,10 @@ class MemoryTrackModel(track.TrackModel):
 
         return []
 
+    def getArtistIds(self):
+        return self.getArtists()
+
+
     def getFragments(self):
         return self.fragments
         

@@ -1,5 +1,13 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/controller/selector.py:
+	* dad/database/memory.py:
+	* dad/model/track.py:
+	* dad/test/test_database_memory.py:
+	 Fix showing tracks in selector example.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/test/test_database_memory.py:
 	  Add a TrackSelectorModel test.
 	* dad/models/app.py:

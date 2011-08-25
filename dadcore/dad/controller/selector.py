@@ -20,6 +20,12 @@ class SelectorController(base.Controller):
         # populate with the iterable we get from the model
         d = self._model.get()
 
+        # a contaxt to track the view deferred and item count
+        class Context:
+            def __init__(self):
+                self.viewD = defer.Deferred()
+                self.i = 0
+
         def cb(iterable):
             # iterable can be generator
             #self.debug('got results: %r' % len(iterable))
@@ -27,23 +33,24 @@ class SelectorController(base.Controller):
 
             # space out add_artist calls from the iterator in blocks of a given
             # size; this allows the throbber to update
-            def space(iterator, viewD, size=1):
+            def space(iterator, ctx, size=1):
                 for i in range(size):
                     try:
                         item = iterator.next()
+                        ctx.i += 1
                     except StopIteration:
                         self.doViews('throb', False)
-                        self.debug('filled view')
-                        viewD.callback(None)
+                        self.debug('filled view with %d items', ctx.i)
+                        ctx.viewD.callback(None)
                         return
 
                     self.addItem(item)
-                self._reactor.callLater(0, space, iterator, viewD, size)
+                self._reactor.callLater(0, space, iterator, ctx, size)
 
-            viewD = defer.Deferred()
-            self._reactor.callLater(0, space, iter(iterable), viewD, size=11)
+            ctx = Context()
+            self._reactor.callLater(0, space, iter(iterable), ctx, size=11)
             self.debug('populated')
-            return viewD
+            return ctx.viewD
         d.addCallback(cb)
 
         def eb(failure):
@@ -92,11 +99,11 @@ class TrackSelectorController(SelectorController):
     def addItem(self, item):
         # add a track
         self.debug('addItem: %r', item)
-        self.doViews('add_item', item, [a.getName() for a in item.artists],
-            [a.getId() for a in item.artists],
-            "%s" % item.name, None, None, None)
+        self.doViews('add_item', item, item.getArtists(),
+            item.getArtistIds(),
+            "%s" % item.getName(), None, None, None)
 
-    def populate(self):
+    def nopopulate(self):
         self.debug('populate()')
         self.doViews('throb', True)
 
