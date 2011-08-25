@@ -1,5 +1,10 @@
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/model/album.py (added):
+	  Add album model.
+
+2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/audio/mixing.py:
 	  Fix import.
 	* dad/database/memory.py:
