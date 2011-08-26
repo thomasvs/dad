@@ -24,12 +24,8 @@ if __name__ == '__main__':
     import pygst
     pygst.require('0.10')
 
-import os
-import sys
-import math
 import urllib
 
-import gobject
 import gst
 
 
