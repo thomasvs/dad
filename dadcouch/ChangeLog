@@ -1,6 +1,14 @@
 2011-08-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:
+	  Reimplement part of getPlaylist; work in progress.
+	* couchdb/views/view-scores-host (added):
+	* couchdb/views/view-scores-host/map.js (added):
+	  Add a view for user/category/score to host.
+
+2011-08-26  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/daddb.py:
 	  Implement getCategory.
 
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>

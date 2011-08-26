@@ -79,6 +79,21 @@ class ScoreRow(mapping.Document):
         self.name = d['key']
         self.user, self.category, self.score = d['value']
 
+# map view-scores-host
+class ViewScoresHostRow:
+
+    def fromDict(self, d):
+        self.id = d['id']
+        self.name = d['key']
+        self.user, self.category, self.score = d['key']
+        self.hosts = d['value']
+        self.track = couch.Track()
+        self.track.fromDict(d['doc'])
+
+    def __repr__(self):
+        return '<Score %.3f for user %r in category %r for %r on %r>' % (
+            self.score, self.user, self.category, self.id, self.hosts)
+
 
 # FIXME: rename
 class ItemTracksByArtist(artist.ArtistModel):
@@ -481,6 +496,29 @@ class DADDB(log.Loggable):
 
         defer.returnValue(ret)
 
+    @defer.inlineCallbacks
+    def getPlaylist(self, userName, categoryName, above, below, limit=None,
+        random=False):
+        """
+        @type  limit:        int or None
+        @type  random:       bool
+
+        @returns: list of tracks and additional info, ordered by track id
+        @rtype: L{defer.Deferred} firing
+                list of Track, Slice, path, score, userId
+        """
+        self.debug('Getting tracks for category %r and user %r',
+            categoryName, userName)
+
+        startkey = [userName, categoryName, above]
+        endkey = [userName, categoryName, below]
+
+        gen = yield self.viewDocs('view-scores-host', couch.Track,
+            startkey=startkey, endkey=endkey, include_docs=True)
+
+        defer.returnValue(gen)
+
+ 
 ### FIXME: old methods that should be reworked
 class NoWayJose:
     ### data-specific methods
