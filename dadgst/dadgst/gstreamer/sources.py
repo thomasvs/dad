@@ -1,4 +1,5 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: dad.test.test_gstreamer_sources -*-
+
 # vi:si:et:sw=4:sts=4:ts=4
 #
 # DAD - Digital Audio Database
@@ -43,7 +44,7 @@ class AudioSource(gst.Bin):
         caps = gst.caps_from_string('audio/x-raw-int;audio/x-raw-float')
 
         self._source = gst.element_factory_make('uridecodebin', 'source-decodebin')
-        self._source.props.uri = 'file://' + urllib.quote(path)
+        self._source.props.uri = 'file://' + urllib.quote(path.encode('utf-8'))
 
         self._convert = gst.element_factory_make('audioconvert', 'source-convert')
         self._volume = gst.element_factory_make('volume', 'source-volume')
