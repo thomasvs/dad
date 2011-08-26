@@ -6,7 +6,6 @@ Interaction with the database.
 """
 
 import os
-import sys
 
 from twisted import plugin
 
