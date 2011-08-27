@@ -145,7 +145,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
             self.loadDeferred = None
 
         resultList = list(result)
-        self.debug('playlist', 'got %r paths resolved', len(resultList))
+        self.debug('got %r paths resolved', len(resultList))
 
 
         for track in resultList:
@@ -155,7 +155,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                     continue
 
                 fragment, file = best
-                self.debug('Got track %r', track.getName())
+                self.log('Got track %r', track.getName())
                 self._tracks.append((track, fragment, file))
                 trackmix = fragment.getTrackMix()
 
@@ -164,7 +164,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 artists.sort()
                 s = selecter.Selected(file.info.path, trackmix, artists=artists, title=track.getName())
                 self.selected(s)
-                self.debug('cache stats: %r lookups, %r hits, %r cached',
+                self.log('cache stats: %r lookups, %r hits, %r cached',
                     self._cache.lookups, self._cache.hits,
                     self._cache.cached)
 
