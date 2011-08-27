@@ -518,6 +518,14 @@ class DADDB(log.Loggable):
 
         # FIXME: filter on host ?
 
+        # FIXME: for randomness, we currently go from generator to
+        # full list and back
+        if random:
+            tracks = list(gen)
+            import random
+            random.shuffle(tracks)
+            gen = (t for t in tracks)
+
         defer.returnValue(gen)
 
  

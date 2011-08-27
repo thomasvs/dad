@@ -148,7 +148,9 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self.debug('got %r paths resolved', len(resultList))
 
 
-        for track in resultList:
+        # we throw the first two away since they were possibly used
+        # in the quick call
+        for track in resultList[2:]:
             if track not in self._tracks:
                 best = track.getFragmentFileByHost(host)
                 if not best:
@@ -167,6 +169,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 self.log('cache stats: %r lookups, %r hits, %r cached',
                     self._cache.lookups, self._cache.hits,
                     self._cache.cached)
+
+        return len(resultList)
 
 def main():
     log.init()
