@@ -1,3 +1,11 @@
+2011-08-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	* python/dadcouch/selecter/couch.py:
+	  Import cleanups.
+	  Now generates playlists that play again!
+
 2011-08-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* python/dadcouch/model/daddb.py:

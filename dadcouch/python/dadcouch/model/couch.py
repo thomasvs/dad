@@ -2,8 +2,8 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import datetime
-import math
 
+from dad.audio import level
 from dad.model import track
 from dad.logic import database
 
@@ -29,9 +29,34 @@ class Fragment(track.FragmentModel):
         @param fragment: one of the fragments on a L{Track}
         """
         self.files = []
+        self.rate = fragment.rate
+        self.level = fragment.level
 
         for file in fragment.files:
             self.files.append(File(file))
+
+
+    # fixme: add to iface
+    def getTrackMix(self):
+        from dad.audio import mixing
+        trackmix = mixing.TrackMix()
+        
+        trackmix.start = self.level.start
+        trackmix.end = self.level.end
+        trackmix.peak = self.level.peak
+        trackmix.rmsPeak = self.level.rms_peak
+        trackmix.rmsPercentile = self.level.rms_percentile
+        trackmix.rmsWeighted = self.level.rms_weighted
+        # FIXME: attack and decay !
+        if not self.level.attack:
+            self.warning('Fragment %r does not have attack', self)
+        if not self.level.decay:
+            self.warning('Fragment %r does not have decay', self)
+        trackmix.attack = level.Attack(self.level.attack)
+        trackmix.decay = level.Attack(self.level.decay)
+
+        return trackmix
+
 
 
 # new documents
@@ -262,6 +287,33 @@ class Track(mapping.Document, track.TrackModel):
 
     def getFragments(self):
         return [Fragment(f) for f in self.fragments]
+
+    # FIXME: add to iface
+    def getFragmentFileByHost(self, host):
+        # for the given track, select the highest quality file on this host
+
+        best = None
+        highestBitrate = 0
+
+        for fragment in self.getFragments():
+            for file in fragment.files:
+                if file.info.host != host:
+                    continue
+
+                rate = fragment.rate or 44100 # FIXME: hack
+                if not file.info.size or file.metadata.length:
+                    bitrate = 0.0
+                else:
+                    bitrate = float(file.info.size * file.metadata.sampleRate) / file.metadata.length
+                # print 'bitrate is %f bps' % bitrate
+                if not best:
+                    best = (fragment, file)
+                    highestBitrate = bitrate
+                elif bitrate > highestBitrate:
+                    best = (fragment, file)
+                    highestBitrate = bitrate
+
+        return best
 
 # old documents
 class Category(mapping.Document):

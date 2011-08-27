@@ -497,7 +497,7 @@ class DADDB(log.Loggable):
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def getPlaylist(self, userName, categoryName, above, below, limit=None,
+    def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,
         random=False):
         """
         @type  limit:        int or None
@@ -507,14 +507,16 @@ class DADDB(log.Loggable):
         @rtype: L{defer.Deferred} firing
                 list of Track, Slice, path, score, userId
         """
-        self.debug('Getting tracks for category %r and user %r',
-            categoryName, userName)
+        self.debug('Getting tracks for host %r and category %r and user %r',
+            hostName, categoryName, userName)
 
         startkey = [userName, categoryName, above]
         endkey = [userName, categoryName, below]
 
         gen = yield self.viewDocs('view-scores-host', couch.Track,
             startkey=startkey, endkey=endkey, include_docs=True)
+
+        # FIXME: filter on host ?
 
         defer.returnValue(gen)
 

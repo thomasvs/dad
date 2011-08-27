@@ -19,19 +19,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import sys
-import os
 import optparse
-import math
-import random
 
 from twisted.internet import defer
 
-from dad.audio import mixing, level
 from dad.common import log
 from dad.common import selecter
 
-from dadcouch.extern.paisley import views, mapping
-from dadcouch.model import couch, daddb
+from dadcouch.model import daddb
 
 _DEFAULT_HOST = 'localhost'
 _DEFAULT_PORT = 5984
@@ -103,6 +98,9 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self._category = options.category
         self._user = options.user
         self.debug('Selecting for user %r', self._user)
+        import socket
+        self._host = unicode(socket.gethostname())
+        self.debug('Selecting for host %r', self._host)
         self._above = options.above
         self._below = options.below
         self._random = options.random
@@ -122,9 +120,9 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
     def _loadLimited(self, limit):
         # get a few results as fast as possible
-        d = self._dadDB.getPlaylist(self._user, self._category,
+        d = self._dadDB.getPlaylist(self._host, self._user, self._category,
             self._above, self._below, limit=limit, random=self._random)
-        d.addCallback(self._getPlaylistCb)
+        d.addCallback(self._getPlaylistCb, self._host)
         def eb(f):
             log.warningFailure(f)
             return f
@@ -134,56 +132,37 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         # all items which is slower
         # FIXME: also gets some we already have, filter them somehow ?
 
-        self.loadDeferred = self._dadDB.getPlaylist(self._user, self._category,
+        self.loadDeferred = self._dadDB.getPlaylist(self._host, self._user, self._category,
             self._above, self._below, random=self._random)
-        self.loadDeferred.addCallback(self._getPlaylistCb, resetLoad=True)
+        self.loadDeferred.addCallback(self._getPlaylistCb, self._host, resetLoad=True)
         self.debug('setting loadDef to %r', self.loadDeferred)
 
         return d
 
-    def _getPlaylistCb(self, result, resetLoad=False):
+    def _getPlaylistCb(self, result, host, resetLoad=False):
         if resetLoad:
             self.debug('setting loadDef to None')
             self.loadDeferred = None
 
         resultList = list(result)
-        log.debug('playlist', 'got %r paths resolved', len(resultList))
+        self.debug('playlist', 'got %r paths resolved', len(resultList))
 
-        def samplesToNano(samples):
-            seconds = samples / 44100.0
-            return int(seconds * 10 ** 9)
 
-        for succeeded, result in resultList:
+        for track in resultList:
+            if track not in self._tracks:
+                best = track.getFragmentFileByHost(host)
+                if not best:
+                    continue
 
-            if not succeeded:
-                print "couchselecter: FAILED:", result
-                continue
-
-            if result not in self._tracks:
-                self._tracks.append(result)
-                track, slice, path, score, userId = result
-                self.debug('Got result for track %r', track.name)
-                # FIXME: convert to trackmix in a nicer way
-                trackmix = mixing.TrackMix()
-                # FIXME: this is in samples !
-                trackmix.start = samplesToNano(slice.start)
-                trackmix.end = samplesToNano(slice.end)
-                trackmix.peak = slice.peak
-                trackmix.rmsPeak = slice.rms_peak
-                trackmix.rmsPercentile = slice.rms_percentile
-                trackmix.rmsWeighted = slice.rms_weighted
-                # FIXME: attack and decay !
-                if not slice.attack:
-                    self.warning('Slice %r does not have attack', slice)
-                if not slice.decay:
-                    self.warning('Slice %r does not have decay', slice)
-                trackmix.attack = level.Attack(slice.attack)
-                trackmix.decay = level.Attack(slice.decay)
+                fragment, file = best
+                self.debug('Got track %r', track.getName())
+                self._tracks.append((track, fragment, file))
+                trackmix = fragment.getTrackMix()
 
                 # FIXME: make this fail, then clean up all twisted warnings
-                artists = [a.displayname for a in track.artists]
+                artists = track.getArtists()
                 artists.sort()
-                s = selecter.Selected(path, trackmix, artists=artists, title=track.name)
+                s = selecter.Selected(file.info.path, trackmix, artists=artists, title=track.getName())
                 self.selected(s)
                 self.debug('cache stats: %r lookups, %r hits, %r cached',
                     self._cache.lookups, self._cache.hits,
