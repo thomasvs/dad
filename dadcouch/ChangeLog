@@ -1,5 +1,11 @@
 2011-08-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/lib (added):
+	* couchdb/lib/md5.js (added):
+	  Import md5 implementation from jshash-2.2
+
+2011-08-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  Re-use a mapping for score between Artist and Album.
 
