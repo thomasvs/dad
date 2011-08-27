@@ -57,6 +57,24 @@ class Fragment(track.FragmentModel):
 
         return trackmix
 
+class Score(mapping.Mapping):
+    user = mapping.TextField()
+    category = mapping.TextField()
+    score = mapping.FloatField() # between 0.0 and 1.0
+ 
+class Artist(mapping.Document):
+    type = mapping.TextField(default="artist")
+
+    name = mapping.TextField()
+    sortname = mapping.TextField()
+    displayname = mapping.TextField()
+
+    added = mapping.DateTimeField(default=datetime.datetime.now)
+    # FIXME: timestamp
+
+    mbartistid = mapping.TextField()
+
+    scores = mapping.ListField(mapping.DictField(Score))
 
 
 # new documents
@@ -164,21 +182,10 @@ class Track(mapping.Document, track.TrackModel):
         ))
     )
     # scores given by users to this track
-    scores = mapping.ListField(
-        mapping.DictField(mapping.Mapping.build(
-            user = mapping.TextField(),
-            category = mapping.TextField(),
-            score = mapping.FloatField(), # between 0.0 and 1.0
-        ))
-     )
+    scores = mapping.ListField(mapping.DictField(Score))
+
     # scores calculated from track/artist/album
-    calculated_scores = mapping.ListField(
-        mapping.DictField(mapping.Mapping.build(
-            user = mapping.TextField(),
-            category = mapping.TextField(),
-            score = mapping.FloatField(), # between 0.0 and 1.0
-        ))
-    )
+    calculated_scores = mapping.ListField(mapping.DictField(Score))
  
     def _camelCaseFields(self, fieldName):
         """
@@ -340,16 +347,6 @@ class Score(mapping.Document):
             category_id = mapping.TextField(),
             score = mapping.FloatField(), # between 0.0 and 1.0
     )))
-
-class Artist(mapping.Document):
-    type = mapping.TextField(default="artist")
-
-    name = mapping.TextField()
-    sortname = mapping.TextField()
-    displayname = mapping.TextField()
-
-    added = mapping.DateTimeField(default=datetime.datetime.now)
-    # FIXME: timestamp
 
 class Album(mapping.Document):
     type = mapping.TextField(default="album")
