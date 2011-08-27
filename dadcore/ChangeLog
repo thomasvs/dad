@@ -1,3 +1,9 @@
+2011-08-27  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/common/selecter.py:
+	  If we don't have songs, raise.
+	  Still need to fix proper handling of that raise.
+
 2011-08-26  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/command/category.py (added):

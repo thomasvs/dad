@@ -20,14 +20,12 @@
 
 import os
 import sys
-import math
 import random
 import optparse
 import pickle
 
 from twisted.internet import defer
 
-from dad.audio import mixing
 from dad.common import pathscan
 
 from dad.extern.log import log
@@ -76,6 +74,7 @@ class Selecter(log.Loggable):
 
     option_parser_class = OptionParser
 
+    # loadDeferred should return a count of tracks loaded
     loadDeferred = None # set when a complete load is in progress in backend
 
 
@@ -132,6 +131,11 @@ class Selecter(log.Loggable):
 
         def loadCb(result):
             self._loop += 1
+            if result == 0:
+                self.warning('get(): no tracks match')
+                raise IndexError('no tracks match')
+                return
+
             self.debug('get(): loaded, starting loop %d of %d',
                 self._loop, self._loops)
         d.addCallback(loadCb)
@@ -198,7 +202,8 @@ class Selecter(log.Loggable):
         """
         Load all tracks to be scheduled.
 
-        @rtype: L{defer.Deferred}
+        @returns: a deferred firing a count of tracks loaded.
+        @rtype:   L{defer.Deferred} firing int
         """
         raise NotImplementedError
 
