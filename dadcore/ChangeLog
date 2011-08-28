@@ -1,3 +1,9 @@
+2011-08-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/database/memory.py:
+	* dad/test/test_database_memory.py:
+	  Fix memory artist model.
+
 2011-08-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/common/selecter.py:

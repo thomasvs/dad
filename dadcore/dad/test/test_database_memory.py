@@ -141,7 +141,17 @@ class DBTest:
         self.assertEquals(len(artists), 1)
         self.assertEquals(artists[0].getName(), u'The Afghan Whigs')
         self.assertEquals(artists[0].getTrackCount(), 2)
+
+    @defer.inlineCallbacks
+    def testArtistController(self):
+        appModel = self.provider.getAppModel(self.testdb)
+        aModel = appModel.getModel('Artist')
+
+        t = yield self._addFirstTrack()
+
+        yield aModel.get(u'The Afghan Whigs')
         
+ 
     @defer.inlineCallbacks
     def testGetTracks(self):
         t = self.testdb.new()
@@ -284,7 +294,7 @@ class DBTest:
             info, metadata)
 
 
-class MemoryDBDatabaseTest(DBTest, unittest.TestCase):
+class MemoryDBTest(DBTest, unittest.TestCase):
 
     def setUp(self):
         self.testdb = memory.MemoryDB()

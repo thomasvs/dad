@@ -27,7 +27,10 @@ class MemoryModel(base.Model):
     def __init__(self, memorydb):
         self._db = memorydb
 
-class MemoryArtistModel(artist.ArtistModel):
+    def get(self, subjectId):
+        return
+
+class MemoryArtistModel(artist.ArtistModel, MemoryModel):
     """
     @ivar id:     id of the artist
     @ivar name:   name of the artist
@@ -198,7 +201,7 @@ class MemoryDB(log.Loggable):
 
         for artist in track.getArtists():
             if not artist in self._artists:
-                am = MemoryArtistModel()
+                am = MemoryArtistModel(self)
                 am.name = artist
                 am.tracks = 1
                 self._artists[artist] = am
