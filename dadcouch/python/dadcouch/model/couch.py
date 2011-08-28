@@ -72,7 +72,7 @@ class Artist(mapping.Document):
     added = mapping.DateTimeField(default=datetime.datetime.now)
     # FIXME: timestamp
 
-    mbartistid = mapping.TextField()
+    mbid = mapping.TextField()
 
     scores = mapping.ListField(mapping.DictField(Score))
 
