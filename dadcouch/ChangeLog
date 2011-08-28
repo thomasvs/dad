@@ -1,3 +1,8 @@
+2011-08-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* couchdb/views/view-scores-by-subject/map.js:
+	  Artists can be scored too.
+
 2011-08-27  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* couchdb/lib (added):
