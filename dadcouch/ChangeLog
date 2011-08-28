@@ -1,5 +1,11 @@
 2011-08-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-artist-docs (added):
+	* couchdb/views/view-artist-docs/map.js (added):
+	  Add a view to look up artists by various ids.
+
+2011-08-28  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/couch.py:
 	  Change to mbid on artist.
 
