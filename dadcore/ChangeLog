@@ -1,5 +1,11 @@
 2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/controller/selector.py:
+	  Controller should not format display of view, so remove
+	  the (%d)
+
+2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/base.py:
 	  Document base class.
 

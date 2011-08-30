@@ -80,7 +80,7 @@ class ArtistSelectorController(SelectorController):
             return
 
         self.doViews('add_row', item.getId(),
-            "%s (%d)" % (item.getName(), item.getTrackCount()),
+            item.getName(),
             item.getSortName(), item.getTrackCount())
 
 class AlbumSelectorController(SelectorController):
@@ -89,7 +89,7 @@ class AlbumSelectorController(SelectorController):
 
     def addItem(self, item):
         # add an album and the count of tracks on it
-        self.doViews('add_row', item.id, "%s (%d)" % (item.name, item.tracks),
+        self.doViews('add_row', item.id, item.name,
             item.sortname, item.tracks)
 
 class TrackSelectorController(SelectorController):
