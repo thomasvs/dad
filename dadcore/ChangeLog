@@ -1,3 +1,8 @@
+2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/base/base.py:
+	  Document base class.
+
 2011-08-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/database/memory.py:

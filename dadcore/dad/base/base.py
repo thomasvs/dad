@@ -11,12 +11,20 @@ from dad.extern.log import log
 
 
 class Model:
+    """
+    I am a base class for models.
+    I hold data coming from a database that can be presented in a view
+    through the controller.
+    """
+
     pass
 
 
 class View(log.Loggable):
     """
     I am a base class for views.
+
+    @ivar controller: L{Controller}
     """
 
     controller = None
@@ -32,10 +40,12 @@ class SelectorView(View):
 
     def add_row(self, i, display, sort, tracks):
         """
-        @param i:      an id
-        @type i:       C{unicode}
-        @type display: C{unicode}
-        @type sort:    C{unicode}
+        @param i:       an id
+        @param i:       a unique id for the row that allows the model to look up
+                        the original object.
+        @type  i:       C{unicode}
+        @type  display: C{unicode}
+        @type  sort:    C{unicode}
         """
         raise NotImplementedError
 
@@ -51,6 +61,7 @@ class SelectorView(View):
 class Controller(log.Loggable):
     """
     I am a base class for controllers.
+    I interact with one model and one or more views.
 
     @type parent: L{Controller}
     """
@@ -70,22 +81,34 @@ class Controller(log.Loggable):
     ### base class methods
 
     def addView(self, view):
+        """
+        @type  view: L{View}
+        """
         self._views.append(view)
         view.controller = self
         self.viewAdded(view)
 
     def doViews(self, method, *args, **kwargs):
+        """
+        Call the given method on all my views, with the given args and kwargs.
+        """
         for view in self._views:
             m = getattr(view, method)
             m(*args, **kwargs)
 
     def add(self, controller):
+        """
+        Add a child controller to me.
+        Takes parentship over the controller.
+
+        @type controller: subclass of L{Controller}
+        """
         self._controllers.append(controller)
         controller.parent = self
 
     def getRoot(self):
         """
-        Get the root controller forr this controller.
+        Get the root controller for this controller.
 
         @rtype: subclass of L{Controller}
         """
@@ -101,6 +124,9 @@ class Controller(log.Loggable):
         """
         This method is called after a view is added.
         It can be used to connect to signals on the view.
+
+        @type  view: L{View}
         """
+        self._views.append(view)
         pass
 
