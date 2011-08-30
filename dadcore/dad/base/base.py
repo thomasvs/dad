@@ -44,8 +44,11 @@ class SelectorView(View):
         @param i:       a unique id for the row that allows the model to look up
                         the original object.
         @type  i:       C{unicode}
+        @param display: the display name of the item
         @type  display: C{unicode}
         @type  sort:    C{unicode}
+        @param tracks:  the number of tracks 
+        @type  tracks:  int
         """
         raise NotImplementedError
 
@@ -127,6 +130,4 @@ class Controller(log.Loggable):
 
         @type  view: L{View}
         """
-        self._views.append(view)
         pass
-
