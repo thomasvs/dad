@@ -242,11 +242,12 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     ### base.SelectorView implementations
     def add_row(self, i, display, sort, tracks):
         assert type(i) is unicode, 'artist id %r is not unicode' % i
+        self.log('add_row: id %r, display %r', i, display)
 
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_ID, i,
-            COLUMN_DISPLAY, display,
+            COLUMN_DISPLAY, "%s (%d)" % (display, tracks),
             COLUMN_SORT, sort,
             COLUMN_TRACKS, tracks)
         self.count += 1

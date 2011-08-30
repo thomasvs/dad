@@ -1,3 +1,8 @@
+2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/views.py:
+	  Format album/artist display with track count.
+
 2011-08-25  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/scheduler.py:
