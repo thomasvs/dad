@@ -259,6 +259,15 @@ class Track(mapping.Document, track.TrackModel):
 
         fragment['level'] = m
 
+    def get(self, trackId):
+        """
+        Get a track by id.
+
+        @returns: a deferred firing a L{couch.Track} object.
+        """
+        return self._daddb.map(trackId, couch.Track)
+
+     
     def getArtists(self):
         # FIXME: artists is a list of dict of ArtistModel ?
         if self.artists:
@@ -321,6 +330,9 @@ class Track(mapping.Document, track.TrackModel):
                     continue
 
         return ret
+
+    def getId(self):
+        return self.id
 
     def getName(self):
         if self.name:

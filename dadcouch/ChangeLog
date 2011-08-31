@@ -1,5 +1,12 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/daddb.py:
+	  Make DADDB only interact with Documents.
+	* python/dadcouch/model/couch.py:
+	  Add get and getId.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* couchdb/views/view-artist-docs/map.js:
 	  Fix broken view.
 	* couchdb/views/view-tracks-title-artistid/map.js:

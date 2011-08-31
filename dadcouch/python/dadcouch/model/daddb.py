@@ -162,6 +162,7 @@ class AlbumsByArtist:
             self.albumId = d['id']
 
 
+# DADDB should only deal with mappings, not with any models.
 
 class DADDB(log.Loggable):
     """
@@ -450,13 +451,22 @@ class DADDB(log.Loggable):
 
     @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
+        """
+        @type subject: L{mapping.Document}
+        """
+        assert isinstance(subject, mapping.Document), \
+            "subject %r is not a document" % subject
+
         # FIXME: maybe we should first get the most recent version,
         #        then update, to avoid conflicts ?
         self.debug('asked to score subject %r '
             'for user %r and category %r to score %r',
             subject, userName, categoryName, score)
 
-        subject = yield subject.get(subject.getId())
+        # the document could not be saved yet
+        if subject.id:
+            subject = yield self.db.map(self.dbName, subject.id,
+                subject.__class__)
 
         self.debug('updated subject to %r', subject)
 
@@ -1168,6 +1178,7 @@ class ScorableModel(CouchDBModel):
         defer.returnValue(scores)
 
     def score(self, subject, userName, categoryName, score):
+        subject = getattr(subject, self.subjectType)
         return self._daddb.score(subject, userName, categoryName, score)
 
 class TrackModel(ScorableModel):
@@ -1226,16 +1237,14 @@ class ArtistModel(ScorableModel):
         raise KeyError
 
 
-
     @defer.inlineCallbacks
-    def get(self, artistId, name=None):
+    def get(self, artistId):
         """
         Get an artist by aid.
 
         @returns: a deferred firing a L{couch.Artist} object.
         """
         from twisted.web import error
-        import traceback; traceback.print_stack()
 
         self.debug('getting aid %r', artistId)
         try:
@@ -1254,7 +1263,7 @@ class ArtistModel(ScorableModel):
                 # raise IndexError(artistId)
                 artist = couch.Artist()
                 self.debug('Creating temporary model %r', artist)
-                artist.name = self.name
+                artist.name = self.getName()
                 artist.sortname = self.sortname
                 # FIXME: based on aid, fill in mbid or name ?
                 artists = [artist, ]
