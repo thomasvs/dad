@@ -8,6 +8,7 @@ from dad.base import base
 
 # match to scorable
 # FIXME; model should not be couchdb-specific
+# FIXME: subject and self._model are the same here ?
 class SubjectController(base.Controller):
     # FIXME: decide subject type
     """
@@ -29,35 +30,31 @@ class SubjectController(base.Controller):
             self.subject, 'thomas', category, score)
 
     @defer.inlineCallbacks
-    def populate(self, subjectId, userName=None):
+    def populate(self, subject, userName=None):
         """
         Populate the views with the model information.
 
         @rtype: L{defer.Deferred}
         """
-        # populate with the Track
-        self.debug('populating with id %r', subjectId)
+        # populate with the Subject
+        self.debug('populating with id %r', subject)
         try:
-            self.subject = yield self._model.get(subjectId)
-        except Exception, e:
-            self.warningFailure(failure.Failure(e))
-            self.doViews('error', "failed to populate",
-               "%r: %r" % (e, e.args))
-            defer.returnValue(None)
-            return
+            self.subject = yield self._model.get(subject.getId())
+        except IndexError:
+            self.debug('No item for subject %r', subject)
 
-        ret = yield self.populateScore(subjectId, userName=userName)
+        ret = yield self.populateScore(self.subject, userName=userName)
 
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
     def populateScore(self, subjectId, userName=None):
-        assert type(subjectId) is unicode, 'subjectId %r is not unicode' % subjectId
+        # assert type(subjectId) is unicode, 'subjectId %r is not unicode' % subjectId
         self.debug('populateScore(): subjectId %r', subjectId)
         # self.doViews('throb', True)
 
-        categories = yield self._model.getCategories()
-        scores = yield self._model.getScores(userName=userName)
+        categories = yield self.subject.getCategories()
+        scores = yield self.subject.getScores(userName=userName)
         # scores: list of data.Score
         res = {} # category name -> score
         for category in categories:

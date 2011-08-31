@@ -79,7 +79,7 @@ class ArtistSelectorController(SelectorController):
         if item.getTrackCount() == 0:
             return
 
-        self.doViews('add_row', item.getId(),
+        self.doViews('add_row', item,
             item.getName(),
             item.getSortName(), item.getTrackCount())
 
@@ -89,7 +89,7 @@ class AlbumSelectorController(SelectorController):
 
     def addItem(self, item):
         # add an album and the count of tracks on it
-        self.doViews('add_row', item.id, item.name,
+        self.doViews('add_row', item, item.name,
             item.sortname, item.tracks)
 
 class TrackSelectorController(SelectorController):
@@ -100,7 +100,7 @@ class TrackSelectorController(SelectorController):
         # add a track
         self.debug('addItem: %r', item)
         self.doViews('add_item', item, item.getArtists(),
-            item.getArtistIds(),
+            item.getArtistMids(),
             "%s" % item.getName(), None, None, None)
 
     def nopopulate(self):

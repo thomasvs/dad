@@ -1,5 +1,12 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/controller/artist.py:
+	* dad/controller/selector.py:
+	* dad/controller/subject.py:
+	  Start implementing multiple id's for artists.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/test/test_database_memory.py:
 	  Comment out an implementation-dependent line.
 
