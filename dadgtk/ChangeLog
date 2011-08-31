@@ -1,3 +1,10 @@
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dadgtk/views/views.py:
+	* dadgtk/views/scheduler.py:
+	  Add model to ListStore.
+	  Filter artists using mid's.
+
 2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dadgtk/views/views.py:

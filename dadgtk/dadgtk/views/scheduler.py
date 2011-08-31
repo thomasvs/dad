@@ -12,7 +12,7 @@ from dad.extern.log import log
 (
     COLUMN_SCHEDULED,
     COLUMN_ARTISTS,
-    COLUMN_ARTIST_IDS,
+    COLUMN_ARTIST_MIDS,
     COLUMN_TITLE,
     COLUMN_SORT,
     COLUMN_PATH,
@@ -28,7 +28,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (object, ))
     }
 
-    _artist_ids = None
+    _artist_mids = None
 
     def __init__(self, selector=False):
         gtk.VBox.__init__(self)
@@ -54,27 +54,27 @@ class TracksUI(gtk.VBox, log.Loggable):
         self._treerowrefs = {} # Scheduled -> gtk.TreeRowReference
 
         # filtering
-        def match_artist_ids(model, iter):
+        def match_artist_mids(model, iter):
             self._filter_count += 1
             # the first iter always should be shown, as it gives totals
             if model.get_path(iter) == (0, ):
                 return True
 
             # if no album_ids filter is set, everything should be shown
-            if self._artist_ids is None:
+            if self._artist_mids is None:
                 return True
 
             # only show tracks matching the current selection
-            value = model.get_value(iter, COLUMN_ARTIST_IDS)
+            value = model.get_value(iter, COLUMN_ARTIST_MIDS)
             for v in value or []:
-                if v in self._artist_ids:
+                if v in self._artist_mids:
                     return True
 
             self._filter_count -= 1
             return False
 
         self._filter = self._store.filter_new(root=None)
-        self._filter.set_visible_func(match_artist_ids)
+        self._filter.set_visible_func(match_artist_mids)
         self._treeview.set_model(self._filter)
 
 
@@ -104,15 +104,15 @@ class TracksUI(gtk.VBox, log.Loggable):
     def _scheduled_cb(self, scheduler, scheduled):
         self.add_scheduled(scheduled)
 
-    def add_item(self, item, artists, artist_ids, title, path, start, end):
+    def add_item(self, item, artists, artist_mids, title, path, start, end):
         """
         """
-        #self.debug('add: adding %r', item)
+        self.debug('add: adding %r with artist_mids %r', item, artist_mids)
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_SCHEDULED, item,
             COLUMN_ARTISTS, "\n".join(artists),
-            COLUMN_ARTIST_IDS, artist_ids,
+            COLUMN_ARTIST_MIDS, artist_mids,
             COLUMN_TITLE, title,
             COLUMN_SORT, title,
             COLUMN_PATH, path,
@@ -160,25 +160,25 @@ class TracksUI(gtk.VBox, log.Loggable):
     def throb(self, active=True):
         print 'THOMAS: FIXME: throb', active
 
-    def set_artist_ids(self, ids):
+    def set_artist_ids(self, mids):
         """
         Filter the view with tracks only from the given artists.
 
-        @param ids: None if all tracks should be shown (no selection),
-                    [] if no tracks should be shown,
-                    or a list of track ids to show.
-        @type  ids: list of C{unicode} or None
+        @param mids: None if all tracks should be shown (no selection),
+                     [] if no tracks should be shown,
+                     or a list of track ids to show.
+        @type  mids: list of C{unicode} or None
         """
-        for i in ids or []:
-            assert type(i) is unicode, "artist id %r is not unicode" % i
+        for i in mids or []:
+            assert type(i) is unicode, "artist mid %r is not unicode" % i
 
         # used when an artist is selected and only its tracks
-        self.debug('set_artist_ids: %r', ids)
-        self._artist_ids = ids
+        self.debug('set_artist_ids: %r', mids)
+        self._artist_mids = mids
         self._filter_count = 0
         self._filter.refilter()
 
-        if ids is None:
+        if mids is None:
             # all selected
             self._show_count()
         else:

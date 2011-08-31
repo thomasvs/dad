@@ -9,11 +9,12 @@ import gtk
 from dad.base import base
 
 (
-    COLUMN_ID,
+    COLUMN_MID,
+    COLUMN_MODEL,
     COLUMN_DISPLAY,
     COLUMN_SORT,
     COLUMN_TRACKS,
-) = range(4)
+) = range(5)
 
 class Throbber(gtk.Image):
     path = None
@@ -129,6 +130,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     def _create_store(self):
         self._store = gtk.ListStore(
             object, # best choice for unicode ?
+            object,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_INT)
@@ -155,10 +157,9 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         for p in paths:
             i = self._store.get_iter(p)
             # FIXME: getting id back from store is a non-unicode str ?
-            itemId = self._store.get_value(i, COLUMN_ID)
+            itemId = self._store.get_value(i, COLUMN_MID)
             if itemId:
                 ids.append(itemId)
-                assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
 
         # if the first row is selected, return None
         if not ids:
@@ -189,39 +190,37 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     def _view_popup_menu(self, event):
         sel = self._treeview.get_selection()
         model, paths = sel.get_selected_rows()
-        ids = []
+        items = []
 
         for p in paths:
             i = self._treeview.get_model().get_iter(p)
             # FIXME: getting id back from store is a non-unicode str ?
-            ids.append(unicode(self._treeview.get_model().get_value(i, COLUMN_ID)))
-            assert type(ids[-1]) is unicode, 'subject id %r is not unicode' % ids[-1]
+            items.append((
+                self._treeview.get_model().get_value(i, COLUMN_MODEL),
+                unicode(self._treeview.get_model().get_value(i, COLUMN_DISPLAY)),
+            ))
 
-        for i in ids:
+        for (model, name) in items:
             menu = gtk.Menu()
             item = gtk.MenuItem(label='_Info')
             menu.add(item)
-            item.connect('activate', self._show_info, i)
+            item.connect('activate', self._show_info, model, name)
             menu.popup(None, None, None, event and event.button or None, event.get_time() or 0.0)
             menu.show_all()
 
-    def _show_info(self, item, subject_id):
-        self.debug('show info in subject with id %r', subject_id)
+    def _show_info(self, item, subject, name):
+        self.debug('show info in subject %r', subject)
 
-        controller, model, views = self.controller.getRoot().getTriad(self.what)
+        controller, model, views = self.controller.getRoot().getTriad(self.what, model=subject)
         w = gtk.Window()
         w.add(views[0].widget)
 
         # FIXME: don't hardcode username
-        self.debug('asking controller %r to populate', controller)
-        d = controller.populate(subject_id, userName='thomas')
+        # self.debug('asking controller %r to populate', controller)
+        d = controller.populate(model, userName='thomas')
 
         def cb(_):
-            if self.what == 'Artist':
-                title = model.artist.name
-            else:
-                title = model.album.name
-            w.set_title(title)
+            w.set_title(model.getName())
         d.addCallback(cb)
 
         w.show_all()
@@ -240,20 +239,21 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             COLUMN_SORT, None)
 
     ### base.SelectorView implementations
-    def add_row(self, i, display, sort, tracks):
-        assert type(i) is unicode, 'artist id %r is not unicode' % i
-        self.log('add_row: id %r, display %r', i, display)
+    def add_row(self, model, display, sort, tracks):
+        assert model, 'artist model %r is empty' % model
+        self.log('add_row: id %r, display %r', model, display)
 
         iter = self._store.append()
         self._store.set(iter,
-            COLUMN_ID, i,
+            COLUMN_MID, model.getMid(),
+            COLUMN_MODEL, model,
             COLUMN_DISPLAY, "%s (%d)" % (display, tracks),
             COLUMN_SORT, sort,
             COLUMN_TRACKS, tracks)
         self.count += 1
         self.track_count += tracks
 
-        self._id_to_tracks[i] = tracks
+        self._id_to_tracks[model.getMid()] = tracks
 
         self._show_count()
 
@@ -298,7 +298,7 @@ class AlbumSelectorView(GTKSelectorView):
                 return True
 
             # only show albums matching the current selection
-            value = model.get_value(iter, COLUMN_ID)
+            value = model.get_value(iter, COLUMN_MID)
             return value in self._album_ids
 
         self._filter = self._store.filter_new(root=None)
