@@ -1,3 +1,18 @@
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* dad/base/app.py:
+	  Allow passing a model to getTriad if we already have one.
+	* dad/base/base.py:
+	  Give models their controller so they can notify.
+
+2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	reviewed by: <delete if not using a buddy>
+	patch by: <delete if not someone else's patch>
+
+	* dad/controller/artist.py:
+	* dad/controller/subject.py:
+
 2011-08-30  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* dad/controller/selector.py:

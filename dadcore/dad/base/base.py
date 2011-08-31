@@ -15,9 +15,13 @@ class Model:
     I am a base class for models.
     I hold data coming from a database that can be presented in a view
     through the controller.
+
+    I can notify views of changes through the controller.
+
+    @type controller: L{Controller}
     """
 
-    pass
+    controller = None
 
 
 class View(log.Loggable):
@@ -38,12 +42,10 @@ class SelectorView(View):
     """
     title = 'Selector, override me'
 
-    def add_row(self, i, display, sort, tracks):
+    def add_row(self, item, display, sort, tracks):
         """
-        @param i:       an id
-        @param i:       a unique id for the row that allows the model to look up
-                        the original object.
-        @type  i:       C{unicode}
+        @param item:    an item that can serve as a model for an individual
+                        item view
         @param display: the display name of the item
         @type  display: C{unicode}
         @type  sort:    C{unicode}
@@ -78,6 +80,8 @@ class Controller(log.Loggable):
         @type  model: L{Model}
         """
         self._model = model
+        model.controller = self
+
         self._views = []
         self._controllers = []
 

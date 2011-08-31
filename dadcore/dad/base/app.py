@@ -47,11 +47,12 @@ class AppView(base.View):
 
 class AppController(base.Controller):
 
-    def getTriad(self, what):
+    def getTriad(self, what, model=None):
         # ex. model: dadcouch.model.daddb.TrackModel
         #            dad.controller.trackTrackController
         #            dadgtk.views.track.TrackView
-        model = self._model.getModel(what)
+        if not model:
+            model = self._model.getModel(what)
 
         whats = {
             'ArtistSelector': 'selector.ArtistSelectorController',
