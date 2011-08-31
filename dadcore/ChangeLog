@@ -1,5 +1,10 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/test/test_database_memory.py:
+	  Comment out an implementation-dependent line.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/base/app.py:
 	  Allow passing a model to getTriad if we already have one.
 	* dad/base/base.py:
