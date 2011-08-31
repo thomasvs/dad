@@ -1,5 +1,16 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/model/base.py (added):
+	* python/dadcouch/model/album.py (added):
+	* python/dadcouch/model/track.py (added):
+	* python/dadcouch/model/artist.py (added):
+	* python/dadcouch/database/couch.py:
+	* python/dadcouch/models/app.py:
+	* python/dadcouch/test/test_model_daddb.py:
+	  Split out models.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/database (added):
 	* python/dadcouch/database/mappings.py (added):
 	* python/dadcouch/database/__init__.py (added):

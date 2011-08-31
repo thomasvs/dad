@@ -16,6 +16,7 @@ from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley.test import test_util
 
 from dadcouch.model import daddb, couch
+from dadcouch.model import track as mtrack, artist
 
 
 class DADDBTestCase(test_util.CouchDBTestCase):
@@ -137,7 +138,7 @@ class SimpleTestCase(DADDBTestCase):
         self.assertEquals(file.path, path)
 
     def test_ItemTracksByArtist(self):
-        i = daddb.ItemTracksByArtist(daddb=self.daddb)
+        i = artist.ItemTracksByArtist(daddb=self.daddb)
         i.fromDict({
             'key': (u'Prince', u'Prince', u'abcd'),
             'value': u'dead',
@@ -283,7 +284,7 @@ class AdvancedTestCase:#(DADDBTestCase):
         self.assertEquals(scores[0].subject_id, track.id)
 
         # test track model
-        model = daddb.TrackModel(self.daddb)
+        model = mtrack.TrackModel(self.daddb)
 
         retrieved = yield model.get(track.id)
         res = yield model.getScores()
@@ -297,7 +298,7 @@ class TrackModelTestCase:#(DADDBTestCase):
     @defer.inlineCallbacks
     def test_get(self):
 
-        model = daddb.TrackModel(self.daddb)
+        model = mtrack.TrackModel(self.daddb)
 
         track = couch.Track(name='hit me')
         # FIXME: don't poke at _data
