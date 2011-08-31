@@ -150,7 +150,7 @@ class DBTest:
 
         t = yield self._addFirstTrack()
 
-        yield aModel.get(u'The Afghan Whigs')
+        yield aModel.get(t.id)
         
  
     @defer.inlineCallbacks
