@@ -1,5 +1,15 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* python/dadcouch/database (added):
+	* python/dadcouch/database/mappings.py (added):
+	* python/dadcouch/database/__init__.py (added):
+	* python/dadcouch/database/couch.py (added):
+	* python/dadcouch/model/couch.py:
+	* python/dadcouch/model/daddb.py:
+	  Move modules to new destination.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* scripts/lookup.py (added):
 	* python/dadcouch/model/lookup.py (deleted):
 	  Move lookup module only used by scripts.
