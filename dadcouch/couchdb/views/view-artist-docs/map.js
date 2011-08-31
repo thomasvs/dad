@@ -8,4 +8,5 @@ function(doc) {
         if (doc.mbid) {
             emit('artist:mbid:' + doc.mbid, 1);
         }
+    }
 }

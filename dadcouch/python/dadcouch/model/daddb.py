@@ -6,6 +6,7 @@ import sys
 import time
 
 from twisted.internet import defer
+from twisted.python import failure
 
 from zope import interface
 
@@ -94,32 +95,12 @@ class ViewScoresHostRow:
         return '<Score %.3f for user %r in category %r for %r on %r>' % (
             self.score, self.user, self.category, self.id, self.hosts)
 
+class CouchDBModel(base.Model, log.Loggable):
 
-# FIXME: rename
-class ItemTracksByArtist(artist.ArtistModel):
+    def __init__(self, daddb):
+        self._daddb = daddb
 
-    tracks = 0 # int
-    id = None
-    trackId = None
 
-    # map tracks-by-artist
-    def fromDict(self, d):
-        self.name, self.sortname, self.id = d['key']
-
-        self.trackId = d['value']
-
-    def getId(self):
-        return self.id
-
-    def getName(self):
-        return self.name
-
-    def getSortName(self):
-        return self.sortname
-
-    def getTrackCount(self):
-        return self.tracks
-    
 class ItemAlbumsByArtist:
 
     tracks = 0 # int
@@ -140,6 +121,9 @@ class ItemAlbumsByArtist:
 
         self.tracks = d['value']
 
+    def getMid(self):
+        # FIXME
+        return self.id
 
 class ItemTracks:
     # map tracks-by-album and tracks-by-artist
@@ -291,11 +275,12 @@ class DADDB(log.Loggable):
         return couch.Track()
 
     @defer.inlineCallbacks
-    def save(self, track):
-        stored = yield self.saveDoc(track)
+    def save(self, item):
+        stored = yield self.saveDoc(item)
         # FIXME: for now, look it up again to maintain the track illusion
-        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
-        defer.returnValue(track)
+        item = yield self.db.map(self.dbName, stored['id'], item.__class__)
+        self.debug('saved item %r', item)
+        defer.returnValue(item)
 
     @defer.inlineCallbacks
     def getTracks(self):
@@ -471,6 +456,11 @@ class DADDB(log.Loggable):
             'for user %r and category %r to score %r',
             subject, userName, categoryName, score)
 
+        subject = yield subject.get(subject.getId())
+
+        self.debug('updated subject to %r', subject)
+
+
         found = False
         ret = None
 
@@ -527,6 +517,13 @@ class DADDB(log.Loggable):
             gen = (t for t in tracks)
 
         defer.returnValue(gen)
+
+    ### own instance methods
+    def map(self, docId, objectFactory):
+        return self.db.map(self.dbName, docId, objectFactory)
+
+    def modelFactory(self, modelClass):
+        return lambda: modelClass(daddb=self)
 
  
 ### FIXME: old methods that should be reworked
@@ -971,11 +968,6 @@ class NoWayJose:
 
         return d
 
-class CouchDBModel(base.Model, log.Loggable):
-
-    def __init__(self, daddb):
-        self._daddb = daddb
-
 class ArtistSelectorModel(artist.ArtistSelectorModel, CouchDBModel):
     def get(self):
         """
@@ -986,11 +978,11 @@ class ArtistSelectorModel(artist.ArtistSelectorModel, CouchDBModel):
         self.debug('get')
         v = views.View(self._daddb.db, self._daddb.dbName,
             'dad', 'view-tracks-by-artist',
-            ItemTracksByArtist)
+            self._daddb.modelFactory(ItemTracksByArtist))
         try:
             d = v.queryView()
         except Exception, e:
-            print 'THOMAS: exception', e
+            self.warning('get: exception: %r', log.getExceptionMessage(e))
             return defer.fail(e)
 
         def cb(itemTracks):
@@ -1109,6 +1101,7 @@ class TrackSelectorModel(CouchDBModel):
 
             ret = []
             for trackRow in trackList:
+                # FIXME: find a better way to convert to a track; use a model
                 track = couch.Track()
                 d = {
                     '_id': trackRow.id,
@@ -1160,6 +1153,12 @@ class ScorableModel(CouchDBModel):
 
         # FIXME: the subject controller has .subject, not .track or .artist?
         subject = getattr(self, self.subjectType)
+        if not subject:
+            self.debug('No subject, no scores')
+            import code; code.interact(local=locals())
+            defer.returnValue([])
+            return
+
         self.debug('Getting scores for %r', subject)
         scores = yield self._daddb.getScores(subject)
         #import code; code.interact(local=locals())
@@ -1205,17 +1204,127 @@ class ArtistModel(ScorableModel):
 
     artist = None
 
-    def get(self, artistId):
+    def getId(self):
+        return self.artist.id
+
+
+    def getName(self):
+        return self.artist.name
+
+    def getSortName(self):
+        return self.artist.sortname
+
+    def getMid(self):
+        i = self.getId()
+        if i:
+            return i
+
+        name = self.getName()
+        if name:
+            return u'artist:name:%s' % name
+
+        raise KeyError
+
+
+
+    @defer.inlineCallbacks
+    def get(self, artistId, name=None):
         """
-        Get an artist by id.
+        Get an artist by aid.
 
         @returns: a deferred firing a L{couch.Artist} object.
         """
-        d = self._daddb.db.map(self._daddb.dbName, artistId, couch.Artist)
+        from twisted.web import error
+        import traceback; traceback.print_stack()
 
-        d.addCallback(lambda artist: setattr(self, 'artist', artist))
-        d.addCallback(lambda _, s: s.artist, self)
-        return d
+        self.debug('getting aid %r', artistId)
+        try:
+            self.subject = yield self._daddb.db.map(
+                self._daddb.dbName, artistId, couch.Artist)
+        except error.Error, e:
+            # FIXME: trap error.Error with 404
+            self.debug('aid %r does not exist as doc, viewing', artistId)
+
+            # get it by aid instead
+            ret = yield self._daddb.viewDocs('view-artist-docs', couch.Artist,
+                key=artistId, include_docs=True)
+            artists = list(ret)
+            if not artists:
+                # create an empty one
+                # raise IndexError(artistId)
+                artist = couch.Artist()
+                self.debug('Creating temporary model %r', artist)
+                artist.name = self.name
+                artist.sortname = self.sortname
+                # FIXME: based on aid, fill in mbid or name ?
+                artists = [artist, ]
+            else:
+                self.debug('Found artists: %r', artists)
+
+            # FIXME: multiple matches, find best one ? maybe mbid first ?
+            self.subject = ArtistModel(self._daddb)
+            self.subject.artist = artists[0]
+            
+        except Exception, e:
+                self.warningFailure(failure.Failure(e))
+                self.controller.doViews('error', "failed to populate",
+                   "%r: %r" % (e, e.args))
+                raise IndexError(artistId)
+                #defer.returnValue(None)
+                #return
+
+        self.debug('found subject %r', self.subject)
+        defer.returnValue(self.subject)
+
+# FIXME: rename
+class ItemTracksByArtist(ArtistModel):
+
+    tracks = 0 # int
+    id = None
+    trackId = None
+
+    _daddb = None
+
+    # map tracks-by-artist
+    def fromDict(self, d):
+        self.name, self.sortname, self.id = d['key']
+
+        self.trackId = d['value']
+
+    def getId(self):
+        return self.id
+
+    def getName(self):
+        return self.name
+
+    def getSortName(self):
+        return self.sortname
+
+    def getTrackCount(self):
+        return self.tracks
+    
+    @defer.inlineCallbacks
+    def noget(self, id, create=False):
+        from twisted.web import error
+        # if the artist exists, return the real model, otherwise it's us!
+        print 'THOMAS: ITBA get: daddb', self._daddb
+        try:
+            artist = yield self._daddb.map(id, couch.Artist)
+        # FIXME: trap 404
+        except error.Error:
+            if not create:
+                artist = self
+            else:
+                artist = couch.Artist()
+                artist.name = self.name
+                artist.sortname = self.sortname
+                artist = yield self._daddb.save(artist)
+
+        defer.returnValue(artist)
+
+
+    def __repr__(self):
+        return '<ItemTracksByArtist %r>' % self.name
 
 class AlbumModel(ScorableModel):
     """

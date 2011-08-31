@@ -87,7 +87,9 @@ class Track(mapping.Document, track.TrackModel):
         mapping.DictField(mapping.Mapping.build(
             name = mapping.TextField(),
             sortname = mapping.TextField(),
-            id = mapping.TextField())))
+            id = mapping.TextField(),
+            mbid = mapping.TextField(),
+        )))
 
     albums = mapping.ListField(
         mapping.DictField(mapping.Mapping.build(
@@ -278,6 +280,47 @@ class Track(mapping.Document, track.TrackModel):
     # FIXME: proper artist ids ?
     def getArtistIds(self):
         return self.getArtists()
+
+    # FIXME: proper artist ids ?
+    def getArtistMids(self):
+        """
+        """
+        ret = []
+
+        # FIXME: artists is a list of ArtistModel ?
+        if self.artists:
+            # also used as TrackRow with made up artists,
+            # so artist.id can be None
+            for artist in self.artists:
+                if artist.id:
+                    ret.append(artist.id)
+                elif artist.mbid:
+                    ret.append('artist:mbid:' + artist.mbid)
+                elif artist.name:
+                    ret.append('artist:name:' + artist.name)
+
+            if ret:
+                return ret
+
+
+        # FIXME: fingerprint
+
+        # FIXME: better ? faster ? stronger ?
+        if not self.fragments:
+            return []
+
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if not file.metadata:
+                    continue
+                if file.mb_artist_id:
+                    ret.append('artist:mbid:' + file.mb_artist_id)
+                    continue
+                if file.artist:
+                    ret.append('artist:name:' + file.artist)
+                    continue
+
+        return ret
 
     def getName(self):
         if self.name:

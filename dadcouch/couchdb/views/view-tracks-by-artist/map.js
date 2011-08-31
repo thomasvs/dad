@@ -19,7 +19,11 @@ function(doc) {
                                 if (file.metadata && file.metadata.artist) {
                                     if (!(file.metadata.artist in seen)) {
                                         // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
-                                        emit([file.metadata.artist, file.metadata.artist, file.metadata.artist],
+                                        aid = 'artist:name:' + file.metadata.artist;
+                                        if (file.metadata.mb_artist_id) {
+                                            aid = 'artist:mbid:' + file.metadata.mb_artist_id;
+                                        }
+                                        emit([file.metadata.artist, file.metadata.artist, aid],
                                           doc._id);
                                         seen[file.metadata.artist] = 1;
                                     }

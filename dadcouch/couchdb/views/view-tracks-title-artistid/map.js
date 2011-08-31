@@ -13,7 +13,8 @@ function(doc) {
                     artists[artist.name] = {
                         'name': artist.name,
                         'sortname': artist.sortname,
-                        'id': artist.id
+                        'id': artist.id,
+                        'mbid': artist.mbid,
                     };
                 }
             );
@@ -28,7 +29,8 @@ function(doc) {
                                     artists[file.metadata.artist] = {
                                         'name': file.metadata.artist,
                                         'sortname': file.metadata.artist,
-                                        'id': file.metadata.artist,
+                                        'id': null,
+                                        'mbid': file.metadata.mb_artist_id,
                                     };
                                 }
                             }

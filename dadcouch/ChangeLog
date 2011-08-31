@@ -1,3 +1,19 @@
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* couchdb/views/view-artist-docs/map.js:
+	  Fix broken view.
+	* couchdb/views/view-tracks-title-artistid/map.js:
+	  Add mbid so we can get mid's.
+	* couchdb/views/view-tracks-by-artist/map.js:
+	  Emit mid.
+	* python/dadcouch/test/test_model_daddb.py:
+	  Add a test.
+	* python/dadcouch/model/daddb.py:
+	  Reuse ArtistModel for ItemTracksByArtist.
+	* python/dadcouch/model/couch.py:
+	  Add mbid.
+	  Add getArtistMids()
+
 2011-08-28  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* couchdb/views/view-artist-docs (added):
