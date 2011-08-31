@@ -1,5 +1,11 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* scripts/lookup.py (added):
+	* python/dadcouch/model/lookup.py (deleted):
+	  Move lookup module only used by scripts.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/daddb.py:
 	  Make DADDB only interact with Documents.
 	* python/dadcouch/model/couch.py:
