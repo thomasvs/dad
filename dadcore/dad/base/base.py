@@ -13,8 +13,8 @@ from dad.extern.log import log
 class Model:
     """
     I am a base class for models.
-    I hold data coming from a database that can be presented in a view
-    through the controller.
+    I hold data coming from a database that can be presented in a view through
+    the controller.
 
     I can notify views of changes through the controller.
 
