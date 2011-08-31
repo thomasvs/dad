@@ -1,5 +1,19 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/memorydb (added):
+	* dad/memorydb/memory.py (added):
+	* dad/memorydb/model (added):
+	* dad/memorydb/model/base.py (added):
+	* dad/memorydb/model/__init__.py (added):
+	* dad/memorydb/model/album.py (added):
+	* dad/memorydb/model/track.py (added):
+	* dad/memorydb/model/artist.py (added):
+	* dad/memorydb/__init__.py (added):
+	* dad/database/memory.py:
+	  Split up into new structure for models.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/controller/artist.py:
 	* dad/controller/selector.py:
 	* dad/controller/subject.py:
