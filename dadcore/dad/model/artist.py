@@ -60,6 +60,7 @@ class ArtistModel(base.ScorableModel):
         name = yield self.getName()
         if name:
             defer.returnValue('artist:name:' + name)
+            return
 
         raise KeyError
 
