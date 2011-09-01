@@ -50,6 +50,14 @@ class MemoryTrackModel(track.TrackModel):
     def getArtistIds(self):
         return self.getArtists()
 
+    def getArtistMids(self):
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if file.metadata and file.metadata.mbArtistId:
+                    return ['artist:mbid:' + file.metadata.mbArtistId, ]
+                if file.metadata and file.metadata.artist:
+                    return ['artist:name:' + file.metadata.artist, ]
+
 
     def getFragments(self):
         return self.fragments
