@@ -47,7 +47,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
         """
         Get an artist by aid.
 
-        @returns: a deferred firing a L{mappings.Artist} object.
+        @returns: a deferred firing a L{ArtistModel} object.
         """
         from twisted.web import error
 
