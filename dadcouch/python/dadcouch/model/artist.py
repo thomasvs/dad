@@ -93,6 +93,19 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
         self.debug('found subject %r', self.subject)
         defer.returnValue(self.subject)
 
+    # In addition to scoring the artist, we want to update calculated scores
+    # for tracks and albums
+    @defer.inlineCallbacks
+    def score(self, subject, userName, categoryName, score):
+        subject = yield base.ScorableModel.score(
+            subject, userName, categoryName, score)
+
+        # now get all tracks for this artist
+        doc = getattr(subject, self.subjectType)
+        doc = yield self._daddb.score(doc, userName, categoryName, score)
+        setattr(subject, self.subjectType, doc)
+        defer.returnValue(subject)
+
 # FIXME: rename
 class ItemTracksByArtist(ArtistModel):
 
@@ -103,11 +116,10 @@ class ItemTracksByArtist(ArtistModel):
 
     _daddb = None
 
-    # map tracks-by-artist
+    # map view-tracks-by-artist
     def fromDict(self, d):
-        self.name, self.sortname, self.id, self.mbid = d['key']
-
-        self.trackId = d['value']
+        for key, value in d['value'].items():
+            setattr(self, key, value)
 
     ### artist.ArtistModel implementations
 
