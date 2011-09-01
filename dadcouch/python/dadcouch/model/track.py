@@ -1,26 +1,57 @@
-# -*- Mode: Python; test_case_name: dadcouch.test.test_model_daddb -*-
+# -*- Mode: Python; test_case_name: dadcouch.test.test_model_track -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-import os
-import sys
 import time
 
 from twisted.internet import defer
-from twisted.python import failure
 
-from zope import interface
-
-from dadcouch.extern.paisley import mapping
-from dadcouch.extern.paisley import views
-
-from dad import idad
-from dad.common import log
-from dad.model import artist
-
-from dadcouch.common import manydef
+from dad.model import track
 
 from dadcouch.model import base
 from dadcouch.database import mappings, couch
+
+
+class TrackModel(base.ScorableModel, track.TrackModel):
+    """
+    I represent a track in a CouchDB database.
+
+    @ivar track: a track as returned by the database.
+    """
+
+    subjectType = 'track'
+
+    track = None
+
+
+    # FIXME: instead of forwarding, do them directly ? In subclass of Track ?
+    def getName(self):
+        return self.track.getName()
+
+    def getId(self):
+        return self.track.getId()
+
+
+    def getArtists(self):
+        return self.track.getArtists()
+
+    def getArtistMids(self):
+        return self.track.getArtistMids()
+
+
+    def get(self, trackId):
+        """
+        Get a track by id and resolve its artists.
+
+        @returns: a deferred firing a L{TrackModel} object.
+        """
+        d = self._daddb.db.map(self._daddb.dbName, trackId, mappings.Track)
+        #d.addCallback(lambda track:
+        #    self._daddb.resolveIds(track, 'artist_ids', 'artists',
+        #    mappings.Artist))
+
+        d.addCallback(lambda track: setattr(self, 'track', track))
+        d.addCallback(lambda _, s: s, self)
+        return d
 
 
 class TrackSelectorModel(base.CouchDBModel):
@@ -28,7 +59,7 @@ class TrackSelectorModel(base.CouchDBModel):
     # instead of everything at the end
     def get(self, cb=None, *cbArgs, **cbKWArgs):
         """
-        @returns: a deferred firing a list of L{database.TrackRow} objects.
+        @returns: a deferred firing a list of L{TrackModel} objects.
         """
         d = defer.Deferred()
 
@@ -64,7 +95,9 @@ class TrackSelectorModel(base.CouchDBModel):
                     'artists': trackRow.artists
                 }
                 track.fromDict(d)
-                ret.append(track)
+                tm = TrackModel(self._daddb)
+                tm.track = track
+                ret.append(tm)
 
             return ret
 
@@ -79,31 +112,4 @@ class TrackSelectorModel(base.CouchDBModel):
         self.debug('get(): calling back deferred chain')
 
         d.callback(None)
-        return d
-
-
-class TrackModel(base.ScorableModel):
-    """
-    I represent a track in a CouchDB database.
-
-    @ivar track: a track as returned by the database.
-    """
-
-    subjectType = 'track'
-
-    track = None
-
-    def get(self, trackId):
-        """
-        Get a track by id and resolve its artists.
-
-        @returns: a deferred firing a L{mappings.Track} object.
-        """
-        d = self._daddb.db.map(self._daddb.dbName, trackId, mappings.Track)
-        #d.addCallback(lambda track:
-        #    self._daddb.resolveIds(track, 'artist_ids', 'artists',
-        #    mappings.Artist))
-
-        d.addCallback(lambda track: setattr(self, 'track', track))
-        d.addCallback(lambda _, s: s.track, self)
         return d

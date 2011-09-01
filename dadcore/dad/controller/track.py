@@ -22,8 +22,8 @@ class TrackController(subject.SubjectController):
     logCategory = 'trackcontroller'
 
     @defer.inlineCallbacks
-    def populate(self, subjectId, userName=None):
-        yield subject.SubjectController.populate(self, subjectId, userName)
+    def populate(self, track, userName=None):
+        yield subject.SubjectController.populate(self, track, userName)
 
         # FIXME: getting it again to avoid poking at internals ?
         try:

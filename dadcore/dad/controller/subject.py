@@ -34,10 +34,12 @@ class SubjectController(base.Controller):
         """
         Populate the views with the model information.
 
+        @type  subject: subclass of L{dad.model.base.ScorableModel}
+
         @rtype: L{defer.Deferred}
         """
         # populate with the Subject
-        self.debug('populating with id %r', subject)
+        self.debug('populating with subject %r', subject)
         try:
             self.subject = yield self._model.get(subject.getId())
         except IndexError:

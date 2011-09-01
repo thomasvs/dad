@@ -192,8 +192,9 @@ class Selector(Gtk2Command):
 
             # FIXME: don't hardcode
             user = 'thomas'
-            d = tController.populate(trackObj.id, userName=user)
-            d.addCallback(lambda _: w.set_title(trackObj.name))
+            d = tController.populate(trackObj, userName=user)
+            d.addCallback(lambda _, o: o.getName(), trackObj)
+            d.addCallback(lambda n: w.set_title(n))
             w.add(tViews[0].widget)
 
             w.show_all()
