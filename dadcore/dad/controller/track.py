@@ -28,9 +28,11 @@ class TrackController(subject.SubjectController):
         # FIXME: getting it again to avoid poking at internals ?
         try:
             self.debug('populating')
-            self.doViews('set_artist', " & ".join(
-                self.subject.getArtists()))
-            self.doViews('set_title', self.subject.getName())
+            artists = yield self.subject.getArtists()
+            name = yield self.subject.getName()
+
+            self.doViews('set_artist', " & ".join(artists))
+            self.doViews('set_title', name)
             self.debug('populated')
         except Exception, e:
             self.warning('Exception %r', log.getExceptionMessage(e, frame=-1))

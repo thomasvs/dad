@@ -9,7 +9,8 @@ from dad.controller import subject
 class AlbumController(subject.SubjectController):
 
     @defer.inlineCallbacks
-    def populate(self, subjectId, userName=None):
-        yield self.populateScore(subjectId, userName)
+    def populate(self, album, userName=None):
+        yield self.populateScore(album, userName)
 
-        self.doViews('set_name', self.subject.name)
+        name = yield self.subject.getName()
+        self.doViews('set_name', name)
