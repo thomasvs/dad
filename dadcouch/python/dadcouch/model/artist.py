@@ -43,30 +43,30 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
     ### FIXME: to be added to iface ?
 
     @defer.inlineCallbacks
-    def get(self, artistId):
+    def get(self, mid):
         """
-        Get an artist by aid.
+        Get an artist by mid.
 
         @returns: a deferred firing a L{ArtistModel} object.
         """
         from twisted.web import error
 
-        self.debug('getting aid %r', artistId)
+        self.debug('getting mid %r', mid)
         try:
             self.subject = yield self._daddb.db.map(
-                self._daddb.dbName, artistId, mappings.Artist)
+                self._daddb.dbName, mid, mappings.Artist)
         except error.Error, e:
             # FIXME: trap error.Error with 404
-            self.debug('aid %r does not exist as doc, viewing', artistId)
+            self.debug('aid %r does not exist as doc, viewing', mid)
 
             # get it by aid instead
             ret = yield self._daddb.viewDocs('view-artist-docs', mappings.Artist,
-                key=artistId, include_docs=True)
+                key=mid, include_docs=True)
             artists = list(ret)
             if not artists:
-                self.debug('aid %r can not be viewed, creating temp', artistId)
+                self.debug('aid %r can not be viewed, creating temp', mid)
                 # create an empty one
-                # raise IndexError(artistId)
+                # raise IndexError(mid)
                 artist = mappings.Artist()
                 artist.name = self.getName()
                 artist.sortname = self.sortname
@@ -86,7 +86,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
                 self.warningFailure(failure.Failure(e))
                 self.controller.doViews('error', "failed to populate",
                    "%r: %r" % (e, e.args))
-                raise IndexError(artistId)
+                raise IndexError(mid)
                 #defer.returnValue(None)
                 #return
 
