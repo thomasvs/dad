@@ -1,2 +1,4 @@
 *.gvim
 *.pyc
+dropin.cache
+_trial_temp
