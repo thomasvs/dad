@@ -14,14 +14,16 @@ from dad.common import log
 from dad.common import logcommand
 from dad.command import tcommand
 
-class Artist(tcommand.TwistedCommand):
-
-    description = """Test viewing artists."""
-
+class Gtk2Command(tcommand.TwistedCommand):
     def installReactor(self):
         from dadgtk.twisted import gtk2reactor
         gtk2reactor.install()
         tcommand.TwistedCommand.installReactor(self)
+
+
+class Artist(Gtk2Command):
+
+    description = """Test viewing artists."""
 
     def done_cb(self, _):
         self._doneDeferred.callback(None)
@@ -87,14 +89,9 @@ class Artist(tcommand.TwistedCommand):
 
         return self._doneDeferred
 
-class Selector(tcommand.TwistedCommand):
+class Selector(Gtk2Command):
 
     description = """Test the whole selector."""
-
-    def installReactor(self):
-        from dadgtk.twisted import gtk2reactor
-        gtk2reactor.install()
-        tcommand.TwistedCommand.installReactor(self)
 
     def done_cb(self, _):
         self._doneDeferred.callback(None)
@@ -232,7 +229,9 @@ class Test(logcommand.LogCommand):
         from twisted import plugin
         from dad import plugins
 
+
         providers = {}
+
         for provider in plugin.getPlugins(idad.IDatabaseProvider, plugins):
             providers[provider.name] = provider
         return providers
