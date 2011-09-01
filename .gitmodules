@@ -1,0 +1,3 @@
+[submodule "dadcouch/python/dadcouch/extern/paisley.git"]
+	path = dadcouch/python/dadcouch/extern/paisley.git
+	url = git@github.com:thomasvs/paisley.git
