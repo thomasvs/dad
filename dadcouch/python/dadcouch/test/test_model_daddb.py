@@ -136,12 +136,6 @@ class SimpleTestCase(DADDBTestCase):
         self.assertEquals(file.host, host)
         self.assertEquals(file.path, path)
 
-    def test_ItemTracksByArtist(self):
-        i = artist.ItemTracksByArtist(daddb=self.daddb)
-        i.fromDict({
-            'key': (u'Prince', u'Prince', u'abcd', u'abcd-abcd-musicbrainz'),
-            'value': u'dead',
-        })
 
 class MD5TestCase(DADDBTestCase):
     @defer.inlineCallbacks
