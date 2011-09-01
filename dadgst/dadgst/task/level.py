@@ -20,16 +20,13 @@
 # You should have received a copy of the GNU General Public License
 # along with morituri.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import math
 import urllib
-
-import gobject
 
 from dad.audio import level, mixing
 
 from dad.extern.log import log
-from dadgst.extern.task import gstreamer
+from dad.extern.task import gstreamer
 
 class GstLogPipelineTask(log.Loggable, gstreamer.GstPipelineTask):
 

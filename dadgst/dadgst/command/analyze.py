@@ -11,7 +11,7 @@ from dad.base import data
 
 from dadgst.task import level, fingerprint
 
-from dadgst.extern.task import task
+from dad.extern.task import task
 
 CHROMAPRINT_APIKEY = 'pmla1DI5' # for DAD 0.0.0
 

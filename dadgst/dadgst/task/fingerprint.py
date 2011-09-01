@@ -21,7 +21,7 @@
 # along with morituri.  If not, see <http://www.gnu.org/licenses/>.
 
 from dad.extern.log import log
-from dadgst.extern.task import gstreamer
+from dad.extern.task import gstreamer
 
 
 # FIXME: copied from morituri.common.checksum, improve and put back
