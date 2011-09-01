@@ -46,6 +46,7 @@ function emitArtist(name, sortname, mid, mbid, docid) {
         'trackId': docid
     });
 }
+
 function(doc) {
     var seen = {}
 
