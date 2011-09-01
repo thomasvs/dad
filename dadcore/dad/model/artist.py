@@ -65,7 +65,7 @@ class ArtistModel(base.ScorableModel):
 
 
     def __repr__(self):
-        return '<Artist %r>' % (self.getName(), )
+        return '<ArtistModel %r>' % (self.getName(), )
 
 class ArtistSelectorModel(base.Model, log.Loggable):
     """

@@ -83,7 +83,7 @@ class TrackModel(base.Model):
         raise NotImplementedError
 
     def __repr__(self):
-        return '<Track %r for %r - %r>' % (self.id, 
+        return '<TrackModel %r for %r - %r>' % (self.id,
             " & ".join(self.getArtists() or []),
             self.getName())
 
