@@ -12,7 +12,8 @@ from dad.task import md5task
 
 from dad.extern.task import task
 
-from dadcouch.model import daddb, couch
+from dadcouch.database import couch
+from dadcouch.database import couch, mappings
 
 
 class CouchDBCommand(logcommand.LogCommand):
@@ -26,7 +27,7 @@ class CouchDBCommand(logcommand.LogCommand):
         from twisted.internet import reactor
         from dadcouch.extern.paisley import client
         self.db = client.CouchDB(self.options.host, int(self.options.port))
-        self.daddb = daddb.DADDB(self.db, self.options.database)
+        self.daddb = couch.DADDB(self.db, self.options.database)
 
         def later():
             d = self.doLater(args)
@@ -100,7 +101,7 @@ class Add(CouchDBCommand):
 
 
 
-            track = couch.Track()
+            track = mappings.Track()
             track.addFragment(host=self.hostname(), path=path,
                 md5sum=t.md5sum)
 
