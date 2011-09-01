@@ -1,5 +1,13 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* couchdb/views/view-tracks-by-artist/map.js:
+	* python/dadcouch/database/couch.py:
+	* python/dadcouch/model/artist.py:
+	* python/dadcouch/test/test_model_daddb.py:
+	  Add mbid.  Add it to view too.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* python/dadcouch/model/base.py (added):
 	* python/dadcouch/model/album.py (added):
 	* python/dadcouch/model/track.py (added):

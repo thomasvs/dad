@@ -12,7 +12,6 @@ from dad.test import test_database_memory
 
 from dad.plugins import pdadcouch
 
-from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley.test import test_util
 
 from dadcouch.model import daddb, couch
@@ -140,7 +139,7 @@ class SimpleTestCase(DADDBTestCase):
     def test_ItemTracksByArtist(self):
         i = artist.ItemTracksByArtist(daddb=self.daddb)
         i.fromDict({
-            'key': (u'Prince', u'Prince', u'abcd'),
+            'key': (u'Prince', u'Prince', u'abcd', u'abcd-abcd-musicbrainz'),
             'value': u'dead',
         })
 

@@ -74,6 +74,9 @@ class ArtistModel(base.ScorableModel):
     def getSortName(self):
         return self.artist.sortname
 
+    def getMbId(self):
+        return self.artist.mbid
+
     def getMid(self):
         i = self.getId()
         if i:
@@ -108,12 +111,15 @@ class ArtistModel(base.ScorableModel):
                 key=artistId, include_docs=True)
             artists = list(ret)
             if not artists:
+                self.debug('aid %r can not be viewed, creating temp', artistId)
                 # create an empty one
                 # raise IndexError(artistId)
                 artist = mappings.Artist()
-                self.debug('Creating temporary model %r', artist)
                 artist.name = self.getName()
                 artist.sortname = self.sortname
+                artist.mbid = self.getMbId()
+                self.debug('Creating temporary model from self %r to %r',
+                    self, artist)
                 # FIXME: based on aid, fill in mbid or name ?
                 artists = [artist, ]
             else:
@@ -139,13 +145,14 @@ class ItemTracksByArtist(ArtistModel):
 
     tracks = 0 # int
     id = None
+    mbid = None
     trackId = None
 
     _daddb = None
 
     # map tracks-by-artist
     def fromDict(self, d):
-        self.name, self.sortname, self.id = d['key']
+        self.name, self.sortname, self.id, self.mbid = d['key']
 
         self.trackId = d['value']
 
@@ -154,6 +161,10 @@ class ItemTracksByArtist(ArtistModel):
 
     def getName(self):
         return self.name
+
+    def getMbId(self):
+        return self.mbid
+
 
     def getSortName(self):
         return self.sortname

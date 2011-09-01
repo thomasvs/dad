@@ -6,7 +6,7 @@ function(doc) {
         if (doc.artists && doc.artists.length > 0) {
             doc.artists.forEach(
                 function(artist) {
-                    emit([artist.name, artist.sortname, artist.id], doc._id);
+                    emit([artist.name, artist.sortname, artist.id, artist.mbid], doc._id);
                     seen[artist.name] = 1;
                 }
             )
@@ -23,8 +23,9 @@ function(doc) {
                                         if (file.metadata.mb_artist_id) {
                                             aid = 'artist:mbid:' + file.metadata.mb_artist_id;
                                         }
-                                        emit([file.metadata.artist, file.metadata.artist, aid],
+                                        emit([file.metadata.artist, file.metadata.artist, aid, file.metadata.mb_artist_id],
                                           doc._id);
+
                                         seen[file.metadata.artist] = 1;
                                     }
                                 }

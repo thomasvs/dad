@@ -3,10 +3,8 @@
 
 import os
 import sys
-import time
 
 from twisted.internet import defer
-from twisted.python import failure
 
 from zope import interface
 
@@ -14,9 +12,8 @@ from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley import views
 
 from dad import idad
-from dad.base import base, data
+from dad.base import data
 from dad.common import log
-from dad.model import artist
 
 from dadcouch.common import manydef
 from dadcouch.model import couch
