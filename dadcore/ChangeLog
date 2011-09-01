@@ -1,5 +1,11 @@
 2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* dad/memorydb/model/artist.py:
+	* dad/memorydb/memory.py:
+	  Add missing methods.
+
+2011-08-31  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* dad/memorydb (added):
 	* dad/memorydb/memory.py (added):
 	* dad/memorydb/model (added):

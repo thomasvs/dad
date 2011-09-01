@@ -51,6 +51,9 @@ class MemoryDB(log.Loggable):
             except (EOFError, IOError):
                 # probably empty or nonexistent
                 pass
+            self.debug('Loaded pickle')
+            self.debug('%d tracks', len(self._tracks))
+            self.debug('%d artists', len(self._artists))
 
     # private methods
     def _save(self):

@@ -14,6 +14,7 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
     """
     id = None
     name = None
+    mbid = None
 
     tracks = 0
 
@@ -31,6 +32,18 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
 
     def getTrackCount(self):
         return self.tracks
+
+    def getMid(self):
+        if self.id:
+            return self.id
+
+        if self.mbid:
+            return 'artist:mbid:' + self.mbid
+
+        if self.name:
+            return 'artist:name:' + self.name
+
+
 
 
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, base.MemoryModel):
