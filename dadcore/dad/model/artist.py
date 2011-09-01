@@ -1,10 +1,12 @@
 # -*- Mode: Python; test_case_name: dad.test.test_model_artist -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+from twisted.internet import defer
+
 from dad.base import base
 from dad.common import log
 
-class ArtistModel(base.Model):
+class ArtistModel(base.ScorableModel):
 
     """
     I am a model for an artist.
@@ -15,7 +17,7 @@ class ArtistModel(base.Model):
         """
         Return the name of the artist, suitable for display.
 
-        @rtype: C{unicode}
+        @rtype: L{twisted.internet.defer.Deferred} firing C{unicode}
         """
         raise NotImplementedError
 
@@ -23,7 +25,15 @@ class ArtistModel(base.Model):
         """
         Return the name of the artist, suitable for sorting.
 
-        @rtype: C{unicode}
+        @rtype: L{twisted.internet.defer.Deferred} firing C{unicode}
+        """
+        raise NotImplementedError
+
+    def getMbId(self):
+        """
+        Return the MusicBrainz id of the artist.
+
+        @rtype: L{twisted.internet.defer.Deferred} firing C{unicode}
         """
         raise NotImplementedError
 
@@ -31,7 +41,28 @@ class ArtistModel(base.Model):
     def getTrackCount(self):
         """
         Return the number of tracks in the database by this artist.
+
+        @rtype: L{twisted.internet.defer.Deferred} firing C{int}
         """
+
+    @defer.inlineCallbacks
+    def getMid(self):
+        i = yield self.getId()
+        if i:
+            defer.returnValue(i)
+            return
+
+        mbid = yield self.getMbId()
+        if mbid:
+            defer.returnValue('artist:mbid:' + mbid)
+            return
+
+        name = yield self.getName()
+        if name:
+            defer.returnValue('artist:name:' + name)
+
+        raise KeyError
+
 
     def __repr__(self):
         return '<Artist %r>' % (self.getName(), )

@@ -18,32 +18,21 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
 
     tracks = 0
 
-    def getId(self):
-        if self.id:
-            return self.id
-
-        return self.name
-
+    ### model implementations
     def getName(self):
-        return self.name
+        return defer.succeed(self.name)
 
     def getSortName(self):
-        return self.name
+        return defer.succeed(self.name)
+
+    def getId(self):
+        return self.id
+
+    def getMbId(self):
+        return defer.succeed(self.mbid)
 
     def getTrackCount(self):
-        return self.tracks
-
-    def getMid(self):
-        if self.id:
-            return self.id
-
-        if self.mbid:
-            return 'artist:mbid:' + self.mbid
-
-        if self.name:
-            return 'artist:name:' + self.name
-
-
+        return defer.succeed(self.tracks)
 
 
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, base.MemoryModel):

@@ -24,6 +24,34 @@ class Model:
     controller = None
 
 
+class ScorableModel(Model):
+    """
+    I am a base class for models that can be given scores.
+    """
+
+    subjectType = 'none'
+
+    def getCategories(self):
+        """
+        @returns: deferred firing generator of category names.
+        """
+        raise NotImplementedError
+
+    def getScores(self, userName=None):
+        """
+        Get a subject's scores.
+
+        @rtype: deferred firing generator of user, category, score
+        """
+        raise NotImplementedError
+
+    def score(self, subject, userName, categoryName, score):
+        """
+        Score a subject.
+        """
+        raise NotImplementedError
+
+
 class View(log.Loggable):
     """
     I am a base class for views.

@@ -120,11 +120,14 @@ class DBTest:
         # check the artist selector model
         artists = yield asModel.get()
         self.assertEquals(len(artists), 1)
-        self.assertEquals(artists[0].getName(), u'The Afghan Whigs')
-        self.assertEquals(artists[0].getSortName(), u'The Afghan Whigs')
+        name = yield artists[0].getName()
+        self.assertEquals(name, u'The Afghan Whigs')
+        sortname = yield artists[0].getSortName()
+        self.assertEquals(sortname, u'The Afghan Whigs')
         # FIXME: id depends on database implementation
         # self.assertEquals(artists[0].getId(), u'artist:name:The Afghan Whigs')
-        self.assertEquals(artists[0].getTrackCount(), 1)
+        count = yield artists[0].getTrackCount()
+        self.assertEquals(count, 1)
 
         # add another track
         t = self.testdb.new()
@@ -140,8 +143,10 @@ class DBTest:
         # check the artist selector model
         artists = yield asModel.get()
         self.assertEquals(len(artists), 1)
-        self.assertEquals(artists[0].getName(), u'The Afghan Whigs')
-        self.assertEquals(artists[0].getTrackCount(), 2)
+        name = yield artists[0].getName()
+        self.assertEquals(name, u'The Afghan Whigs')
+        count = yield artists[0].getTrackCount()
+        self.assertEquals(count, 2)
 
     @defer.inlineCallbacks
     def testArtistController(self):

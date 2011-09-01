@@ -69,6 +69,7 @@ class ArtistSelectorController(SelectorController):
 
     logCategory = 'artistSC'
 
+    @defer.inlineCallbacks
     def addItem(self, item):
         """
         @type  item: subclass of L{dad.model.artist.ArtistModel}
@@ -79,17 +80,20 @@ class ArtistSelectorController(SelectorController):
         if item.getTrackCount() == 0:
             return
 
-        self.doViews('add_row', item,
-            item.getName(),
-            item.getSortName(), item.getTrackCount())
+        mid = yield item.getMid()
+        name = yield item.getName()
+        sortname = yield item.getSortName()
+        count = yield item.getTrackCount()
+        self.doViews('add_row', item, mid, name, sortname, count)
 
 class AlbumSelectorController(SelectorController):
 
     logCategory = 'albumSC'
 
+    # FIXME: need an mid
     def addItem(self, item):
         # add an album and the count of tracks on it
-        self.doViews('add_row', item, item.name,
+        self.doViews('add_row', item, None, item.name,
             item.sortname, item.tracks)
 
 class TrackSelectorController(SelectorController):

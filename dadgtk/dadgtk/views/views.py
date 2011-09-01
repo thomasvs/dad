@@ -239,13 +239,13 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             COLUMN_SORT, None)
 
     ### base.SelectorView implementations
-    def add_row(self, model, display, sort, tracks):
+    def add_row(self, model, mid, display, sort, tracks):
         assert model, 'artist model %r is empty' % model
         self.log('add_row: id %r, display %r', model, display)
 
         iter = self._store.append()
         self._store.set(iter,
-            COLUMN_MID, model.getMid(),
+            COLUMN_MID, mid,
             COLUMN_MODEL, model,
             COLUMN_DISPLAY, "%s (%d)" % (display, tracks),
             COLUMN_SORT, sort,

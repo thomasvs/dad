@@ -14,49 +14,7 @@ from dadcouch.model import base
 from dadcouch.database import mappings
 from dadcouch.extern.paisley import views
 
-
-class ArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
-    def get(self):
-        """
-        @returns: a deferred firing a list of L{daddb.ItemTracksByArtist}
-                  objects representing only artists and their track count.
-        """
-        start = time.time()
-        self.debug('get')
-        v = views.View(self._daddb.db, self._daddb.dbName,
-            'dad', 'view-tracks-by-artist',
-            self._daddb.modelFactory(ItemTracksByArtist))
-        try:
-            d = v.queryView()
-        except Exception, e:
-            self.warning('get: exception: %r', log.getExceptionMessage(e))
-            return defer.fail(e)
-
-        def cb(itemTracks):
-            # convert list of ordered itemTracks
-            # into a list of ItemTracks with track counts
-            artists = {} # artist sortname -> name, id, count
-
-            for item in itemTracks:
-                if item.sortname not in artists:
-                    artists[item.sortname] = item
-                artists[item.sortname].tracks += 1
-
-            ret = artists.values()
-
-            self.debug('get: got %d artists in %.3f seconds',
-                len(ret), time.time() - start)
-            return ret
-        d.addCallback(cb)
-
-        def eb(failure):
-            print 'THOMAS: Failure:', failure
-            return failure
-        d.addErrback(eb)
-
-        return d
-
-class ArtistModel(base.ScorableModel):
+class ArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     I represent an artist in a CouchDB database.
     """
@@ -64,30 +22,25 @@ class ArtistModel(base.ScorableModel):
 
     artist = None
 
-    def getId(self):
-        return self.artist.id
-
-
+    ### artist.ArtistModel implementations
     def getName(self):
         return self.artist.name
 
     def getSortName(self):
         return self.artist.sortname
 
+    def getId(self):
+        return self.artist.id
+
     def getMbId(self):
         return self.artist.mbid
 
-    def getMid(self):
-        i = self.getId()
-        if i:
-            return i
+    ### FIXME: to be implemented
+    def getTrackCount(self):
+        return 424242
 
-        name = self.getName()
-        if name:
-            return u'artist:name:%s' % name
 
-        raise KeyError
-
+    ### FIXME: to be added to iface ?
 
     @defer.inlineCallbacks
     def get(self, artistId):
@@ -156,41 +109,64 @@ class ItemTracksByArtist(ArtistModel):
 
         self.trackId = d['value']
 
-    def getId(self):
-        return self.id
+    ### artist.ArtistModel implementations
 
     def getName(self):
         return self.name
 
-    def getMbId(self):
-        return self.mbid
-
-
     def getSortName(self):
         return self.sortname
+
+    def getId(self):
+        return self.id
+
+    def getMbId(self):
+        return self.mbid
 
     def getTrackCount(self):
         return self.tracks
     
-    @defer.inlineCallbacks
-    def noget(self, id, create=False):
-        from twisted.web import error
-        # if the artist exists, return the real model, otherwise it's us!
-        print 'THOMAS: ITBA get: daddb', self._daddb
-        try:
-            artist = yield self._daddb.map(id, mappings.Artist)
-        # FIXME: trap 404
-        except error.Error:
-            if not create:
-                artist = self
-            else:
-                artist = mappings.Artist()
-                artist.name = self.name
-                artist.sortname = self.sortname
-                artist = yield self._daddb.save(artist)
-
-        defer.returnValue(artist)
-
-
     def __repr__(self):
         return '<ItemTracksByArtist %r>' % self.name
+
+
+class ArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
+    def get(self):
+        """
+        @returns: a deferred firing a list of L{daddb.ItemTracksByArtist}
+                  objects representing only artists and their track count.
+        """
+        start = time.time()
+        self.debug('get')
+        v = views.View(self._daddb.db, self._daddb.dbName,
+            'dad', 'view-tracks-by-artist',
+            self._daddb.modelFactory(ItemTracksByArtist))
+        try:
+            d = v.queryView()
+        except Exception, e:
+            self.warning('get: exception: %r', log.getExceptionMessage(e))
+            return defer.fail(e)
+
+        def cb(itemTracks):
+            # convert list of ordered itemTracks
+            # into a list of ItemTracks with track counts
+            artists = {} # artist sortname -> name, id, count
+
+            for item in itemTracks:
+                if item.sortname not in artists:
+                    artists[item.sortname] = item
+                artists[item.sortname].tracks += 1
+
+            ret = artists.values()
+
+            self.debug('get: got %d artists in %.3f seconds',
+                len(ret), time.time() - start)
+            return ret
+        d.addCallback(cb)
+
+        def eb(failure):
+            print 'THOMAS: Failure:', failure
+            return failure
+        d.addErrback(eb)
+
+        return d
