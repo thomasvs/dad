@@ -102,7 +102,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
     # for tracks and albums
     @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
-        subject = yield base.ScorableModel.score(
+        subject = yield base.ScorableModel.score(self,
             subject, userName, categoryName, score)
 
         # now get all tracks for this artist
