@@ -53,8 +53,10 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
 
         self.debug('getting mid %r', mid)
         try:
+            # FIXME: fix subject vs artist
             self.subject = yield self._daddb.db.map(
                 self._daddb.dbName, mid, mappings.Artist)
+            self.artist = self.subject
         except error.Error, e:
             # FIXME: trap error.Error with 404
             self.debug('aid %r does not exist as doc, viewing', mid)
@@ -80,7 +82,10 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
 
             # FIXME: multiple matches, find best one ? maybe mbid first ?
             self.subject = ArtistModel(self._daddb)
+            self.artist = self.subject
             self.subject.artist = artists[0]
+            defer.returnValue(self.subject)
+            return
             
         except Exception, e:
                 self.warningFailure(failure.Failure(e))
@@ -91,7 +96,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
                 #return
 
         self.debug('found subject %r', self.subject)
-        defer.returnValue(self.subject)
+        defer.returnValue(self)
 
     # In addition to scoring the artist, we want to update calculated scores
     # for tracks and albums

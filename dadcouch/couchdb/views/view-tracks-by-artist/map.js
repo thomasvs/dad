@@ -37,10 +37,11 @@ function getMetadataArtistMid(metadata) {
     return mid;
 }
 
-function emitArtist(name, sortname, mid, mbid, docid) {
+function emitArtist(name, sortname, id, mid, mbid, docid) {
     emit(mid, {
         'name': name,
         'sortname': sortname,
+        'id': id,
         'mid': mid,
         'mbid': mbid,
         'trackId': docid
@@ -54,7 +55,7 @@ function(doc) {
         if (doc.artists && doc.artists.length > 0) {
             doc.artists.forEach(
                 function(artist) {
-                    emitArtist(artist.name, artist.sortname, getArtistMid(artist), artist.mbid, doc._id);
+                    emitArtist(artist.name, artist.sortname, artist.id, getArtistMid(artist), artist.mbid, doc._id);
                     seen[artist.name] = 1;
                 }
             )
@@ -70,7 +71,7 @@ function(doc) {
                                         // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
                                         aid = getMetadataArtistMid(file.metadata);
                                         if (aid) {
-                                            emitArtist(file.metadata.artist, file.metadata.artist, aid, file.metadata.mb_artist_id, doc._id);
+                                            emitArtist(file.metadata.artist, file.metadata.artist, null, aid, file.metadata.mb_artist_id, doc._id);
 
                                             seen[file.metadata.artist] = 1;
                                         }
