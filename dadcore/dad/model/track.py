@@ -32,6 +32,7 @@ class TrackModel(base.Model):
     # FIXME: scores ?
 
     id = None
+    fragments = None
 
     def __init__(self):
         self.fragments = []
@@ -54,6 +55,7 @@ class TrackModel(base.Model):
         """
         raise NotImplementedError
     
+
     def getName(self):
         """
         Return the name of the track, suitable for display.
