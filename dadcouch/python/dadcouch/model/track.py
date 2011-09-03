@@ -30,6 +30,9 @@ class TrackModel(base.ScorableModel, track.TrackModel):
     def getId(self):
         return self.track.getId()
 
+    def getMid(self):
+        return self.getId()
+
 
     def getArtists(self):
         return self.track.getArtists()
