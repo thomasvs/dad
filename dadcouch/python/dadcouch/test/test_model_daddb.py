@@ -8,15 +8,14 @@ from twisted.internet import defer
 
 from dad.logic import database
 
-from dad.test import test_database_memory
-
 from dad.plugins import pdadcouch
 
 from dadcouch.extern.paisley.test import test_util
 
 from dadcouch.model import daddb, couch
-from dadcouch.model import track as mtrack, artist
+from dadcouch.model import track as mtrack
 
+from dad.test import test_database
 
 class DADDBTestCase(test_util.CouchDBTestCase):
 
@@ -45,7 +44,7 @@ class DADDBTestCase(test_util.CouchDBTestCase):
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
 
-class DADDBTest(test_database_memory.DBTest, DADDBTestCase):
+class DADDBTest(test_database.DBTest, DADDBTestCase):
 
     @defer.inlineCallbacks
     def setUp(self):
