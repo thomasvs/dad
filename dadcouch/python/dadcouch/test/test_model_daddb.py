@@ -44,7 +44,10 @@ class DADDBTestCase(test_util.CouchDBTestCase):
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
 
-class DADDBTest(test_database.DBTest, DADDBTestCase):
+class CouchDatabaseTestCase(test_database.BaseTestCase, DADDBTestCase):
+    """
+    I am a base class for tests defined in test_database.
+    """
 
     @defer.inlineCallbacks
     def setUp(self):
@@ -302,3 +305,17 @@ class TrackModelTestCase:#(DADDBTestCase):
 
         retrieved = yield model.get(stored['id'])
         self.assertEquals(retrieved.name, 'hit me')
+
+# FIXME: find a way to find all tests dynamically and subclass
+
+class CouchTrackModelTest(test_database.TrackModelTest, CouchDatabaseTestCase):
+    pass
+class CouchTrackSelectorModelTest(test_database.TrackSelectorModelTest,
+    CouchDatabaseTestCase):
+    pass
+class CouchArtistSelectorModelTest(test_database.ArtistSelectorModelTest,
+    CouchDatabaseTestCase):
+    pass
+class CouchDatabaseTest(test_database.DatabaseTestCase,
+    CouchDatabaseTestCase):
+    pass

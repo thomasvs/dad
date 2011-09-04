@@ -14,13 +14,20 @@ from dad.database import memory
 from dad.test import test_database
 
 
-class MemoryDBTest(test_database.DBTest, unittest.TestCase):
+class MemoryDBTestCase(test_database.BaseTestCase):
+    """
+    I am a base class for test_database tests using the memory database.
+    """
 
     def setUp(self):
         self.testdb = memory.MemoryDB()
         self.provider = pdad.CoreDatabaseProvider()
 
-class MemoryDBPickleDatabaseTest(test_database.DBTest, unittest.TestCase):
+class MemoryDBPickleTestCase(test_database.BaseTestCase):
+    """
+    I am a base class for test_database tests using the memory database
+    with pickle storage.
+    """
 
     def setUp(self):
         self._fd, self._path = tempfile.mkstemp(suffix=u'.dad.test.memorydb')
@@ -32,7 +39,22 @@ class MemoryDBPickleDatabaseTest(test_database.DBTest, unittest.TestCase):
     def tearDown(self):
         os.unlink(self._path)
 
-class MemoryDBPickleTest(MemoryDBPickleDatabaseTest):
+# subclass all test_database tests
+
+class MemoryTrackModelTestCase(test_database.TrackModelTest, MemoryDBTestCase):
+    pass
+class MemoryTrackSelectorModelTestCase(test_database.TrackSelectorModelTest,
+    MemoryDBTestCase):
+    pass
+class MemoryArtistSelectorModelTestCase(test_database.ArtistSelectorModelTest,
+    MemoryDBTestCase):
+    pass
+class MemoryDatabaseTestCase(test_database.DatabaseTestCase,
+    MemoryDBTestCase):
+    pass
+
+# additional tests
+class MemoryDatabasePickleTestCase(MemoryDBPickleTestCase):
 
     @defer.inlineCallbacks
     def testScorePersists(self):

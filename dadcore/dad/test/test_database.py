@@ -1,6 +1,7 @@
-# -*- Mode: Python; test-case-name: dad.test.test_database_memory -*-
+# -*- Mode: Python -*- #
 # vi:si:et:sw=4:sts=4:ts=4
 
+import unittest
 
 from twisted.internet import defer
 
@@ -10,18 +11,35 @@ from dad.logic import database
 Base class for tests for database implementations.
 """
 
-class DBTest:
+class BaseTestCase(unittest.TestCase):
     """
     Subclass me to have database-specific tests run against the generic
     tests.
 
-    The subclass is responsible for settings testdb.
+    The subclass is responsible for setting the testdb instance variable.
 
     @ivar testdb:   the database being tested
     @type testdb:   an implementer of L{idad.IDatabase}
     @ivar provider: the database provider
     @type provider: an implementor of L{idad.IDatabaseProvider}
     """
+
+    @defer.inlineCallbacks
+    def addFirstTrack(self):
+        # add a first track
+        t = self.testdb.new()
+        yield self.testdb.save(t)
+
+        info = database.FileInfo('localhost', '/tmp/first.flac')
+        metadata = database.TrackMetadata()
+        metadata.title = u'Milez iz Ded'
+        metadata.artist = u'The Afghan Whigs'
+
+        t.addFragment(info, metadata=metadata)
+        ret = yield self.testdb.save(t)
+        defer.returnValue(ret)
+
+class TrackModelTest(BaseTestCase):
 
     @defer.inlineCallbacks
     def testNewSave(self):
@@ -77,27 +95,15 @@ class DBTest:
         # make sure we get the metadata track name back
         self.assertEquals(t.getName(), u'hit me')
 
-    @defer.inlineCallbacks
-    def _addFirstTrack(self):
-        # add a first track
-        t = self.testdb.new()
-        yield self.testdb.save(t)
 
-        info = database.FileInfo('localhost', '/tmp/first.flac')
-        metadata = database.TrackMetadata()
-        metadata.title = u'Milez iz Ded'
-        metadata.artist = u'The Afghan Whigs'
+class TrackSelectorModelTest(BaseTestCase):
 
-        t.addFragment(info, metadata=metadata)
-        ret = yield self.testdb.save(t)
-        defer.returnValue(ret)
- 
     @defer.inlineCallbacks
     def testTrackSelectorModel(self):
         appModel = self.provider.getAppModel(self.testdb)
         tsModel = appModel.getModel('TrackSelector')
 
-        yield self._addFirstTrack()
+        yield self.addFirstTrack()
 
         # check the artist selector model
         tracks = yield tsModel.get()
@@ -107,12 +113,14 @@ class DBTest:
         self.assertEquals(tracks[0].getArtistMids(),
             [u'artist:name:The Afghan Whigs', ])
 
+class ArtistSelectorModelTest(BaseTestCase):
+
     @defer.inlineCallbacks
     def testArtistSelectorModel(self):
         appModel = self.provider.getAppModel(self.testdb)
         asModel = appModel.getModel('ArtistSelector')
 
-        t = yield self._addFirstTrack()
+        t = yield self.addFirstTrack()
 
         # check the artist selector model
         artists = yield asModel.get()
@@ -150,10 +158,12 @@ class DBTest:
         appModel = self.provider.getAppModel(self.testdb)
         aModel = appModel.getModel('Artist')
 
-        t = yield self._addFirstTrack()
+        t = yield self.addFirstTrack()
 
         yield aModel.get(t.id)
         
+
+class DatabaseTestCase(BaseTestCase):
  
     @defer.inlineCallbacks
     def testGetTracks(self):
