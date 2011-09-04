@@ -8,6 +8,26 @@ from dadcouch.extern.paisley import views
 from dadcouch.database import mappings, couch
 from dadcouch.model import base
 
+class AlbumModel(base.ScorableModel):
+    """
+    I represent an album in a CouchDB database.
+    """
+    subjectType = 'album'
+
+    album = None
+
+    def get(self, albumId):
+        """
+        Get an artist by id.
+
+        @returns: a deferred firing a L{mappings.Artist} object.
+        """
+        d = self._daddb.db.map(self._daddb.dbName, albumId, mappings.Album)
+
+        d.addCallback(lambda album: setattr(self, 'album', album))
+        d.addCallback(lambda _, s: s.album, self)
+        return d
+
 # FIXME: convert to inline deferreds
 class AlbumSelectorModel(base.CouchDBModel):
 
@@ -67,22 +87,4 @@ class AlbumSelectorModel(base.CouchDBModel):
 
         return ret.keys()
 
-class AlbumModel(base.ScorableModel):
-    """
-    I represent an album in a CouchDB database.
-    """
-    subjectType = 'album'
 
-    album = None
-
-    def get(self, albumId):
-        """
-        Get an artist by id.
-
-        @returns: a deferred firing a L{mappings.Artist} object.
-        """
-        d = self._daddb.db.map(self._daddb.dbName, albumId, mappings.Album)
-
-        d.addCallback(lambda album: setattr(self, 'album', album))
-        d.addCallback(lambda _, s: s.album, self)
-        return d
