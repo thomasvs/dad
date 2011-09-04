@@ -11,7 +11,7 @@ from dad.logic import database
 Base class for tests for database implementations.
 """
 
-class BaseTestCase(unittest.TestCase):
+class BaseTestCase:
     """
     Subclass me to have database-specific tests run against the generic
     tests.

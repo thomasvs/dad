@@ -14,7 +14,7 @@ from dad.database import memory
 from dad.test import test_database
 
 
-class MemoryDBTestCase(test_database.BaseTestCase):
+class MemoryDBTestCase(test_database.BaseTestCase, unittest.TestCase):
     """
     I am a base class for test_database tests using the memory database.
     """
