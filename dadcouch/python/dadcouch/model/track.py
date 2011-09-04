@@ -11,7 +11,7 @@ from dadcouch.model import base
 from dadcouch.database import mappings, couch
 
 
-class TrackModel(base.ScorableModel, track.TrackModel):
+class CouchTrackModel(base.ScorableModel, track.TrackModel):
     """
     I represent a track in a CouchDB database.
 
@@ -22,6 +22,7 @@ class TrackModel(base.ScorableModel, track.TrackModel):
 
     track = None
 
+    # base class implementations
 
     # FIXME: instead of forwarding, do them directly ? In subclass of Track ?
     def getName(self):
@@ -45,7 +46,7 @@ class TrackModel(base.ScorableModel, track.TrackModel):
         """
         Get a track by id and resolve its artists.
 
-        @returns: a deferred firing a L{TrackModel} object.
+        @returns: a deferred firing a L{CouchTrackModel} object.
         """
         d = self._daddb.db.map(self._daddb.dbName, trackId, mappings.Track)
         #d.addCallback(lambda track:
@@ -57,12 +58,12 @@ class TrackModel(base.ScorableModel, track.TrackModel):
         return d
 
 
-class TrackSelectorModel(base.CouchDBModel):
+class CouchTrackSelectorModel(base.CouchDBModel):
     # FIXME: this should actually be able to pass results in as they arrive,
     # instead of everything at the end
     def get(self, cb=None, *cbArgs, **cbKWArgs):
         """
-        @returns: a deferred firing a list of L{TrackModel} objects.
+        @returns: a deferred firing a list of L{CouchTrackModel} objects.
         """
         d = defer.Deferred()
 
@@ -98,7 +99,7 @@ class TrackSelectorModel(base.CouchDBModel):
                     'artists': trackRow.artists
                 }
                 track.fromDict(d)
-                tm = TrackModel(self._daddb)
+                tm = CouchTrackModel(self._daddb)
                 tm.track = track
                 ret.append(tm)
 

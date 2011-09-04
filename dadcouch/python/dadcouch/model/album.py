@@ -8,7 +8,7 @@ from dadcouch.extern.paisley import views
 from dadcouch.database import mappings, couch
 from dadcouch.model import base
 
-class AlbumModel(base.ScorableModel):
+class CouchAlbumModel(base.ScorableModel):
     """
     I represent an album in a CouchDB database.
     """
@@ -20,7 +20,7 @@ class AlbumModel(base.ScorableModel):
         """
         Get an artist by id.
 
-        @returns: a deferred firing a L{mappings.Artist} object.
+        @returns: a deferred firing a L{mappings.Album} object.
         """
         d = self._daddb.db.map(self._daddb.dbName, albumId, mappings.Album)
 
@@ -29,7 +29,7 @@ class AlbumModel(base.ScorableModel):
         return d
 
 # FIXME: convert to inline deferreds
-class AlbumSelectorModel(base.CouchDBModel):
+class CouchAlbumSelectorModel(base.CouchDBModel):
 
     artistAlbums = None # artist id -> album ids
 

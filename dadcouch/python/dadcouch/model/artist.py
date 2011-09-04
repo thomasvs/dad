@@ -14,7 +14,7 @@ from dadcouch.model import base
 from dadcouch.database import mappings
 from dadcouch.extern.paisley import views
 
-class ArtistModel(base.ScorableModel, artist.ArtistModel):
+class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     I represent an artist in a CouchDB database.
     """
@@ -47,7 +47,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
         """
         Get an artist by mid.
 
-        @returns: a deferred firing a L{ArtistModel} object.
+        @returns: a deferred firing a L{CouchArtistModel} object.
         """
         from twisted.web import error
 
@@ -81,7 +81,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
                 self.debug('Found artists: %r', artists)
 
             # FIXME: multiple matches, find best one ? maybe mbid first ?
-            self.subject = ArtistModel(self._daddb)
+            self.subject = CouchArtistModel(self._daddb)
             self.artist = self.subject
             self.subject.artist = artists[0]
             defer.returnValue(self.subject)
@@ -112,7 +112,7 @@ class ArtistModel(base.ScorableModel, artist.ArtistModel):
         defer.returnValue(subject)
 
 # FIXME: rename
-class ItemTracksByArtist(ArtistModel):
+class ItemTracksByArtist(CouchArtistModel):
 
     tracks = 0 # int
     id = None
@@ -147,7 +147,7 @@ class ItemTracksByArtist(ArtistModel):
         return '<ItemTracksByArtist %r>' % self.name
 
 
-class ArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
+class CouchArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
     def get(self):
         """
         @returns: a deferred firing a list of L{daddb.ItemTracksByArtist}
