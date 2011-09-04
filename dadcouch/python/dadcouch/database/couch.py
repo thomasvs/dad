@@ -16,7 +16,7 @@ from dad.base import data
 from dad.common import log
 
 from dadcouch.common import manydef
-from dadcouch.model import couch
+from dadcouch.database import mappings
 
 # value to use for ENDKEY when looking up strings
 # FIXME: something better; with unicode ?
@@ -85,7 +85,7 @@ class ViewScoresHostRow:
         self.name = d['key']
         self.user, self.category, self.score = d['key']
         self.hosts = d['value']
-        self.track = couch.Track()
+        self.track = mappings.Track()
         self.track.fromDict(d['doc'])
 
     def __repr__(self):
@@ -264,7 +264,7 @@ class DADDB(log.Loggable):
 
     ## idad.IDatabase interface
     def new(self):
-        return couch.Track()
+        return mappings.Track()
 
     @defer.inlineCallbacks
     def save(self, item):
@@ -276,13 +276,13 @@ class DADDB(log.Loggable):
 
     @defer.inlineCallbacks
     def getTracks(self):
-        ret = yield self.viewDocs('view-tracks-title', couch.Track,
+        ret = yield self.viewDocs('view-tracks-title', mappings.Track,
             include_docs=True)
 
         defer.returnValue(list(ret))
 
     def addCategory(self, name):
-        cat = couch.Category(name=name)
+        cat = mappings.Category(name=name)
         return self.save(cat)
 
     @defer.inlineCallbacks
@@ -334,7 +334,7 @@ class DADDB(log.Loggable):
         @type  path: unicode
 
         ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
         assert type(host) is unicode, \
             'host is type %r, not unicode' % type(host)
@@ -343,7 +343,7 @@ class DADDB(log.Loggable):
 
         self.debug('get track for host %r and path %r', host, path)
 
-        ret = yield self.viewDocs('view-host-path', couch.Track,
+        ret = yield self.viewDocs('view-host-path', mappings.Track,
             include_docs=True, key=[host, path])
 
         defer.returnValue(ret)
@@ -359,11 +359,11 @@ class DADDB(log.Loggable):
         fragments.
 
         ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
         self.debug('get track for md5sum %r', md5sum)
 
-        ret = yield self.viewDocs('view-md5sum', couch.Track,
+        ret = yield self.viewDocs('view-md5sum', mappings.Track,
             include_docs=True, key=md5sum)
 
         defer.returnValue(ret)
@@ -377,11 +377,11 @@ class DADDB(log.Loggable):
         fragments.
 
         ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
         self.debug('get track for mb track id %r', mbTrackId)
 
-        ret = yield self.viewDocs('view-mbtrackid', couch.Track,
+        ret = yield self.viewDocs('view-mbtrackid', mappings.Track,
             include_docs=True, key=mbTrackId)
 
         defer.returnValue(ret)
@@ -393,7 +393,7 @@ class DADDB(log.Loggable):
         """
         self.debug('get track for track %r', track.id)
 
-        track = yield self.db.map(self.dbName, track.id, couch.Track)
+        track = yield self.db.map(self.dbName, track.id, mappings.Track)
 
         # FIXME: possibly raise if we don't find it ?
         found = False
@@ -417,7 +417,7 @@ class DADDB(log.Loggable):
     def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
         self.debug('get track for track id %r', track.id)
 
-        track = yield self.db.map(self.dbName, track.id, couch.Track)
+        track = yield self.db.map(self.dbName, track.id, mappings.Track)
 
         # FIXME: possibly raise if we don't find it ?
         found = False
@@ -437,7 +437,7 @@ class DADDB(log.Loggable):
 
         stored = yield self.saveDoc(track)
 
-        track = yield self.db.map(self.dbName, stored['id'], couch.Track)
+        track = yield self.db.map(self.dbName, stored['id'], mappings.Track)
         defer.returnValue(track)
 
     @defer.inlineCallbacks
@@ -504,7 +504,7 @@ class DADDB(log.Loggable):
         startkey = [userName, categoryName, above]
         endkey = [userName, categoryName, below]
 
-        gen = yield self.viewDocs('view-scores-host', couch.Track,
+        gen = yield self.viewDocs('view-scores-host', mappings.Track,
             startkey=startkey, endkey=endkey, include_docs=True)
 
         # FIXME: filter on host ?
@@ -547,7 +547,7 @@ class NoWayJose:
         # seed the cache
         # FIXME: doesn't seem faster in practice
         # d.addCallback(lambda _: lookup.load(
-        #    server, dbName, couch.Track, 'tracks'))
+        #    server, dbName, mappings.Track, 'tracks'))
         d.addCallback(lambda _: self.viewDocs(
             'track-score', TrackScore))
 
@@ -570,7 +570,7 @@ class NoWayJose:
                 log.debug('playlist', 'track %r has score %f by user %r',
                     track, score, userId)
                 d.addCallable(self.resolveIds, track,
-                    'artist_ids', 'artists', couch.Artist)
+                    'artist_ids', 'artists', mappings.Artist)
                 d.addCallable(self.getSlices, track)
 
             d.start()
@@ -586,7 +586,7 @@ class NoWayJose:
             for succeeded, result in resultList:
                 if not succeeded:
                     self.warningFailure(result)
-                if isinstance(result, couch.Track):
+                if isinstance(result, mappings.Track):
                     # result from resolveIds
                     continue
 
@@ -705,7 +705,7 @@ class NoWayJose:
 
         @returns: list of tracks and additional info;
                   ordered by track id or randomized on request
-        @rtype: L{defer.Deferred} firing list of (couch.Track, score, userId)
+        @rtype: L{defer.Deferred} firing list of (mappings.Track, score, userId)
         """
         assert type(above) is float, 'above is type %r, not float' % type(above)
 
@@ -802,12 +802,12 @@ class NoWayJose:
 
         @type  categoryName: str
 
-        @rtype: L{defer.Deferred} firing L{couch.Category}
+        @rtype: L{defer.Deferred} firing L{mappings.Category}
         """
-        return self._getSingleByKey('categories', couch.Category, categoryName)
+        return self._getSingleByKey('categories', mappings.Category, categoryName)
 
     def getCategories(self):
-        return self.viewDocs('categories', couch.Category, include_docs=True)
+        return self.viewDocs('categories', mappings.Category, include_docs=True)
 
     def getUser(self, userName):
         """
@@ -815,9 +815,9 @@ class NoWayJose:
 
         @type  userName: str
 
-        @rtype: L{defer.Deferred} firing L{couch.User}
+        @rtype: L{defer.Deferred} firing L{mappings.User}
         """
-        return self._getSingleByKey('users', couch.User, userName)
+        return self._getSingleByKey('users', mappings.User, userName)
 
     @defer.inlineCallbacks
     def getOrAddUser(self, userName):
@@ -825,7 +825,7 @@ class NoWayJose:
             ret = yield self.getUser(userName)
         except KeyError:
             self.debug('User %r does not exist, adding', userName)
-            u = couch.User(name=userName)
+            u = mappings.User(name=userName)
             yield self.db.saveDoc(self.dbName, u._data)
             ret = yield self.getUser(userName)
 
@@ -886,7 +886,7 @@ class NoWayJose:
 
         for trackScore in list(trackScores):
             d.addCallable(self.db.map,
-                self.dbName, trackScore.subjectId, couch.Track)
+                self.dbName, trackScore.subjectId, mappings.Track)
 
         d.start()
 
@@ -906,7 +906,7 @@ class NoWayJose:
         """
         Given a track, get the slices of this track.
         """
-        d = self.viewDocs('slice-lookup', couch.Slice,
+        d = self.viewDocs('slice-lookup', mappings.Slice,
             include_docs=True,
             startkey=[track.id, ""],
             endkey=[track.id, ENDKEY_STRING])
@@ -917,7 +917,7 @@ class NoWayJose:
         """
         Given a slice, get the audio file for this slice.
         """
-        return self.db.map(self.dbName, slice.audiofile_id, couch.AudioFile)
+        return self.db.map(self.dbName, slice.audiofile_id, mappings.AudioFile)
 
 
     def getFilePath(self, file):
@@ -927,7 +927,7 @@ class NoWayJose:
         self.log('getting path for file %r', file)
         # FIXME: file.directory_id seems unicode; does not work for url; handle
         # this in paisley internally ?
-        d = self.db.map(self.dbName, unicode(file.directory_id), couch.Directory)
+        d = self.db.map(self.dbName, unicode(file.directory_id), mappings.Directory)
 
         def eb(failure, file):
             log.warningFailure(failure)
@@ -939,7 +939,7 @@ class NoWayJose:
 
         def cb(obj, parts):
             # Directory has .name, Volume has .path
-            if isinstance(obj, couch.Volume):
+            if isinstance(obj, mappings.Volume):
                 parts.append(obj.path)
                 parts.reverse()
 
@@ -953,9 +953,9 @@ class NoWayJose:
 
             if getattr(obj, 'parent_id', None):
                 d = self.db.map(
-                    self.dbName, unicode(obj.parent_id), couch.Directory)
+                    self.dbName, unicode(obj.parent_id), mappings.Directory)
             elif getattr(obj, 'volume_id', None):
-                d = self.db.map(self.dbName, unicode(obj.volume_id), couch.Volume)
+                d = self.db.map(self.dbName, unicode(obj.volume_id), mappings.Volume)
 
             assert d, 'child %r did not have parent path or volume' % obj
 
