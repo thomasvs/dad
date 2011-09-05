@@ -38,7 +38,7 @@ class BaseTestCase:
         ret = yield self.testdb.save(t)
         defer.returnValue(ret)
 
-class TrackModelTest(BaseTestCase):
+class TrackModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testNewSave(self):
@@ -95,7 +95,7 @@ class TrackModelTest(BaseTestCase):
         self.assertEquals(t.getName(), u'hit me')
 
 
-class TrackSelectorModelTest(BaseTestCase):
+class TrackSelectorModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testTrackSelectorModel(self):
@@ -112,7 +112,7 @@ class TrackSelectorModelTest(BaseTestCase):
         self.assertEquals(tracks[0].getArtistMids(),
             [u'artist:name:The Afghan Whigs', ])
 
-class ArtistSelectorModelTest(BaseTestCase):
+class ArtistSelectorModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testArtistSelectorModel(self):
@@ -315,9 +315,9 @@ def makeTestCaseClasses(cls):
         """
         classes = {}
         for klazz in [
-            TrackModelTest,
-            TrackSelectorModelTest,
-            ArtistSelectorModelTest,
+            TrackModelTestCase,
+            TrackSelectorModelTestCase,
+            ArtistSelectorModelTestCase,
             DatabaseTestCase
             ]:
             name = cls.__name__ + "." + klazz.__name__
