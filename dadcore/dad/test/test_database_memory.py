@@ -39,19 +39,8 @@ class MemoryDBPickleTestCase(test_database.BaseTestCase):
     def tearDown(self):
         os.unlink(self._path)
 
-# subclass all test_database tests
-
-class MemoryTrackModelTestCase(test_database.TrackModelTest, MemoryDBTestCase):
-    pass
-class MemoryTrackSelectorModelTestCase(test_database.TrackSelectorModelTest,
-    MemoryDBTestCase):
-    pass
-class MemoryArtistSelectorModelTestCase(test_database.ArtistSelectorModelTest,
-    MemoryDBTestCase):
-    pass
-class MemoryDatabaseTestCase(test_database.DatabaseTestCase,
-    MemoryDBTestCase):
-    pass
+# instantiate all generic database tests
+globals().update(test_database.makeTestCaseClasses(MemoryDBTestCase))
 
 # additional tests
 class MemoryDatabasePickleTestCase(MemoryDBPickleTestCase):

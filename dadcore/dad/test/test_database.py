@@ -1,7 +1,6 @@
 # -*- Mode: Python -*- #
 # vi:si:et:sw=4:sts=4:ts=4
 
-import unittest
 
 from twisted.internet import defer
 
@@ -305,3 +304,25 @@ class DatabaseTestCase(BaseTestCase):
 
         yield self.testdb.trackAddFragmentFileByMBTrackId(t, 
             info, metadata)
+
+def makeTestCaseClasses(cls):
+        """
+        Create a L{TestCase} subclass which mixes in C{cls} for each known
+        test case.
+
+        @param cls: the base class for the database-specific handling
+                    including a setUp that sets testdb and provider ivars.
+        """
+        classes = {}
+        for klazz in [
+            TrackModelTest,
+            TrackSelectorModelTest,
+            ArtistSelectorModelTest,
+            DatabaseTestCase
+            ]:
+            name = cls.__name__ + "." + klazz.__name__
+            class testcase(cls, klazz):
+                __module__ = cls.__module__
+            testcase.__name__ = name
+            classes[testcase.__name__] = testcase
+        return classes

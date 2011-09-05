@@ -1,6 +1,8 @@
 # -*- Mode: Python; test_case_name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+#__metaclass__ = type
+
 import os
 import commands
 
@@ -306,16 +308,5 @@ class TrackModelTestCase:#(DADDBTestCase):
         retrieved = yield model.get(stored['id'])
         self.assertEquals(retrieved.name, 'hit me')
 
-# FIXME: find a way to find all tests dynamically and subclass
-
-class CouchTrackModelTest(test_database.TrackModelTest, CouchDatabaseTestCase):
-    pass
-class CouchTrackSelectorModelTest(test_database.TrackSelectorModelTest,
-    CouchDatabaseTestCase):
-    pass
-class CouchArtistSelectorModelTest(test_database.ArtistSelectorModelTest,
-    CouchDatabaseTestCase):
-    pass
-class CouchDatabaseTest(test_database.DatabaseTestCase,
-    CouchDatabaseTestCase):
-    pass
+# instantiate all generic database tests
+globals().update(test_database.makeTestCaseClasses(CouchDatabaseTestCase))
