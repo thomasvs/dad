@@ -1,4 +1,4 @@
-# -*- Mode: Python; test_case_name: dadcouch.test.test_model_daddb -*-
+# -*- Mode: Python; test_case_name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 from twisted.internet import defer
