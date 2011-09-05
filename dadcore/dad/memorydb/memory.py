@@ -9,9 +9,9 @@ from twisted.internet import defer
 from zope import interface
 
 from dad import idad
-from dad.base import base, data
+from dad.base import data
 from dad.common import log
-from dad.memorydb.model import track, artist, album
+from dad.memorydb.model import track, artist
 
 _DEFAULT_PATH = 'dad.pickle'
 
