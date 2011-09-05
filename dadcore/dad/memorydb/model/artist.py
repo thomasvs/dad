@@ -22,6 +22,10 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
     def getName(self):
         return defer.succeed(self.name)
 
+    def setName(self, name):
+        self.name = name
+        return defer.succeed(None)
+
     def getSortName(self):
         return defer.succeed(self.name)
 
@@ -33,6 +37,9 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
 
     def getTrackCount(self):
         return defer.succeed(self.tracks)
+
+    def save(self):
+        return self._db.saveArtist(self)
 
 
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, base.MemoryModel):

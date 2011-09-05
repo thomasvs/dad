@@ -112,6 +112,19 @@ class TrackSelectorModelTestCase(BaseTestCase):
         self.assertEquals(tracks[0].getArtistMids(),
             [u'artist:name:The Afghan Whigs', ])
 
+class ArtistModelTestCase(BaseTestCase):
+
+    @defer.inlineCallbacks
+    def testArtist(self):
+        appModel = self.provider.getAppModel(self.testdb)
+        aModel = appModel.getModel('Artist')
+        yield aModel.setName(u'The Afghan Whigs')
+        yield aModel.save()
+
+        mid = yield aModel.getMid()
+
+        self.failUnless(mid)
+
 class ArtistSelectorModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
@@ -317,10 +330,11 @@ def makeTestCaseClasses(cls):
         for klazz in [
             TrackModelTestCase,
             TrackSelectorModelTestCase,
+            ArtistModelTestCase,
             ArtistSelectorModelTestCase,
             DatabaseTestCase
             ]:
-            name = cls.__name__ + "." + klazz.__name__
+            name = klazz.__name__
             class testcase(cls, klazz):
                 __module__ = cls.__module__
             testcase.__name__ = name

@@ -1,4 +1,4 @@
-# -*- Mode: Python; test_case_name: dadcouch.test.test_model_daddb -*-
+# -*- Mode: Python; test_case_name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import time
@@ -14,6 +14,8 @@ from dadcouch.model import base
 from dadcouch.database import mappings
 from dadcouch.extern.paisley import views
 
+# FIXME: should be possible to create a new one through AppModel
+# either empty or from db
 class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     I represent an artist in a CouchDB database.
@@ -25,6 +27,14 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     ### artist.ArtistModel implementations
     def getName(self):
         return self.artist.name
+
+    def setName(self, name):
+        # FIXME: this is ugly, self.artist should be set already
+        if not self.artist:
+            self.artist = mappings.Artist()
+
+        self.artist.name = name
+        return defer.succeed(None)
 
     def getSortName(self):
         return self.artist.sortname
@@ -39,6 +49,10 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     def getTrackCount(self):
         return 424242
 
+    @defer.inlineCallbacks
+    def save(self):
+        self.artist = yield self._daddb.save(self.artist)
+        defer.returnValue(self)
 
     ### FIXME: to be added to iface ?
 

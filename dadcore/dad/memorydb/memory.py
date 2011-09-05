@@ -95,18 +95,20 @@ class MemoryDB(log.Loggable):
                     self._mbTrackIds[mb].append(track)
 
 
-        for model in track.getArtists():
-            if not model in self._artists:
+        # FIXME: work with id ?
+        for name in track.getArtists():
+            if not name in self._artists:
                 am = artist.MemoryArtistModel(self)
-                am.name = model
+                am.name = name
                 am.tracks = 1
-                self._artists[model] = am
+                self._artists[name] = am
             else:
-                self._artists[model].tracks += 1
+                self._artists[name].tracks += 1
 
         self._save()
             
         return defer.succeed(track)
+
 
     def getTracks(self):
         return self._tracks.values()
@@ -265,8 +267,16 @@ class MemoryDB(log.Loggable):
         self._save()
 
         defer.returnValue(ret)
+
+    ### implementation methods
+    def saveArtist(self, artist):
+        """
+        @type  artist: L{artist.ArtistModel}
+        """
+        # FIXME: use interface, getName ?
+        self._artists[artist.name] = artist
+        return self._save()
+
     # TOPORT
     def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
         return track.addFragment(info, metadata, mix, number)
-
-

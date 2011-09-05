@@ -21,6 +21,16 @@ class ArtistModel(base.ScorableModel):
         """
         raise NotImplementedError
 
+    def setName(self, name):
+        """
+        Set the name of the artist, suitable for display.
+
+        @type  name: C{unicode}
+
+        @rtype: L{twisted.internet.defer.Deferred} firing C{None}
+        """
+        raise NotImplementedError
+
     def getSortName(self):
         """
         Return the name of the artist, suitable for sorting.
@@ -64,6 +74,12 @@ class ArtistModel(base.ScorableModel):
 
         raise KeyError
 
+    def save(self):
+        """
+        Save the model to the database backend.
+
+        @rtype: L{twisted.internet.defer.Deferred} firing L{ArtistModel}
+        """
 
     def __repr__(self):
         return '<ArtistModel %r>' % (self.getName(), )
