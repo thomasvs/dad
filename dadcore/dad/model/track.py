@@ -34,28 +34,6 @@ class TrackModel(base.Model):
     id = None
     fragments = None
 
-    def __init__(self):
-        self.fragments = []
-
-
-    # FIXME: what does it mean if mix is None ? How does that identify
-    # a fragment ?
-    # FIXME: maybe metadata should be folded into info ?
-    # FIXME: maybe TrackMetadata should be renamed to FileMetadata, since
-    #        it's tied to a file ?
-    def addFragment(self, info, metadata=None, mix=None, number=None):
-        """
-        Add a new fragment to the track, into the given file.
-
-        @type  info:     L{dad.logic.database.FileInfo}
-        @type  metadata: L{dad.logic.database.TrackMetadata}
-        @type  mix:      L{dad.audio.mix.TrackMix}
-        @type  number:   C{int}
-        @param number:   the number of the fragment in the file
-        """
-        raise NotImplementedError
-    
-
     def getName(self):
         """
         Return the name of the track, suitable for display.
@@ -77,6 +55,24 @@ class TrackModel(base.Model):
         """
         raise NotImplementedError
 
+
+
+    # FIXME: what does it mean if mix is None ? How does that identify
+    # a fragment ?
+    # FIXME: maybe metadata should be folded into info ?
+    # FIXME: maybe TrackMetadata should be renamed to FileMetadata, since
+    #        it's tied to a file ?
+    def addFragment(self, info, metadata=None, mix=None, number=None):
+        """
+        Add a new fragment to the track, into the given file.
+
+        @type  info:     L{dad.logic.database.FileInfo}
+        @type  metadata: L{dad.logic.database.TrackMetadata}
+        @type  mix:      L{dad.audio.mix.TrackMix}
+        @type  number:   C{int}
+        @param number:   the number of the fragment in the file
+        """
+        raise NotImplementedError
 
     def getFragments(self):
         """
