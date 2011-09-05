@@ -5,6 +5,11 @@ Model
 -----
 A model 
 
+Models can be created:
+- by looking up something in the database
+- by creating a new one and setting attributes
+- by getting them from another model
+
 Example: ArtistSelector
 =======================
 
