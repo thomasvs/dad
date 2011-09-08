@@ -162,7 +162,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 trackmix = fragment.getTrackMix()
 
                 # FIXME: make this fail, then clean up all twisted warnings
-                artists = track.getArtists()
+                artists = track.getArtistNames()
                 artists.sort()
                 s = selecter.Selected(file.info.path, trackmix, artists=artists, title=track.getName())
                 self.selected(s)

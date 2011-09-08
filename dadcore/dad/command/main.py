@@ -70,7 +70,7 @@ class List(tcommand.TwistedCommand):
         res = yield db.getTracks()
         for track in res:
             self.stdout.write('%s - %s\n' % (
-                " & ".join(track.getArtists()), track.getName()))
+                " & ".join(track.getArtistNames()), track.getName()))
 
 
 class Add(tcommand.TwistedCommand):

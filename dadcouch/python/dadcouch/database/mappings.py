@@ -268,7 +268,7 @@ class Track(mapping.Document, track.TrackModel):
         return self._daddb.map(trackId, couch.Track)
 
      
-    def getArtists(self):
+    def getArtistNames(self):
         # FIXME: artists is a list of dict of ArtistModel ?
         if self.artists:
             # return self.artists
@@ -288,7 +288,7 @@ class Track(mapping.Document, track.TrackModel):
 
     # FIXME: proper artist ids ?
     def getArtistIds(self):
-        return self.getArtists()
+        return self.getArtistNames()
 
     # FIXME: proper artist ids ?
     def getArtistMids(self):

@@ -96,7 +96,7 @@ class MemoryDB(log.Loggable):
 
 
         # FIXME: work with id ?
-        for name in track.getArtists():
+        for name in track.getArtistNames():
             if not name in self._artists:
                 am = artist.MemoryArtistModel(self)
                 am.name = name

@@ -103,7 +103,7 @@ class TrackSelectorController(SelectorController):
     def addItem(self, item):
         # add a track
         self.debug('addItem: %r', item)
-        self.doViews('add_item', item, item.getArtists(),
+        self.doViews('add_item', item, item.getArtistNames(),
             item.getArtistMids(),
             "%s" % item.getName(), None, None, None)
 

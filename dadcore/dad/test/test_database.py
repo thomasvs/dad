@@ -108,7 +108,7 @@ class TrackSelectorModelTestCase(BaseTestCase):
         tracks = yield tsModel.get()
         self.assertEquals(len(tracks), 1)
         self.assertEquals(tracks[0].getName(), u'Milez iz Ded')
-        self.assertEquals(tracks[0].getArtists(), [u'The Afghan Whigs', ])
+        self.assertEquals(tracks[0].getArtistNames(), [u'The Afghan Whigs', ])
         self.assertEquals(tracks[0].getArtistMids(),
             [u'artist:name:The Afghan Whigs', ])
 

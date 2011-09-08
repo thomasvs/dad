@@ -42,10 +42,9 @@ class TrackModel(base.Model):
         """
         raise NotImplementedError
 
-    # FIXME: make this return ArtistModel ?
-    def getArtists(self):
+    def getArtistNames(self):
         """
-        @rtype: list of C{unicode}
+        @rtype: list of L{unicode}
         """
         raise NotImplementedError
 
@@ -82,7 +81,7 @@ class TrackModel(base.Model):
 
     def __repr__(self):
         return '<TrackModel %r for %r - %r>' % (self.id,
-            " & ".join(self.getArtists() or []),
+            " & ".join(self.getArtistNames() or []),
             self.getName())
 
 class TrackSelectorModel(base.Model, log.Loggable):

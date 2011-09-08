@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dadcouch.test.test_model_track -*-
+# -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import time
@@ -35,8 +35,8 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return self.getId()
 
 
-    def getArtists(self):
-        return self.track.getArtists()
+    def getArtistNames(self):
+        return self.track.getArtistNames()
 
     def getArtistMids(self):
         return self.track.getArtistMids()
