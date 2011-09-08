@@ -30,16 +30,17 @@ class BaseTestCase:
         @rtype: mappings.Track
         """
         # add a first track
-        t = self.testdb.new()
-        yield self.testdb.save(t)
+        # FIXME: no name makes sense or not?
+        tm = self.testdb.newTrack(name=None)
+        yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/first.flac')
         metadata = database.TrackMetadata()
         metadata.title = u'Milez iz Ded'
         metadata.artist = u'The Afghan Whigs'
 
-        t.addFragment(info, metadata=metadata)
-        ret = yield self.testdb.save(t)
+        tm.addFragment(info, metadata=metadata)
+        ret = yield self.testdb.save(tm)
         defer.returnValue(ret)
 
 class TrackModelTestCase(BaseTestCase):
@@ -155,7 +156,7 @@ class ArtistSelectorModelTestCase(BaseTestCase):
         appModel = self.provider.getAppModel(self.testdb)
         asModel = appModel.getModel('ArtistSelector')
 
-        t = yield self.addFirstTrack()
+        tm = yield self.addFirstTrack()
 
         # check the artist selector model
         artists = yield asModel.get()
@@ -170,15 +171,15 @@ class ArtistSelectorModelTestCase(BaseTestCase):
         self.assertEquals(count, 1)
 
         # add another track
-        t = self.testdb.new()
-        yield self.testdb.save(t)
+        tm = self.testdb.newTrack(name=None)
+        yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/second.flac')
         metadata = database.TrackMetadata()
         metadata.artist = u'The Afghan Whigs'
 
-        t.addFragment(info, metadata=metadata)
-        yield self.testdb.save(t)
+        tm.addFragment(info, metadata=metadata)
+        yield self.testdb.save(tm)
         
         # check the artist selector model
         artists = yield asModel.get()
@@ -202,11 +203,10 @@ class DatabaseTestCase(BaseTestCase):
  
     @defer.inlineCallbacks
     def testGetTracks(self):
-        t = self.testdb.new()
-        t.setName(u'first')
+        tm = self.testdb.newTrack(name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac')
-        t.addFragment(info)
-        yield self.testdb.save(t)
+        tm.addFragment(info)
+        yield self.testdb.save(tm)
 
         gen = yield self.testdb.getTracks()
         tracks = list(gen)
@@ -215,11 +215,10 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracksByHostPath(self):
-        t = self.testdb.new()
-        t.name = 'first'
+        tm = self.testdb.newTrack(name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac')
-        t.addFragment(info)
-        yield self.testdb.save(t)
+        tm.addFragment(info)
+        yield self.testdb.save(tm)
 
         # get the right track
         gen = yield self.testdb.getTracksByHostPath(
@@ -251,12 +250,11 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracksByMD5Sum(self):
-        t = self.testdb.new()
-        t.name = u'first'
+        tm = self.testdb.newTrack(name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac',
             md5sum=u'deadbeef')
-        t.addFragment(info)
-        t = yield self.testdb.save(t)
+        tm.addFragment(info)
+        tm = yield self.testdb.save(tm)
 
         # get the right track
         gen = yield self.testdb.getTracksByMD5Sum(u'deadbeef')
@@ -286,10 +284,10 @@ class DatabaseTestCase(BaseTestCase):
         mb = u'9b9b333e-8278-401b-8361-700c14096228'
         metadata.mbTrackId = mb
 
-        t = yield self.testdb.trackAddFragmentFileByMD5Sum(t, 
+        tm = yield self.testdb.trackAddFragmentFileByMD5Sum(tm, 
             info, metadata)
 
-        fragments = yield t.getFragments()
+        fragments = yield tm.getFragments()
         self.assertEquals(len(fragments), 1)
         f = fragments[0]
         self.assertEquals(len(f.files), 2)
@@ -297,8 +295,7 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracksByMBTrackId(self):
-        t = self.testdb.new()
-        t.name = u'first'
+        tm = self.testdb.newTrack(name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/milez.flac',
             md5sum=u'deadbeef')
 
@@ -307,8 +304,8 @@ class DatabaseTestCase(BaseTestCase):
         mb = u'9b9b333e-8278-401b-8361-700c14096228'
         metadata.mbTrackId = mb
 
-        t.addFragment(info, metadata=metadata)
-        t = yield self.testdb.save(t)
+        tm.addFragment(info, metadata=metadata)
+        tm = yield self.testdb.save(tm)
  
         # get the right track
         gen = yield self.testdb.getTracksByMBTrackId(mb)
@@ -338,7 +335,7 @@ class DatabaseTestCase(BaseTestCase):
         mb = u'9b9b333e-8278-401b-8361-700c14096228'
         metadata.mbTrackId = mb
 
-        yield self.testdb.trackAddFragmentFileByMBTrackId(t, 
+        yield self.testdb.trackAddFragmentFileByMBTrackId(tm, 
             info, metadata)
 
 def makeTestCaseClasses(cls):

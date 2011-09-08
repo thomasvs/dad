@@ -159,12 +159,6 @@ class DADDB(log.Loggable):
         self._internal = internal.InternalDB(db, dbName)
 
     ## idad.IDatabase interface
-    # FIXME: remove this from iface
-    def new(self):
-        am = track.CouchTrackModel(self)
-        am.document = mappings.Track()
-        return am
-
     def newTrack(self, name, sort=None, mbid=None):
         return track.CouchTrackModel.new(self, name, sort, mbid)
 
