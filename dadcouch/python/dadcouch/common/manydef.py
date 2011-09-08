@@ -1,4 +1,4 @@
-# -*- Mode: Python; test_case_name: dadcouch.test.test_common_manydef -*-
+# -*- Mode: Python; test-case-name: dadcouch.test.test_common_manydef -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import sys

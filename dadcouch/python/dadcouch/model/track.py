@@ -1,4 +1,4 @@
-# -*- Mode: Python; test_case_name: dadcouch.test.test_model_track -*-
+# -*- Mode: Python; test-case-name: dadcouch.test.test_model_track -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import time

@@ -1,4 +1,4 @@
-# -*- Mode: Python; test_case_name: dad.test.test_model_album -*-
+# -*- Mode: Python; test-case-name: dad.test.test_model_album -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 from dad.base import base
