@@ -47,6 +47,23 @@ class MemoryTrackModel(track.TrackModel):
 
         return []
 
+    def getArtists(self):
+        models = []
+
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if not file.metadata:
+                    continue
+
+                # metadata only lists one artist
+                am = self._memorydb.newArtist(
+                    name=file.metadata.artist,
+                    mbid=file.metadata.mbArtistId)
+                models.append(am)
+
+        return defer.succeed(models)
+
+
     def getArtistIds(self):
         return self.getArtistNames()
 

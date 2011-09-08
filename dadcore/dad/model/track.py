@@ -42,6 +42,12 @@ class TrackModel(base.Model):
         """
         raise NotImplementedError
 
+    def getArtists(self):
+        """
+        @rtype: L{Deferred} firing generator of L{artist.ArtistModel}
+        """
+        raise NotImplementedError
+
     def getArtistNames(self):
         """
         @rtype: list of L{unicode}
