@@ -24,6 +24,15 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
 
     artist = None
 
+    def new(self, db, name, mbid=None):
+        model = CouchArtistModel(db)
+        model.artist = mappings.Artist()
+
+        model.artist.name = name
+        model.artist.mbid = mbid
+        return model
+    new = classmethod(new)
+
     ### artist.ArtistModel implementations
     def getName(self):
         return self.artist.name

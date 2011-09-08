@@ -13,6 +13,18 @@ class ArtistModel(base.ScorableModel):
 
     My controller is L{dad.controller.track.ArtistController}
     """
+
+    def new(self, db, name, mbid=None):
+        """
+        Return a new artist model.
+
+        @type  name: C{unicode}
+        @type  mbid: C{unicode}
+
+        @rtype: L{dad.model.artist.ArtistModel}
+        """
+    new = classmethod(new)
+
     def getName(self):
         """
         Return the name of the artist, suitable for display.
