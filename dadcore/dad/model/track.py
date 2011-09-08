@@ -34,6 +34,19 @@ class TrackModel(base.Model):
     id = None
     fragments = None
 
+    def new(self, db, name, sort=None, mbid=None):
+        """
+        Return a new track model.
+
+        @type  name: C{unicode}
+        @type  sort: C{unicode}
+        @type  mbid: C{unicode}
+
+        @rtype: L{dad.model.track.TrackModel}
+        """
+    new = classmethod(new)
+
+
     def getName(self):
         """
         Return the name of the track, suitable for display.

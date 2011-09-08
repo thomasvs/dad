@@ -13,6 +13,7 @@ class MemoryTrackModel(track.TrackModel, base.MemoryModel):
 
     def __init__(self, memorydb, id=None):
         base.MemoryModel.__init__(self, memorydb)
+
         self.id = id
 
         self.scores = []
@@ -20,6 +21,17 @@ class MemoryTrackModel(track.TrackModel, base.MemoryModel):
         self.name = None
 
     # base class implementations
+
+    def new(self, db, name, sort=None, mbid=None, id=None):
+        if not sort:
+            sort = name
+
+        model = MemoryTrackModel(db, id)
+        model.name = name
+        model.sortName = sort
+        model.mbid = mbid
+        return model
+    new = classmethod(new)
 
     def addFragment(self, info, metadata=None, mix=None, number=None):
         fragment = track.FragmentModel()

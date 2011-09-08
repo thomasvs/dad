@@ -25,9 +25,23 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
     # base class implementations
 
+    def new(self, db, name, sort=None, mbid=None):
+        if not sort:
+            sort = name
+
+        model = CouchTrackModel(db)
+        model.document = mappings.Track()
+
+        model.document.name = name
+        model.document.sortName = sort
+        model.document.mbid = mbid
+        model.document = model.document
+        return model
+    new = classmethod(new)
+
     # FIXME: instead of forwarding, do them directly ? In subclass of Track ?
     def getName(self):
-        return self.track.getName()
+        return self.document.getName()
 
     # FIXME: add to iface ?
     def getArtists(self):
@@ -50,11 +64,17 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
         return models
 
+    def getId(self):
+        return self.document.getId()
+
+    def getMid(self):
+        return self.getId()
+
     def getArtistNames(self):
-        return self.track.getArtistNames()
+        return self.document.getArtistNames()
 
     def getArtistMids(self):
-        return self.track.getArtistMids()
+        return self.document.getArtistMids()
 
     def getId(self):
         return self.track.getId()
@@ -74,6 +94,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         #    self._daddb.resolveIds(track, 'artist_ids', 'artists',
         #    mappings.Artist))
 
+        # FIXME: document ?
         d.addCallback(lambda track: setattr(self, 'track', track))
         d.addCallback(lambda _, s: s, self)
         return d

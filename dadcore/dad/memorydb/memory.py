@@ -70,6 +70,9 @@ class MemoryDB(log.Loggable):
         self._id += 1
         return track.MemoryTrackModel(self, id=self._id)
 
+    def newTrack(self, name, sort=None, mbid=None):
+        return track.MemoryTrackModel.new(self, name, sort=sort, mbid=mbid)
+
     def newArtist(self, name, sort=None, mbid=None):
         return artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
 
