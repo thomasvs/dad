@@ -13,8 +13,18 @@ class CouchDBModel(base.Model, log.Loggable):
     def __init__(self, daddb):
         self._daddb = daddb
 
+class CouchDocModel(CouchDBModel):
+    """
+    I represent an object in a CouchDB database that can be
+    stored as a document.
 
-class ScorableModel(CouchDBModel):
+    @type document: L{paisley.mapping.Document}
+    """
+
+    document = None
+
+    
+class ScorableModel(CouchDocModel):
     """
     I represent a subject in a CouchDB database that can be scored.
     """
