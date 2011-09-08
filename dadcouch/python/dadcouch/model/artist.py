@@ -50,6 +50,21 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         return 424242
 
     @defer.inlineCallbacks
+    def getTracks(self):
+        self.debug('get')
+        v = views.View(self._daddb.db, self._daddb.dbName,
+            'dad', 'view-tracks-by-artist',
+            self._daddb.modelFactory(ItemTracksByArtist))
+        try:
+            result = yield v.queryView()
+        except Exception, e:
+            self.warning('get: exception: %r', log.getExceptionMessage(e))
+            raise
+
+        defer.returnValue(result)
+
+
+    @defer.inlineCallbacks
     def save(self):
         self.artist = yield self._daddb.save(self.artist)
         defer.returnValue(self)

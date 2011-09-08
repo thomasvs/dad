@@ -10,13 +10,18 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
     """
     @ivar id:     id of the artist
     @ivar name:   name of the artist
-    @type tracks: int
+    @type tracks: list of L{track.TrackModel}
     """
     id = None
     name = None
     mbid = None
 
-    tracks = 0
+    tracks = None
+
+    def __init__(self, memorydb):
+        base.MemoryModel.__init__(self, memorydb)
+        self.tracks = []
+
 
     ### model implementations
     def getName(self):
@@ -36,6 +41,9 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
         return defer.succeed(self.mbid)
 
     def getTrackCount(self):
+        return defer.succeed(len(self.tracks))
+
+    def getTracks(self):
         return defer.succeed(self.tracks)
 
     def save(self):

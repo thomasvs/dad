@@ -120,10 +120,23 @@ class ArtistModelTestCase(BaseTestCase):
         aModel = appModel.getModel('Artist')
         yield aModel.setName(u'The Afghan Whigs')
         yield aModel.save()
+        tid = yield aModel.getId()
 
         mid = yield aModel.getMid()
 
         self.failUnless(mid)
+
+        tracks = yield aModel.getTracks()
+        tracks = list(tracks)
+        self.assertEquals(len(tracks), 0)
+
+        yield self.addFirstTrack()
+
+        tracks = yield aModel.getTracks()
+        tracks = list(tracks)
+        self.assertEquals(len(tracks), 1)
+        rtid = yield aModel.getId()
+        self.assertEquals(tid, rtid)
 
 class ArtistSelectorModelTestCase(BaseTestCase):
 

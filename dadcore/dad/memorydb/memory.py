@@ -100,10 +100,10 @@ class MemoryDB(log.Loggable):
             if not name in self._artists:
                 am = artist.MemoryArtistModel(self)
                 am.name = name
-                am.tracks = 1
+                am.tracks = [track, ]
                 self._artists[name] = am
             else:
-                self._artists[name].tracks += 1
+                self._artists[name].tracks.append(track)
 
         self._save()
             

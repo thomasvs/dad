@@ -74,6 +74,13 @@ class ArtistModel(base.ScorableModel):
 
         raise KeyError
 
+    def getTracks(self):
+        """
+        Get all tracks this artist has performed.
+
+        @rtype: L{twisted.internet.defer.Deferred} firing L{TrackModel}
+        """
+
     def save(self):
         """
         Save the model to the database backend.
