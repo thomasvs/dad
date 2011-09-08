@@ -17,7 +17,7 @@ from dad.common import log
 
 from dadcouch.common import manydef
 from dadcouch.database import mappings
-from dadcouch.model import artist
+from dadcouch.model import base, artist, track
 
 # value to use for ENDKEY when looking up strings
 # FIXME: something better; with unicode ?
@@ -156,157 +156,59 @@ class DADDB(log.Loggable):
         self.db = db
         self.dbName = dbName
 
-        self.debug('My FUTON is at http://%s:%d/_utils/index.html',
-            self.db.host, self.db.port)
-
-    ### generic helper methods
-
-    # FIXME: work around having to poke at doc._data
-    def saveDoc(self, doc, docId=None):
-        return self.db.saveDoc(self.dbName, doc._data, docId=docId)
-
-    def viewDocs(self, viewName, klazz, *args, **kwargs):
-        """
-        Load the given view including Docs, and map to objects of the given
-        klazz.
-        Specify include_docs=True if you want to load full docs (and
-        allow them to get cached)
-
-        @param viewName: name of the view to load objects from
-        @param klazz:    the class to instantiate objects from
-        """
-        assert type(viewName) is str
-
-        self.debug('loading %s->%r using view %r, args %r, kwargs %r',
-            self.dbName, klazz, viewName, args, kwargs)
-        self.doLog(log.DEBUG, where=-2, format='loading for')
-
-        v = views.View(self.db, self.dbName, 'dad', viewName, klazz,
-            *args, **kwargs)
-        d = v.queryView()
-
-        def cb(result):
-            self.debug('loaded %s->%r using view %r',
-                self.dbName, klazz, viewName)
-            return result
-        d.addCallback(cb)
-
-        def eb(failure):
-            self.warning('Failed to query view: %r',
-                log.getFailureMessage(failure))
-            sys.stderr.write(failure.getTraceback())
-            return failure
-        d.addErrback(eb)
-
-        return d
-
-    # FIXME: move this method to paisley
-    def resolveIds(self, obj, idAttr, objAttr, klazz, getter=getattr, setter=setattr):
-        """
-        Resolve id's on an object into the relevant objects using the given
-        klazz.
-
-        @rtype: L{defer.Deferred} firing obj, so it can be chained.
-        """
-        ids = getter(obj, idAttr)
-
-        if not isinstance(ids, list):
-            ids = [ids, ]
-
-        res = []
-        d = defer.Deferred()
-        def mapped(o, res):
-            res.append(o)
-
-        for i in ids:
-            # FIXME: again, unicode!
-            i = unicode(i)
-            d.addCallback(lambda _, j: self.db.map(self.dbName, j, klazz), i)
-            d.addCallback(mapped, res)
-
-        def done(_, r):
-            ids = getter(obj, idAttr)
-            if not isinstance(ids, list):
-                r = r[0]
-            setter(obj, objAttr, r)
-
-            return obj
-
-        d.addCallback(done, res)
-
-        d.callback(None)
-
-        return d
-            
-    def resolveDictIds(self, obj, idAttr, objAttr, klazz,
-            getter=getattr, setter=setattr):
-        return self.resolveIds(obj, idAttr, objAttr, klazz,
-            getter=dict.__getitem__, setter=dict.__setitem__)
-
-    ### data-specific methods
+        self._internal = InternalDB(db, dbName)
 
     ## idad.IDatabase interface
-    def new(self):
-        return mappings.Track()
+    def newTrack(self, name, sort=None, mbid=None):
+        return track.CouchTrackModel.new(self, name, sort, mbid)
 
     def newArtist(self, name, sort=None, mbid=None):
         return artist.CouchArtistModel.new(self, name, sort, mbid)
 
+    # FIXME: use internal save ?
     @defer.inlineCallbacks
     def save(self, item):
-        stored = yield self.saveDoc(item)
-        # FIXME: for now, look it up again to maintain the track illusion
-        item = yield self.db.map(self.dbName, stored['id'], item.__class__)
-        self.debug('saved item %r', item)
-        defer.returnValue(item)
+        """
+        @type item; L{base.CouchDocModel}
+        """
+        if isinstance(item, base.CouchDocModel):
+            stored = yield self.saveDoc(item.document)
+            # FIXME: for now, look it up again to maintain the track illusion
+            item.document = yield self.db.map(self.dbName, stored['id'],
+                item.document.__class__)
+            self.debug('saved item doc %r', item.document)
+            defer.returnValue(item)
+        else:
+            raise AttributeError, \
+                "Cannot save item of class %r" % item.__class__
 
-    @defer.inlineCallbacks
+    # FIXME: this actually still yields models I think
     def getTracks(self):
-        ret = yield self.viewDocs('view-tracks-title', mappings.Track,
-            include_docs=True)
+        return self._internal.getTracks()
 
-        defer.returnValue(list(ret))
+    def score(self, subject, userName, categoryName, score):
+        """
+        @type subject: L{base.Scorable}
+        """
+        assert isinstance(subject, base.Scorable), \
+            "subject %r is not a scorable" % subject
+        return self._internal.score(subject.document,
+            userName, categoryName, score)
 
-    def addCategory(self, name):
-        cat = mappings.Category(name=name)
-        return self.save(cat)
-
-    @defer.inlineCallbacks
-    def getCategories(self):
-        rows = yield self.viewDocs('view-categories', GenericRow,
-            group_level=1)
-        rows = list(rows)
-        categories = [row.key for row in rows]
-        defer.returnValue(categories)
-
-    @defer.inlineCallbacks
     def getScores(self, subject):
         """
         @returns: deferred firing list of L{data.Score}
         """
+        assert isinstance(subject, base.ScorableModel), \
+            "subject %r is not scorable" % subject
+        return self._internal.getScores(subject.document)
 
-        # get all scores for this subject
-        rows = yield self.viewDocs('view-scores-by-subject', ScoreRow,
-            key=subject.id)
+    def addCategory(self, name):
+        return self._internal.addCategory(name)
 
-        rows = list(rows)
+    def getCategories(self):
+        return self._internal.getCategories()
 
-        if not rows:
-            self.debug('No scores for %r', subject)
-            defer.returnValue([])
-            return
-
-        scores = []
-        for row in rows:
-            score = data.Score()
-            score.subject = subject
-            score.user = row.user
-            score.category = row.category
-            score.score = row.score
-            scores.append(score)
-
-        self.debug('%d scores for %r', len(scores), subject.id)
-        defer.returnValue(scores)
 
     @defer.inlineCallbacks
     def getTracksByHostPath(self, host, path):
@@ -427,6 +329,194 @@ class DADDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
+    def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,
+        random=False):
+        """
+        @type  limit:        int or None
+        @type  random:       bool
+
+        @returns: list of tracks and additional info, ordered by track id
+        @rtype: L{defer.Deferred} firing
+                list of Track, Slice, path, score, userId
+        """
+        self.debug('Getting tracks for host %r and category %r and user %r',
+            hostName, categoryName, userName)
+
+        startkey = [userName, categoryName, above]
+        endkey = [userName, categoryName, below]
+
+        gen = yield self.viewDocs('view-scores-host', mappings.Track,
+            startkey=startkey, endkey=endkey, include_docs=True)
+
+        # FIXME: filter on host ?
+
+        # FIXME: for randomness, we currently go from generator to
+        # full list and back
+        if random:
+            tracks = list(gen)
+            import random
+            random.shuffle(tracks)
+            gen = (t for t in tracks)
+
+        defer.returnValue(gen)
+
+    ### own instance methods
+    def map(self, docId, objectFactory):
+        return self.db.map(self.dbName, docId, objectFactory)
+
+    def modelFactory(self, modelClass):
+        return lambda: modelClass(daddb=self)
+
+ 
+class InternalDB(log.Loggable):
+    """
+    I interact with the CouchDB database and mappings and documents.
+    I don't deal with any models.
+
+    @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
+    @type  dbName: str
+    """
+
+    logCategory = 'daddb'
+
+    def __init__(self, db, dbName):
+        """
+        @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
+        @type  dbName: str
+        """
+        self.db = db
+        self.dbName = dbName
+
+        self.debug('My FUTON is at http://%s:%d/_utils/index.html',
+            self.db.host, self.db.port)
+
+    ### generic helper methods
+
+    # FIXME: work around having to poke at doc._data
+    def saveDoc(self, doc, docId=None):
+        return self.db.saveDoc(self.dbName, doc._data, docId=docId)
+
+    def viewDocs(self, viewName, klazz, *args, **kwargs):
+        """
+        Load the given view including Docs, and map to objects of the given
+        klazz.
+        Specify include_docs=True if you want to load full docs (and
+        allow them to get cached)
+
+        @param viewName: name of the view to load objects from
+        @param klazz:    the class to instantiate objects from
+        """
+        assert type(viewName) is str
+
+        self.debug('loading %s->%r using view %r, args %r, kwargs %r',
+            self.dbName, klazz, viewName, args, kwargs)
+        self.doLog(log.DEBUG, where=-2, format='loading for')
+
+        v = views.View(self.db, self.dbName, 'dad', viewName, klazz,
+            *args, **kwargs)
+        d = v.queryView()
+
+        def cb(result):
+            self.debug('loaded %s->%r using view %r',
+                self.dbName, klazz, viewName)
+            return result
+        d.addCallback(cb)
+
+        def eb(failure):
+            self.warning('Failed to query view: %r',
+                log.getFailureMessage(failure))
+            sys.stderr.write(failure.getTraceback())
+            return failure
+        d.addErrback(eb)
+
+        return d
+
+    # FIXME: move this method to paisley
+    def resolveIds(self, obj, idAttr, objAttr, klazz, getter=getattr, setter=setattr):
+        """
+        Resolve id's on an object into the relevant objects using the given
+        klazz.
+
+        @rtype: L{defer.Deferred} firing obj, so it can be chained.
+        """
+        ids = getter(obj, idAttr)
+
+        if not isinstance(ids, list):
+            ids = [ids, ]
+
+        res = []
+        d = defer.Deferred()
+        def mapped(o, res):
+            res.append(o)
+
+        for i in ids:
+            # FIXME: again, unicode!
+            i = unicode(i)
+            d.addCallback(lambda _, j: self.db.map(self.dbName, j, klazz), i)
+            d.addCallback(mapped, res)
+
+        def done(_, r):
+            ids = getter(obj, idAttr)
+            if not isinstance(ids, list):
+                r = r[0]
+            setter(obj, objAttr, r)
+
+            return obj
+
+        d.addCallback(done, res)
+
+        d.callback(None)
+
+        return d
+            
+    def resolveDictIds(self, obj, idAttr, objAttr, klazz,
+            getter=getattr, setter=setattr):
+        return self.resolveIds(obj, idAttr, objAttr, klazz,
+            getter=dict.__getitem__, setter=dict.__setitem__)
+
+    ### data-specific methods
+
+    def new(self):
+        return mappings.Track()
+
+    # FIXME: docs only
+    @defer.inlineCallbacks
+    def save(self, item):
+        """
+        @type item; L{base.CouchDocModel}
+        """
+        if isinstance(item, base.CouchDocModel):
+            stored = yield self.saveDoc(item.document)
+            # FIXME: for now, look it up again to maintain the track illusion
+            item.document = yield self.db.map(self.dbName, stored['id'],
+                item.document.__class__)
+            self.debug('saved item doc %r', item.document)
+            defer.returnValue(item)
+        else:
+            raise AttributeError, \
+                "Cannot save item of class %r" % item.__class__
+
+    @defer.inlineCallbacks
+    def getTracks(self):
+        ret = yield self.viewDocs('view-tracks-title', mappings.Track,
+            include_docs=True)
+
+        defer.returnValue(list(ret))
+
+    def addCategory(self, name):
+        cat = mappings.Category(name=name)
+        return self.save(cat)
+
+    @defer.inlineCallbacks
+    def getCategories(self):
+        rows = yield self.viewDocs('view-categories', GenericRow,
+            group_level=1)
+        rows = list(rows)
+        categories = [row.key for row in rows]
+        defer.returnValue(categories)
+
+    # FIXME: rename to setScore ?
+    @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
         """
         @type subject: L{mapping.Document}
@@ -472,6 +562,158 @@ class DADDB(log.Loggable):
             ret = yield self.save(subject)
 
         defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def getScores(self, subject):
+        """
+        @type  subject: L{mappings.Document}
+
+        @returns: deferred firing list of L{data.Score}
+        """
+
+        # get all scores for this subject
+        rows = yield self.viewDocs('view-scores-by-subject', ScoreRow,
+            key=subject.id)
+
+        rows = list(rows)
+
+        if not rows:
+            self.debug('No scores for %r', subject)
+            defer.returnValue([])
+            return
+
+        scores = []
+        for row in rows:
+            score = data.Score()
+            score.subject = subject
+            score.user = row.user
+            score.category = row.category
+            score.score = row.score
+            scores.append(score)
+
+        self.debug('%d scores for %r', len(scores), subject.id)
+        defer.returnValue(scores)
+
+
+
+    # FIXME: all of these are currently duplicated; move to internal
+    @defer.inlineCallbacks
+    def getTracksByHostPath(self, host, path):
+        """
+        Look up tracks by path.
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+
+        @type  host: unicode
+        @type  path: unicode
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
+        """
+        assert type(host) is unicode, \
+            'host is type %r, not unicode' % type(host)
+        assert type(path) is unicode, \
+            'host is type %r, not unicode' % type(path)
+
+        self.debug('get track for host %r and path %r', host, path)
+
+        ret = yield self.viewDocs('view-host-path', mappings.Track,
+            include_docs=True, key=[host, path])
+
+        defer.returnValue(ret)
+
+    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
+        return track.addFragment(info, metadata, mix, number)
+
+    @defer.inlineCallbacks
+    def getTracksByMD5Sum(self, md5sum):
+        """
+        Look up tracks by md5sum
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
+        """
+        self.debug('get track for md5sum %r', md5sum)
+
+        ret = yield self.viewDocs('view-md5sum', mappings.Track,
+            include_docs=True, key=md5sum)
+
+        defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def getTracksByMBTrackId(self, mbTrackId):
+        """
+        Look up tracks by musicbrainz track id.
+
+        Can return multiple tracks for a path; for example, multiple
+        fragments.
+
+        ### FIXME:
+        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
+        """
+        self.debug('get track for mb track id %r', mbTrackId)
+
+        ret = yield self.viewDocs('view-mbtrackid', mappings.Track,
+            include_docs=True, key=mbTrackId)
+
+        defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
+        """
+        Add the given file to each fragment with a file with the same md5sum.
+        """
+        self.debug('get track for track %r', track.id)
+
+        track = yield self.db.map(self.dbName, track.id, mappings.Track)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.md5sum == info.md5sum:
+                    self.debug('Appending to fragment %r', fragment)
+                    track.filesAppend(fragment.files, info, metadata, number)
+                    self.debug('fragment %r now has %r files', fragment,
+                        len(fragment.files))
+                    found = True
+                    break
+            if found:
+                break
+
+        track = yield self.save(track)
+        defer.returnValue(track)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
+        self.debug('get track for track id %r', track.id)
+
+        track = yield self.db.map(self.dbName, track.id, mappings.Track)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        if len(track.fragments) > 1:
+            self.warning('Not yet implemented finding the right fragment to add by mbid')
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
+                    self.debug('Appending to fragment %r', fragment)
+                    track.filesAppend(fragment.files, info, metadata, number)
+                    found = True
+                    break
+            if found:
+                break
+
+        stored = yield self.saveDoc(track)
+
+        track = yield self.db.map(self.dbName, stored['id'], mappings.Track)
+        defer.returnValue(track)
 
     @defer.inlineCallbacks
     def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,

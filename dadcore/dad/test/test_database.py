@@ -45,57 +45,56 @@ class TrackModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testNewSave(self):
-        t = yield self.testdb.new()
-        yield self.testdb.save(t)
+        tm = yield self.testdb.newTrack(name=u'hit me')
+        yield self.testdb.save(tm)
 
     @defer.inlineCallbacks
     def testTrackGetName(self):
-        t = yield self.testdb.new()
-        t.name = u'hit me'
-        yield self.testdb.save(t)
+        tm = yield self.testdb.newTrack(name=u'hit me')
+        tm = yield self.testdb.save(tm)
 
-        self.assertEquals(t.getName(), u'hit me')
+        self.assertEquals(tm.getName(), u'hit me')
 
 
     @defer.inlineCallbacks
     def testScore(self):
-        t = self.testdb.new()
+        tm = yield self.testdb.newTrack(name=u'hit me')
 
         # make sure it gets an id
-        t = yield self.testdb.save(t)
+        tm = yield self.testdb.save(tm)
 
-        t = yield self.testdb.score(t, u'thomas', u'Good', 0.1)
-        t = yield self.testdb.score(t, u'thomas', u'Party', 0.2)
+        tm = yield self.testdb.score(tm, u'thomas', u'Good', 0.1)
+        tm = yield self.testdb.score(tm, u'thomas', u'Party', 0.2)
 
         categories = yield self.testdb.getCategories()
         self.failUnless(u'Good' in categories)
         self.failUnless(u'Party' in categories)
 
-        scores = yield self.testdb.getScores(t)
+        scores = yield self.testdb.getScores(tm)
         self.assertEquals(scores[0].category, u'Good')
         self.assertEquals(scores[0].score, 0.1)
 
         # update score
-        yield self.testdb.score(t, u'thomas', u'Good', 0.3)
+        yield self.testdb.score(tm, u'thomas', u'Good', 0.3)
 
-        scores = yield self.testdb.getScores(t)
+        scores = yield self.testdb.getScores(tm)
         self.assertEquals(scores[0].category, u'Good')
         self.assertEquals(scores[0].score, 0.3)
 
     @defer.inlineCallbacks
     def testFragments(self):
-        t = self.testdb.new()
-        yield self.testdb.save(t)
+        tm = yield self.testdb.newTrack(name=u'hit me')
+        yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/first.flac')
         metadata = database.TrackMetadata()
         metadata.title = u'hit me'
 
-        t.addFragment(info, metadata=metadata)
-        yield self.testdb.save(t)
+        tm.document.addFragment(info, metadata=metadata)
+        yield self.testdb.save(tm)
 
         # make sure we get the metadata track name back
-        self.assertEquals(t.getName(), u'hit me')
+        self.assertEquals(tm.getName(), u'hit me')
 
     @defer.inlineCallbacks
     def testGetArtists(self):
