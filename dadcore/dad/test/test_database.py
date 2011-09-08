@@ -90,7 +90,7 @@ class TrackModelTestCase(BaseTestCase):
         metadata = database.TrackMetadata()
         metadata.title = u'hit me'
 
-        tm.document.addFragment(info, metadata=metadata)
+        tm.addFragment(info, metadata=metadata)
         yield self.testdb.save(tm)
 
         # make sure we get the metadata track name back
