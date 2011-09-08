@@ -116,9 +116,7 @@ class ArtistModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testArtist(self):
-        appModel = self.provider.getAppModel(self.testdb)
-        aModel = appModel.getModel('Artist')
-        yield aModel.setName(u'The Afghan Whigs')
+        aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
         yield aModel.save()
         tid = yield aModel.getId()
 

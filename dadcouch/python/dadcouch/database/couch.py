@@ -17,6 +17,7 @@ from dad.common import log
 
 from dadcouch.common import manydef
 from dadcouch.database import mappings
+from dadcouch.model import artist
 
 # value to use for ENDKEY when looking up strings
 # FIXME: something better; with unicode ?
@@ -153,8 +154,6 @@ class AlbumsByArtist:
             self.albumId = d['id']
 
 
-# DADDB should only deal with mappings, not with any models.
-
 class DADDB(log.Loggable):
     """
     @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
@@ -265,6 +264,9 @@ class DADDB(log.Loggable):
     ## idad.IDatabase interface
     def new(self):
         return mappings.Track()
+
+    def newArtist(self, name, mbid=None):
+        return artist.CouchArtistModel.new(self, name, mbid)
 
     @defer.inlineCallbacks
     def save(self, item):
