@@ -1,6 +1,7 @@
 # -*- Mode: Python; test-case-name: dad.test.test_database_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import types
 
 from twisted.internet import defer
 
@@ -99,10 +100,11 @@ class TrackModelTestCase(BaseTestCase):
     @defer.inlineCallbacks
     def testGetArtists(self):
         t = yield self.addFirstTrack()
-        print type(t)
         artists = yield t.getArtists()
+        self.failUnless(isinstance(artists, types.GeneratorType),
+            'getArtists on %r should return a generator' % t.__class__)
         a = artists.next()
-        self.assertEquals(a.name, u'The Afghan Whigs')
+        self.assertEquals(a.getName(), u'The Afghan Whigs')
         self.failIf(artists.next())
 
 class TrackSelectorModelTestCase(BaseTestCase):

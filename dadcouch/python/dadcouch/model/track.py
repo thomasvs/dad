@@ -47,22 +47,23 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     def getArtists(self):
         models = []
 
-        if track.artists:
-            for artist in track.artists:
+        if self.document.artists:
+            for artist in self.document.artists:
                 # FIXME: sort name ? id ?
                 model = self._daddb.newArtist(
                     name=artist.name, mbid=artist.mbid)
                 models.append(model)
 
-        for fragment in self.fragments:
+        for fragment in self.document.fragments:
             for file in fragment.files:
                 if not file.metadata:
                     continue
+                # FIXME: why is this a dict and not something with attrs?
                 model = self._daddb.newArtist(
-                    name=file.metadata.artist, mbid=file.mb_artist_id)
+                    name=file.metadata.artist, mbid=file.metadata.mb_artist_id)
                 models.append(model)
 
-        return models
+        return (m for m in models)
 
     def setName(self, name):
         self.document.name = name
@@ -80,7 +81,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return self.document.getArtistMids()
 
     def getId(self):
-        return self.track.getId()
+        return self.document.getId()
 
     def getMid(self):
         return self.getId()
