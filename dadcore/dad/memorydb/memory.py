@@ -35,7 +35,7 @@ class MemoryDB(log.Loggable):
 
     def __init__(self, path=None):
         self._tracks = {} # id -> track
-        self._artists = {} # dict of artist name -> (MemoryArtistModel, count)
+        self._artists = {} # dict of artist name -> MemoryArtistModel
         self._categories = {}
         self._mbTrackIds = {} # mb track id -> track
 
