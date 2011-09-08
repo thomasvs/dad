@@ -193,7 +193,7 @@ class ArtistSelectorModelTestCase(BaseTestCase):
 
         t = yield self.addFirstTrack()
 
-        yield aModel.get(t.id)
+        yield aModel.get(t.getId())
         
 
 class DatabaseTestCase(BaseTestCase):
@@ -201,7 +201,7 @@ class DatabaseTestCase(BaseTestCase):
     @defer.inlineCallbacks
     def testGetTracks(self):
         t = self.testdb.new()
-        t.name = u'first'
+        t.setName(u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac')
         t.addFragment(info)
         yield self.testdb.save(t)

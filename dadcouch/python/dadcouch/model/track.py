@@ -64,6 +64,9 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
         return models
 
+    def setName(self, name):
+        self.document.name = name
+
     def getId(self):
         return self.document.getId()
 
@@ -99,6 +102,11 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         d.addCallback(lambda _, s: s, self)
         return d
 
+    def addFragment(self, info, metadata=None, mix=None, number=None):
+        return self.document.addFragment(info, metadata, mix, number)
+
+    def getFragments(self):
+        return self.document.getFragment()
 
 class CouchTrackSelectorModel(base.CouchDBModel):
     # FIXME: this should actually be able to pass results in as they arrive,
@@ -114,8 +122,9 @@ class CouchTrackSelectorModel(base.CouchDBModel):
         start = last[0]
 
 
+        # FIXME: don't poke at the internals
         def loadTracks(_):
-            vd = self._daddb.viewDocs('view-tracks-title-artistid', mappings.TrackRow)
+            vd = self._daddb._internal.viewDocs('view-tracks-title-artistid', mappings.TrackRow)
             def eb(f):
                 print 'THOMAS: failure', f
                 return f
@@ -142,7 +151,9 @@ class CouchTrackSelectorModel(base.CouchDBModel):
                 }
                 track.fromDict(d)
                 tm = CouchTrackModel(self._daddb)
+                # FIXME: remove track attribute
                 tm.track = track
+                tm.document = track
                 ret.append(tm)
 
             return ret

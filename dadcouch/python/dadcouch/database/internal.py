@@ -138,236 +138,6 @@ class AlbumsByArtist:
             self.albumId = d['id']
 
 
-class DADDB(log.Loggable):
-    """
-    @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
-    @type  dbName: str
-    """
-
-    interface.implements(idad.IDatabase)
-
-    logCategory = 'daddb'
-
-    def __init__(self, db, dbName):
-        """
-        @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
-        @type  dbName: str
-        """
-        self.db = db
-        self.dbName = dbName
-
-        self._internal = InternalDB(db, dbName)
-
-    ## idad.IDatabase interface
-    def newTrack(self, name, sort=None, mbid=None):
-        return track.CouchTrackModel.new(self, name, sort, mbid)
-
-    def newArtist(self, name, sort=None, mbid=None):
-        return artist.CouchArtistModel.new(self, name, sort, mbid)
-
-    # FIXME: use internal save ?
-    @defer.inlineCallbacks
-    def save(self, item):
-        """
-        @type item; L{base.CouchDocModel}
-        """
-        if isinstance(item, base.CouchDocModel):
-            stored = yield self.saveDoc(item.document)
-            # FIXME: for now, look it up again to maintain the track illusion
-            item.document = yield self.db.map(self.dbName, stored['id'],
-                item.document.__class__)
-            self.debug('saved item doc %r', item.document)
-            defer.returnValue(item)
-        else:
-            raise AttributeError, \
-                "Cannot save item of class %r" % item.__class__
-
-    # FIXME: this actually still yields models I think
-    def getTracks(self):
-        return self._internal.getTracks()
-
-    def score(self, subject, userName, categoryName, score):
-        """
-        @type subject: L{base.Scorable}
-        """
-        assert isinstance(subject, base.Scorable), \
-            "subject %r is not a scorable" % subject
-        return self._internal.score(subject.document,
-            userName, categoryName, score)
-
-    def getScores(self, subject):
-        """
-        @returns: deferred firing list of L{data.Score}
-        """
-        assert isinstance(subject, base.ScorableModel), \
-            "subject %r is not scorable" % subject
-        return self._internal.getScores(subject.document)
-
-    def addCategory(self, name):
-        return self._internal.addCategory(name)
-
-    def getCategories(self):
-        return self._internal.getCategories()
-
-
-    @defer.inlineCallbacks
-    def getTracksByHostPath(self, host, path):
-        """
-        Look up tracks by path.
-        Can return multiple tracks for a path; for example, multiple
-        fragments.
-
-
-        @type  host: unicode
-        @type  path: unicode
-
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
-        """
-        assert type(host) is unicode, \
-            'host is type %r, not unicode' % type(host)
-        assert type(path) is unicode, \
-            'host is type %r, not unicode' % type(path)
-
-        self.debug('get track for host %r and path %r', host, path)
-
-        ret = yield self.viewDocs('view-host-path', mappings.Track,
-            include_docs=True, key=[host, path])
-
-        defer.returnValue(ret)
-
-    def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
-        return track.addFragment(info, metadata, mix, number)
-
-    @defer.inlineCallbacks
-    def getTracksByMD5Sum(self, md5sum):
-        """
-        Look up tracks by md5sum
-        Can return multiple tracks for a path; for example, multiple
-        fragments.
-
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
-        """
-        self.debug('get track for md5sum %r', md5sum)
-
-        ret = yield self.viewDocs('view-md5sum', mappings.Track,
-            include_docs=True, key=md5sum)
-
-        defer.returnValue(ret)
-
-    @defer.inlineCallbacks
-    def getTracksByMBTrackId(self, mbTrackId):
-        """
-        Look up tracks by musicbrainz track id.
-
-        Can return multiple tracks for a path; for example, multiple
-        fragments.
-
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
-        """
-        self.debug('get track for mb track id %r', mbTrackId)
-
-        ret = yield self.viewDocs('view-mbtrackid', mappings.Track,
-            include_docs=True, key=mbTrackId)
-
-        defer.returnValue(ret)
-
-    @defer.inlineCallbacks
-    def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
-        """
-        Add the given file to each fragment with a file with the same md5sum.
-        """
-        self.debug('get track for track %r', track.id)
-
-        track = yield self.db.map(self.dbName, track.id, mappings.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
-
-        for fragment in track.fragments:
-            for f in fragment.files:
-                if f.md5sum == info.md5sum:
-                    self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata, number)
-                    self.debug('fragment %r now has %r files', fragment,
-                        len(fragment.files))
-                    found = True
-                    break
-            if found:
-                break
-
-        track = yield self.save(track)
-        defer.returnValue(track)
-
-    @defer.inlineCallbacks
-    def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
-        self.debug('get track for track id %r', track.id)
-
-        track = yield self.db.map(self.dbName, track.id, mappings.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
-
-        if len(track.fragments) > 1:
-            self.warning('Not yet implemented finding the right fragment to add by mbid')
-
-        for fragment in track.fragments:
-            for f in fragment.files:
-                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
-                    self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata, number)
-                    found = True
-                    break
-            if found:
-                break
-
-        stored = yield self.saveDoc(track)
-
-        track = yield self.db.map(self.dbName, stored['id'], mappings.Track)
-        defer.returnValue(track)
-
-    @defer.inlineCallbacks
-    def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,
-        random=False):
-        """
-        @type  limit:        int or None
-        @type  random:       bool
-
-        @returns: list of tracks and additional info, ordered by track id
-        @rtype: L{defer.Deferred} firing
-                list of Track, Slice, path, score, userId
-        """
-        self.debug('Getting tracks for host %r and category %r and user %r',
-            hostName, categoryName, userName)
-
-        startkey = [userName, categoryName, above]
-        endkey = [userName, categoryName, below]
-
-        gen = yield self.viewDocs('view-scores-host', mappings.Track,
-            startkey=startkey, endkey=endkey, include_docs=True)
-
-        # FIXME: filter on host ?
-
-        # FIXME: for randomness, we currently go from generator to
-        # full list and back
-        if random:
-            tracks = list(gen)
-            import random
-            random.shuffle(tracks)
-            gen = (t for t in tracks)
-
-        defer.returnValue(gen)
-
-    ### own instance methods
-    def map(self, docId, objectFactory):
-        return self.db.map(self.dbName, docId, objectFactory)
-
-    def modelFactory(self, modelClass):
-        return lambda: modelClass(daddb=self)
-
- 
 class InternalDB(log.Loggable):
     """
     I interact with the CouchDB database and mappings and documents.
@@ -481,20 +251,20 @@ class InternalDB(log.Loggable):
 
     # FIXME: docs only
     @defer.inlineCallbacks
-    def save(self, item):
+    def save(self, doc):
         """
-        @type item; L{base.CouchDocModel}
+        @type doc; L{paisley.mapping.Document}
         """
-        if isinstance(item, base.CouchDocModel):
-            stored = yield self.saveDoc(item.document)
+        if isinstance(doc, mapping.Document):
+            stored = yield self.saveDoc(doc)
             # FIXME: for now, look it up again to maintain the track illusion
-            item.document = yield self.db.map(self.dbName, stored['id'],
-                item.document.__class__)
-            self.debug('saved item doc %r', item.document)
-            defer.returnValue(item)
+            doc = yield self.db.map(self.dbName, stored['id'],
+                doc.__class__)
+            self.debug('saved doc %r', doc)
+            defer.returnValue(doc)
         else:
             raise AttributeError, \
-                "Cannot save item of class %r" % item.__class__
+                "Cannot save doc of class %r" % doc.__class__
 
     @defer.inlineCallbacks
     def getTracks(self):

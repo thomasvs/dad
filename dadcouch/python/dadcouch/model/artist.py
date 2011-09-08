@@ -16,6 +16,7 @@ from dadcouch.extern.paisley import views
 
 # FIXME: should be possible to create a new one through AppModel
 # either empty or from db
+# FIXME: remove artist for document
 class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     I represent an artist in a CouchDB database.
@@ -29,11 +30,12 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
             sort = name
 
         model = CouchArtistModel(db)
-        model.artist = mappings.Artist()
+        model.document = mappings.Artist()
 
-        model.artist.name = name
-        model.artist.sortName = sort
-        model.artist.mbid = mbid
+        model.document.name = name
+        model.document.sortName = sort
+        model.document.mbid = mbid
+        model.artist = model.document
         return model
     new = classmethod(new)
 
@@ -77,10 +79,8 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         defer.returnValue(result)
 
 
-    @defer.inlineCallbacks
     def save(self):
-        self.artist = yield self._daddb.save(self.artist)
-        defer.returnValue(self)
+        return self._daddb.save(self)
 
     ### FIXME: to be added to iface ?
 

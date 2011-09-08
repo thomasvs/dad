@@ -159,6 +159,12 @@ class DADDB(log.Loggable):
         self._internal = internal.InternalDB(db, dbName)
 
     ## idad.IDatabase interface
+    # FIXME: remove this from iface
+    def new(self):
+        am = track.CouchTrackModel(self)
+        am.document = mappings.Track()
+        return am
+
     def newTrack(self, name, sort=None, mbid=None):
         return track.CouchTrackModel.new(self, name, sort, mbid)
 
@@ -174,7 +180,8 @@ class DADDB(log.Loggable):
         if isinstance(item, base.CouchDocModel):
             stored = yield self._internal.saveDoc(item.document)
             # FIXME: for now, look it up again to maintain the track illusion
-            item.document = yield self.db.map(self.dbName, stored['id'],
+            item.document = yield self._internal.db.map(
+                self.dbName, stored['id'],
                 item.document.__class__)
             self.debug('saved item doc %r', item.document)
             defer.returnValue(item)
@@ -186,14 +193,17 @@ class DADDB(log.Loggable):
     def getTracks(self):
         return self._internal.getTracks()
 
+    @defer.inlineCallbacks
     def score(self, subject, userName, categoryName, score):
         """
-        @type subject: L{base.Scorable}
+        @type subject: L{base.ScorableModel}
         """
-        assert isinstance(subject, base.Scorable), \
+        assert isinstance(subject, base.ScorableModel), \
             "subject %r is not a scorable" % subject
-        return self._internal.score(subject.document,
+        doc = yield self._internal.score(subject.document,
             userName, categoryName, score)
+        subject.document = doc
+        defer.returnValue(subject)
 
     def getScores(self, subject):
         """
@@ -209,8 +219,6 @@ class DADDB(log.Loggable):
     def getCategories(self):
         return self._internal.getCategories()
 
-
-    @defer.inlineCallbacks
     def getTracksByHostPath(self, host, path):
         """
         Look up tracks by path.
@@ -224,22 +232,12 @@ class DADDB(log.Loggable):
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
-        assert type(host) is unicode, \
-            'host is type %r, not unicode' % type(host)
-        assert type(path) is unicode, \
-            'host is type %r, not unicode' % type(path)
-
-        self.debug('get track for host %r and path %r', host, path)
-
-        ret = yield self.viewDocs('view-host-path', mappings.Track,
-            include_docs=True, key=[host, path])
-
-        defer.returnValue(ret)
+        return self._internal.getTracksByHostPath(host, path)
 
     def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
         return track.addFragment(info, metadata, mix, number)
 
-    @defer.inlineCallbacks
+    # FIXME: what do we return ?
     def getTracksByMD5Sum(self, md5sum):
         """
         Look up tracks by md5sum
@@ -249,14 +247,8 @@ class DADDB(log.Loggable):
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
-        self.debug('get track for md5sum %r', md5sum)
+        return self._internal.getTracksByMD5Sum(md5sum)
 
-        ret = yield self.viewDocs('view-md5sum', mappings.Track,
-            include_docs=True, key=md5sum)
-
-        defer.returnValue(ret)
-
-    @defer.inlineCallbacks
     def getTracksByMBTrackId(self, mbTrackId):
         """
         Look up tracks by musicbrainz track id.
@@ -267,66 +259,18 @@ class DADDB(log.Loggable):
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
-        self.debug('get track for mb track id %r', mbTrackId)
+        return self._internal.getTracksByMBTrackId(mbTrackId)
 
-        ret = yield self.viewDocs('view-mbtrackid', mappings.Track,
-            include_docs=True, key=mbTrackId)
-
-        defer.returnValue(ret)
-
-    @defer.inlineCallbacks
     def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
         """
         Add the given file to each fragment with a file with the same md5sum.
         """
-        self.debug('get track for track %r', track.id)
+        return self._internal.trackAddFragmentFileByMD5Sum(
+            track.document, info, metadata, mix, number)
 
-        track = yield self.db.map(self.dbName, track.id, mappings.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
-
-        for fragment in track.fragments:
-            for f in fragment.files:
-                if f.md5sum == info.md5sum:
-                    self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata, number)
-                    self.debug('fragment %r now has %r files', fragment,
-                        len(fragment.files))
-                    found = True
-                    break
-            if found:
-                break
-
-        track = yield self.save(track)
-        defer.returnValue(track)
-
-    @defer.inlineCallbacks
     def trackAddFragmentFileByMBTrackId(self, track, info, metadata, mix=None, number=None):
-        self.debug('get track for track id %r', track.id)
-
-        track = yield self.db.map(self.dbName, track.id, mappings.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
-
-        if len(track.fragments) > 1:
-            self.warning('Not yet implemented finding the right fragment to add by mbid')
-
-        for fragment in track.fragments:
-            for f in fragment.files:
-                if f.metadata and f.metadata.mb_track_id == metadata.mbTrackId:
-                    self.debug('Appending to fragment %r', fragment)
-                    track.filesAppend(fragment.files, info, metadata, number)
-                    found = True
-                    break
-            if found:
-                break
-
-        stored = yield self.saveDoc(track)
-
-        track = yield self.db.map(self.dbName, stored['id'], mappings.Track)
-        defer.returnValue(track)
+        return self._internal.trackAddFragmentFileByMBTrackId(
+            track.document, info, metadata, mix, number)
 
     @defer.inlineCallbacks
     def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,

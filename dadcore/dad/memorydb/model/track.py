@@ -51,6 +51,21 @@ class MemoryTrackModel(track.TrackModel, base.MemoryModel):
                 if file.metadata:
                     return file.metadata.title
 
+    def setName(self, name):
+        self.name = name
+
+    # FIXME: should this be in the iface ?
+    def getId(self):
+        return self.id
+
+    def getArtistNames(self):
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if file.metadata and file.metadata.artist:
+                    return [file.metadata.artist, ]
+
+        return []
+
     @defer.inlineCallbacks
     def getArtists(self):
         models = []
