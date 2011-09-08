@@ -24,11 +24,15 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
 
     artist = None
 
-    def new(self, db, name, mbid=None):
+    def new(self, db, name, sort=None, mbid=None):
+        if not sort:
+            sort = name
+
         model = CouchArtistModel(db)
         model.artist = mappings.Artist()
 
         model.artist.name = name
+        model.artist.sortName = sort
         model.artist.mbid = mbid
         return model
     new = classmethod(new)

@@ -14,11 +14,12 @@ class ArtistModel(base.ScorableModel):
     My controller is L{dad.controller.track.ArtistController}
     """
 
-    def new(self, db, name, mbid=None):
+    def new(self, db, name, sort=None, mbid=None):
         """
         Return a new artist model.
 
         @type  name: C{unicode}
+        @type  sort: C{unicode}
         @type  mbid: C{unicode}
 
         @rtype: L{dad.model.artist.ArtistModel}

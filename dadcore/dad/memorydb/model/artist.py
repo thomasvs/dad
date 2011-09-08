@@ -22,9 +22,13 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
         base.MemoryModel.__init__(self, memorydb)
         self.tracks = []
 
-    def new(self, db, name, mbid=None):
+    def new(self, db, name, sort=None, mbid=None):
+        if not sort:
+            sort = name
+
         model = MemoryArtistModel(db)
         model.name = name
+        model.sortName = sort
         model.mbid = mbid
         return model
     new = classmethod(new)

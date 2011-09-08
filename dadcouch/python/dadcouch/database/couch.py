@@ -265,9 +265,8 @@ class DADDB(log.Loggable):
     def new(self):
         return mappings.Track()
 
-    def newArtist(self, name, mbid=None):
-        model = artist.CouchArtistModel.new(self, name, mbid)
-        return model
+    def newArtist(self, name, sort=None, mbid=None):
+        return artist.CouchArtistModel.new(self, name, sort, mbid)
 
     @defer.inlineCallbacks
     def save(self, item):

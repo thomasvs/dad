@@ -43,11 +43,12 @@ class IDatabase(interface.Interface):
         Return a new track data object that can be handed to calls.
         """
 
-    def newArtist(name, mbid=None):
+    def newArtist(name, sort=None, mbid=None):
         """
         Return a new artist model.
 
         @type  name: C{unicode}
+        @type  sort: C{unicode}
         @type  mbid: C{unicode}
 
         @rtype: L{dad.model.artist.ArtistModel}
