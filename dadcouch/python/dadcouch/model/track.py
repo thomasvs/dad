@@ -8,9 +8,10 @@ from twisted.internet import defer
 from dad.model import track
 
 from dadcouch.model import base
-from dadcouch.database import mappings, couch
+from dadcouch.database import mappings
 
 
+# FIXME: remove track attribute
 class CouchTrackModel(base.ScorableModel, track.TrackModel):
     """
     I represent a track in a CouchDB database.
