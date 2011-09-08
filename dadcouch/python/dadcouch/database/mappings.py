@@ -78,6 +78,7 @@ class Artist(mapping.Document):
 
 
 # new documents
+# FIXME: do we want to directly subclass from TrackModel here ?
 class Track(mapping.Document, track.TrackModel):
     type = mapping.TextField(default="track")
 

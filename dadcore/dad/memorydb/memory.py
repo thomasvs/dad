@@ -68,10 +68,11 @@ class MemoryDB(log.Loggable):
     ### idad.IDatabase interface
     def new(self):
         self._id += 1
-        return track.MemoryTrackModel(self._id)
+        return track.MemoryTrackModel(self, id=self._id)
 
     def newArtist(self, name, mbid=None):
-        return artist.MemoryArtistModel.new(self, name, mbid)
+        model = artist.MemoryArtistModel.new(self, name, mbid)
+        return model
 
     def save(self, track):
         self._tracks[track.id] = track

@@ -6,15 +6,15 @@ from twisted.internet import defer
 from dad.model import track
 from dad.memorydb.model import base
 
-# FIXME: should subclass from base; __init__ needs fixing
-class MemoryTrackModel(track.TrackModel):
+class MemoryTrackModel(track.TrackModel, base.MemoryModel):
     """
-    @ivar id:     id of the track
     @ivar scores: list of L{data.Score}
     """
 
-    def __init__(self, id):
+    def __init__(self, memorydb, id=None):
+        base.MemoryModel.__init__(self, memorydb)
         self.id = id
+
         self.scores = []
         self.fragments = []
         self.name = None
@@ -39,14 +39,7 @@ class MemoryTrackModel(track.TrackModel):
                 if file.metadata:
                     return file.metadata.title
 
-    def getArtistNames(self):
-        for fragment in self.fragments:
-            for file in fragment.files:
-                if file.metadata and file.metadata.artist:
-                    return [file.metadata.artist, ]
-
-        return []
-
+    @defer.inlineCallbacks
     def getArtists(self):
         models = []
 
@@ -56,12 +49,20 @@ class MemoryTrackModel(track.TrackModel):
                     continue
 
                 # metadata only lists one artist
-                am = self._memorydb.newArtist(
+                am = yield self._db.newArtist(
                     name=file.metadata.artist,
                     mbid=file.metadata.mbArtistId)
                 models.append(am)
 
-        return defer.succeed(models)
+        defer.returnValue((m for m in models))
+
+    def getArtistNames(self):
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if file.metadata and file.metadata.artist:
+                    return [file.metadata.artist, ]
+
+        return []
 
 
     def getArtistIds(self):

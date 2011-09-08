@@ -1,4 +1,4 @@
-# -*- Mode: Python -*- #
+# -*- Mode: Python; test-case-name: dad.test.test_database_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 
@@ -25,6 +25,9 @@ class BaseTestCase:
 
     @defer.inlineCallbacks
     def addFirstTrack(self):
+        """
+        @rtype: mappings.Track
+        """
         # add a first track
         t = self.testdb.new()
         yield self.testdb.save(t)
@@ -94,6 +97,14 @@ class TrackModelTestCase(BaseTestCase):
         # make sure we get the metadata track name back
         self.assertEquals(t.getName(), u'hit me')
 
+    @defer.inlineCallbacks
+    def testGetArtists(self):
+        t = yield self.addFirstTrack()
+        print type(t)
+        artists = yield t.getArtists()
+        a = artists.next()
+        self.assertEquals(a.name, u'The Afghan Whigs')
+        self.failIf(artists.next())
 
 class TrackSelectorModelTestCase(BaseTestCase):
 

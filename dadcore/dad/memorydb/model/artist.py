@@ -30,15 +30,16 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
     new = classmethod(new)
 
     ### model implementations
+    # FIXME: decide if getName can return this or def; used in __repr__
     def getName(self):
-        return defer.succeed(self.name)
+        return self.name
 
     def setName(self, name):
         self.name = name
         return defer.succeed(None)
 
     def getSortName(self):
-        return defer.succeed(self.name)
+        return self.name
 
     def getId(self):
         return self.id

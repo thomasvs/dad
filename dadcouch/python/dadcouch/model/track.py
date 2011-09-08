@@ -28,18 +28,38 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     def getName(self):
         return self.track.getName()
 
-    def getId(self):
-        return self.track.getId()
+    # FIXME: add to iface ?
+    def getArtists(self):
+        models = []
 
-    def getMid(self):
-        return self.getId()
+        if track.artists:
+            for artist in track.artists:
+                # FIXME: sort name ? id ?
+                model = self._daddb.newArtist(
+                    name=artist.name, mbid=artist.mbid)
+                models.append(model)
 
+        for fragment in self.fragments:
+            for file in fragment.files:
+                if not file.metadata:
+                    continue
+                model = self._daddb.newArtist(
+                    name=file.metadata.artist, mbid=file.mb_artist_id)
+                models.append(model)
+
+        return models
 
     def getArtistNames(self):
         return self.track.getArtistNames()
 
     def getArtistMids(self):
         return self.track.getArtistMids()
+
+    def getId(self):
+        return self.track.getId()
+
+    def getMid(self):
+        return self.getId()
 
 
     def get(self, trackId):
