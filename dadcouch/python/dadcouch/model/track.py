@@ -93,7 +93,7 @@ class CouchTrackSelectorModel(base.CouchDBModel):
 
 
         def loadTracks(_):
-            vd = self._daddb.viewDocs('view-tracks-title-artistid', couch.TrackRow)
+            vd = self._daddb.viewDocs('view-tracks-title-artistid', mappings.TrackRow)
             def eb(f):
                 print 'THOMAS: failure', f
                 return f

@@ -506,3 +506,20 @@ class Slice(mapping.Document):
         mapping.FloatField, mapping.LongField)))
     decay = mapping.ListField(mapping.TupleField((
         mapping.FloatField, mapping.LongField)))
+
+# map track view
+class TrackRow(mapping.Document):
+    id = mapping.TextField()
+    name = mapping.TextField()
+    artist_ids = mapping.ListField(mapping.TextField())
+
+    artist = mapping.DictField(mapping.Mapping.build(
+            name = mapping.TextField(),
+            sortname = mapping.TextField(),
+            id = mapping.TextField(),
+    ))
+
+    def fromDict(self, d):
+        self.id = d['id']
+        self.name = d['key']
+        self.artists = d['value']
