@@ -287,7 +287,7 @@ class InternalDB(log.Loggable):
 
     # FIXME: rename to setScore ?
     @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
+    def setScore(self, subject, userName, categoryName, score):
         """
         @type subject: L{mapping.Document}
         """

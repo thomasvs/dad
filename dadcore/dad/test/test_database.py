@@ -65,8 +65,8 @@ class TrackModelTestCase(BaseTestCase):
         # make sure it gets an id
         tm = yield self.testdb.save(tm)
 
-        tm = yield self.testdb.score(tm, u'thomas', u'Good', 0.1)
-        tm = yield self.testdb.score(tm, u'thomas', u'Party', 0.2)
+        tm = yield self.testdb.setScore(tm, u'thomas', u'Good', 0.1)
+        tm = yield self.testdb.setScore(tm, u'thomas', u'Party', 0.2)
 
         categories = yield self.testdb.getCategories()
         self.failUnless(u'Good' in categories)
@@ -77,7 +77,7 @@ class TrackModelTestCase(BaseTestCase):
         self.assertEquals(scores[0].score, 0.1)
 
         # update score
-        yield self.testdb.score(tm, u'thomas', u'Good', 0.3)
+        yield self.testdb.setScore(tm, u'thomas', u'Good', 0.3)
 
         scores = yield self.testdb.getScores(tm)
         self.assertEquals(scores[0].category, u'Good')
@@ -148,6 +148,31 @@ class ArtistModelTestCase(BaseTestCase):
         self.assertEquals(len(tracks), 1)
         rtid = yield aModel.getId()
         self.assertEquals(tid, rtid)
+
+    def testScore(self):
+        am = yield self.testdb.newArtist(name=u'The Afghan Whigs')
+
+        # make sure it gets an id
+        am = yield self.testdb.save(am)
+
+        am = yield self.testdb.setScore(am, u'thomas', u'Good', 0.1)
+        am = yield self.testdb.setScore(am, u'thomas', u'Party', 0.2)
+
+        categories = yield self.testdb.getCategories()
+        self.failUnless(u'Good' in categories)
+        self.failUnless(u'Party' in categories)
+
+        scores = yield self.testdb.getScores(am)
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 0.1)
+
+        # update score
+        yield self.testdb.setScore(am, u'thomas', u'Good', 0.3)
+
+        scores = yield self.testdb.getScores(am)
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 0.3)
+
 
 class ArtistSelectorModelTestCase(BaseTestCase):
 

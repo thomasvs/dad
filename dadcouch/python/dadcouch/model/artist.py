@@ -142,8 +142,9 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
 
     # In addition to scoring the artist, we want to update calculated scores
     # for tracks and albums
+    # FIXME: but maybe we want that in the database layer instead
     @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
+    def setScore(self, subject, userName, categoryName, score):
         subject = yield base.ScorableModel.score(self,
             subject, userName, categoryName, score)
 

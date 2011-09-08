@@ -45,7 +45,7 @@ class ScorableModel(Model):
         """
         raise NotImplementedError
 
-    def score(self, subject, userName, categoryName, score):
+    def setScore(self, subject, userName, categoryName, score):
         """
         Score a subject.
         """

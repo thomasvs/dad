@@ -158,7 +158,7 @@ class IDatabase(interface.Interface):
         track id.
         """
 
-    def score(subject, userName, categoryName, score):
+    def setScore(subject, userName, categoryName, score):
         """
         Score the given subject.
         The database backend should store the score and related information.

@@ -237,7 +237,7 @@ class MemoryDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
+    def setScore(self, subject, userName, categoryName, score):
         self.debug('asked to score subject %r '
             'for user %r and category %r to score %r',
             subject, userName, categoryName, score)

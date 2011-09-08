@@ -66,7 +66,7 @@ class ScorableModel(CouchDocModel):
         defer.returnValue(scores)
 
     @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
+    def setScore(self, subject, userName, categoryName, score):
         doc = getattr(subject, self.subjectType)
         doc = yield self._daddb.score(doc, userName, categoryName, score)
         setattr(subject, self.subjectType, doc)

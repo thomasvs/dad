@@ -188,13 +188,13 @@ class DADDB(log.Loggable):
         return self._internal.getTracks()
 
     @defer.inlineCallbacks
-    def score(self, subject, userName, categoryName, score):
+    def setScore(self, subject, userName, categoryName, score):
         """
         @type subject: L{base.ScorableModel}
         """
         assert isinstance(subject, base.ScorableModel), \
             "subject %r is not a scorable" % subject
-        doc = yield self._internal.score(subject.document,
+        doc = yield self._internal.setScore(subject.document,
             userName, categoryName, score)
         subject.document = doc
         defer.returnValue(subject)
