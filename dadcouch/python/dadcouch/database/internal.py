@@ -316,7 +316,6 @@ class InternalDB(log.Loggable):
                 self.debug('Updating score for %r in %r from %r to %r',
                     userName, categoryName, s.score, score)
                 subject.scores[i].score = score
-                ret = yield self.save(subject)
                 found = True
 
         if not found:
@@ -329,12 +328,12 @@ class InternalDB(log.Loggable):
                 'category': categoryName,
                 'score': score
             })
-            ret = yield self.save(subject)
 
+        ret = yield self.save(subject)
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
-    def getScores(self, subject):
+    def getScores(self, subject, view='view-scores-by-subject'):
         """
         @type  subject: L{mappings.Document}
 
@@ -342,7 +341,7 @@ class InternalDB(log.Loggable):
         """
 
         # get all scores for this subject
-        rows = yield self.viewDocs('view-scores-by-subject', ScoreRow,
+        rows = yield self.viewDocs(view, ScoreRow,
             key=subject.id)
 
         rows = list(rows)
@@ -364,7 +363,61 @@ class InternalDB(log.Loggable):
         self.debug('%d scores for %r', len(scores), subject.id)
         defer.returnValue(scores)
 
+    # FIXME: copy/paste from setScore, reuse ?
+    @defer.inlineCallbacks
+    def setCalculatedScore(self, subject, userName, categoryName, score):
+        """
+        @type subject: L{mapping.Document}
+        """
+        assert isinstance(subject, mappings.Track), \
+            "subject %r is not a track" % subject
 
+        # FIXME: maybe we should first get the most recent version,
+        #        then update, to avoid conflicts ?
+        self.debug('asked to score subject %r '
+            'for user %r and category %r to score %r',
+            subject, userName, categoryName, score)
+
+        # the document could not be saved yet
+        if subject.id:
+            subject = yield self.db.map(self.dbName, subject.id,
+                subject.__class__)
+
+        self.debug('updated subject to %r', subject)
+
+
+        found = False
+        ret = None
+
+        for i, s in enumerate(subject.calculated_scores):
+            if s.user == userName and s.category == categoryName:
+                self.debug('Updating score for %r in %r from %r to %r',
+                    userName, categoryName, s.score, score)
+                subject.calculated_scores[i].score = score
+                found = True
+
+        if not found:
+            self.debug('Setting score for %r in %r to %r',
+                userName, categoryName, score)
+            if not subject.calculated_scores:
+                subject.calculated_scores = []
+            subject.calculated_scores.append({
+                'user': userName,
+                'category': categoryName,
+                'score': score
+            })
+        ret = yield self.save(subject)
+
+        defer.returnValue(ret)
+
+
+    def getCalculatedScores(self, track):
+        """
+        @type  track: L{couch.Track}
+
+        @returns: deferred firing list of L{data.Score}
+        """
+        return self.getScores(track, view='view-calculated-scores-by-track')
 
     # FIXME: all of these are currently duplicated; move to internal
     @defer.inlineCallbacks

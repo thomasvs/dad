@@ -39,7 +39,8 @@ class ScorableModel(CouchDocModel):
         """
         Get a subject's scores and resolve their user and category.
 
-        @rtype: list of user, category, score
+
+        @returns: L{Deferred} firing list of L{data.Score}
         """
 
         userId = None
@@ -50,15 +51,14 @@ class ScorableModel(CouchDocModel):
         #     user.Id = unicode(user.id)
 
         # FIXME: the subject controller has .subject, not .track or .artist?
-        subject = getattr(self, self.subjectType)
-        if not subject:
-            self.debug('No subject, no scores')
+        if not self.document:
+            self.debug('No document, no scores')
             import code; code.interact(local=locals())
             defer.returnValue([])
             return
 
-        self.debug('Getting scores for %r', subject)
-        scores = yield self._daddb.getScores(subject)
+        self.debug('Getting scores for %r', self.document)
+        scores = yield self._daddb.getScores(self)
         #import code; code.interact(local=locals())
         #scores = yield self._daddb.getScores(self.subject)
 
@@ -67,7 +67,4 @@ class ScorableModel(CouchDocModel):
 
     @defer.inlineCallbacks
     def setScore(self, subject, userName, categoryName, score):
-        doc = getattr(subject, self.subjectType)
-        doc = yield self._daddb.score(doc, userName, categoryName, score)
-        setattr(subject, self.subjectType, doc)
-        defer.returnValue(subject)
+        yield self._daddb.setScore(self, userName, categoryName, score)

@@ -42,6 +42,8 @@ class MemoryDB(log.Loggable):
         self._hostPath = {} # dict of host -> (dict of path -> track)
         self._md5sums = {} # dict of md5sum -> track
 
+        self._calculatedScores = {} # dict of track -> list of Score
+
         self._id = 0
 
         self._path = path
@@ -71,6 +73,28 @@ class MemoryDB(log.Loggable):
 
     def newArtist(self, name, sort=None, mbid=None):
         return artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
+
+    @defer.inlineCallbacks
+    def getOrCreateArtist(self, name, sort=None, mbid=None):
+        # look up by mbid or name
+        mid = None
+        if mbid:
+            mid = u'artist:mbid:' + mbid
+        elif name:
+            mid = u'artist:name:' + name
+
+        if mid:
+            self.debug('Looking up by mid %r', mid)
+            if name in self._artists:
+                model = self._artists[name]
+            self.debug('Looked up by mid %r, model %r', mid, model)
+
+        if not model:
+            self.debug('Creating new artist for mid %r', mid)
+            model = yield self.newArtist(name, sort, mbid)
+
+        defer.returnValue(model)
+
 
     # FIXME: make generic
     def save(self, track):
@@ -126,10 +150,53 @@ class MemoryDB(log.Loggable):
         """
         @returns: deferred firing list of L{data.Score}
         """
-        scores = self._tracks[subject.id].scores
-        self.debug('%d scores for %r', len(scores), subject.id)
+        if isinstance(subject, track.MemoryTrackModel):
+            scores = self._tracks[subject.getId()].scores
+            self.debug('%d scores for %r', len(scores), subject.id)
+            return defer.succeed(scores)
+        elif isinstance(subject, artist.MemoryArtistModel):
+            scores = self._artists[subject.getName()].scores
+            self.debug('%d scores for %r', len(scores), subject.id)
+            return defer.succeed(scores)
+        else:
+            raise AttributeError('No way to get scores for class %r' %
+                subject.__class__)
+
+    def getCalculatedScores(self, subject):
+        """
+        @returns: deferred firing list of L{data.Score}
+        """
+        scores = self._calculatedScores.get(subject, [])
         return defer.succeed(scores)
 
+    
+    @defer.inlineCallbacks
+    def setCalculatedScore(self, subject, userName, categoryName, score):
+        found = False
+
+        for i, s in enumerate(self._calculatedScores.get(subject, [])):
+            if s.user == userName and s.category == categoryName:
+                self.debug('Updating score for %r in %r from %r to %r',
+                    userName, categoryName, s.score, score)
+                self._calculatedScores[subject][i].score = score
+                found = True
+
+        if not found:
+            self.debug('Setting score for %r in %r to %r',
+                userName, categoryName, score)
+            if not self._calculatedScores.has_key(subject):
+                self._calculatedScores[subject] = []
+            s = data.Score()
+            s.subject = subject
+            s.user = userName
+            s.category = categoryName
+            s.score = score
+            self._calculatedScores[subject].append(s)
+        ret = yield self._save()
+
+        defer.returnValue(subject)
+
+ 
     def getTracksByHostPath(self, host, path):
         """
         Look up tracks by path.

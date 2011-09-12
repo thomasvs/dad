@@ -44,6 +44,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return self.document.getName()
 
     # FIXME: add to iface ?
+    @defer.inlineCallbacks
     def getArtists(self):
         models = []
 
@@ -59,11 +60,12 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
                 if not file.metadata:
                     continue
                 # FIXME: why is this a dict and not something with attrs?
-                model = self._daddb.newArtist(
+                model = yield self._daddb.getOrCreateArtist(
                     name=file.metadata.artist, mbid=file.metadata.mb_artist_id)
                 models.append(model)
 
-        return (m for m in models)
+        gen = (m for m in models)
+        defer.returnValue(gen)
 
     def setName(self, name):
         self.document.name = name
@@ -85,6 +87,20 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
     def getMid(self):
         return self.getId()
+
+    def getCalculatedScores(self, userName=None):
+        """
+        Get a track's calculated scores and resolve their user and category.
+
+        @returns: L{Deferred} firing list of L{data.Score}
+        """
+        return self._db.getCalculatedScores(self)
+
+    def setCalculatedScore(self, userName, categoryName, score):
+        """
+        Set calculated score on a track.
+        """
+        return self._daddb.setCalculatedScore(self, userName, categoryName, score)
 
 
     def get(self, trackId):

@@ -181,7 +181,73 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         defer.returnValue(ret)
 
+    @defer.inlineCallbacks
+    def recalculateTrackScore(self, tm):
+        """
+        Recalculate the aggregate track score of a track, taking into account
+        artist and album scores.
 
+        @type  tm: L{dad.model.track.TrackModel}
+        """
+        def _calculate(track, artists, albums):
+            """
+            Calculate an aggregate score given the inputs.
+            """
+            self.debug('based on %r track, %r artists, %r albums',
+                track, artists, albums)
+
+            typed = []
+
+            if track:
+                typed.append(track)
+            if artists:
+                typed.append(_geometric(artists))
+            if albums:
+                typed.append(_geometric(albums))
+            return _geometric(typed)
+
+        def _geometric(values):
+            product = 1.0
+            for v in values:
+                product *= v
+            return pow(product, 1.0 / len(values))
+
+        pairs = {}
+        scores = {}
+
+        trackScores = yield tm.getScores()
+        for score in trackScores:
+            scores[tm] = score
+            key = (score.user, score.category)
+            if not key in pairs:
+                pairs[key] = []
+            pairs[key].append((score.score, 'track'))
+
+        artists = yield tm.getArtists()
+        for artist in artists:
+            artistScores = yield artist.getScores()
+            for score in artistScores:
+                scores[artist] = score
+                key = (score.user, score.category)
+                if not key in pairs:
+                    pairs[key] = []
+                pairs[key].append((score.score, 'artist'))
+        
+        for ((user, category), scoreModels) in pairs.items():
+            track = None
+            artists = []
+
+            for value, which in scoreModels:
+                if which == 'track':
+                    track = value
+                elif which == 'artist':
+                    artists.append(value)
+
+            value = _calculate(track, artists, [])
+            self.debug('Setting score on %r to %r, %r, %r',
+                tm, user, category, value)
+            tm = yield tm.setCalculatedScore(user, category, value)
+    
 class FileInfo:
     """
     A class for collecting information about a file.

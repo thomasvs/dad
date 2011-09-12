@@ -23,8 +23,6 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     subjectType = 'artist'
 
-    artist = None
-
     def new(self, db, name, sort=None, mbid=None):
         if not sort:
             sort = name
@@ -41,24 +39,24 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
 
     ### artist.ArtistModel implementations
     def getName(self):
-        return self.artist.name
+        return self.document.name
 
     def setName(self, name):
-        # FIXME: this is ugly, self.artist should be set already
-        if not self.artist:
-            self.artist = mappings.Artist()
+        # FIXME: this is ugly, self.document should be set already
+        if not self.document:
+            self.document = mappings.Artist()
 
-        self.artist.name = name
+        self.document.name = name
         return defer.succeed(None)
 
     def getSortName(self):
-        return self.artist.sortname
+        return self.document.sortname
 
     def getId(self):
-        return self.artist.id
+        return self.document.id
 
     def getMbId(self):
-        return self.artist.mbid
+        return self.document.mbid
 
     ### FIXME: to be implemented
     def getTrackCount(self):
@@ -98,35 +96,34 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
             # FIXME: fix subject vs artist
             self.subject = yield self._daddb.db.map(
                 self._daddb.dbName, mid, mappings.Artist)
-            self.artist = self.subject
+            self.document = self.subject
         except error.Error, e:
             # FIXME: trap error.Error with 404
             self.debug('aid %r does not exist as doc, viewing', mid)
 
             # get it by aid instead
-            ret = yield self._daddb.viewDocs('view-artist-docs', mappings.Artist,
+            # FIXME: _internal
+            ret = yield self._daddb._internal.viewDocs('view-artist-docs', mappings.Artist,
                 key=mid, include_docs=True)
-            artists = list(ret)
-            if not artists:
+            artistDocs = list(ret)
+            if not artistDocs:
                 self.debug('aid %r can not be viewed, creating temp', mid)
                 # create an empty one
                 # raise IndexError(mid)
-                artist = mappings.Artist()
-                artist.name = self.getName()
-                artist.sortname = self.sortname
-                artist.mbid = self.getMbId()
-                self.debug('Creating temporary model from self %r to %r',
-                    self, artist)
+                artist = yield CouchArtistModel.new(self._daddb,
+                    self.getName(), self.getSortName(), self.getMbId())
                 # FIXME: based on aid, fill in mbid or name ?
                 artists = [artist, ]
             else:
-                self.debug('Found artists: %r', artists)
-
+                self.debug('Found artists: %r', artistDocs)
+                artists = []
+                for doc in artistDocs:
+                    am = CouchArtistModel(self._daddb)
+                    am.document = doc
+                    artists.append(am)
+ 
             # FIXME: multiple matches, find best one ? maybe mbid first ?
-            self.subject = CouchArtistModel(self._daddb)
-            self.artist = self.subject
-            self.subject.artist = artists[0]
-            defer.returnValue(self.subject)
+            defer.returnValue(artists[0])
             return
             
         except Exception, e:
@@ -143,15 +140,22 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     # In addition to scoring the artist, we want to update calculated scores
     # for tracks and albums
     # FIXME: but maybe we want that in the database layer instead
+    # FIXME: if we finish this method, remove subject from the args,
+    # should work on model directly
     @defer.inlineCallbacks
     def setScore(self, subject, userName, categoryName, score):
-        subject = yield base.ScorableModel.score(self,
+        subject = yield base.ScorableModel.setScore(self,
             subject, userName, categoryName, score)
+
+        defer.returnValue(self)
+        return
+        # FIXME: remove this ?
 
         # now get all tracks for this artist
         doc = getattr(subject, self.subjectType)
         doc = yield self._daddb.score(doc, userName, categoryName, score)
         setattr(subject, self.subjectType, doc)
+        setattr(subject, self.document, doc)
         defer.returnValue(subject)
 
 # FIXME: rename

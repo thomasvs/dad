@@ -6,7 +6,7 @@ from twisted.internet import defer
 from dad.model import artist
 from dad.memorydb.model import base
 
-class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
+class MemoryArtistModel(base.ScorableMemoryModel, artist.ArtistModel):
     """
     @ivar id:     id of the artist
     @ivar name:   name of the artist
@@ -19,7 +19,7 @@ class MemoryArtistModel(artist.ArtistModel, base.MemoryModel):
     tracks = None
 
     def __init__(self, memorydb):
-        base.MemoryModel.__init__(self, memorydb)
+        base.ScorableMemoryModel.__init__(self, memorydb)
         self.tracks = []
 
     def new(self, db, name, sort=None, mbid=None):

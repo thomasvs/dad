@@ -155,8 +155,8 @@ class ArtistModelTestCase(BaseTestCase):
         # make sure it gets an id
         am = yield self.testdb.save(am)
 
-        am = yield self.testdb.setScore(am, u'thomas', u'Good', 0.1)
-        am = yield self.testdb.setScore(am, u'thomas', u'Party', 0.2)
+        am = yield am.setScore(u'thomas', u'Good', 0.1)
+        am = yield am.setScore(u'thomas', u'Party', 0.2)
 
         categories = yield self.testdb.getCategories()
         self.failUnless(u'Good' in categories)
@@ -363,6 +363,64 @@ class DatabaseTestCase(BaseTestCase):
         yield self.testdb.trackAddFragmentFileByMBTrackId(tm, 
             info, metadata)
 
+class DatabaseInteractorTestCase(BaseTestCase):
+
+    def setUp(self):
+        self._interactor = database.DatabaseInteractor(self.testdb)
+
+
+    @defer.inlineCallbacks
+    def testRecalculateTrackScore(self):
+        tm = yield self.addFirstTrack()
+
+        # no scores, should not get anything
+        yield self._interactor.recalculateTrackScore(tm)
+        scores = yield self.testdb.getScores(tm)
+        self.failIf(scores)
+        scores = yield self.testdb.getCalculatedScores(tm)
+        self.failIf(scores)
+
+        # score the track directly
+        tm = yield self.testdb.setScore(tm, u'thomas', u'Good', 1.0)
+        tm = yield self.testdb.setScore(tm, u'thomas', u'Rock', 0.9)
+
+        yield self._interactor.recalculateTrackScore(tm)
+        scores = yield self.testdb.getScores(tm)
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 1.0)
+
+        scores = yield self.testdb.getCalculatedScores(tm)
+        self.failUnless(scores)
+        scores.sort(key=lambda x: x.category)
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 1.0)
+
+        # now get and score the artist
+        ams = yield tm.getArtists()
+        am = ams.next()
+        am = yield am.setScore(am, u'thomas', u'Good', 0.85)
+
+        # verify that this model in particular was scored
+        scores = yield am.getScores()
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 0.85)
+
+        # verify that we can get the same model through the track again,
+        # with scores
+        ams = yield tm.getArtists()
+        am = ams.next()
+        scores = yield am.getScores()
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 0.85)
+
+        # verify that scores are recalculated
+        yield self._interactor.recalculateTrackScore(tm)
+        scores = yield self.testdb.getCalculatedScores(tm)
+        self.failUnless(scores)
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertAlmostEquals(scores[0].score, 0.92, 2)
+
+
 def makeTestCaseClasses(cls):
         """
         Create a L{TestCase} subclass which mixes in C{cls} for each known
@@ -377,11 +435,24 @@ def makeTestCaseClasses(cls):
             TrackSelectorModelTestCase,
             ArtistModelTestCase,
             ArtistSelectorModelTestCase,
-            DatabaseTestCase
+            DatabaseInteractorTestCase,
+            DatabaseTestCase,
             ]:
             name = klazz.__name__
             class testcase(cls, klazz):
                 __module__ = cls.__module__
+
+                @defer.inlineCallbacks
+                def setUp(self):
+                    if hasattr(cls, 'setUp'):
+                        yield cls.setUp(self)
+
+                    if hasattr(self._klazz, 'setUp'):
+                        yield self._klazz.setUp(self)
+
             testcase.__name__ = name
+            # we can't use klazz directly in setUp, since when it's evaluated
+            # it's set to the last class in the loop
+            testcase._klazz = klazz
             classes[testcase.__name__] = testcase
         return classes

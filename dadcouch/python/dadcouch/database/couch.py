@@ -165,6 +165,29 @@ class DADDB(log.Loggable):
     def newArtist(self, name, sort=None, mbid=None):
         return artist.CouchArtistModel.new(self, name, sort, mbid)
 
+    @defer.inlineCallbacks
+    def getOrCreateArtist(self, name, sort=None, mbid=None):
+        # look up by mbid or name
+        mid = None
+        if mbid:
+            mid = u'artist:mbid:' + mbid
+        elif name:
+            mid = u'artist:name:' + name
+
+        if mid:
+            self.debug('Looking up by mid %r', mid)
+            # FIXME: convert to class method ?
+            model = yield artist.CouchArtistModel.new(self, name, sort, mbid)
+            model = yield model.get(mid)
+            self.debug('Looked up by mid %r, model %r', mid, model)
+
+        if not model:
+            self.debug('Creating new artist for mid %r', mid)
+            model = yield artist.CouchArtistModel.new(self, name, sort, mbid)
+
+        defer.returnValue(model)
+
+
     # FIXME: use internal save ?
     @defer.inlineCallbacks
     def save(self, item):
@@ -206,6 +229,27 @@ class DADDB(log.Loggable):
         assert isinstance(subject, base.ScorableModel), \
             "subject %r is not scorable" % subject
         return self._internal.getScores(subject.document)
+
+    def getCalculatedScores(self, tm):
+        """
+        @returns: deferred firing list of L{data.Score}
+        """
+        assert isinstance(tm, track.CouchTrackModel), \
+            "track %r is not a track" % track
+        return self._internal.getCalculatedScores(tm.document)
+
+    @defer.inlineCallbacks
+    def setCalculatedScore(self, subject, userName, categoryName, score):
+        """
+        @type subject: L{track.TrackModel}
+        """
+        assert isinstance(subject, track.CouchTrackModel), \
+            "subject %r is not a scorable" % subject
+        doc = yield self._internal.setCalculatedScore(subject.document,
+            userName, categoryName, score)
+        subject.document = doc
+        defer.returnValue(subject)
+
 
     def addCategory(self, name):
         return self._internal.addCategory(name)

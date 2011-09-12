@@ -73,6 +73,20 @@ class TrackModel(base.Model):
         """
         raise NotImplementedError
 
+    def setCalculatedScore(self, userName, categoryName, score):
+        """
+        Set calculated score on a track.
+        """
+        raise NotImplementedError
+
+    def getCalculatedScores(self, userName=None):
+        """
+        Get a track's calculated scores and resolve their user and category.
+
+        @returns: L{Deferred} firing list of L{data.Score}
+        """
+        return self._db.getCalculatedScores(self)
+
 
 
     # FIXME: what does it mean if mix is None ? How does that identify
