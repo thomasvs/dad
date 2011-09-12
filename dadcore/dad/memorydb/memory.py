@@ -348,7 +348,8 @@ class MemoryDB(log.Loggable):
         """
         # FIXME: use interface, getName ?
         self._artists[artist.name] = artist
-        return self._save()
+        self._save()
+        return artist
 
     # TOPORT
     def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):

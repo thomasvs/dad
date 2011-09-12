@@ -17,7 +17,7 @@ class FragmentModel(base.Model):
     def __init__(self):
         self.files = []
 
-class TrackModel(base.Model):
+class TrackModel(base.ScorableModel):
     """
     I am a model for a track.
 

@@ -6,17 +6,16 @@ from twisted.internet import defer
 from dad.model import track
 from dad.memorydb.model import base
 
-class MemoryTrackModel(track.TrackModel, base.MemoryModel):
+class MemoryTrackModel(base.ScorableMemoryModel, track.TrackModel):
     """
     @ivar scores: list of L{data.Score}
     """
 
     def __init__(self, memorydb, id=None):
-        base.MemoryModel.__init__(self, memorydb)
+        base.ScorableMemoryModel.__init__(self, memorydb)
 
         self.id = id
 
-        self.scores = []
         self.fragments = []
         self.name = None
 

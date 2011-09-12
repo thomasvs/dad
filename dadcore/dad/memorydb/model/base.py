@@ -35,20 +35,5 @@ class ScorableMemoryModel(MemoryModel):
     def getScores(self):
         return self.scores
 
-    def setScore(self, subject, userName, categoryName, score):
-        found = False
-
-        for i, s in enumerate(self.scores):
-            if s.user == userName and s.category == categoryName:
-                self.scores[i].score = score
-                found = True
-
-        if not found:
-            s = data.Score()
-            s.subject = self
-            s.user = userName
-            s.category = categoryName
-            s.score = score
-            self.scores.append(s)
-
-        return self
+    def setScore(self, userName, categoryName, score):
+        return self._db.setScore(self, userName, categoryName, score)

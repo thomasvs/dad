@@ -137,26 +137,6 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         self.debug('found subject %r', self.subject)
         defer.returnValue(self)
 
-    # In addition to scoring the artist, we want to update calculated scores
-    # for tracks and albums
-    # FIXME: but maybe we want that in the database layer instead
-    # FIXME: if we finish this method, remove subject from the args,
-    # should work on model directly
-    @defer.inlineCallbacks
-    def setScore(self, subject, userName, categoryName, score):
-        subject = yield base.ScorableModel.setScore(self,
-            subject, userName, categoryName, score)
-
-        defer.returnValue(self)
-        return
-        # FIXME: remove this ?
-
-        # now get all tracks for this artist
-        doc = getattr(subject, self.subjectType)
-        doc = yield self._daddb.score(doc, userName, categoryName, score)
-        setattr(subject, self.subjectType, doc)
-        setattr(subject, self.document, doc)
-        defer.returnValue(subject)
 
 # FIXME: rename
 class ItemTracksByArtist(CouchArtistModel):

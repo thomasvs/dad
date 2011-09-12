@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dadcouch.test.test_model_daddb -*-
+# -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 
@@ -65,6 +65,5 @@ class ScorableModel(CouchDocModel):
         scores = list(scores)
         defer.returnValue(scores)
 
-    @defer.inlineCallbacks
-    def setScore(self, subject, userName, categoryName, score):
-        yield self._daddb.setScore(self, userName, categoryName, score)
+    def setScore(self, userName, categoryName, score):
+        return self._daddb.setScore(self, userName, categoryName, score)

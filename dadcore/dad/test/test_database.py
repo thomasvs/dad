@@ -65,11 +65,11 @@ class TrackModelTestCase(BaseTestCase):
         # make sure it gets an id
         tm = yield self.testdb.save(tm)
 
-        tm = yield self.testdb.setScore(tm, u'thomas', u'Good', 0.1)
-        tm = yield self.testdb.setScore(tm, u'thomas', u'Party', 0.2)
+        tm = yield tm.setScore(u'thomas', u'Good', 0.1)
+        tm = yield tm.setScore(u'thomas', u'Party', 0.2)
 
         categories = yield self.testdb.getCategories()
-        self.failUnless(u'Good' in categories)
+        self.failUnless(u'Good' in categories, categories)
         self.failUnless(u'Party' in categories)
 
         scores = yield self.testdb.getScores(tm)
@@ -77,7 +77,7 @@ class TrackModelTestCase(BaseTestCase):
         self.assertEquals(scores[0].score, 0.1)
 
         # update score
-        yield self.testdb.setScore(tm, u'thomas', u'Good', 0.3)
+        yield tm.setScore(u'thomas', u'Good', 0.3)
 
         scores = yield self.testdb.getScores(tm)
         self.assertEquals(scores[0].category, u'Good')
@@ -167,7 +167,7 @@ class ArtistModelTestCase(BaseTestCase):
         self.assertEquals(scores[0].score, 0.1)
 
         # update score
-        yield self.testdb.setScore(am, u'thomas', u'Good', 0.3)
+        yield am.setScore(u'thomas', u'Good', 0.3)
 
         scores = yield self.testdb.getScores(am)
         self.assertEquals(scores[0].category, u'Good')
@@ -398,7 +398,7 @@ class DatabaseInteractorTestCase(BaseTestCase):
         # now get and score the artist
         ams = yield tm.getArtists()
         am = ams.next()
-        am = yield am.setScore(am, u'thomas', u'Good', 0.85)
+        am = yield am.setScore(u'thomas', u'Good', 0.85)
 
         # verify that this model in particular was scored
         scores = yield am.getScores()
