@@ -2,7 +2,6 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 from twisted.internet import defer
-from twisted.python import failure
 
 from dad.base import base
 
@@ -26,8 +25,7 @@ class SubjectController(base.Controller):
     def _scored(self, view, category, score):
         # FIXME: user ?
         # FIXME: make interface for this model
-        self.subject = yield self._model.score(
-            self.subject, 'thomas', category, score)
+        self.subject = yield self._model.score('thomas', category, score)
 
     @defer.inlineCallbacks
     def populate(self, subject, userName=None):

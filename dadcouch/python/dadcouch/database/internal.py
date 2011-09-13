@@ -347,7 +347,7 @@ class InternalDB(log.Loggable):
         rows = list(rows)
 
         if not rows:
-            self.debug('No scores for %r', subject)
+            self.debug('No scores for %r with id %r', subject, subject.id)
             defer.returnValue([])
             return
 

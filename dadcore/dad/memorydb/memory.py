@@ -9,8 +9,7 @@ from twisted.internet import defer
 from zope import interface
 
 from dad import idad
-from dad.base import data
-from dad.common import log
+from dad.base import data, database
 from dad.memorydb.model import track, artist
 
 _DEFAULT_PATH = 'dad.pickle'
@@ -23,7 +22,7 @@ memorydb_option_list = [
 ]
 
 
-class MemoryDB(log.Loggable):
+class MemoryDB(database.Database):
     """
     I am a database that stores all data in memory.
     I can be saved to a pickle.

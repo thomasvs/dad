@@ -8,7 +8,7 @@ from zope import interface
 from dadcouch.extern.paisley import mapping
 
 from dad import idad
-from dad.common import log
+from dad.base import database
 
 from dadcouch.database import mappings, internal
 from dadcouch.model import base, artist, track
@@ -132,7 +132,7 @@ class AlbumsByArtist:
             self.albumId = d['id']
 
 
-class DADDB(log.Loggable):
+class DADDB(database.Database):
     """
     @type  db:     L{dadcouch.extern.paisley.client.CouchDB}
     @type  dbName: str
@@ -214,6 +214,11 @@ class DADDB(log.Loggable):
         """
         assert isinstance(subject, base.ScorableModel), \
             "subject %r is not a scorable" % subject
+        if not subject.document:
+            mid = yield subject.getMid()
+            subject = yield subject.get(mid)
+        assert subject.document, \
+            "subject %r does not have a document" % subject
         doc = yield self._internal.setScore(subject.document,
             userName, categoryName, score)
         subject.document = doc

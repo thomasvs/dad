@@ -42,13 +42,15 @@ class ScorableModel(CouchDocModel):
 
         @returns: L{Deferred} firing list of L{data.Score}
         """
+        self.debug('Getting scores for model %r, doc %r',
+            self, self.document)
+
         if not self.document:
             self.debug('No document, no scores')
             import code; code.interact(local=locals())
             defer.returnValue([])
             return
 
-        self.debug('Getting scores for %r', self.document)
         scores = yield self._daddb.getScores(self)
         #import code; code.interact(local=locals())
         #scores = yield self._daddb.getScores(self.subject)
@@ -60,3 +62,6 @@ class ScorableModel(CouchDocModel):
 
     def setScore(self, userName, categoryName, score):
         return self._daddb.setScore(self, userName, categoryName, score)
+
+    def score(self, userName, categoryName, score):
+        return self._daddb.score(self, userName, categoryName, score)

@@ -37,3 +37,6 @@ class ScorableMemoryModel(MemoryModel):
 
     def setScore(self, userName, categoryName, score):
         return self._db.setScore(self, userName, categoryName, score)
+
+    def score(self, userName, categoryName, score):
+        return self._db.score(self, userName, categoryName, score)

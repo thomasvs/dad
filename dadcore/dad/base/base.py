@@ -47,7 +47,13 @@ class ScorableModel(Model):
 
     def setScore(self, userName, categoryName, score):
         """
-        Score a subject.
+        Score a subject directly.
+        """
+        raise NotImplementedError
+
+    def score(self, userName, categoryName, score):
+        """
+        Score a subject and possibly recalculate internal scoring.
         """
         raise NotImplementedError
 
