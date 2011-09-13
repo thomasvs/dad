@@ -29,3 +29,4 @@
 * Add notification to Model classes so we can make changes work.
 * Why do scorable models have subject as argument ? They operate on themselves
 * ArtistModel: get methods don't return deferred
+* rename models to include couch in name
