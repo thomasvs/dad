@@ -421,6 +421,7 @@ class DatabaseInteractorTestCase(BaseTestCase):
         self.assertAlmostEquals(scores[0].score, 0.92, 2)
 
 
+
 def makeTestCaseClasses(cls):
         """
         Create a L{TestCase} subclass which mixes in C{cls} for each known

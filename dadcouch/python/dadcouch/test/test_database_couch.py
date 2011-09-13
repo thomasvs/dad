@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
+# -*- Mode: Python; test-case-name: dadcouch.test.mixin_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 #__metaclass__ = type
@@ -17,7 +17,7 @@ from dadcouch.extern.paisley.test import test_util
 from dadcouch.model import daddb, couch
 from dadcouch.model import track as mtrack
 
-from dad.test import test_database
+from dad.test import mixin_database
 
 class DADDBTestCase(test_util.CouchDBTestCase):
 
@@ -46,9 +46,9 @@ class DADDBTestCase(test_util.CouchDBTestCase):
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
 
-class CouchDatabaseTestCase(test_database.BaseTestCase, DADDBTestCase):
+class CouchDatabaseTestCase(mixin_database.BaseTestCase, DADDBTestCase):
     """
-    I am a base class for tests defined in test_database.
+    I am a base class for tests defined in mixin_database.
     """
 
     @defer.inlineCallbacks
@@ -57,4 +57,4 @@ class CouchDatabaseTestCase(test_database.BaseTestCase, DADDBTestCase):
         self.provider = pdadcouch.CouchDBDatabaseProvider()
 
 # instantiate all generic database tests
-globals().update(test_database.makeTestCaseClasses(CouchDatabaseTestCase))
+globals().update(mixin_database.makeTestCaseClasses(CouchDatabaseTestCase))
