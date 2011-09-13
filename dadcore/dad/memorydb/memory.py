@@ -97,10 +97,14 @@ class MemoryDB(log.Loggable):
 
 
     # FIXME: make generic
-    def save(self, track):
-        if isinstance(track, artist.MemoryArtistModel):
-            return self.saveArtist(track)
+    def save(self, subject):
+        if isinstance(subject, track.MemoryTrackModel):
+            return self._saveTrack(subject)
+        elif isinstance(subject, artist.MemoryArtistModel):
+            return self.saveArtist(subject)
+        raise TypeError('Cannot save subject %r' % subject)
 
+    def _saveTrack(self, track):
         self._tracks[track.id] = track
 
         for fragment in track.fragments:

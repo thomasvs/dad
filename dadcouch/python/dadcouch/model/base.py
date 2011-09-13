@@ -42,15 +42,6 @@ class ScorableModel(CouchDocModel):
 
         @returns: L{Deferred} firing list of L{data.Score}
         """
-
-        userId = None
-        # for now, skip adding actual User docs
-        # if userName:
-        #     user = yield self._daddb.getOrAddUser(userName)
-        #     # FIXME: unicode
-        #     user.Id = unicode(user.id)
-
-        # FIXME: the subject controller has .subject, not .track or .artist?
         if not self.document:
             self.debug('No document, no scores')
             import code; code.interact(local=locals())
@@ -63,6 +54,8 @@ class ScorableModel(CouchDocModel):
         #scores = yield self._daddb.getScores(self.subject)
 
         scores = list(scores)
+        if userName:
+            scores = [s for s in scores if s.user == userName]
         defer.returnValue(scores)
 
     def setScore(self, userName, categoryName, score):

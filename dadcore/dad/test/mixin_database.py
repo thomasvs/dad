@@ -175,6 +175,15 @@ class ArtistModelTestCase(BaseTestCase):
         self.assertEquals(scores[0].category, u'Good')
         self.assertEquals(scores[0].score, 0.3)
 
+        scores = yield am.getScores()
+        self.assertEquals(len(scores), 1)
+
+        scores = yield am.getScores(userName=u'thomas')
+        self.assertEquals(len(scores), 1)
+
+        scores = yield am.getScores(userName=u'jefke')
+        self.assertEquals(len(scores), 0)
+
 
 class ArtistSelectorModelTestCase(BaseTestCase):
 

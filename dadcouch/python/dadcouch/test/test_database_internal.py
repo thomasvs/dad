@@ -7,14 +7,9 @@ from twisted.internet import defer
 
 from dad.logic import database
 
-from dad.plugins import pdadcouch
-
-from dadcouch.extern.paisley.test import test_util
-
 from dadcouch.model import daddb, couch
 from dadcouch.model import track as mtrack
 
-from dad.test import test_database
 from dadcouch.test import test_database_couch
 
 
