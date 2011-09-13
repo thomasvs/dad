@@ -5,13 +5,14 @@ import types
 
 from twisted.internet import defer
 
+from dad.common import log
 from dad.logic import database
 
 """
 Base class for tests for database implementations.
 """
 
-class BaseTestCase:
+class BaseTestCase(log.Loggable):
     """
     Subclass me to have database-specific tests run against the generic
     tests.
@@ -143,6 +144,7 @@ class ArtistModelTestCase(BaseTestCase):
 
         yield self.addFirstTrack()
 
+        mid = yield aModel.getMid()
         tracks = yield aModel.getTracks()
         tracks = list(tracks)
         self.assertEquals(len(tracks), 1)
@@ -420,6 +422,13 @@ class DatabaseInteractorTestCase(BaseTestCase):
         self.assertEquals(scores[0].category, u'Good')
         self.assertAlmostEquals(scores[0].score, 0.92, 2)
 
+        # now score directly through interactor
+        self.debug('scoring through interactor')
+        yield self._interactor.score(am, u'thomas', u'Rock', 0.8)
+        scores = yield self.testdb.getCalculatedScores(tm)
+        self.failUnless(scores)
+        self.assertEquals(scores[1].category, u'Rock')
+        self.assertAlmostEquals(scores[1].score, 0.85, 2)
 
 
 def makeTestCaseClasses(cls):

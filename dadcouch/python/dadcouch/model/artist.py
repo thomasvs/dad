@@ -65,16 +65,30 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     @defer.inlineCallbacks
     def getTracks(self):
         self.debug('get')
+        # FIXME: this gets all possible tracks for this artist, but maybe
+        # this should be more limited ?
+        keys = [
+            'artist:name:%s' % self.getName(),
+            'artist:mbid:%s' % self.getMbId(),
+            self.getId()
+        ]
+
         v = views.View(self._daddb.db, self._daddb.dbName,
             'dad', 'view-tracks-by-artist',
-            self._daddb.modelFactory(ItemTracksByArtist))
+            self._daddb.modelFactory(ItemTracksByArtist), keys=keys)
         try:
             result = yield v.queryView()
         except Exception, e:
             self.warning('get: exception: %r', log.getExceptionMessage(e))
             raise
 
-        defer.returnValue(result)
+        # FIXME: instead of doing a loop, create them from the view directly
+        tracks = []
+        for r in result:
+            tm = yield self._daddb.getTrack(r.trackId)
+            tracks.append(tm)
+
+        defer.returnValue(tracks)
 
 
     def save(self):

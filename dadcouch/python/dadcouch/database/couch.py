@@ -156,6 +156,9 @@ class DADDB(log.Loggable):
     def newTrack(self, name, sort=None, mbid=None):
         return track.CouchTrackModel.new(self, name, sort, mbid)
 
+    def getTrack(self, trackId):
+        return track.CouchTrackModel.get(self, trackId)
+
     def newArtist(self, name, sort=None, mbid=None):
         return artist.CouchArtistModel.new(self, name, sort, mbid)
 

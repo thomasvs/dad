@@ -319,8 +319,8 @@ class InternalDB(log.Loggable):
                 found = True
 
         if not found:
-            self.debug('Setting score for %r in %r to %r',
-                userName, categoryName, score)
+            self.debug('Setting score on %r for %r in %r to %r',
+                subject, userName, categoryName, score)
             if not subject.scores:
                 subject.scores = []
             subject.scores.append({

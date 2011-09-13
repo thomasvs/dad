@@ -182,6 +182,22 @@ class DatabaseInteractor(logcommand.LogCommand):
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
+    def score(self, model, userName, categoryName, score):
+        """
+        Score the given model.
+        Recalculates track scores if needed.
+        """
+        self.debug('score: model %r', model)
+        yield model.setScore(userName, categoryName, score)
+        tracks = yield model.getTracks()
+        tracks = list(tracks)
+        self.debug('recalculating score on %d tracks', len(tracks))
+        for track in tracks:
+            self.debug('score: model %r: recalculating on track %r',
+                model, track)
+            yield self.recalculateTrackScore(track)
+    
+    @defer.inlineCallbacks
     def recalculateTrackScore(self, tm):
         """
         Recalculate the aggregate track score of a track, taking into account

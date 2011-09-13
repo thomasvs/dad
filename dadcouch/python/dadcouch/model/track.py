@@ -39,6 +39,18 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return model
     new = classmethod(new)
 
+    @defer.inlineCallbacks
+    def get(self, db, trackId):
+        """
+        Get a track by id.
+
+        @returns: a deferred firing a L{CouchTrackModel} object.
+        """
+        model = CouchTrackModel(db)
+        model.document = yield db.map(trackId, mappings.Track)
+        defer.returnValue(model)
+    get = classmethod(get)
+
     # FIXME: instead of forwarding, do them directly ? In subclass of Track ?
     def getName(self):
         return self.document.getName()
@@ -103,21 +115,6 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return self._daddb.setCalculatedScore(self, userName, categoryName, score)
 
 
-    def get(self, trackId):
-        """
-        Get a track by id and resolve its artists.
-
-        @returns: a deferred firing a L{CouchTrackModel} object.
-        """
-        d = self._daddb.db.map(self._daddb.dbName, trackId, mappings.Track)
-        #d.addCallback(lambda track:
-        #    self._daddb.resolveIds(track, 'artist_ids', 'artists',
-        #    mappings.Artist))
-
-        # FIXME: document ?
-        d.addCallback(lambda track: setattr(self, 'track', track))
-        d.addCallback(lambda _, s: s, self)
-        return d
 
     def addFragment(self, info, metadata=None, mix=None, number=None):
         return self.document.addFragment(info, metadata, mix, number)
