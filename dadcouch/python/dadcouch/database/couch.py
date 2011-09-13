@@ -1,21 +1,15 @@
 # -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-import os
-import sys
-
 from twisted.internet import defer
 
 from zope import interface
 
 from dadcouch.extern.paisley import mapping
-from dadcouch.extern.paisley import views
 
 from dad import idad
-from dad.base import data
 from dad.common import log
 
-from dadcouch.common import manydef
 from dadcouch.database import mappings, internal
 from dadcouch.model import base, artist, track
 
