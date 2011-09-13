@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dadcouch.test.mixin_database_couch -*-
+# -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 #__metaclass__ = type
@@ -8,14 +8,11 @@ import commands
 
 from twisted.internet import defer
 
-from dad.logic import database
-
 from dad.plugins import pdadcouch
 
 from dadcouch.extern.paisley.test import test_util
 
-from dadcouch.model import daddb, couch
-from dadcouch.model import track as mtrack
+from dadcouch.model import daddb
 
 from dad.test import mixin_database
 
