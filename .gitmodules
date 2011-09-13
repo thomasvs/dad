@@ -1,3 +1,6 @@
 [submodule "dadcouch/python/dadcouch/extern/paisley.git"]
 	path = dadcouch/python/dadcouch/extern/paisley.git
 	url = git@github.com:thomasvs/paisley.git
+[submodule "dadws/dadws/extern/websocket"]
+	path = dadws/dadws/extern/websocket
+	url = git@github.com:thomasvs/txWebSocket.git
