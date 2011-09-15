@@ -120,8 +120,8 @@ class IDatabase(interface.Interface):
         Can return multiple tracks for a path; for example, multiple
         fragments.
 
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing opaque track objects.
+        @rtype: a L{defer.Deferred} firing a generator
+                returning subclasses of L{dad.model.track.TrackModel}
         """
 
 
