@@ -31,6 +31,22 @@ class ScorableModel(Model):
 
     subjectType = 'none'
 
+    # FIXME: this is more a method for any database-backed model,
+    # but for now we only deal with scorables
+    def getOrCreate(self):
+        """
+        Look up a database-backed model, or create a new one.
+
+        The returned model can then be changed and saved to the database.
+
+        @type  name: C{unicode}
+        @type  sort: C{unicode}
+        @type  mbid: C{unicode}
+
+        @rtype: L{dad.model.artist.ArtistModel}
+        """
+        raise NotImplementedError
+
     def getCategories(self):
         """
         @returns: deferred firing generator of category names.
