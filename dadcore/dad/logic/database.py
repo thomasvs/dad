@@ -179,6 +179,9 @@ class DatabaseInteractor(logcommand.LogCommand):
 
             self.debug('Stored in database as %r\n' % stored)
 
+            # The artist may already be scored
+            self.recalculateTrackScore(stored)
+
             ret[1].append(track)
             yield
 
