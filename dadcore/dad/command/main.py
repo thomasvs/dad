@@ -105,6 +105,8 @@ class Add(tcommand.TwistedCommand):
         # FIXME: imports reactor
         from twisted.web import error
 
+        paths = []
+
         for path in args:
             path = path.decode('utf-8')
             if not os.path.exists(path):
@@ -113,6 +115,20 @@ class Add(tcommand.TwistedCommand):
         
             self.stdout.write('%s\n' % path.encode('utf-8'))
 
+            # handle playlist
+            if path.endswith('.m3u'):
+                handle = open(path, 'r')
+                for line in handle.readlines():
+                    if line.startswith('#'):
+                        continue
+                    filePath = line.decode('utf-8').strip()
+                    if not os.path.exists(filePath):
+                        self.stderr.write('Could not find %s\n' %
+                            filePath.encode('utf-8'))
+                        continue
+                    paths.append(filePath)
+
+        for path in paths:
             try:
                 res = yield interactor.add(path, hostname=self.hostname)
             except error.Error, e:
