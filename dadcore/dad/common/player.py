@@ -34,7 +34,7 @@ class Player(log.Loggable):
     ### base method implementations
 
     ### overridable methods
-    def setup(self):
+    def setup(self, options=None):
         raise NotImplementedError
 
 
@@ -56,7 +56,7 @@ class FakePlayer(Player):
     def _scheduleUntilCb(result):
         pass
         
-    def setup(self):
+    def setup(self, options=None):
         # Fill up minimal queue size
         d = self.scheduler.schedule()
         return d

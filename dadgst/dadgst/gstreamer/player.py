@@ -28,8 +28,9 @@ class GstPlayer(player.Player):
 
         self._uis = [player.CommandPlayerView(self), ]
 
-    def setup(self, sink):
+    def setup(self, options):
 
+        sink = options.sink
         import gst
 
         _TEMPLATE = gst.PadTemplate('template', gst.PAD_SINK, gst.PAD_ALWAYS,

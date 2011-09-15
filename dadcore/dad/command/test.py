@@ -174,8 +174,7 @@ class JukeboxMain(log.Loggable):
         self._setup_dbus()
 
         # now we can start triggering setup calls
-        # FIXME: take all options, not just the one
-        self._player.setup(playerOptions.sink)
+        self._player.setup(playerOptions)
 
 
         # FIXME: async setup selecter, then start selecting
