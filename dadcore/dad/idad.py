@@ -33,6 +33,29 @@ class IDatabaseProvider(interface.Interface):
         """
         pass
 
+class IPlayerProvider(interface.Interface):
+    """
+    I am an interface for a provider of a player.
+    """
+
+    name = interface.Attribute("""
+        @type name: C{str}
+        @ivar name: the short name of the player provider
+        """)
+
+    def getOptions():
+        """
+        Get the options that can be used to instantiate a player.
+        """
+        pass
+
+    def getPlayer(scheduler, options):
+        """
+        Return a new Player with the given scheduler and options.
+        """
+        pass
+
+
 class IDatabase(interface.Interface):
     """
     I am an interface for databases.

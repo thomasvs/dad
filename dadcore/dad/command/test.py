@@ -9,6 +9,7 @@ import optparse
 
 from twisted.internet import defer
 from twisted.python import reflect
+from twisted import plugin
 
 from dad import idad
 
@@ -19,7 +20,6 @@ from dad.command import tcommand
 
 from dadgtk.views import player as vplayer
 
-from dadgst.gstreamer import player as gplayer
 
 class Gtk2Command(tcommand.TwistedCommand):
     def installReactor(self):
@@ -126,12 +126,12 @@ class JukeboxMain(log.Loggable):
 
     def _setup_gtk(self):
             gtkui = vplayer.GTKPlayerView(self._player)
-            # FIXME: don't poke in privates
+            #options FIXME: don't poke in privates
             self._player._uis.append(gtkui)
 
 
     # FIXME: gtk frontend should be some kind of viewer class
-    def setup(self, options):
+    def _getScheduler(self, options):
         from dad.common import scheduler
         # parse selecter class and arguments
 
@@ -163,7 +163,10 @@ class JukeboxMain(log.Loggable):
         #    tracks, options.playlist, options.random, loops=int(options.loops))
         self._scheduler = scheduler.Scheduler(self._selecter,
             begin=options.begin)
-        self._player = gplayer.GstPlayer(self._scheduler)
+
+        return self._scheduler
+
+    def setup(self, options, playerOptions):
 
         if options.gtk == True:
             self._setup_gtk()
@@ -171,7 +174,8 @@ class JukeboxMain(log.Loggable):
         self._setup_dbus()
 
         # now we can start triggering setup calls
-        self._player.setup(options.sink)
+        # FIXME: take all options, not just the one
+        self._player.setup(playerOptions.sink)
 
 
         # FIXME: async setup selecter, then start selecting
@@ -194,6 +198,16 @@ class JukeboxMain(log.Loggable):
 # FIXME: install reactor optionally only ?
 class Jukebox(Gtk2Command):
     description = """Test the whole selector."""
+
+    # FIXME: extract and reuse ?
+    def _getProviders(self):
+        from dad import plugins
+
+        providers = {}
+        for provider in plugin.getPlugins(idad.IPlayerProvider, plugins):
+            providers[provider.name] = provider
+        return providers
+
 
     def addOptions(self):
         default = 10
@@ -225,17 +239,72 @@ class Jukebox(Gtk2Command):
             help="whether to use GTK+ (defaults to %default)",
             default=False)
      
-        self.parser.add_options(gplayer.gst_player_option_list)
+        self.parser.add_option('-p', '--player',
+                          action="store", dest="player",
+                          default="gst", # FIXME: don't hardcode?
+                          help="select player and arguments (from %s)" % (
+                            ", ".join(self._getProviders().keys())))
 
+    def handleOptions(self, options):
+        
+        self._main = JukeboxMain()
+
+        providers = self._getProviders()
+
+        # FIXME: abstract this code
+        args = []
+        playerName = options.player
+
+        if ':' in playerName:
+            playerName, line = options.player.split(':', 1)
+            args = line.split(':')
+
+        if playerName not in providers.keys():
+            self.stderr.write('Please choose an existing player.\n')
+            self.stderr.write('Possible choices: %s\n' %
+                ', '.join(providers.keys()))
+            return
+
+        provider = providers[playerName]
+
+        parser = optparse.OptionParser()
+        parser.usage = "--player %s:[option]:[option]:..." % playerName
+        parser.add_options(provider.getOptions())
+
+        if 'help' in args:
+            self.stdout.write('Options for player %s:\n' % playerName)
+            self.stdout.write(parser.format_option_help())
+            return -3
+
+
+        playerOptions, rest = parser.parse_args(args)
+
+        if rest:
+            self.stderr.write(
+                "WARNING: make sure you specify options with dashes.\n")
+            self.stderr.write("Did not parse %r\n" % rest)
+
+        self.debug('Creating player %r with args %r',
+            playerName, args)
+
+        self._playerProvider = provider
+        self._playerOptions = playerOptions
 
     def doLater(self, args):
-        from twisted.internet import reactor
+        scheduler = self._main._getScheduler(self.options)
 
-        main = JukeboxMain()
+        player = self._playerProvider.getPlayer(scheduler, self._playerOptions)
+        self.player = player
 
-        d = main.setup(self.options)
+
+        main = self._main
+        # FIXME: ugly proxying
+        self._main._player = player
+
+        d = main.setup(self.options, self._playerOptions)
         def setupCb(result):
             if not result:
+                from twisted.internet import reactor
                 print 'setup failed, stopping reactor'
                 reactor.callLater(0L, reactor.stop)
 
@@ -246,6 +315,7 @@ class Jukebox(Gtk2Command):
             return defer.Deferred()
 
         def setupEb(failure):
+            from twisted.internet import reactor
             reactor.callLater(0L, reactor.stop)
 
         d.addCallback(setupCb)

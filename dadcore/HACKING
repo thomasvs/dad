@@ -21,6 +21,6 @@ Testing
 - example jukebox:
   - simple playlist:
   - couch-based:
-  python examples/jukebox.py -g --selecter=dadcouch.selecter.couch.CouchSelecter:help
-  python examples/jukebox.py -g --selecter=dadcouch.selecter.couch.CouchSelecter:--user=thomas:--category=sleep
+  dad test jukebox -g --selecter=dadcouch.selecter.couch.CouchSelecter:help
+  dad test jukebox -g --selecter=dadcouch.selecter.couch.CouchSelecter:--user=thomas:--category=sleep
  

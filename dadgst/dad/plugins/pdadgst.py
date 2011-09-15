@@ -87,8 +87,22 @@ class GstLeveller(object):
 
         return t.get_track_mixes()
     
+class GstPlayerProvider(object):
+    interface.implements(plugin.IPlugin, idad.IPlayerProvider)
+
+    name = 'gst'
+
+    def getOptions(self):
+        from dadgst.gstreamer import player
+        return player.gst_player_option_list
+
+    def getPlayer(self, scheduler, options):
+        from dadgst.gstreamer import player
+        return player.GstPlayer(scheduler)
+
 
 # instantiate twisted plugins
 _ca = CommandAppender()
 _gmg = GstMetadataGetter()
 _gl = GstLeveller()
+_gpp = GstPlayerProvider()

@@ -8,6 +8,5 @@ PYTHONPATH=`pwd` python examples/trackmix.py [--playlist myplaylist.m3u] tracks.
 PYTHONPATH=`pwd` python examples/mix.py tracks.pickle
 
 - to listen to the jukebox:
-PYTHONPATH=`pwd` python examples/jukebox.py tracks.pickle [--playlist myplaylist.m3u]
-DAD_DEBUG=4 python examples/jukebox.py --selecter=dad.common.selecter.SimplePlaylistSelecter:--tracks=band.pickle
+DAD_DEBUG=4 dad test jukebox --selecter=dad.common.selecter.SimplePlaylistSelecter:--tracks=band.pickle
 
