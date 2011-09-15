@@ -156,14 +156,23 @@ class DADDB(database.Database):
     def newTrack(self, name, sort=None, mbid=None):
         return track.CouchTrackModel.new(self, name, sort, mbid)
 
+    @defer.inlineCallbacks
     def getTrack(self, trackId):
-        return track.CouchTrackModel.get(self, trackId)
+        model = track.CouchTrackModel(self)
+        model.document = yield self.map(trackId, mappings.Track)
+        defer.returnValue(model)
 
     def newArtist(self, name, sort=None, mbid=None):
         return artist.CouchArtistModel.new(self, name, sort, mbid)
 
     @defer.inlineCallbacks
     def getOrCreateArtist(self, name, sort=None, mbid=None):
+        am = artist.CouchArtistModel.new(self, name, sort, mbid)
+        am = yield am.getOrCreate()
+        defer.returnValue(am)
+        return
+
+        # FIXME: remove this code or fold it into the class method
         # look up by mbid or name
         mid = None
         if mbid:
@@ -215,8 +224,7 @@ class DADDB(database.Database):
         assert isinstance(subject, base.ScorableModel), \
             "subject %r is not a scorable" % subject
         if not subject.document:
-            mid = yield subject.getMid()
-            subject = yield subject.get(mid)
+            subject = yield subject.getOrCreate()
         assert subject.document, \
             "subject %r does not have a document" % subject
         doc = yield self._internal.setScore(subject.document,
@@ -259,6 +267,7 @@ class DADDB(database.Database):
     def getCategories(self):
         return self._internal.getCategories()
 
+    @defer.inlineCallbacks
     def getTracksByHostPath(self, host, path):
         """
         Look up tracks by path.
@@ -270,24 +279,28 @@ class DADDB(database.Database):
         @type  path: unicode
 
         ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
+        @rtype: L{defer.Deferred} firing list of L{track.TrackModel}
         """
-        return self._internal.getTracksByHostPath(host, path)
+        gen = yield self._internal.getTracksByHostPath(host, path)
+
+        defer.returnValue(self._wrapTrackDocuments(gen))
 
     def trackAddFragment(self, track, info, metadata=None, mix=None, number=None):
         return track.addFragment(info, metadata, mix, number)
 
-    # FIXME: what do we return ?
+    @defer.inlineCallbacks
     def getTracksByMD5Sum(self, md5sum):
         """
         Look up tracks by md5sum
         Can return multiple tracks for a path; for example, multiple
         fragments.
 
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{mappings.Track}
+        @rtype: a L{defer.Deferred} firing a generator
+                returning subclasses of L{dad.model.track.TrackModel}
         """
-        return self._internal.getTracksByMD5Sum(md5sum)
+        gen = yield self._internal.getTracksByMD5Sum(md5sum)
+
+        defer.returnValue(self._wrapTrackDocuments(gen))
 
     def getTracksByMBTrackId(self, mbTrackId):
         """
@@ -300,6 +313,12 @@ class DADDB(database.Database):
         @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
         return self._internal.getTracksByMBTrackId(mbTrackId)
+
+    def _wrapTrackDocuments(self, gen):
+        for doc in gen or []:
+            model = self.newTrack(doc.name)
+            model.document = doc
+            yield model
 
     def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
         """

@@ -38,9 +38,9 @@ class SubjectController(base.Controller):
         """
         # populate with the Subject
         self.debug('populating with subject %r', subject)
-        mid = yield subject.getMid()
+        id = yield subject.getId()
         try:
-            self.subject = yield self._model.get(mid)
+            self.subject = yield subject.getOrCreate()
         except IndexError:
             self.debug('No item for subject %r', subject)
 

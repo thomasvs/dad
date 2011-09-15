@@ -40,16 +40,27 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     new = classmethod(new)
 
     @defer.inlineCallbacks
-    def get(self, db, trackId):
+    def getOrCreate(self):
+        """
+        Get a backed track.
+
+        @returns: a deferred firing a L{CouchTrackModel} object.
+        """
+        model = CouchTrackModel(self._daddb)
+        trackId = self.getId()
+        model.document = yield self._daddb.map(trackId, mappings.Track)
+        defer.returnValue(model)
+
+    def getById(self, db, trackId):
         """
         Get a track by id.
 
         @returns: a deferred firing a L{CouchTrackModel} object.
         """
-        model = CouchTrackModel(db)
+        model = CouchTrackModel(self._daddb)
         model.document = yield db.map(trackId, mappings.Track)
         defer.returnValue(model)
-    get = classmethod(get)
+
 
     # FIXME: instead of forwarding, do them directly ? In subclass of Track ?
     def getName(self):

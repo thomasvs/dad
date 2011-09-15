@@ -97,14 +97,15 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     ### FIXME: to be added to iface ?
 
     @defer.inlineCallbacks
-    def get(self, mid):
+    def getOrCreate(self):
         """
-        Get an artist by mid.
+        Get an artist by mid, or create a new model if we can't find one.
 
         @returns: a deferred firing a L{CouchArtistModel} object.
         """
         from twisted.web import error
 
+        mid = yield self.getMid()
         self.debug('getting mid %r', mid)
         try:
             # FIXME: fix subject vs artist
