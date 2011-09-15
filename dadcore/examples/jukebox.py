@@ -2,10 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import sys
-import random
 import optparse
-
-import pickle
 
 import gobject
 gobject.threads_init()
@@ -13,7 +10,6 @@ gobject.threads_init()
 from twisted.python import reflect
 from twisted.internet import defer
 
-from dad.audio import mixing, common
 from dad.extern.log import log
 
 from dad.common import player
@@ -322,7 +318,7 @@ class Main(log.Loggable):
 
     # FIXME: gtk frontend should be some kind of viewer class
     def setup(self, options):
-        from dad.common import scheduler, selecter
+        from dad.common import scheduler
         # parse selecter class and arguments
 
         selecterArgs = []
