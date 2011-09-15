@@ -121,22 +121,17 @@ def main():
     default = 10
     parser.add_option('-c', '--count',
         action="store", dest="count",
-        help="how many tracks to play (defaults to %d)" % default,
+        help="how many tracks to play (defaults to %default)",
         default=default)
     default = -1
     # FIXME: should we proxy this to selecter or throw out ?
     parser.add_option('-l', '--loops',
         action="store", dest="loops",
-        help="how many times to loop the playlist (defaults to %d)" % default,
+        help="how many times to loop the playlist (defaults to %default)",
         default=default),
     parser.add_option('-r', '--random',
         action="store_true", dest="random",
         help="play tracks in random order")
-    default = 'queue ! autoaudiosink'
-    parser.add_option('-s', '--sink',
-        action="store", dest="sink",
-        help="GStreamer audio sink to output to (defaults to %s" % default,
-        default=default)
     parser.add_option('-b', '--begin',
         action="store_true", dest="begin",
         help="Start at beginning of first song, instead of before first mix")
@@ -144,7 +139,7 @@ def main():
     default = 'dad.common.selecter.SimplePlaylistSelecter'
     parser.add_option('', '--selecter',
         action="store", dest="selecter",
-        help="Selecter class to use (default %s)" % default,
+        help="Selecter class to use (default %default)",
         default=default)
 
     parser.add_option('-g', '--gtk',
@@ -152,6 +147,8 @@ def main():
         help="whether to use GTK+ (defaults to %default)",
         default=False)
  
+    parser.add_options(gplayer.gst_player_option_list)
+
     options, args = parser.parse_args(sys.argv[1:])
 
     import pygst

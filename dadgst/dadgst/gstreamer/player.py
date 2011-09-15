@@ -2,8 +2,18 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import gobject
+import optparse
 
 from dad.common import player
+
+
+_DEFAULT_SINK = 'queue ! autoaudiosink'
+gst_player_option_list = [
+    optparse.Option('-s', '--sink',
+        action="store", dest="sink",
+        help="GStreamer audio sink to output to (defaults to %default)",
+        default=_DEFAULT_SINK),
+]
 
 class GstPlayer(player.Player):
 
