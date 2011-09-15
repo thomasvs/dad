@@ -159,8 +159,11 @@ class DatabaseInteractor(logcommand.LogCommand):
 
 
             # no tracks with this md5sum, so add it
+            name = os.path.basename(path)
+            if metadata and metadata.title:
+                name = metadata.title
 
-            track = self.database.new()
+            track = self.database.newTrack(name=name)
             self.debug('Adding new track %r, number %r', track, i + 1)
             self.database.trackAddFragment(track, info, metadata=metadata, mix=mix, number=i + 1)
 
