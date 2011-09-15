@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import sys
 import time
 
 from dad.extern.log import log
@@ -66,4 +67,32 @@ class FakePlayer(Player):
     def scheduled_cb(self, scheduler, scheduled):
         print 'THOMAS: scheduled_cb', scheduled
 
+class PlayerView:
+    """
+    I am a base class for a UI.
+    """
+    def __init__(self, player):
+        self._player = player
 
+    def set_schedule_position(self, position):
+        raise NotImplementedError
+
+    def set_schedule_length(self, length):
+        raise NotImplementedError
+
+class CommandPlayerView(PlayerView):
+    """
+    I am a simple command-line application UI.
+    """
+    def __init__(self, player):
+        self._player = player
+
+    def set_schedule_position(self, position):
+        if position is not None:
+            import gst
+            sys.stdout.write('\roverall position: %s' % 
+                gst.TIME_ARGS(position))
+            sys.stdout.flush()
+        else:
+            print 'Could not get position'
+            sys.stdout.flush()
