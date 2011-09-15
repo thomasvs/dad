@@ -6,18 +6,14 @@ import sys
 
 from twisted.internet import defer
 
-from zope import interface
-
 from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley import views
 
-from dad import idad
 from dad.base import data
 from dad.common import log
 
 from dadcouch.common import manydef
 from dadcouch.database import mappings
-from dadcouch.model import base, artist, track
 
 # value to use for ENDKEY when looking up strings
 # FIXME: something better; with unicode ?
