@@ -131,7 +131,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return self.document.addFragment(info, metadata, mix, number)
 
     def getFragments(self):
-        return self.document.getFragment()
+        return self.document.getFragments()
 
 class CouchTrackSelectorModel(base.CouchDBModel):
     # FIXME: this should actually be able to pass results in as they arrive,

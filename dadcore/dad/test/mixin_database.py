@@ -7,6 +7,7 @@ from twisted.internet import defer
 
 from dad.common import log
 from dad.logic import database
+from dad.model import track
 
 """
 Base class for tests for database implementations.
@@ -225,15 +226,6 @@ class ArtistSelectorModelTestCase(BaseTestCase):
         count = yield artists[0].getTrackCount()
         self.assertEquals(count, 2)
 
-    @defer.inlineCallbacks
-    def testArtistController(self):
-        appModel = self.provider.getAppModel(self.testdb)
-        aModel = appModel.getModel('Artist')
-
-        t = yield self.addFirstTrack()
-
-        yield aModel.get(t.getId())
-        
 
 class DatabaseTestCase(BaseTestCase):
  
@@ -298,6 +290,7 @@ class DatabaseTestCase(BaseTestCase):
         tracks = list(gen)
         self.assertEquals(len(tracks), 1)
 
+        self.failUnless(isinstance(tracks[0], track.TrackModel))
         fragments = tracks[0].getFragments()
         # FIXME: should we try and make sure the same FileInfo objects
         # passed in get returned ?

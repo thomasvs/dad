@@ -302,6 +302,7 @@ class DADDB(database.Database):
 
         defer.returnValue(self._wrapTrackDocuments(gen))
 
+    @defer.inlineCallbacks
     def getTracksByMBTrackId(self, mbTrackId):
         """
         Look up tracks by musicbrainz track id.
@@ -312,7 +313,9 @@ class DADDB(database.Database):
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
-        return self._internal.getTracksByMBTrackId(mbTrackId)
+        gen = yield self._internal.getTracksByMBTrackId(mbTrackId)
+
+        defer.returnValue(self._wrapTrackDocuments(gen))
 
     def _wrapTrackDocuments(self, gen):
         for doc in gen or []:
