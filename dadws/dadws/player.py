@@ -3,6 +3,7 @@
 
 import os
 
+import gobject
 import optparse
 
 from dad.common import player
@@ -45,7 +46,6 @@ class WebSocketPlayer(player.Player):
         site = websocket.WebSocketSite(root)
         site.addHandler('/test', lambda transport:
             handler.PlayerTestHandler(transport, self))
-
         # add songs ?
         root.putChild("16.mp3", File("/tmp/16.mp3"))
         root.putChild("blood", File("/tmp/blood.mp3"))
