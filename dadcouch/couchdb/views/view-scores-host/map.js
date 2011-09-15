@@ -17,7 +17,7 @@ function(doc) {
                 );
             }
         );
-        doc.scores.forEach(
+        doc.calculated_scores.forEach(
             function(score) {
     	        emit([score.user, score.category, score.score], hosts);
             }

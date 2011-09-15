@@ -329,7 +329,7 @@ class DADDB(database.Database):
         startkey = [userName, categoryName, above]
         endkey = [userName, categoryName, below]
 
-        gen = yield self.viewDocs('view-scores-host', mappings.Track,
+        gen = yield self._internal.viewDocs('view-scores-host', mappings.Track,
             startkey=startkey, endkey=endkey, include_docs=True)
 
         # FIXME: filter on host ?
