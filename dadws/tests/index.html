@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <title>Twisted WebSocket Test</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" ></script>
+        <script language="javascript" src="http://pap.io/ntp/at.js"></script>
+  	<script language="javascript" src="http://pap.io/js/libs/jqclock_201.js"></script>
+
+  </script>
+        <script language='javascript'>
+
+            $(document).ready(function() {
+                document.audios = {};
+                document.start = new Date().getTime();
+		console.log('Document ready at ' + document.start);
+
+		      $("#clock").clock({"timestamp": new Date().getTime()});
+
+                WebSocket = MozWebSocket;
+                var ws = new WebSocket("ws://localhost:8080/test");
+                ws.onmessage = function(evt) {
+                    console.log(evt.data);
+                    var message = jQuery.parseJSON(evt.data);
+                    if (message.command == 'load') {
+                        $('#audio > tbody:last').append(
+				'<tr><td>' + message.id + '</td>' +
+                                '<td>' + message.artist + '</td>' +
+                                '<td>' + message.title + '</td>' +
+                                '<td>' + new Date(message.when * 1000 + document.start) + '</td>' +
+                                '<td><audio id="' + message.id + '" src="' + message.uri + '" controls="controls"/></td></tr>');
+                        var audio = $('#' + message.id).get(0);
+                        console.log('Audio: ' + audio);
+                        document.audios[message.id] = audio;
+                        at.at(function() {
+                            a = document.audios[message.id];
+			    console.log('Play id ' + message.id + ' at ' + (new Date().getTime() - document.start));
+                            a.play();
+                        
+                        }, document.start + message.when * 1000);
+                    }
+                    if (message.command == 'play') {
+			console.log('Schedule play of ' + message.id +
+				' at' + (document.start + message.when * 1000));
+                        at.at(function() {
+                            a = document.audios[message.id];
+			    console.log('Play ' + a + (new Date().getTime() - document.start));
+                            a.play();
+                        
+                        }, document.start + message.when * 1000);
+                    }
+                     
+                    
+                }
+                ws.onopen = function(evt) {
+                    $('#conn_status').html('<b>Connected</b>');
+                    ws.send('Test data');
+                }
+                ws.onerror = function(evt) {
+                    $('#conn_status').html('<b>Error</b>');
+                }
+                ws.onclose = function(evt) {
+                    $('#conn_status').html('<b>Closed</b>');
+                }
+            });
+
+        </script>
+
+    </head>
+    <body>
+        <h1>WebSocket in Twisted Test</h1>
+        <div id="conn_status">Not Connected</div>
+        <div id="clock">Synchronizing</div>
+        <div id="output"></div>
+        <table id="audio">
+          <tbody>
+          </tbody>
+        </table>
+    </body>
+</html>
+
