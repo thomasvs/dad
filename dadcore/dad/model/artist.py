@@ -24,6 +24,7 @@ class ArtistModel(base.ScorableModel):
 
         @rtype: L{dad.model.artist.ArtistModel}
         """
+        raise NotImplementedError
     new = classmethod(new)
 
     def getName(self):
