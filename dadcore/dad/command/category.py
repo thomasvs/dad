@@ -5,23 +5,10 @@
 Commands related to categories.
 """
 
-import os
-import sys
-import optparse
-
-from twisted import plugin
-
 from twisted.internet import defer
 
-
-from dad import idad
-
-from dad.common import log
 from dad.common import logcommand
-from dad.command import test, tcommand
-
-from dad.extern.command import command
-from dad.extern.task import task
+from dad.command import tcommand
 
 
 class Add(tcommand.TwistedCommand):
