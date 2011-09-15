@@ -33,15 +33,15 @@ class MemoryDB(database.Database):
     logCategory = 'memorydb'
 
     def __init__(self, path=None):
-        self._tracks = {} # id -> track
+        self._tracks = {} # id -> MemoryTrackModel
         self._artists = {} # dict of artist name -> MemoryArtistModel
         self._categories = {}
-        self._mbTrackIds = {} # mb track id -> track
+        self._mbTrackIds = {} # mb track id -> MemoryTrackModel
 
-        self._hostPath = {} # dict of host -> (dict of path -> track)
-        self._md5sums = {} # dict of md5sum -> track
+        self._hostPath = {} # dict of host -> (dict of path -> MemoryTrackModel
+        self._md5sums = {} # dict of md5sum -> MemoryTrackModel
 
-        self._calculatedScores = {} # dict of track -> list of Score
+        self._calculatedScores = {} # dict of MemoryTrackModel -> list of Score
 
         self._id = 0
 
@@ -202,16 +202,10 @@ class MemoryDB(database.Database):
  
     def getTracksByHostPath(self, host, path):
         """
-        Look up tracks by path.
-        Can return multiple tracks for a path; for example, multiple
-        fragments.
-
-
         @type  host: unicode
         @type  path: unicode
 
-        ### FIXME:
-        @rtype: L{defer.Deferred} firing list of L{couch.Track}
+        @rtype: L{defer.Deferred} firing list of L{track.MemoryTrackModel}
         """
         assert type(host) is unicode, \
             'host is type %r, not unicode' % type(host)
