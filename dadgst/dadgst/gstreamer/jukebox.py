@@ -23,18 +23,13 @@ if __name__ == '__main__':
     import pygst
     pygst.require('0.10')
 
-import os
-import sys
-import math
-
 import gobject
 import gst
 
 from gst.extend import pygobject
 
-from dad.audio import mixing, common
+from dad.audio import common
 from dadgst.gstreamer import sources
-from dad.common import scheduler
 
 _TEMPLATE = gst.PadTemplate('template', gst.PAD_SRC, gst.PAD_ALWAYS,
     gst.caps_from_string('audio/x-raw-int; audio/x-raw-float'))
