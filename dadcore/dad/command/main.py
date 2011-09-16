@@ -127,6 +127,8 @@ class Add(tcommand.TwistedCommand):
                             filePath.encode('utf-8'))
                         continue
                     paths.append(filePath)
+            else:
+                paths.append(path)
 
         for path in paths:
             try:
