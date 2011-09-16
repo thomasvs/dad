@@ -2,14 +2,16 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import os
+import time
 
-import gobject
+import urllib
 import optparse
 
 from dad.common import player
 
+SCHEDULE_DURATION = 1800L # in seconds
 
-_DEFAULT_PORT = 8080
+_DEFAULT_PORT = 8800
 ws_player_option_list = [
     optparse.Option('-p', '--port',
         action="store", dest="port",
@@ -29,6 +31,11 @@ class WebSocketPlayer(player.Player):
         self._scheduler = scheduler
         self._clients = []
 
+        self._lastend = 0L
+        self._started = 0L # seconds since epoch when we started
+
+        self._scheduling = False
+
     def setup(self, options):
 
         port = int(options.port)
@@ -45,17 +52,18 @@ class WebSocketPlayer(player.Player):
         from dadws.extern.websocket import websocket
         site = websocket.WebSocketSite(root)
         site.addHandler('/test', lambda transport:
-            handler.PlayerTestHandler(transport, self))
+            handler.PlayerTestHandler(transport, self, port))
         # add songs ?
-        root.putChild("16.mp3", File("/tmp/16.mp3"))
-        root.putChild("blood", File("/tmp/blood.mp3"))
-        root.putChild("abel.ogg", File("/tmp/abel.ogg"))
-        root.putChild("daughters.ogg", File("/tmp/daughters.ogg"))
+        self._media = handler.MediaResource(self)
+        root.putChild('media', self._media)
 
         reactor.listenTCP(port, site)
 
     def start(self):
+        self._started = time.time()
         self._scheduler.schedule()
+        from twisted.internet import reactor
+        reactor.callLater(0L, self.keepScheduled)
 
     def get_position(self):
         """
@@ -151,12 +159,54 @@ class WebSocketPlayer(player.Player):
         return True 
 
     def scheduled_cb(self, scheduler, scheduled):
+        self._scheduling = False
         self.debug('scheduled %r', scheduled)
         self._scheduled.append((scheduled.start, scheduled)) 
         for client in self._clients:
             client.schedule(scheduled)
+        self._lastend = scheduled.start + scheduled.duration
+        # make it available for download
+        from twisted.web import static
+        print 'THOMAS: publishing', scheduled.path
+        # FIXME: putChild with nested path does not seem to work
+        c = self._media.putChild(urllib.quote(scheduled.path), static.File(scheduled.path))
+        # this works
+        c = self._media.putChild('a', static.File(scheduled.path))
+        # this doesn't
+        c = self._media.putChild('b/b', static.File(scheduled.path))
+        print c
+#        import code; code.interact(local=locals())
 
     def addClient(self, transport):
         self._clients.append(transport)
         for _, scheduled in self._scheduled:
             transport.schedule(scheduled)
+
+    # specific methods
+    def isAllowed(self, path):
+        for _, scheduled in self._scheduled:
+            if scheduled.path == path:
+                return True
+
+        return False
+
+    # keeping things scheduled
+    def keepScheduled(self):
+        remaining = nsToS(self._lastend) - self.position()
+        self.debug('keepScheduled: %.3f s remaining', remaining)
+        if remaining < SCHEDULE_DURATION:
+            self.debug('Need to schedule some more')
+            # only ask once at a time
+            if not self._scheduling:
+                self.info('asking scheduler to schedule')
+                self._scheduling = True
+                self._scheduler.schedule()
+
+        from twisted.internet import reactor
+        reactor.callLater(30L, self.keepScheduled)
+ 
+    def position(self):
+        return time.time() - self._started
+
+def nsToS(ns):
+    return float(ns) / (1000.0 * 1000 * 1000)

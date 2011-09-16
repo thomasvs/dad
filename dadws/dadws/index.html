@@ -23,19 +23,26 @@
                     if (message.command == 'load') {
                         $('#audio > tbody:last').append(
 				'<tr><td>' + message.id + '</td>' +
-                                '<td>' + message.artist + '</td>' +
+                                '<td>' + message.artists + '</td>' +
                                 '<td>' + message.title + '</td>' +
                                 '<td>' + new Date(message.when * 1000 + document.start) + '</td>' +
                                 '<td><audio id="' + message.id + '" src="' + message.uri + '" controls="controls"/></td></tr>');
                         var audio = $('#' + message.id).get(0);
                         console.log('Audio: ' + audio);
                         document.audios[message.id] = audio;
+                        function loadSeek(event) {
+                            audio.currentTime = message.offset;
+                        }
+                        audio.addEventListener('loadedmetadata', loadSeek, false);
+                        when = document.start + message.when * 1000;
+                        remaining = when - new Date().getTime();
                         at.at(function() {
                             a = document.audios[message.id];
 			    console.log('Play id ' + message.id + ' at ' + (new Date().getTime() - document.start));
                             a.play();
                         
-                        }, document.start + message.when * 1000);
+                        }, when);
+			        console.log('Scheduled play of id ' + message.id + ' at ' + when + ' in ' + remaining);
                     }
                     if (message.command == 'play') {
 			console.log('Schedule play of ' + message.id +
@@ -70,7 +77,7 @@
         <div id="conn_status">Not Connected</div>
         <div id="clock">Synchronizing</div>
         <div id="output"></div>
-        <table id="audio">
+        <table id="audio" border="1">
           <tbody>
           </tbody>
         </table>
