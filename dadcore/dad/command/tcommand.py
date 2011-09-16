@@ -20,7 +20,6 @@ class TwistedCommand(logcommand.LogCommand):
         self.reactor = reactor
 
     def do(self, args):
-
         self.installReactor()
 
 
