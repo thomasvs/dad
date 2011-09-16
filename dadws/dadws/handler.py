@@ -34,7 +34,7 @@ class PlayerTestHandler(websocket.WebSocketHandler):
 
     def frameReceived(self, frame):
         print 'Peer: ', self.transport.getPeer()
-        self.transport.write(frame)
+        # self.transport.write(frame)
 
     def schedule(self, scheduled):
         
