@@ -129,6 +129,7 @@ class Add(tcommand.TwistedCommand):
                 paths.append(path)
 
         for path in paths:
+            path = os.path.abspath(path)
             self.stdout.write('%s\n' % path.encode('utf-8'))
 
             try:
