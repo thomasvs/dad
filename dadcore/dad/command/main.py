@@ -113,8 +113,6 @@ class Add(tcommand.TwistedCommand):
                 self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
                 continue
         
-            self.stdout.write('%s\n' % path.encode('utf-8'))
-
             # handle playlist
             if path.endswith('.m3u'):
                 handle = open(path, 'r')
@@ -131,6 +129,8 @@ class Add(tcommand.TwistedCommand):
                 paths.append(path)
 
         for path in paths:
+            self.stdout.write('%s\n' % path.encode('utf-8'))
+
             try:
                 res = yield interactor.add(path, hostname=self.hostname)
             except error.Error, e:
