@@ -20,6 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with morituri.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import math
 import urllib
 
@@ -77,7 +78,9 @@ class LevellerTask(GstLogPipelineTask):
 
         self._source = self.gst.element_factory_make('uridecodebin')
         # FIXME: we probably need to encode the uri better
-        self._source.props.uri = 'file://' + urllib.quote(self._inpath.encode('utf-8'))
+        # file:// uri's should always be absolute
+        self._source.props.uri = 'file://' + urllib.quote(
+            os.path.abspath(self._inpath).encode('utf-8'))
         self.debug('__init__: source refcount: %d' % self._source.__grefcount__)
 
         self._level = self.gst.element_factory_make("level")
