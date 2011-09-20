@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dad.task.md5 -*-
+# -*- Mode: Python; test-case-name: dad.test.test_task_md5 -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 # DAD - Digital Audio Database
