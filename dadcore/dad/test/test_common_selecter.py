@@ -1,9 +1,6 @@
 # -*- Mode: Python; test-case-name: dad.test.test_common_selecter -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-import os
-import math
-
 import unittest
 
 from twisted.internet import defer
