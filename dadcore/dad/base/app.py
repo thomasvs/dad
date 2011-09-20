@@ -7,8 +7,6 @@ Base classes.
 
 from twisted.python import reflect
 
-from dad.extern.log import log
-
 from dad.base import base
 
 # base class for model
