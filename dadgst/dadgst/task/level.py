@@ -35,7 +35,7 @@ class GstLogPipelineTask(log.Loggable, gstreamer.GstPipelineTask):
         log.Loggable.doLog(self, log.ERROR, -2, message, *args)
 
     def warning(self, message, *args):
-        log.Loggable.doLog(self, log.WARNING, -2, message, *args)
+        log.Loggable.doLog(self, log.WARN, -2, message, *args)
 
     def info(self, message, *args):
         log.Loggable.doLog(self, log.INFO, -2, message, *args)
@@ -385,6 +385,10 @@ class TagReadTask(GstLogPipelineTask):
     def paused(self):
         decoder = self.pipeline.get_by_name('decoder')
         self.length = self.query_length(self.pipeline)
+        if self.length is None:
+            # query failed, exception is set, leave without playing
+            return True
+
         self.debug('Length in samples: %r', self.length)
 
         sink = self.pipeline.get_by_name('sink')
