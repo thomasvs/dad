@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: dad.test.test_memorydb_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 """

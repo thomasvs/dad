@@ -7,7 +7,7 @@ import os
 import tempfile
 
 from dad.plugins import pdad
-from dad.database import memory
+from dad.memorydb import memory
 
 from dad.test import mixin_controller
 

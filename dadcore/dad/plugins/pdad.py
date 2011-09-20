@@ -6,7 +6,7 @@ from twisted import plugin
 
 from dad import idad
 
-from dad.database import memory
+from dad.memorydb import memory
 
 class CoreDatabaseProvider(object):
     interface.implements(plugin.IPlugin, idad.IDatabaseProvider)

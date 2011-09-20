@@ -16,7 +16,10 @@ class MemoryAppModel(app.AppModel, log.Loggable):
 
     def getModel(self, what):
         # name = 'dad.models.%s.%sModel' % (what.lower(), what)
-        name = 'dad.database.memory.Memory%sModel' % (what, )
+        module = what.lower()
+        if module.endswith('selector'):
+            module = module[:-8]
+        name = 'dad.memorydb.model.%s.Memory%sModel' % (module, what, )
         # FIXME: move
         if what == 'Album':
             name = 'dadcouch.model.daddb.AlbumModel'

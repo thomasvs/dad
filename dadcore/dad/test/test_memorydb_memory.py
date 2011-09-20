@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dad.test.mixin_database_memory -*-
+# -*- Mode: Python; test-case-name: dad.test.test_memorydb_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import unittest
@@ -9,7 +9,7 @@ import tempfile
 from twisted.internet import defer
 
 from dad.plugins import pdad
-from dad.database import memory
+from dad.memorydb import memory
 
 from dad.test import mixin_database
 
