@@ -13,6 +13,8 @@ from dad.database import memory
 
 from dad.test import mixin_database
 
+from dad.test import common # logging
+
 
 class MemoryDBTestCase(mixin_database.BaseTestCase, unittest.TestCase):
     """
@@ -43,11 +45,11 @@ class MemoryDBPickleTestCase(mixin_database.BaseTestCase):
 globals().update(mixin_database.makeTestCaseClasses(MemoryDBTestCase))
 
 # additional tests
-class MemoryDatabasePickleTestCase(MemoryDBPickleTestCase):
+class MemoryDatabasePickleTestCase(MemoryDBPickleTestCase, unittest.TestCase):
 
     @defer.inlineCallbacks
     def testScorePersists(self):
-        t = self.testdb.new()
+        t = yield self.testdb.newTrack(name=u'Crap Song')
         yield self.testdb.save(t)
 
         yield self.testdb.score(t, u'thomas', u'Good', 0.1)

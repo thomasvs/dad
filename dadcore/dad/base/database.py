@@ -8,6 +8,7 @@ Base implementation of common database methods.
 from twisted.internet import defer
 
 from dad.base import base
+from dad.model import track
 from dad.common import log
 
 class Database(log.Loggable):
@@ -23,13 +24,17 @@ class Database(log.Loggable):
         assert isinstance(model, base.ScorableModel), "Cannot score %r" % model
         self.debug('score: model %r', model)
         yield model.setScore(userName, categoryName, score)
+
+        if isinstance(model, track.TrackModel):
+            return
+
         tracks = yield model.getTracks()
         tracks = list(tracks)
         self.debug('recalculating score on %d tracks', len(tracks))
-        for track in tracks:
+        for t in tracks:
             self.debug('score: model %r: recalculating on track %r',
-                model, track)
-            yield self.recalculateTrackScore(track)
+                model, t)
+            yield self.recalculateTrackScore(t)
     
     @defer.inlineCallbacks
     def recalculateTrackScore(self, tm):
