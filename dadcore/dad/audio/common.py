@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: dad.test.test_audio_common -*-
 # vi:si:et:sw=4:sts=4:ts=4
 #
 # DAD - Digital Audio Database
@@ -36,7 +36,7 @@ def rawToDecibel(raw):
     """
     # cheat
     if raw == 0.0:
-        return -100
+        return -1000.0
     try:
         return math.log(raw, 10) * 10.0
     except OverflowError:

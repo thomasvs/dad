@@ -2,7 +2,6 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import os
-import math
 
 import unittest
 
@@ -13,6 +12,11 @@ class LevelTest(unittest.TestCase):
         # cheat and put values in here
         self._half_dB = common.rawToDecibel(0.5)
         self._quarter_dB = common.rawToDecibel(0.25)
+
+    def testEmpty(self):
+        l = level.Level(scale=level.SCALE_RAW)
+        self.failUnless(repr(l).startswith('<Level'))
+        self.failIf(l.end())
 
     def testConvert(self):
         l = level.Level(scale=level.SCALE_RAW)
@@ -38,6 +42,10 @@ class SouthLevelTest(unittest.TestCase):
 
     def testRMS(self):
         self.assertAlmostEqual(self._level.rms(), -10.5704, places=4)
+        self.assertAlmostEqual(self._level.rms(start=1000000000L),
+            -10.5720, places=4)
+        self.assertAlmostEqual(self._level.rms(end=9000000000L),
+            -16.3701, places=4)
 
     def testSlice(self):
         slices = self._level.slice()
@@ -54,6 +62,13 @@ class HomeLevelTest(unittest.TestCase):
         self.assertEquals(trimmed.start(), self._level.start())
         self.assertEquals(trimmed.end(), self._level.end())
 
+        trimmed = self._level.trim(end=self._level.end())
+        self.assertEquals(trimmed.start(), 0)
+        self.assertEquals(trimmed.end(), self._level.end())
+
+        trimmed = self._level.trim(start=self._level.start())
+        self.assertEquals(trimmed.start(), self._level.start())
+        self.assertEquals(trimmed.end(), self._level.end())
 
     def testSlice(self):
         slices = self._level.slice()
@@ -67,7 +82,27 @@ class HomeLevelTest(unittest.TestCase):
 
         self.failUnless(second.start() > first.end())
 
+    def testSliceRaw(self):
+        raw = self._level.convert(level.SCALE_RAW)
+
+        slices = raw.slice()
+        self.assertEquals(len(slices), 2)
+
+        first = slices[0]
+        self.assertEquals(first.start(), 0L)
+
+        second = slices[1]
+        self.assertEquals(second.end(), raw.end())
+
+        self.failUnless(second.start() > first.end())
+
+
     def testAttack(self):
+        a = level.Attack()
+        self.failIf(a.get(0))
+
+
+    def testLevelAttack(self):
         a = self._level.attack()
 
         # Home Again reaches slightly above -20 dB close to 2 seconds

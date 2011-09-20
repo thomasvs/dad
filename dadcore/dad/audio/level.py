@@ -323,9 +323,7 @@ class Level(list):
 
 
     def _log(self, message):
-        return
-        import sys
-        sys.stdout.write(message + '\n')
+        return # import sys; sys.stdout.write(message + '\n')
 
 # FIXME: also used for decay
 class Attack(list):
