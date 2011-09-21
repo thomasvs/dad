@@ -108,10 +108,8 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         mid = yield self.getMid()
         self.debug('getting mid %r', mid)
         try:
-            # FIXME: fix subject vs artist
-            self.subject = yield self._daddb.db.map(
+            self.document = yield self._daddb.db.map(
                 self._daddb.dbName, mid, mappings.Artist)
-            self.document = self.subject
         except error.Error, e:
             # FIXME: trap error.Error with 404
             self.debug('aid %r does not exist as doc, viewing', mid)
@@ -149,7 +147,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
                 #defer.returnValue(None)
                 #return
 
-        self.debug('found subject %r', self.subject)
+        self.debug('found document %r', self.document)
         defer.returnValue(self)
 
 
