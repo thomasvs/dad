@@ -64,6 +64,9 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
     # FIXME: instead of forwarding, do them directly ? In subclass of Track ?
     def getName(self):
+        if not self.document:
+            return u"(Unknown Track)"
+
         return self.document.getName()
 
     # FIXME: add to iface ?
@@ -100,16 +103,13 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         return self.getId()
 
     def getArtistNames(self):
+        if not self.document:
+            return [u"(Unknown Artist)", ]
+
         return self.document.getArtistNames()
 
     def getArtistMids(self):
         return self.document.getArtistMids()
-
-    def getId(self):
-        return self.document.getId()
-
-    def getMid(self):
-        return self.getId()
 
     def getCalculatedScores(self, userName=None):
         """
