@@ -7,16 +7,12 @@ from dad.base import base
 
 # match to scorable
 # FIXME; model should not be couchdb-specific
-# FIXME: subject and self._model are the same here ?
 class SubjectController(base.Controller):
     # FIXME: decide subject type
     """
     I am a controller for scorable models like
     L{dadcouch.model.daddb.ScorableModel}
-
-    @ivar  subject: the subject this is a controller for
     """
-    subject = None
 
     def viewAdded(self, view):
         view.connect('scored', self._scored)
@@ -25,7 +21,7 @@ class SubjectController(base.Controller):
     def _scored(self, view, category, score):
         # FIXME: user ?
         # FIXME: make interface for this model
-        self.subject.score('thomas', category, score)
+        yield self._model.score('thomas', category, score)
 
     @defer.inlineCallbacks
     def populate(self, subject, userName=None):
@@ -40,11 +36,11 @@ class SubjectController(base.Controller):
         self.debug('populating with subject %r', subject)
         id = yield subject.getId()
         try:
-            self.subject = yield subject.getOrCreate()
+            self._model = yield subject.getOrCreate()
         except IndexError:
             self.debug('No item for subject %r', subject)
 
-        ret = yield self.populateScore(self.subject, userName=userName)
+        ret = yield self.populateScore(self._model, userName=userName)
 
         defer.returnValue(ret)
 
@@ -54,8 +50,8 @@ class SubjectController(base.Controller):
         self.debug('populateScore(): subjectId %r', subjectId)
         # self.doViews('throb', True)
 
-        categories = yield self.subject.getCategories()
-        scores = yield self.subject.getScores(userName=userName)
+        categories = yield self._model.getCategories()
+        scores = yield self._model.getScores(userName=userName)
         # scores: list of data.Score
         res = {} # category name -> score
         for category in categories:
