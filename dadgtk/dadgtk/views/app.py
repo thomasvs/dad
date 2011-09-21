@@ -38,3 +38,5 @@ class GTKAppView(app.AppView):
         view = reflect.namedAny(name)()
         return view
 
+    def set_title(self, title):
+        self.widget.set_title(title)

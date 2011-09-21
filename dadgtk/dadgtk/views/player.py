@@ -65,3 +65,6 @@ class GTKPlayerView(player.PlayerView):
             if self._playing is not None:
                 self._seekui.set_track_position(
                     float(position - self._playing.start) / gst.SECOND)
+
+    def set_title(self, title):
+        self._window.set_title(title)

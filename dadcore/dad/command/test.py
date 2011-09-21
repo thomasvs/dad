@@ -60,6 +60,7 @@ class Artist(Gtk2Command):
         for viewType in viewTypes:
             viewModule = 'dad%s.views.app.%sAppView' % (viewType.lower(), viewType)
             aview = reflect.namedAny(viewModule)()
+            aview.set_title(self.getFullName())
             acontroller.addView(aview)
 
 
@@ -96,6 +97,9 @@ class Artist(Gtk2Command):
 
 class JukeboxMain(log.Loggable):
 
+    def set_title(self, title):
+        self._title = title
+
     def _setup_dbus(self):
         # dbussy bits
 
@@ -126,6 +130,7 @@ class JukeboxMain(log.Loggable):
 
     def _setup_gtk(self):
             gtkui = vplayer.GTKPlayerView(self._player)
+            gtkui.set_title(self._title)
             #options FIXME: don't poke in privates
             self._player._uis.append(gtkui)
 
@@ -247,6 +252,7 @@ class Jukebox(Gtk2Command):
     def handleOptions(self, options):
         
         self._main = JukeboxMain()
+        self._main.set_title(self.getFullName())
 
         providers = self._getProviders()
 
@@ -356,6 +362,7 @@ class Selector(Gtk2Command):
         for viewType in viewTypes:
             viewModule = 'dad%s.views.app.%sAppView' % (viewType.lower(), viewType)
             aview = reflect.namedAny(viewModule)()
+            aview.set_title(self.getFullName())
             acontroller.addView(aview)
 
 
