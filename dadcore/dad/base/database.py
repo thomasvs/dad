@@ -26,8 +26,10 @@ class Database(log.Loggable):
         yield model.setScore(userName, categoryName, score)
 
         if isinstance(model, track.TrackModel):
+            yield self.recalculateTrackScore(model)
             return
 
+        # artists and albums
         tracks = yield model.getTracks()
         tracks = list(tracks)
         self.debug('recalculating score on %d tracks', len(tracks))
