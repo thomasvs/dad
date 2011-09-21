@@ -25,7 +25,7 @@ class SubjectController(base.Controller):
     def _scored(self, view, category, score):
         # FIXME: user ?
         # FIXME: make interface for this model
-        self.subject = yield self._model.score('thomas', category, score)
+        self.subject.score('thomas', category, score)
 
     @defer.inlineCallbacks
     def populate(self, subject, userName=None):
