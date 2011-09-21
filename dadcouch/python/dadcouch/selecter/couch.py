@@ -152,8 +152,23 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         # in the quick call
         for track in resultList[2:]:
             if track not in self._tracks:
+                # make sure the track is here
                 best = track.getFragmentFileByHost(host)
                 if not best:
+                    continue
+
+                artists = track.getArtistNames()
+
+                # make sure we didn't just play a track by any of the artists
+                artistReused = False
+                if self._tracks:
+                    previousArtists = self._tracks[-1][0].getArtistNames()
+                    for a in previousArtists:
+                        if a in artists:
+                            self.debug('Already played track by %r', a)
+                            artistReused = True
+
+                if artistReused:
                     continue
 
                 fragment, file = best
@@ -162,7 +177,6 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 trackmix = fragment.getTrackMix()
 
                 # FIXME: make this fail, then clean up all twisted warnings
-                artists = track.getArtistNames()
                 artists.sort()
                 s = selecter.Selected(file.info.path, trackmix, artists=artists, title=track.getName())
                 self.selected(s)
