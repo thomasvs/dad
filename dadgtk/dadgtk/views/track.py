@@ -7,8 +7,6 @@ import glib
 import gobject
 import gtk
 
-from dad.base import base
-
 from dadgtk.views import views
 
 # FIXME: move out ?
