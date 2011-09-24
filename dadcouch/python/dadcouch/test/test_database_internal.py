@@ -7,7 +7,8 @@ from twisted.internet import defer
 
 from dad.logic import database
 
-from dadcouch.model import daddb, couch
+from dadcouch.database import mappings
+from dadcouch.model import daddb
 from dadcouch.model import track as mtrack
 
 from dadcouch.test import test_database_couch
@@ -22,7 +23,7 @@ class SimpleTestCase(test_database_couch.DADDBTestCase):
         host = u'localhost'
         path = u'/tmp/hitme.flac'
 
-        track = couch.Track(
+        track = mappings.Track(
             name='Hit Me',
             fragments=[
                 {
@@ -53,7 +54,7 @@ class SimpleTestCase(test_database_couch.DADDBTestCase):
         path = u'/tmp/hitme.flac'
         info = database.FileInfo(host=host, path=path)
 
-        track = couch.Track(name='Hit Me')
+        track = mappings.Track(name='Hit Me')
         track.addFragment(info)
 
         stored = yield self.daddb._internal.saveDoc(track)
@@ -73,13 +74,13 @@ class SimpleTestCase(test_database_couch.DADDBTestCase):
         path = u'/tmp/hitme.flac'
         info = database.FileInfo(host=host, path=path)
 
-        track = couch.Track(name='Hit Me')
+        track = mappings.Track(name='Hit Me')
         track.addFragment(info)
 
         stored = yield self.daddb._internal.saveDoc(track)
 
         info = database.FileInfo(host=host + '-2', path=path)
-        track = couch.Track(name='Hit Me')
+        track = mappings.Track(name='Hit Me')
         track.addFragment(info)
 
         stored = yield self.daddb._internal.saveDoc(track)
@@ -108,7 +109,7 @@ class MD5TestCase(test_database_couch.DADDBTestCase):
         info = database.FileInfo(host=host, path=path, md5sum=md5sum)
 
         # add track
-        track = couch.Track(name='Hit Me')
+        track = mappings.Track(name='Hit Me')
         track.addFragment(info)
 
         stored = yield self.daddb._internal.save(track)
@@ -157,7 +158,7 @@ class OldSimpleTestCase: # old test cases (test_database_couch.DADDBTestCase):
 
     @defer.inlineCallbacks
     def test_getCategory(self):
-        category = couch.Category(name='Good')
+        category = mappings.Category(name='Good')
         # FIXME: don't poke at _data
         stored = yield self.db.saveDoc('dadtest', category._data)
         retrieved = yield self.daddb._internal.getCategory('Good')
@@ -202,9 +203,9 @@ class AdvancedTestCase:#(test_database_couch.DADDBTestCase):
         objs = []
         self.ids = []
 
-        objs.append(couch.Category(name='Good'))
-        objs.append(couch.User(name='thomas'))
-        objs.append(couch.Track(name='hit me with your rhythm stick'))
+        objs.append(mappings.Category(name='Good'))
+        objs.append(mappings.User(name='thomas'))
+        objs.append(mappings.Track(name='hit me with your rhythm stick'))
 
         for o in objs:
             ret = yield self.db.saveDoc('dadtest', o._data)
@@ -212,11 +213,11 @@ class AdvancedTestCase:#(test_database_couch.DADDBTestCase):
 
     @defer.inlineCallbacks
     def test_score(self):
-        track = yield self.db.map('dadtest', self.ids[2], couch.Track)
+        track = yield self.db.map('dadtest', self.ids[2], mappings.Track)
         ret = yield self.daddb._internal.score(track, 'thomas', 'Good', 0.7)
 
         # we should have only one track
-        category = yield self.db.map('dadtest', self.ids[0], couch.Category)
+        category = yield self.db.map('dadtest', self.ids[0], mappings.Category)
         trackScores = yield self.daddb._internal.getTrackScoresByCategory(category)
         trackScores = list(trackScores)
         self.assertEquals(len(trackScores), 1)
@@ -254,12 +255,12 @@ class TrackModelTestCase:#(test_database_couch.DADDBTestCase):
 
         model = mtrack.TrackModel(self.daddb._internal)
 
-        track = couch.Track(name='hit me')
+        track = mappings.Track(name='hit me')
         # FIXME: don't poke at _data
         stored = yield self.db.saveDoc('dadtest', track._data)
 
         retrieved = yield self.daddb._internal.db.map(self.daddb._internal.dbName, stored['id'],
-            couch.Track)
+            mappings.Track)
         self.assertEquals(retrieved.name, 'hit me')
 
         retrieved = yield model.get(stored['id'])
