@@ -12,7 +12,7 @@ from dad.plugins import pdadcouch
 
 from dadcouch.extern.paisley.test import test_util
 
-from dadcouch.model import daddb
+from dadcouch.database import couch
 
 from dad.test import mixin_database
 
@@ -20,7 +20,7 @@ class DADDBTestCase(test_util.CouchDBTestCase):
 
     """
     @type db:    L{paisley.client.CouchDB}
-    @type daddb: L{daddb.DADDB}
+    @type daddb: L{couch.DADDB}
     """
 
     @defer.inlineCallbacks
@@ -31,7 +31,7 @@ class DADDBTestCase(test_util.CouchDBTestCase):
 
         yield self.db.createDB('dadtest')
 
-        self.daddb = daddb.DADDB(self.db, 'dadtest')
+        self.daddb = couch.DADDB(self.db, 'dadtest')
         self.testdb = self.daddb
 
         thisDir = os.path.dirname(__file__)
