@@ -22,6 +22,27 @@ class CouchDocModel(CouchDBModel):
     """
 
     document = None
+    documentClass = None # set by subclass
+
+    def new(self, db, name, sort=None, mbid=None):
+        """
+        @type  db:   L{dadcouch.database.couch.DADDB}
+        @type  name: C{unicode}
+        @type  sort: C{unicode}
+        @type  mbid: C{unicode}
+        """
+        if not sort:
+            sort = name
+
+        model = self(db)
+        model.document = self.documentClass()
+
+        model.document.name = name
+        model.document.sortName = sort
+        model.document.mbid = mbid
+        model.document = model.document
+        return model
+    new = classmethod(new)
 
     
 class ScorableModel(CouchDocModel):
@@ -30,6 +51,8 @@ class ScorableModel(CouchDocModel):
     """
 
     subjectType = 'none'
+
+
 
     def getCategories(self):
         return self._daddb.getCategories()

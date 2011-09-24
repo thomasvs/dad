@@ -20,24 +20,11 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     """
 
     subjectType = 'track'
+    documentClass = mappings.Track
 
     track = None
 
     # base class implementations
-
-    def new(self, db, name, sort=None, mbid=None):
-        if not sort:
-            sort = name
-
-        model = CouchTrackModel(db)
-        model.document = mappings.Track()
-
-        model.document.name = name
-        model.document.sortName = sort
-        model.document.mbid = mbid
-        model.document = model.document
-        return model
-    new = classmethod(new)
 
     @defer.inlineCallbacks
     def getOrCreate(self):

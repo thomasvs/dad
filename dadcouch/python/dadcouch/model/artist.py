@@ -23,19 +23,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     subjectType = 'artist'
 
-    def new(self, db, name, sort=None, mbid=None):
-        if not sort:
-            sort = name
-
-        model = CouchArtistModel(db)
-        model.document = mappings.Artist()
-
-        model.document.name = name
-        model.document.sortName = sort
-        model.document.mbid = mbid
-        model.artist = model.document
-        return model
-    new = classmethod(new)
+    documentClass = mappings.Artist
 
     ### artist.ArtistModel implementations
     def getName(self):
