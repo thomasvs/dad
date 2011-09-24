@@ -7,8 +7,7 @@ from twisted.internet import defer
 
 from dad.logic import database
 
-from dadcouch.database import mappings
-from dadcouch.model import daddb
+from dadcouch.database import mappings, internal
 from dadcouch.model import track as mtrack
 
 from dadcouch.test import test_database_couch
@@ -61,7 +60,7 @@ class SimpleTestCase(test_database_couch.DADDBTestCase):
 
 
         # look up
-        ret = yield self.daddb._internal.viewDocs('view-host-path', daddb.GenericRow)
+        ret = yield self.daddb._internal.viewDocs('view-host-path', internal.GenericRow)
 
         results = list(ret)
         self.assertEquals(len(results), 1)

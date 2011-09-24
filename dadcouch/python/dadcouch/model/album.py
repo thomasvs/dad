@@ -5,7 +5,7 @@ from twisted.internet import defer
 
 from dadcouch.extern.paisley import views
 
-from dadcouch.database import mappings, couch
+from dadcouch.database import mappings, internal
 from dadcouch.model import base
 
 class CouchAlbumModel(base.ScorableModel):
@@ -31,7 +31,7 @@ class CouchAlbumModel(base.ScorableModel):
 # FIXME: convert to inline deferreds
 class CouchAlbumSelectorModel(base.CouchDBModel):
 
-    artistAlbums = None # artist id -> album ids
+    artistAlbums = None # artist mid -> album ids
 
     def get(self):
         """
@@ -45,7 +45,7 @@ class CouchAlbumSelectorModel(base.CouchDBModel):
         # first, load a mapping of artists to albums
         view = views.View(self._daddb.db, self._daddb.dbName,
             'dad', 'view-albums-by-artist',
-            couch.ItemAlbumsByArtist, group=True)
+            internal.ItemAlbumsByArtist, group=True)
         d.addCallback(lambda _, v: v.queryView(), view)
         
         def cb(result):
