@@ -37,7 +37,8 @@ class TracksUI(gtk.VBox, log.Loggable):
         self._first_iter = None
         self._count = 0
 
-        self._filter_count = 0
+        self._filter_path = {}
+
         self._create_store()
 
         self._treeview = gtk.TreeView(self._store)
@@ -55,7 +56,6 @@ class TracksUI(gtk.VBox, log.Loggable):
 
         # filtering
         def match_artist_mids(model, iter):
-            self._filter_count += 1
             # the first iter always should be shown, as it gives totals
             if model.get_path(iter) == (0, ):
                 return True
@@ -68,9 +68,9 @@ class TracksUI(gtk.VBox, log.Loggable):
             value = model.get_value(iter, COLUMN_ARTIST_MIDS)
             for v in value or []:
                 if v in self._artist_mids:
+                    self._filter_path[model.get_path(iter)] = True
                     return True
 
-            self._filter_count -= 1
             return False
 
         self._filter = self._store.filter_new(root=None)
@@ -175,7 +175,7 @@ class TracksUI(gtk.VBox, log.Loggable):
         # used when an artist is selected and only its tracks
         self.debug('set_artist_ids: %r', mids)
         self._artist_mids = mids
-        self._filter_count = 0
+        self._filter_path = {}
         self._filter.refilter()
 
         if mids is None:
@@ -183,8 +183,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             self._show_count()
         else:
             # update count to show filtered results
-            # FIXME: this formula determined by experimentation
-            self._show_count((self._filter_count -1) / 2)
+            self._show_count(len(self._filter_path))
 
         # reselect the first
         # self._selection.select_path((0, ))        
