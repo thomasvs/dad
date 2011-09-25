@@ -14,9 +14,9 @@ function getArtistMid(artist) {
     if (artist.id) {
         mid = artist.id;
     } else if (artist.mbid) {
-        mid = 'artist:mbid:' + metadata.mb_artist_id;
+        mid = 'artist:mbid:' + artist.mbid;
     } else if (artist.name) {
-        mid = 'artist:name:' + metadata.artist;
+        mid = 'artist:name:' + artist.name;
     }
 
     return mid;
@@ -37,7 +37,7 @@ function getMetadataArtistMid(metadata) {
     return mid;
 }
 
-function emitArtist(name, sortname, id, mid, mbid, docid) {
+function emitRow(name, sortname, id, mid, mbid, docid) {
     emit(mid, {
         'name': name,
         'sortname': sortname,
@@ -55,7 +55,7 @@ function(doc) {
         if (doc.artists && doc.artists.length > 0) {
             doc.artists.forEach(
                 function(artist) {
-                    emitArtist(artist.name, artist.sortname, artist.id, getArtistMid(artist), artist.mbid, doc._id);
+                    emitRow(artist.name, artist.sortname, artist.id, getArtistMid(artist), artist.mbid, doc._id);
                     seen[artist.name] = 1;
                 }
             )
@@ -71,7 +71,7 @@ function(doc) {
                                         // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
                                         aid = getMetadataArtistMid(file.metadata);
                                         if (aid) {
-                                            emitArtist(file.metadata.artist, file.metadata.artist, null, aid, file.metadata.mb_artist_id, doc._id);
+                                            emitRow(file.metadata.artist, file.metadata.artist, null, aid, file.metadata.mb_artist_id, doc._id);
 
                                             seen[file.metadata.artist] = 1;
                                         }

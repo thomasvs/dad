@@ -241,7 +241,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
     ### base.SelectorView implementations
     def add_row(self, model, mid, display, sort, tracks):
         assert model, 'artist model %r is empty' % model
-        self.log('add_row: id %r, display %r', model, display)
+        self.log('add_row: model %r, mid %r, display %r', model, mid, display)
 
         iter = self._store.append()
         self._store.set(iter,
@@ -283,6 +283,9 @@ class AlbumSelectorView(GTKSelectorView):
     what = 'Album'
 
     _album_ids = None
+
+
+    logCategory = 'albumselector'
 
     def __init__(self):
         GTKSelectorView.__init__(self)
@@ -326,7 +329,7 @@ class AlbumSelectorView(GTKSelectorView):
         else:
             tracks = 0
             for i in ids:
-                tracks += self._id_to_tracks[i]
+                tracks += self._id_to_tracks.get(i, 0)
 
             # update count to show filtered results
             self._show_count(len(self._album_ids), tracks)

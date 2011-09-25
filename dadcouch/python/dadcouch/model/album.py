@@ -43,9 +43,9 @@ class CouchAlbumSelectorModel(base.CouchDBModel):
             self.debug('Got %d artist/albums combos', len(result))
 
             for item in result:
-                if item.artistId not in self.artistAlbums:
-                    self.artistAlbums[item.artistId] = []
-                self.artistAlbums[item.artistId].append(item.id)
+                if item.artistMid not in self.artistAlbums:
+                    self.artistAlbums[item.artistMid] = []
+                self.artistAlbums[item.artistMid].append(item.mid)
             return result
         d.addCallback(cb)
                     
@@ -56,7 +56,7 @@ class CouchAlbumSelectorModel(base.CouchDBModel):
 
     def get_artists_albums(self, artist_ids):
         """
-        @rtype: list of str
+        @rtype: list of unicode
         """
         # return a list of album ids for the given list of artist ids
         # returns None if the first total row is selected, ie all artists

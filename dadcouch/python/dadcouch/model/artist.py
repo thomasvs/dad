@@ -21,8 +21,6 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     """
     I represent an artist in a CouchDB database.
     """
-    subjectType = 'artist'
-
     documentClass = mappings.Artist
 
     ### artist.ArtistModel implementations

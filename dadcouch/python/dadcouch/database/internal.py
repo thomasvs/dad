@@ -76,20 +76,38 @@ class ViewScoresHostRow:
 class ItemAlbumsByArtist:
 
     tracks = 0 # int
+    artistId = None
+    artistMid = None
     artistName = None
     artistSortname = None
-    artistId = None
+    artistMbId = None
 
     # of album
     name = None
     sortname = None
     id = None
+    mid = None
+    mbid = None
 
     # map view-albums-by-artist
     # key: artist name, sortname, id; album name, sortname, id
     # value: track count
     def fromDict(self, d):
-        self.artistName, self.artistSortname, self.artistId, self.name, self.sortname, self.id = d['key']
+        self.artistMid = d['key'][0]
+        artist = d['key'][1]
+        self.artistName = artist['name']
+        self.artistSortName = artist['sortname']
+        self.artistId = artist['id']
+        self.artistMid = artist['mid']
+        # FIXME: if a value is null, the key doesn't go in the dict in couch?
+        self.artistMbId = artist.get('mbid', None)
+
+        album = d['key'][2]
+        self.name = album['name']
+        self.sortname = album['sortname']
+        self.id = album['id']
+        self.mid = album['mid']
+        self.mbid = album.get('mbid', None)
 
         self.tracks = d['value']
 

@@ -2,7 +2,7 @@
 // key:   [user, category, score, user]
 // value: [hosts] on which this track is available
 function(doc) {
-    if (doc.type == 'track' && doc.scores) {
+    if (doc.type == 'track' && doc.calculated_scores) {
 
         var hosts = [];
 
