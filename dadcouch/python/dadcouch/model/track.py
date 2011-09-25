@@ -19,10 +19,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     @ivar track: a track as returned by the database.
     """
 
-    subjectType = 'track'
     documentClass = mappings.Track
-
-    track = None
 
     # base class implementations
 
