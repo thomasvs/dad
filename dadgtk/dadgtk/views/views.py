@@ -253,7 +253,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         self.count += 1
         self.track_count += tracks
 
-        self._id_to_tracks[model.getMid()] = tracks
+        self._id_to_tracks[mid] = tracks
 
         self._show_count()
 
