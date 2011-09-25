@@ -26,7 +26,7 @@ from twisted.internet import defer
 from dad.common import log
 from dad.common import selecter
 
-from dadcouch.model import daddb
+from dadcouch.database import couch
 
 _DEFAULT_HOST = 'localhost'
 _DEFAULT_PORT = 5984
@@ -93,7 +93,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self._cache = client.MemoryCache()
         self._db = client.CouchDB(options.host, int(options.port),
             cache=self._cache)
-        self._dadDB = daddb.DADDB(self._db, options.database)
+        self._dadDB = couch.DADDB(self._db, options.database)
 
         self._category = options.category
         self._user = options.user

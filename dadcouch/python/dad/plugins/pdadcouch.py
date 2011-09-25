@@ -27,10 +27,10 @@ class CouchDBDatabaseProvider(object):
         return couch.couchdb_option_list
 
     def getDatabase(self, options):
-        from dadcouch.model import daddb
+        from dadcouch.database import couch
         from dadcouch.extern.paisley import client
         db = client.CouchDB(options.host, int(options.port))
-        return daddb.DADDB(db, options.database)
+        return couch.DADDB(db, options.database)
 
     def getAppModel(self, database):
         from dadcouch.models import app
