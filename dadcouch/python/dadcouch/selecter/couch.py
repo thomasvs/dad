@@ -172,7 +172,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                     continue
 
                 fragment, file = best
-                self.log('Got track %r', track.getName())
+                self.debug('Got track %r', track.getName())
                 self._tracks.append((track, fragment, file))
                 trackmix = fragment.getTrackMix()
 

@@ -1,6 +1,8 @@
 # -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import time
+
 from twisted.internet import defer
 
 from zope import interface
@@ -228,6 +230,8 @@ class DADDB(database.Database):
         @rtype: L{defer.Deferred} firing
                 list of Track, Slice, path, score, userId
         """
+        start = time.time()
+
         self.debug('Getting tracks for host %r and category %r and user %r',
             hostName, categoryName, userName)
 
@@ -242,11 +246,26 @@ class DADDB(database.Database):
         # FIXME: for randomness, we currently go from generator to
         # full list and back
         if random:
-            tracks = list(gen)
+            tracks = []
+            for t in gen:
+                # FIXME: should also apply if non-random
+                # map score above/below from 1 to 10 frequency
+                score = t.getCalculatedScore(userName, categoryName)
+                if not score:
+                    print 'THOMAS: ERROR: no score for', t
+                    continue
+                frequency = int(9.0 * float(score.score - above) / float(below - above)) + 1
+                self.debug('Adding track %r with frequency %r', t.getName(), frequency)
+                tracks.extend([t, ] * frequency)
+                #tracks.extend([t, ])
+
             import random
             random.shuffle(tracks)
+            self.debug('%d tracks in shuffle', len(tracks))
             gen = (t for t in tracks)
+            #gen = random.sample(tracks, 100)
 
+        self.debug('created playlist in %.3f seconds', time.time() - start)
         defer.returnValue(gen)
 
     ### own instance methods

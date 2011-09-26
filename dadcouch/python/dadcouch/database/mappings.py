@@ -351,6 +351,13 @@ class Track(mapping.Document, track.TrackModel):
     def getFragments(self):
         return [Fragment(f) for f in self.fragments]
 
+    def getCalculatedScore(self, userName, categoryName):
+        for s in self.calculated_scores:
+            if s.user == userName and s.category == categoryName:
+                return s
+
+        return None
+
     # FIXME: add to iface
     def getFragmentFileByHost(self, host):
         # for the given track, select the highest quality file on this host
