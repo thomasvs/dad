@@ -9,7 +9,7 @@ from dad import idad
 from dad.base import database
 
 from dadcouch.database import mappings, internal
-from dadcouch.model import base, artist, track
+from dadcouch.model import base, artist, track, album
 
 
 class DADDB(database.Database):
@@ -72,6 +72,9 @@ class DADDB(database.Database):
             model = yield artist.CouchArtistModel.new(self, name, sort, mbid)
 
         defer.returnValue(model)
+
+    def newAlbum(self, name, sort=None, mbid=None):
+        return album.CouchAlbumModel.new(self, name, sort, mbid)
 
 
     # FIXME: use internal save ?

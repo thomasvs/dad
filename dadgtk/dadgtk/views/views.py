@@ -155,15 +155,17 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
         ids = []
 
         for p in paths:
-            i = self._store.get_iter(p)
+            i = model.get_iter(p)
             # FIXME: getting id back from store is a non-unicode str ?
-            itemId = self._store.get_value(i, COLUMN_MID)
+            itemId = model.get_value(i, COLUMN_MID)
             if itemId:
                 ids.append(itemId)
 
         # if the first row is selected, return None
         if not ids:
             ids = None
+
+        self.debug('Selected %r', ids)
 
         self.emit('selected', ids)
 

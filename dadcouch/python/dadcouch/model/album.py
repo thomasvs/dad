@@ -15,6 +15,27 @@ class CouchAlbumModel(base.ScorableModel):
     """
     documentClass = mappings.Album
 
+    def getName(self):
+        return self.document.name
+
+    def getSortName(self):
+        return self.document.sortname
+
+    def getId(self):
+        return self.document.id
+
+    def getMbId(self):
+        return self.document.mbid
+
+    def getMid(self):
+        if self.document.id:
+            return self.document.id
+
+        if self.document.mbid:
+            return 'album:mbid:' + self.document.mbid
+
+        return 'album:name:' + self.document.name
+
 
 # FIXME: convert to inline deferreds
 class CouchAlbumSelectorModel(base.CouchDBModel):
@@ -74,5 +95,3 @@ class CouchAlbumSelectorModel(base.CouchDBModel):
                     ret[album] = 1
 
         return ret.keys()
-
-

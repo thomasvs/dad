@@ -77,6 +77,28 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         gen = (m for m in models)
         defer.returnValue(gen)
 
+    @defer.inlineCallbacks
+    def getAlbums(self):
+        models = []
+
+        if self.document.albums:
+            for album in self.document.albums:
+                # FIXME: sort name ? id ?
+                model = self._daddb.newAlbum(
+                    name=album.name, mbid=getattr(album, 'mbid', None))
+                models.append(model)
+
+        for fragment in self.document.fragments:
+            for file in fragment.files:
+                if not file.metadata:
+                    continue
+                # FIXME: why is this a dict and not something with attrs?
+                model = yield self._daddb.getOrCreateAlbum(
+                    name=file.metadata.album, mbid=file.metadata.mb_album_id)
+                models.append(model)
+
+        defer.returnValue(models)
+
     def setName(self, name):
         self.document.name = name
 
@@ -156,7 +178,8 @@ class CouchTrackSelectorModel(base.CouchDBModel):
                 d = {
                     '_id': trackRow.id,
                     'name': trackRow.name,
-                    'artists': trackRow.artists
+                    'artists': trackRow.artists,
+                    'albums': trackRow.albums,
                 }
                 track.fromDict(d)
                 tm = CouchTrackModel(self._daddb)

@@ -522,4 +522,4 @@ class TrackRow(mapping.Document):
     def fromDict(self, d):
         self.id = d['id']
         self.name = d['key']
-        self.artists = d['value']
+        self.artists, self.albums = d['value']

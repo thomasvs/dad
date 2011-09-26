@@ -100,12 +100,18 @@ class TrackSelectorController(SelectorController):
 
     logCategory = 'trackSC'
 
+    @defer.inlineCallbacks
     def addItem(self, item):
+        """
+        @type  item: L{dad.model.track.TrackModel}
+        """
         # add a track
         self.debug('addItem: %r', item)
+        albums = yield item.getAlbums()
+        album_mids = [a.getMid() for a in albums]
         self.doViews('add_item', item, item.getArtistNames(),
             item.getArtistMids(),
-            "%s" % item.getName(), None, None, None)
+            "%s" % item.getName(), None, None, None, album_mids)
 
     def nopopulate(self):
         self.debug('populate()')

@@ -412,15 +412,15 @@ class Selector(Gtk2Command):
         def album_selected_cb(self, ids):
             self.debug('album_selected_cb: ids %r', ids)
 
-            # without ids, select everything
-            track_ids = None
+            ## without ids, select everything
+            #track_ids = None
 
-            if ids is not None:
-                track_ids = alsModel.get_albums_tracks(ids)
+            #if ids is not None:
+            #    track_ids = alsModel.get_albums_tracks(ids)
 
-            tViews[0].set_album_ids(ids)
+            tViews[0].set_album_mids(ids)
 
-        #alViews[0].connect('selected', album_selected_cb)
+        alsViews[0].connect('selected', album_selected_cb)
 
 
         def track_selected_cb(self, trackObj):

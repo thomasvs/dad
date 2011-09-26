@@ -17,8 +17,9 @@ from dad.extern.log import log
     COLUMN_SORT,
     COLUMN_PATH,
     COLUMN_START,
-    COLUMN_END
-) = range(8)
+    COLUMN_END,
+    COLUMN_ALBUM_MIDS
+) = range(9)
 
 class TracksUI(gtk.VBox, log.Loggable):
     logCategory = 'tracksui'
@@ -29,6 +30,7 @@ class TracksUI(gtk.VBox, log.Loggable):
     }
 
     _artist_mids = None
+    _album_mids = None
 
     def __init__(self, selector=False):
         gtk.VBox.__init__(self)
@@ -60,16 +62,38 @@ class TracksUI(gtk.VBox, log.Loggable):
             if model.get_path(iter) == (0, ):
                 return True
 
-            # if no album_ids filter is set, everything should be shown
-            if self._artist_mids is None:
+            # if no album or artist filter is set, everything should be shown
+            if not self._artist_mids and not self._album_mids:
                 return True
 
-            # only show tracks matching the current selection
-            value = model.get_value(iter, COLUMN_ARTIST_MIDS)
-            for v in value or []:
-                if v in self._artist_mids:
-                    self._filter_path[model.get_path(iter)] = True
-                    return True
+            artist = False
+            album = False
+
+            if self._artist_mids:
+                self.debug('Filtering on artists %r', self._artist_mids)
+                # only show tracks matching the current selection
+                value = model.get_value(iter, COLUMN_ARTIST_MIDS)
+
+                for v in value or []:
+                    if v in self._artist_mids:
+                        artist = True
+            else:
+                artist = True
+
+            if self._album_mids:
+                self.debug('Filtering on albums %r', self._album_mids)
+                # only show tracks matching the current selection
+                value = model.get_value(iter, COLUMN_ALBUM_MIDS)
+                self.debug('value: %r', value)
+                for v in value or []:
+                    if v in self._album_mids:
+                        album = True
+            else:
+                album = True
+
+            if artist and album:
+                self._filter_path[model.get_path(iter)] = True
+                return True
 
             return False
 
@@ -88,6 +112,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
+            object
             )
 
 
@@ -104,10 +129,11 @@ class TracksUI(gtk.VBox, log.Loggable):
     def _scheduled_cb(self, scheduler, scheduled):
         self.add_scheduled(scheduled)
 
-    def add_item(self, item, artists, artist_mids, title, path, start, end):
+    def add_item(self, item, artists, artist_mids, title, path, start, end, album_mids):
         """
         """
-        self.debug('add: adding %r with artist_mids %r', item, artist_mids)
+        self.debug('add: adding %r with artist_mids %r and album_mids %r',
+            item, artist_mids, album_mids)
         iter = self._store.append()
         self._store.set(iter,
             COLUMN_SCHEDULED, item,
@@ -117,7 +143,8 @@ class TracksUI(gtk.VBox, log.Loggable):
             COLUMN_SORT, title,
             COLUMN_PATH, path,
             COLUMN_START, start,
-            COLUMN_END, end
+            COLUMN_END, end,
+            COLUMN_ALBUM_MIDS, album_mids
         )
         # self._treeview.set_model(self._store)
         self._treerowrefs[item] = gtk.TreeRowReference(
@@ -188,6 +215,34 @@ class TracksUI(gtk.VBox, log.Loggable):
         # reselect the first
         # self._selection.select_path((0, ))        
 
+    def set_album_mids(self, mids):
+        """
+        Filter the view with tracks only from the given albums.
+
+        @param mids: None if all tracks should be shown (no selection),
+                     [] if no tracks should be shown,
+                     or a list of track ids to show.
+        @type  mids: list of C{unicode} or None
+        """
+        for i in mids or []:
+            assert type(i) is unicode, "album mid %r is not unicode" % i
+
+        # used when an album is selected and only its tracks
+        self.debug('set_album_mids: %r', mids)
+        self._album_mids = mids
+        self._filter_path = {}
+        self._filter.refilter()
+
+        if mids is None:
+            # all selected
+            self._show_count()
+        else:
+            # update count to show filtered results
+            self._show_count(len(self._filter_path))
+
+        # reselect the first
+        # self._selection.select_path((0, ))        
+
 class SchedulerUI(TracksUI):
     logCategory = 'schedulerui'
 
@@ -219,7 +274,7 @@ class SchedulerUI(TracksUI):
             [], scheduled.title or scheduled.description,
             scheduled.path,
             gst.TIME_ARGS(scheduled.start),
-            gst.TIME_ARGS(scheduled.start + scheduled.duration))
+            gst.TIME_ARGS(scheduled.start + scheduled.duration), [])
 
 gobject.type_register(SchedulerUI)
 
