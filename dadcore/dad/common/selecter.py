@@ -131,7 +131,7 @@ class Selecter(log.Loggable):
 
         def loadCb(result):
             self._loop += 1
-            if result == 0:
+            if result is None:
                 self.warning('get(): no tracks match')
                 raise IndexError('no tracks match')
                 return
@@ -202,7 +202,7 @@ class Selecter(log.Loggable):
         """
         Load all tracks to be scheduled.
 
-        @returns: a deferred firing a count of tracks loaded.
+        @returns: a deferred firing True if tracks could be loaded.
         @rtype:   L{defer.Deferred} firing int
         """
         raise NotImplementedError

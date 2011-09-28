@@ -2,6 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import time
+import random
 
 from twisted.internet import defer
 
@@ -221,10 +222,10 @@ class DADDB(database.Database):
 
     @defer.inlineCallbacks
     def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,
-        random=False):
+        randomize=False):
         """
         @type  limit:        int or None
-        @type  random:       bool
+        @type  randomize:       bool
 
         @returns: list of tracks and additional info, ordered by track id
         @rtype: L{defer.Deferred} firing
@@ -238,35 +239,47 @@ class DADDB(database.Database):
         startkey = [userName, categoryName, above]
         endkey = [userName, categoryName, below]
 
-        gen = yield self._internal.viewDocs('view-scores-host', mappings.Track,
+        gen = yield self._internal.viewDocs('view-scores-host',
+            mappings.Track,
             startkey=startkey, endkey=endkey, include_docs=True)
 
         # FIXME: filter on host ?
 
         # FIXME: for randomness, we currently go from generator to
         # full list and back
-        if random:
-            tracks = []
-            for t in gen:
-                # FIXME: should also apply if non-random
-                # map score above/below from 1 to 10 frequency
-                score = t.getCalculatedScore(userName, categoryName)
-                if not score:
-                    print 'THOMAS: ERROR: no score for', t
-                    continue
-                frequency = int(9.0 * float(score.score - above) / float(below - above)) + 1
-                self.debug('Adding track %r with frequency %r', t.getName(), frequency)
-                tracks.extend([t, ] * frequency)
-                #tracks.extend([t, ])
-
-            import random
+        if randomize:
+            tracks = [t for t in gen]
             random.shuffle(tracks)
-            self.debug('%d tracks in shuffle', len(tracks))
-            gen = (t for t in tracks)
-            #gen = random.sample(tracks, 100)
+            gen = self._randomizer((t for t in tracks),
+                userName, categoryName, above, below)
 
         self.debug('created playlist in %.3f seconds', time.time() - start)
         defer.returnValue(gen)
+
+    def _randomizer(self, gen, userName, categoryName, above, below):
+        """
+        Given a generator of tracks, returns a generator that yields
+        results randomly.
+        """
+
+        for t in gen:
+            # FIXME: should also apply if non-random
+            score = t.getCalculatedScore(userName, categoryName)
+            if not score:
+                print 'THOMAS: ERROR: no score for', t
+                continue
+            prob = float(score.score - above) / float(below - above)
+            r = random.random()
+
+            skipping = True
+            if r < prob:
+                skipping = False
+
+            self.debug('Track %r with probability %.3f and random %.3f, %s',
+                t.getName(), prob, r, skipping and 'skipping' or 'yielding')
+            if not skipping:
+                yield t
+
 
     ### own instance methods
     def map(self, docId, objectFactory):

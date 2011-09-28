@@ -121,7 +121,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
     def _loadLimited(self, limit):
         # get a few results as fast as possible
         d = self._dadDB.getPlaylist(self._host, self._user, self._category,
-            self._above, self._below, limit=limit, random=self._random)
+            self._above, self._below, limit=limit, randomize=self._random)
         d.addCallback(self._getPlaylistCb, self._host)
         def eb(f):
             log.warningFailure(f)
@@ -133,7 +133,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         # FIXME: also gets some we already have, filter them somehow ?
 
         self.loadDeferred = self._dadDB.getPlaylist(self._host, self._user, self._category,
-            self._above, self._below, random=self._random)
+            self._above, self._below, randomize=self._random)
         self.loadDeferred.addCallback(self._getPlaylistCb, self._host, resetLoad=True)
         self.debug('setting loadDef to %r', self.loadDeferred)
 
@@ -144,13 +144,16 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
             self.debug('setting loadDef to None')
             self.loadDeferred = None
 
-        resultList = list(result)
-        self.debug('got %r paths resolved', len(resultList))
-
 
         # we throw the first two away since they were possibly used
         # in the quick call
-        for track in resultList[2:]:
+        result.next()
+        result.next()
+
+        i = 0
+
+        # FIXME: this logic about selecting should go somewhere else ?
+        for track in result:
             if track not in self._tracks:
                 # make sure the track is here
                 best = track.getFragmentFileByHost(host)
@@ -162,17 +165,23 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 # make sure we didn't just play a track by any of the artists
                 artistReused = False
                 if self._tracks:
-                    previousArtists = self._tracks[-1][0].getArtistNames()
+                    size = min(len(self._tracks), 5)
+                    previousArtists = []
+                    for t, fr, fi in self._tracks[-size:]:
+                        previousArtists.extend(t.getArtistNames())
+
                     for a in previousArtists:
                         if a in artists:
                             self.debug('Already played track by %r', a)
+                            # FIXME: put on reuse pile ?
                             artistReused = True
 
                 if artistReused:
                     continue
 
                 fragment, file = best
-                self.debug('Got track %r', track.getName())
+                i += 1
+                self.debug('Got track %d: %r', i, track.getName())
                 self._tracks.append((track, fragment, file))
                 trackmix = fragment.getTrackMix()
 
@@ -184,7 +193,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                     self._cache.lookups, self._cache.hits,
                     self._cache.cached)
 
-        return len(resultList)
+        return True # len(resultList)
 
 def main():
     log.init()
