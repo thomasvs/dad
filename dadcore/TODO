@@ -135,3 +135,5 @@ That track looks like it's 5:06 and thus citi soleil
 - decide whether getTracksByHostPath can return None.
 
 - when selecting an artist on a VA album, the album pane lists the album more than once, as many as there are tracks
+
+- publicize subject.SubjectController._model somehow

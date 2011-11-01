@@ -28,8 +28,8 @@ class TrackController(subject.SubjectController):
         # FIXME: getting it again to avoid poking at internals ?
         try:
             self.debug('populating')
-            artists = yield self.subject.getArtistNames()
-            name = yield self.subject.getName()
+            artists = yield self._model.getArtistNames()
+            name = yield self._model.getName()
 
             self.doViews('set_artist', " & ".join(artists))
             self.doViews('set_title', name)

@@ -20,5 +20,5 @@ class ArtistController(subject.SubjectController):
         yield subject.SubjectController.populate(
             self, artist, userName)
 
-        name = yield self.subject.getName()
+        name = yield self._model.getName()
         self.doViews('set_name', name)
