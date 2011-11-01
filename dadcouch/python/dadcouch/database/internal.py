@@ -73,48 +73,6 @@ class ViewScoresHostRow:
         return '<Score %.3f for user %r in category %r for %r on %r>' % (
             self.score, self.user, self.category, self.id, self.hosts)
 
-class ItemAlbumsByArtist:
-
-    tracks = 0 # int
-    artistId = None
-    artistMid = None
-    artistName = None
-    artistSortname = None
-    artistMbId = None
-
-    # of album
-    name = None
-    sortname = None
-    id = None
-    mid = None
-    mbid = None
-
-    # map view-albums-by-artist
-    # key: artist name, sortname, id; album name, sortname, id
-    # value: track count
-    def fromDict(self, d):
-        self.artistMid = d['key'][0]
-        artist = d['key'][1]
-        self.artistName = artist['name']
-        self.artistSortName = artist['sortname']
-        self.artistId = artist['id']
-        self.artistMid = artist['mid']
-        # FIXME: if a value is null, the key doesn't go in the dict in couch?
-        self.artistMbId = artist.get('mbid', None)
-
-        album = d['key'][2]
-        self.name = album['name']
-        self.sortname = album['sortname']
-        self.id = album['id']
-        self.mid = album['mid']
-        self.mbid = album.get('mbid', None)
-
-        self.tracks = d['value']
-
-    def getMid(self):
-        # FIXME
-        return self.id
-
 class ItemTracks:
     # map tracks-by-album and tracks-by-artist
     def fromDict(self, d):
@@ -207,8 +165,8 @@ class InternalDB(log.Loggable):
         d.addCallback(cb)
 
         def eb(failure):
-            self.warning('Failed to query view: %r',
-                log.getFailureMessage(failure))
+            self.warning('Failed to query view %r: %r',
+                viewName, log.getFailureMessage(failure))
             sys.stderr.write(failure.getTraceback())
             return failure
         d.addErrback(eb)

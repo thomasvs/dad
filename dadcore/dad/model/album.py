@@ -1,10 +1,12 @@
 # -*- Mode: Python; test-case-name: dad.test.test_model_album -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+from twisted.internet import defer
+
 from dad.base import base
 from dad.common import log
 
-class AlbumModel(base.Model):
+class AlbumModel(base.ScorableModel):
 
     """
     I am a model for an album.
@@ -35,6 +37,27 @@ class AlbumModel(base.Model):
 
     def __repr__(self):
         return '<Album %r>' % (self.getName(), )
+
+    # FIXME: copied from artist.py; abstract ?
+    @defer.inlineCallbacks
+    def getMid(self):
+        i = yield self.getId()
+        if i:
+            defer.returnValue(i)
+            return
+
+        mbid = yield self.getMbId()
+        if mbid:
+            defer.returnValue('album:mbid:' + mbid)
+            return
+
+        name = yield self.getName()
+        if name:
+            defer.returnValue('album:name:' + name)
+            return
+
+        raise KeyError
+
 
 class AlbumSelectorModel(base.Model, log.Loggable):
     """

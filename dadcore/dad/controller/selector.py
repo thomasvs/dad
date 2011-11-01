@@ -92,6 +92,7 @@ class AlbumSelectorController(SelectorController):
 
     # FIXME: need an mid
     def addItem(self, item):
+        self.debug('addItem: %r', item)
         # add an album and the count of tracks on it
         self.doViews('add_row', item, item.mid, item.name,
             item.sortname, item.tracks)
