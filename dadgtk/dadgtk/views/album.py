@@ -15,6 +15,12 @@ from dadgtk.views import track
 
 class AlbumView(views.GTKView, track.ScorableView):
 
+    """
+    I am a view on an album.
+
+    My controller is L{dad.controller.artist.AlbumController}
+    """
+
     subject_type = 'album'
 
     def __init__(self):
