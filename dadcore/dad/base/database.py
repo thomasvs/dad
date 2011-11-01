@@ -21,7 +21,8 @@ class Database(log.Loggable):
         Score the given model.
         Recalculates track scores if needed.
         """
-        assert isinstance(model, base.ScorableModel), "Cannot score %r" % model
+        assert isinstance(model, base.ScorableModel), \
+            "Cannot score %r" % model
         self.debug('score: model %r', model)
         yield model.setScore(userName, categoryName, score)
 
@@ -37,7 +38,8 @@ class Database(log.Loggable):
             self.debug('score: model %r: recalculating on track %r',
                 model, t)
             yield self.recalculateTrackScore(t)
-    
+        self.debug('recalculated score on %d tracks', len(tracks))
+
     @defer.inlineCallbacks
     def recalculateTrackScore(self, tm):
         """
