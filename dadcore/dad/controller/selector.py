@@ -109,7 +109,11 @@ class TrackSelectorController(SelectorController):
         # add a track
         self.debug('addItem: %r', item)
         albums = yield item.getAlbums()
-        album_mids = [a.getMid() for a in albums]
+        album_mids = []
+        for a in albums:
+            mid = yield a.getMid()
+            album_mids.append(mid)
+
         self.doViews('add_item', item, item.getArtistNames(),
             item.getArtistMids(),
             "%s" % item.getName(), None, None, None, album_mids)
