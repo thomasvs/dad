@@ -8,6 +8,7 @@ import gtk
 from dadgtk.views import views, track
 
 
+# FIXME: move track.ScorableView to something more generic
 class ArtistView(views.GTKView, track.ScorableView):
     """
     I am a view on an artist.
