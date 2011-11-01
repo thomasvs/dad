@@ -257,8 +257,8 @@ class SimplePlaylistSelecter(Selecter):
         return defer.succeed(None)
 
     def load(self):
-        self._load()
-        return defer.succeed(None)
+        res = self._load()
+        return defer.succeed(res)
 
     # FIXME: should this be pushed to base class ?
     def shuffle(self, files):
@@ -314,6 +314,8 @@ class SimplePlaylistSelecter(Selecter):
         for selectable in selectables:
             self.selected(selectable)
         
+        return True
+
 class SpreadingArtistSelecter(SimplePlaylistSelecter):
     """
     I shuffle tracks by spreading the same artists throughout the playlist.
