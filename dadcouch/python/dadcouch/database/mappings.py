@@ -396,7 +396,7 @@ class User(mapping.Document):
 
     name = mapping.TextField()
 
-class Score(mapping.Document):
+class OldScore(mapping.Document):
     # scores for an object from a single person for various categories
     type = mapping.TextField(default="score")
 
@@ -415,9 +415,17 @@ class Album(mapping.Document):
     type = mapping.TextField(default="album")
 
     name = mapping.TextField()
+    sortname = mapping.TextField()
+    displayname = mapping.TextField()
+
     artist_ids = mapping.ListField(mapping.TextField())
 
     added = mapping.DateTimeField(default=datetime.datetime.now)
+
+    mbid = mapping.TextField()
+
+    scores = mapping.ListField(mapping.DictField(Score))
+
 
 class AudioFile(File):
     type = mapping.TextField(default="audiofile")
@@ -483,7 +491,7 @@ class TrackAlbum(mapping.Document):
 
     number = mapping.IntegerField()
 
-class Score(mapping.Document):
+class OldScore(mapping.Document):
     type = mapping.TextField(default="score")
 
     subject_id = mapping.TextField()
