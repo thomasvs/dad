@@ -45,7 +45,7 @@ class ScorableModel(Model):
 
         @rtype: L{dad.model.artist.ArtistModel}
         """
-        raise NotImplementedError
+        raise NotImplementedError, '%r does not implement getOrCreate' % self.__class__
 
     def getCategories(self):
         """
