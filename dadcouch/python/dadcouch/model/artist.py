@@ -141,6 +141,8 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
 class ItemTracksByArtist(CouchArtistModel):
 
     tracks = 0 # int
+
+    # of artist
     id = None
     mbid = None
     trackId = None
