@@ -44,7 +44,7 @@ class CouchDocModel(CouchDBModel):
         return model
     new = classmethod(new)
 
-    
+
 class ScorableModel(CouchDocModel):
     """
     I represent a subject in a CouchDB database that can be scored.
@@ -70,7 +70,7 @@ class ScorableModel(CouchDocModel):
 
         if not self.document:
             self.debug('No document, no scores')
-            import code; code.interact(local=locals())
+            # import code; code.interact(local=locals())
             defer.returnValue([])
             return
 
