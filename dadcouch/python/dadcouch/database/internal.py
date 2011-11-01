@@ -510,6 +510,7 @@ class InternalDB(log.Loggable):
         track = yield self.db.map(self.dbName, stored['id'], mappings.Track)
         defer.returnValue(track)
 
+    # FIXME: docstring, is now a generator, not ordered ?
     @defer.inlineCallbacks
     def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,
         random=False):

@@ -8,6 +8,8 @@ from twisted.internet import defer
 from dad.audio import mixing
 from dad.common import selecter
 
+from dad.test import common # logging
+
 class EmptyTest(unittest.TestCase):
 
     def setUp(self):

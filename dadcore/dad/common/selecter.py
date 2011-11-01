@@ -203,7 +203,7 @@ class Selecter(log.Loggable):
         Load all tracks to be scheduled.
 
         @returns: a deferred firing True if tracks could be loaded.
-        @rtype:   L{defer.Deferred} firing int
+        @rtype:   L{defer.Deferred} firing bool
         """
         raise NotImplementedError
 
