@@ -109,7 +109,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         self._loops = options.loops
 
-        self._tracks = [] # list of L{couch.Track}; private cache
+        # list of L{couch.Track}; private cache of selected tracks
+        self._tracks = []
 
     def setup(self):
         self.debug('setup')
@@ -144,11 +145,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
             self.debug('setting loadDef to None')
             self.loadDeferred = None
 
+        self.debug('Got playlist generator %r', result)
 
-        # we throw the first two away since they were possibly used
-        # in the quick call
-        result.next()
-        result.next()
 
         i = 0
 
@@ -158,6 +156,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 # make sure the track is here
                 best = track.getFragmentFileByHost(host)
                 if not best:
+                    self.debug('track %r not on host %r, skipping',
+                        track, host)
                     continue
 
                 artists = track.getArtistNames()
@@ -181,14 +181,16 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
                 fragment, file = best
                 i += 1
-                self.debug('Got track %d: %r', i, track.getName())
+                artists.sort()
+                self.debug('Got track %d: %r - %r', i, track.getName(),
+                    artists)
                 self._tracks.append((track, fragment, file))
                 trackmix = fragment.getTrackMix()
 
                 # FIXME: make this fail, then clean up all twisted warnings
-                artists.sort()
                 s = selecter.Selected(file.info.path, trackmix, artists=artists, title=track.getName())
                 self.selected(s)
+                self.debug('couch selecter selected %r', s)
                 self.log('cache stats: %r lookups, %r hits, %r cached',
                     self._cache.lookups, self._cache.hits,
                     self._cache.cached)
@@ -204,9 +206,12 @@ def main():
     selecter = CouchSelecter(opts)
 
     def output(selected):
-        print selected.path.encode('utf-8'), \
-            " & ".join(selected.artists).encode('utf-8'), \
-            selected.title.encode('utf-8')
+        text = "# %s - %s\n%s" % (
+            " & ".join(selected.artists).encode('utf-8'),
+            selected.title.encode('utf-8'),
+            selected.path.encode('utf-8'))
+        log.debug('main', 'output: %r', text)
+        sys.stdout.write(text)
         sys.stdout.flush()
 
     d = selecter.setup()

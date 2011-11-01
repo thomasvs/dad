@@ -153,8 +153,8 @@ class Selecter(log.Loggable):
         if not self._selected:
             return None
 
-        tuple = self._selected[-1]
-        del self._selected[-1]
+        tuple = self._selected[0]
+        del self._selected[0]
 
         return tuple
 

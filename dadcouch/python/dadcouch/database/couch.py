@@ -227,7 +227,7 @@ class DADDB(database.Database):
         @type  limit:        int or None
         @type  randomize:       bool
 
-        @returns: list of tracks and additional info, ordered by track id
+        @returns: deferred firing a generator of tracks and additional info
         @rtype: L{defer.Deferred} firing
                 list of Track, Slice, path, score, userId
         """
@@ -253,7 +253,8 @@ class DADDB(database.Database):
             gen = self._randomizer((t for t in tracks),
                 userName, categoryName, above, below)
 
-        self.debug('created playlist in %.3f seconds', time.time() - start)
+        self.debug('created playlist generator in %.3f seconds',
+            time.time() - start)
         defer.returnValue(gen)
 
     def _randomizer(self, gen, userName, categoryName, above, below):
