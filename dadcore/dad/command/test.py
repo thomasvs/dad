@@ -100,11 +100,12 @@ class JukeboxMain(log.Loggable):
     def set_title(self, title):
         self._title = title
 
-    def _setup_dbus(self):
-        # dbussy bits
+    def _setup_mediakeys(self):
+        from dad.common import mediakeys
+        listener = mediakeys.GNOMEMediaKeysListener('dad')
+        listener.grab()
 
-        def signal_handler(*keys):
-            for key in keys:
+        def signal_handler(app, key):
                 self.debug('Key %r pressed', key)
                 if key == u'Next':
                     self.info('Next track')
@@ -116,17 +117,7 @@ class JukeboxMain(log.Loggable):
                     self.info('Play')
                     self._player.toggle()
 
-        import dbus
-        # this import has the side effect of setting the main loop on dbus
-        from dbus import glib
-        bus = dbus.SessionBus()
-        try:
-            listener = bus.get_object('org.gnome.SettingsDaemon',
-                '/org/gnome/SettingsDaemon/MediaKeys')
-            listener.connect_to_signal("MediaPlayerKeyPressed", signal_handler,
-                dbus_interface='org.gnome.SettingsDaemon.MediaKeys')
-        except Exception, e:
-            print 'Cannot listen to multimedia keys', e
+        listener.add(signal_handler)
 
     def _setup_gtk(self):
             gtkui = vplayer.GTKPlayerView(self._player)
@@ -176,7 +167,7 @@ class JukeboxMain(log.Loggable):
         if options.gtk == True:
             self._setup_gtk()
 
-        self._setup_dbus()
+        self._setup_mediakeys()
 
         # now we can start triggering setup calls
         self._player.setup(playerOptions)
