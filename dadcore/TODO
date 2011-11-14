@@ -137,3 +137,14 @@ That track looks like it's 5:06 and thus citi soleil
 - when selecting an artist on a VA album, the album pane lists the album more than once, as many as there are tracks
 
 - publicize subject.SubjectController._model somehow
+
+- dad selecter can save state from last run that was unused for certain params to prime selection
+- select song randomly from &#32;options
+- assign scores betw 0.0 and 1.0 for likelihood of playing based on params
+- adapt score based on rule engine (artists, album, mood, years, previous song match, ...(
+- select if score + rand bigger than 1
+- put on reuse pile if certain proximity rules triggered
+- unschedule operation to rebuild schedule
+- use it on changing params
+- have scheduler buttons in ui to switch scheduler algorithm from radio to album mode to new songs to ... while keeping history but unscheduling and rescheduling future
+
