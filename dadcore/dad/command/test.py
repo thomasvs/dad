@@ -233,7 +233,7 @@ class Jukebox(Gtk2Command):
             action="store_true", dest="gtk",
             help="whether to use GTK+ (defaults to %default)",
             default=False)
-     
+
         self.parser.add_option('-p', '--player',
                           action="store", dest="player",
                           default="gst", # FIXME: don't hardcode?
@@ -241,7 +241,6 @@ class Jukebox(Gtk2Command):
                             ", ".join(self._getProviders().keys())))
 
     def handleOptions(self, options):
-        
         self._main = JukeboxMain()
         self._main.set_title(self.getFullName())
 
@@ -259,7 +258,7 @@ class Jukebox(Gtk2Command):
             self.stderr.write('Please choose an existing player.\n')
             self.stderr.write('Possible choices: %s\n' %
                 ', '.join(providers.keys()))
-            return
+            return -3
 
         provider = providers[playerName]
 
@@ -477,7 +476,6 @@ class Test(logcommand.LogCommand):
                             ", ".join(self._getProviders().keys())))
 
     def handleOptions(self, options):
-        
         providers = self._getProviders()
 
         args = []
@@ -491,7 +489,7 @@ class Test(logcommand.LogCommand):
             self.stderr.write('Please choose an existing database.\n')
             self.stderr.write('Possible choices: %s\n' %
                 ', '.join(providers.keys()))
-            return
+            return -3
 
         provider = providers[dbName]
 
