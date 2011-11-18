@@ -30,7 +30,7 @@ class CouchAlbumModel(base.ScorableModel, album.AlbumModel):
 
     @defer.inlineCallbacks
     def getTracks(self):
-        self.debug('get')
+        self.debug('getTracks')
         # FIXME: this gets all possible tracks for this album, but maybe
         # this should be more limited ?
         # FIXME: what about albums with the same name by different artists?
