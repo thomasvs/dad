@@ -128,6 +128,7 @@ class Add(tcommand.TwistedCommand):
             else:
                 paths.append(path)
 
+        failed = []
         for path in paths:
             path = os.path.abspath(path)
             self.stdout.write('%s\n' % path.encode('utf-8'))
@@ -140,6 +141,9 @@ class Add(tcommand.TwistedCommand):
                     self.reactor.stop()
                     defer.returnValue(3)
                     return
+            except Exception, e:
+                failed.append((path, e))
+                continue
 
             if res:
                 existing, new = res
@@ -151,6 +155,11 @@ class Add(tcommand.TwistedCommand):
                         len(new))
             else:
                 self.stdout.write('Audio file already in database.\n')
+
+        if failed:
+            for path, e in failed:
+                self.stdout.write('Failed to add %s:\n' % path.encode('utf-8'))
+                self.stdout.write('%s\n' % log.getExceptionMessage(e))
 
 
 class Lookup(tcommand.TwistedCommand):
