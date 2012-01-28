@@ -81,10 +81,10 @@ class TracksUI(gtk.VBox, log.Loggable):
                 artist = True
 
             if self._album_mids:
-                self.debug('Filtering on albums %r', self._album_mids)
+                self.log('Filtering on albums %r', self._album_mids)
                 # only show tracks matching the current selection
                 value = model.get_value(iter, COLUMN_ALBUM_MIDS)
-                self.debug('value: %r', value)
+                self.log('value: %r', value)
                 for v in value or []:
                     if v in self._album_mids:
                         album = True
