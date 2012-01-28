@@ -6,7 +6,7 @@
 import os
 
 from dad.audio import common
-from dad.common import logcommand
+from dad.common import log, logcommand
 from dad.base import data
 
 from dadgst.task import level, fingerprint
@@ -69,13 +69,29 @@ class ChromaPrint(logcommand.LogCommand):
             import urllib2
 
             url = 'http://api.acoustid.org/v2/lookup'
-            resp = urllib2.urlopen(url, urllib.urlencode(lookup))
-            # uncomment for a quick debug that you can paste in tests
-            # print resp.read()
+            resp = None
+            for i in range(0, 3):
+                try:
+                    resp = urllib2.urlopen(url, urllib.urlencode(lookup))
+                    # uncomment for a quick debug that you can paste in tests
+                    # print resp.read()
+                    break
+                except Exception, e:
+                    self.debug('Failed to open %r',
+                        log.getExceptionMessage(e))
+                    
 
             import simplejson
 
-            decoded = simplejson.load(resp)
+            if not resp:
+                self.debug('Failed to look up %r', lookup)
+                continue
+
+            try:
+                decoded = simplejson.load(resp)
+            except Exception, e:
+                    self.debug('Failed to json-decode %r', resp)
+                    continue
 
             if decoded['status'] == 'ok':
                 results = decoded['results']
@@ -105,8 +121,7 @@ class ChromaPrint(logcommand.LogCommand):
 
                 fp = data.ChromaPrint()
                 fp.fromResults(results)
-                print fp.metadata
-
+                self.stdout.write('%r\n' % fp.metadata)
             else:
                 print 'ERROR:', result
 
