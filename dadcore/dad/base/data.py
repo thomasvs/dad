@@ -20,9 +20,9 @@ class ChromaPrint:
 
         for result in results:
             # highest-scoring result comes first ?
-            recordings = result['recordings']
+            recordings = result.get('recordings', [])
             for recording in recordings:
-                for track in recording['tracks']:
+                for track in recording.get('tracks', []):
                     artists = track['artists']
                     artist[repr(artists)] = artists
                     key = (recording['id'], repr(artists), track['title'])
@@ -50,7 +50,8 @@ class TrackMetadata:
 
     def __repr__(self):
         return '<TrackMetadata for %s - %s>' % (
-            " & ".join(self.artists), self.title)
+            " & ".join([a.encode('utf-8') for a in self.artists]),
+            self.title.encode('utf-8'))
 
 class Score:
     """
