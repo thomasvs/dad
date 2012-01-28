@@ -122,6 +122,7 @@ class FingerPrintTask(log.Loggable, gstreamer.GstPipelineTask):
     @type fingerprint: str
     """
 
+    done = False # FIXME: should be higher up?
     fingerprint = None
 
     def __init__(self, path):
@@ -159,6 +160,12 @@ class FingerPrintTask(log.Loggable, gstreamer.GstPipelineTask):
         self.schedule(0, self.stop)
 
     def _new_buffer_cb(self, sink):
+        # we could be done, but since we schedule a stop buffers could
+        # still come in.  Get out if that happens.
+        if self.done:
+            self.debug('new buffer after stopping, ignoring')
+            return
+
         # this is just for counting progress
         buf = sink.emit('pull-buffer')
         self.gst.debug('received buffer, timestamp %r, duration %r' % (
