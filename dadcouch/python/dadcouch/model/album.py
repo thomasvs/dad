@@ -218,6 +218,7 @@ class ItemTracksByAlbum(CouchAlbumModel):
 # FIXME: convert to inline deferreds
 class CouchAlbumSelectorModel(base.CouchDBModel):
 
+    logCategory = 'CouchASModel'
     artistAlbums = None # artist mid -> album ids
 
     def get(self):
@@ -230,8 +231,11 @@ class CouchAlbumSelectorModel(base.CouchDBModel):
         d = defer.Deferred()
 
         # first, load a mapping of artists to albums
+        viewName = 'view-albums-by-artist'
+        self.debug('Querying view %r', viewName)
+
         view = views.View(self._daddb.db, self._daddb.dbName,
-            'dad', 'view-albums-by-artist',
+            'dad', viewName,
             self._daddb.modelFactory(ItemAlbumsByArtist), group=True)
         d.addCallback(lambda _, v: v.queryView(), view)
         
