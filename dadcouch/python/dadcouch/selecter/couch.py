@@ -30,8 +30,7 @@ from dadcouch.database import couch
 
 _DEFAULT_HOST = 'localhost'
 _DEFAULT_PORT = 5984
-# temporarily change for rewrite
-_DEFAULT_DB = 'dadrewrite'
+_DEFAULT_DB = 'dad'
 _DEFAULT_ABOVE = 0.7
 _DEFAULT_BELOW = 1.0
 _DEFAULT_CATEGORY = 'Good'
