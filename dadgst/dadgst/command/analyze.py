@@ -98,7 +98,7 @@ class ChromaPrint(logcommand.LogCommand):
                 self.stdout.write('Found %d results\n' % len(results))
 
                 for result in results:
-                    recordings = result['recordings']
+                    recordings = result.get('recordings', [])
                     self.stdout.write('- Found %d recordings.\n' %
                         len(recordings))
                     for recording in recordings:
@@ -108,12 +108,12 @@ class ChromaPrint(logcommand.LogCommand):
                             '  - URL: http://musicbrainz.org/recording/%s\n' %
                                 recording['id'])
 
-                        for track in recording['tracks']:
+                        for track in recording.get('tracks', []):
                             for artist in track['artists']:
                                 self.stdout.write('    - artist: %s\n' %
-                                    artist['name'])
+                                    artist['name'].encode('utf-8'))
                             self.stdout.write('    - title: %s\n' %
-                                track['title'])
+                                track['title'].encode('utf-8'))
 
                             # these all ought to contain the same info,
                             # since it's the same musicbrainz id
