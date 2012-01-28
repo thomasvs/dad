@@ -30,3 +30,10 @@
 * Why do scorable models have subject as argument ? They operate on themselves
 * ArtistModel: get methods don't return deferred
 * rename models to include couch in name
+Failed to add /home/thomas/morituri/Jasper Erkens - The Brighter Story/11. Jasper Erkens - Needed.flac:
+exception ZeroDivisionError at /usr/lib64/python2.7/site-packages/twisted/internet/defer.py:997: returnValue(): float division by zero
+Failed to add /home/thomas/morituri/Korn - Follow the Leader/25. Korn - My Gift to You - Earache My Eye.flac:
+exception ZeroDivisionError at /usr/lib64/python2.7/site-packages/twisted/internet/defer.py:997: returnValue(): float division by zero
+Failed to add /home/thomas/morituri/Sparklehorse - It's a Wonderful Life/12. Sparklehorse - Babies on the Sun - Morning Hollow.flac:
+exception ZeroDivisionError at /usr/lib64/python2.7/site-packages/twisted/internet/defer.py:997: returnValue(): float division by zero
+
