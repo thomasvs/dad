@@ -166,6 +166,9 @@ class Selecter(log.Loggable):
 
         def _getCb(result):
             self.info('selected %r', result)
+            if not os.path.exists(result.path):
+                self.warning('path %r does not exist', result.path)
+                print 'WARNING: path %r does not exist' % result.path
             return result
         d.addCallback(_getCb)
 
