@@ -261,6 +261,7 @@ class Database(logcommand.LogCommand):
         self.runner = task.SyncRunner()
 
 class MD5(logcommand.LogCommand):
+    summary = "calculate md5sum"
 
     def do(self, args):
 
