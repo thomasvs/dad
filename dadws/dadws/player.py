@@ -48,7 +48,7 @@ class WebSocketPlayer(player.Player):
 
         # run our websocket server
         # serve index.html from the local directory
-        # path = os.path.dirname(websocket.__file__)
+        # FIXME: this serves our complete current directory; including .py
         path = os.path.dirname(__file__)
         from twisted.web.static import File
         root = File(path)

@@ -91,7 +91,7 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
         # self.transport.write(frame)
 
     def schedule(self, scheduled):
-        path = 'http://localhost:%d/media' % self._port + urllib.quote(scheduled.path.encode('utf-8'))
+        path = '/media' + urllib.quote(scheduled.path.encode('utf-8'))
         when = self._started + \
             scheduled.start / float(1000 * 1000 * 1000), # ns -> s
         
