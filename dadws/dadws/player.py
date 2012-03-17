@@ -68,6 +68,8 @@ class WebSocketPlayer(player.Player):
 
     def start(self):
         self._started = time.time()
+        for client in self._clients:
+            client.started(self._started)
         self._scheduler.schedule()
         from twisted.internet import reactor
         reactor.callLater(0L, self.keepScheduled)
@@ -183,7 +185,15 @@ class WebSocketPlayer(player.Player):
     def addClient(self, transport):
         self.debug('addClient: %r', transport)
         self._clients.append(transport)
+        transport.started(self._started)
         for _, scheduled in self._scheduled:
+            # only schedule tracks that shouldn't have finished yet
+            now = time.time()
+            # FIXME: should probably keep a small window for tracks
+            # in the middle of playing
+            if self._started + nsToS(scheduled.start + scheduled.duration) < now:
+                continue
+            self.debug('Scheduling %r', scheduled)
             transport.schedule(scheduled)
 
     # specific methods
@@ -196,6 +206,7 @@ class WebSocketPlayer(player.Player):
 
     # keeping things scheduled
     def keepScheduled(self):
+        from twisted.internet import reactor
         remaining = nsToS(self._lastend) - self.position()
         self.debug('keepScheduled: %.3f s remaining', remaining)
         if remaining < SCHEDULE_DURATION:
@@ -206,8 +217,9 @@ class WebSocketPlayer(player.Player):
                 self._scheduling = True
                 self._scheduler.schedule()
 
-        from twisted.internet import reactor
-        reactor.callLater(30L, self.keepScheduled)
+        # FIXME: instead of always calling this again, wait for the result
+        # of the previous schedule, but keep scheduling
+        reactor.callLater(10L, self.keepScheduled)
  
     def position(self):
         return time.time() - self._started

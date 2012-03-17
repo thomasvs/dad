@@ -40,15 +40,22 @@ class MediaResource(resource.Resource):
 
 class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
 
+    logCategory = 'wshandler'
+
     def __init__(self, transport, player, port):
         websocket.WebSocketHandler.__init__(self, transport)
         self._player = player
         self._port = port
         self.debug('handler: init')
+        self._started = 0L
 
     # FIXME: remove
     def __del__(self):
         print 'Deleting handler'
+
+    def started(self, started):
+        self._started = started # epoch seconds
+        self.debug('started time %r', started)
 
     def send_time(self):
         # send current time as an ISO8601 string
@@ -62,10 +69,21 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
 
 
     def load_track(self, uri, id, **kwargs):
+        """
+        Tell the browser to load the given track.
+        """
         self._send(command='load', uri=uri, id=id, **kwargs)
 
+    # FIXME: not being used ?
     def play_track(self, id, when=None):
-        self._send(command='play', id=id, when=when)
+        """
+        Tell the browser to schedule playing the given track
+        at the given time.
+
+        @param when: absolute time in epoch seconds.
+        @type  when: float
+        """
+        self._send(command='play', id=id, when=self._started + when)
 
 
     def frameReceived(self, frame):
@@ -74,10 +92,12 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
 
     def schedule(self, scheduled):
         path = 'http://localhost:%d/media' % self._port + urllib.quote(scheduled.path.encode('utf-8'))
+        when = self._started + \
+            scheduled.start / float(1000 * 1000 * 1000), # ns -> s
         
         self.load_track(path, scheduled.number,
             artists=scheduled.artists, title=scheduled.title,
-            when=scheduled.start / float(1000 * 1000 * 1000), # ns -> s
+            when=when,
             offset=scheduled.mediaStart / float(1000 * 1000 * 1000),
             volume=scheduled.volume)
 
