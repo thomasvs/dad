@@ -104,7 +104,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         info.mtime = stat.st_mtime
 
         self.debug('Got fileinfo: %r', info)
-        
+
         leveller = None
         for leveller in plugin.getPlugins(idad.ILeveller, plugins):
             continue
@@ -194,7 +194,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         """
         # FIXME: remove method
         return self.database.score(model, userName, categoryName, score)
-    
+
     def recalculateTrackScore(self, tm):
         """
         Recalculate the aggregate track score of a track, taking into account
