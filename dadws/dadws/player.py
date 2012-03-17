@@ -172,7 +172,7 @@ class WebSocketPlayer(player.Player):
         from twisted.web import static
         print 'THOMAS: publishing', scheduled.path
         # FIXME: putChild with nested path does not seem to work
-        c = self._media.putChild(urllib.quote(scheduled.path), static.File(scheduled.path))
+        c = self._media.putChild(urllib.quote(scheduled.path.encode('utf-8')), static.File(scheduled.path))
         # this works
         c = self._media.putChild('a', static.File(scheduled.path))
         # this doesn't
@@ -189,7 +189,7 @@ class WebSocketPlayer(player.Player):
     # specific methods
     def isAllowed(self, path):
         for _, scheduled in self._scheduled:
-            if scheduled.path == path:
+            if scheduled.path.encode('utf-8') == path:
                 return True
 
         return False

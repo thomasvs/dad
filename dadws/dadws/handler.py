@@ -72,7 +72,7 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
         # self.transport.write(frame)
 
     def schedule(self, scheduled):
-        path = 'http://localhost:%d/media' % self._port + urllib.quote(scheduled.path)
+        path = 'http://localhost:%d/media' % self._port + urllib.quote(scheduled.path.encode('utf-8'))
         
         self.load_track(path, scheduled.number,
             artists=scheduled.artists, title=scheduled.title,
