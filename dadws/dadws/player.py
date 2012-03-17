@@ -178,7 +178,7 @@ class WebSocketPlayer(player.Player):
         # FIXME: putChild with nested path does not seem to work
         uri = urllib.quote(scheduled.path.encode('utf-8'))
         c = self._media.putChild(uri, static.File(scheduled.path))
-        self.debug('published as %s/media/%s', self.url, uri)
+        self.debug('published as %s/media%s', self.url, uri)
 
     def addClient(self, transport):
         self.debug('addClient: %r', transport)
