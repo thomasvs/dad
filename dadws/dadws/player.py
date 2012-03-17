@@ -21,6 +21,8 @@ ws_player_option_list = [
 
 class WebSocketPlayer(player.Player):
 
+    logCategory = 'wsplayer'
+
     def __init__(self, scheduler):
         player.Player.__init__(self, scheduler)
 
@@ -37,6 +39,7 @@ class WebSocketPlayer(player.Player):
     def setup(self, options):
 
         port = int(options.port)
+        self.debug('setup: going to listen on port %d', port)
 
         from twisted.internet import reactor
 
@@ -46,6 +49,7 @@ class WebSocketPlayer(player.Player):
         path = os.path.dirname(__file__)
         from twisted.web.static import File
         root = File(path)
+
         from dadws import handler
         from dadws.extern.websocket import websocket
         site = websocket.WebSocketSite(root)
@@ -55,7 +59,8 @@ class WebSocketPlayer(player.Player):
         self._media = handler.MediaResource(self)
         root.putChild('media', self._media)
 
-        reactor.listenTCP(port, site)
+        p = reactor.listenTCP(port, site)
+        self.debug('setup: listening on port %d', p.port)
 
     def start(self):
         self._started = time.time()
@@ -176,6 +181,7 @@ class WebSocketPlayer(player.Player):
 #        import code; code.interact(local=locals())
 
     def addClient(self, transport):
+        self.debug('addClient: %r', transport)
         self._clients.append(transport)
         for _, scheduled in self._scheduled:
             transport.schedule(scheduled)

@@ -7,6 +7,8 @@ import urllib
 
 from twisted.web import resource, static
 
+from dad.common import log
+
 from dadws.extern.websocket import websocket
 
 class MediaResource(resource.Resource):
@@ -36,11 +38,13 @@ class MediaResource(resource.Resource):
         
 
 
-class PlayerTestHandler(websocket.WebSocketHandler):
+class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
+
     def __init__(self, transport, player, port):
         websocket.WebSocketHandler.__init__(self, transport)
         self._player = player
         self._port = port
+        self.debug('handler: init')
 
     def __del__(self):
         print 'Deleting handler'
