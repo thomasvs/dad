@@ -58,12 +58,12 @@ $(document).ready(function() {
 		for (i in imageCollection.data.images) {
 		    images.push(imageCollection.data.images[i].url);
 		}
-		// Initialize Backgound Stretcher
-		$('BODY').bgStretcher({
+		$('.background').bgStretcher({
 			images: images,
 			resizeProportionally: true,
 			nextSlideDelay: 10000,
 		 })
+
 	    });
 
             }, when);
@@ -92,6 +92,5 @@ $(document).ready(function() {
     ws.onclose = function(evt) {
         $('#conn_status').html('<b>Closed</b>');
     };
-
 
 });

@@ -4,3 +4,9 @@
 [submodule "dadws/dadws/extern/websocket"]
 	path = dadws/dadws/extern/websocket
 	url = git@github.com:thomasvs/txWebSocket.git
+[submodule "dadws/dadws/www/echonest"]
+	path = dadws/dadws/www/echonest
+	url = https://github.com/Rodeoclash/Echonest-jQuery-Plugin.git
+[submodule "dadws/dadws/www/supersized"]
+	path = dadws/dadws/www/supersized
+	url = https://github.com/buildinternet/supersized.git
