@@ -14,7 +14,7 @@ from twisted import plugin
 from dad import idad
 
 from dad.base import app
-from dad.common import log
+from dad.common import log, player
 from dad.common import logcommand
 from dad.command import tcommand
 
@@ -122,9 +122,7 @@ class JukeboxMain(log.Loggable):
     def _setup_gtk(self):
             gtkui = vplayer.GTKPlayerView(self._player)
             gtkui.set_title(self._title)
-            #options FIXME: don't poke in privates
-            self._player._uis.append(gtkui)
-
+            self._player.addView(gtkui)
 
     # FIXME: gtk frontend should be some kind of viewer class
     def _getScheduler(self, options):
@@ -166,6 +164,10 @@ class JukeboxMain(log.Loggable):
 
         if options.gtk == True:
             self._setup_gtk()
+
+        # always add a command line player
+        # FIXME: remove init argument for player in view ?
+        self._player.addView(player.CommandPlayerView(self._player))
 
         self._setup_mediakeys()
 

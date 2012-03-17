@@ -26,8 +26,6 @@ class WebSocketPlayer(player.Player):
 
         self._scheduled = [] # (time, scheduled)
 
-        self._uis = [player.CommandPlayerView(self), ]
-
         self._scheduler = scheduler
         self._clients = []
 

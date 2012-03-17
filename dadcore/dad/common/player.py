@@ -21,13 +21,17 @@
 import sys
 import time
 
-from dad.extern.log import log
+from dad.base import base
 
-class Player(log.Loggable):
+
+# FIXME: rename to PlayerController
+class Player(base.Controller):
     """
     I implement playback of scheduled tracks.
     """
+    # FIXME: rename scheduler to model; remove self.scheduler
     def __init__(self, scheduler):
+        base.Controller.__init__(self, scheduler)
         self.scheduler = scheduler
         self.scheduler.connect('scheduled', self.scheduled_cb)
 
@@ -67,10 +71,11 @@ class FakePlayer(Player):
     def scheduled_cb(self, scheduler, scheduled):
         print 'THOMAS: scheduled_cb', scheduled
 
-class PlayerView:
+class PlayerView(base.View):
     """
-    I am a base class for a UI.
+    I am a base class for a player view.
     """
+    # FIXME: the view should not get the player
     def __init__(self, player):
         self._player = player
 
@@ -78,6 +83,12 @@ class PlayerView:
         raise NotImplementedError
 
     def set_schedule_length(self, length):
+        raise NotImplementedError
+
+    def scheduled_started(self, scheduled):
+        """
+        Called when the given scheduled track has started playing.
+        """
         raise NotImplementedError
 
 class CommandPlayerView(PlayerView):
@@ -96,3 +107,6 @@ class CommandPlayerView(PlayerView):
         else:
             print 'Could not get position'
             sys.stdout.flush()
+
+    def scheduled_started(self, scheduled):
+            sys.stdout.write('\nStarted %s\n' % scheduled.description)

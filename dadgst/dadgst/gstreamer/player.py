@@ -15,6 +15,7 @@ gst_player_option_list = [
         default=_DEFAULT_SINK),
 ]
 
+# FIXME: is a Controller
 class GstPlayer(player.Player):
 
     def __init__(self, scheduler):
@@ -26,7 +27,10 @@ class GstPlayer(player.Player):
 
         self._scheduled = [] # (time, scheduled)
 
-        self._uis = [player.CommandPlayerView(self), ]
+        self._jukebox.connect('started', self._jukebox_started_cb)
+
+    def _jukebox_started_cb(self, jukebox, scheduled):
+        self.doViews('scheduled_started', scheduled)
 
     def setup(self, options):
 
@@ -93,8 +97,7 @@ class GstPlayer(player.Player):
  
     def work(self):
         position = self.get_position()
-        for ui in self._uis:
-            ui.set_schedule_position(position)
+        self.doViews('set_schedule_position', position)
 
         return True
 

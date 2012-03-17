@@ -14,35 +14,19 @@ class GTKPlayerView(player.PlayerView):
 
         self._window = gtk.Window()
         from dadgtk.views import scheduler as sch, seek
-        sui = sch.SchedulerUI()
-
-        def jukebox_started_cb(jukebox, scheduled):
-            sui.started(scheduled)
-            import gst
-            self._seekui.set_track_length(
-                float(scheduled.duration) / gst.SECOND)
-            self._seekui.set_track_offset(
-                float(scheduled.start) / gst.SECOND)
-            self._seekui.set_schedule_length(
-                float(self._player.scheduler.duration) / gst.SECOND)
-            self._playing = scheduled
-            self._window.set_title('dad: %s - %s' % (
-                " & ".join(scheduled.artists), scheduled.title))
-
-        # FIXME: poking into private bits
-        self._player._jukebox.connect('started', jukebox_started_cb)
+        self.sui = sch.SchedulerUI()
 
         def scheduler_clicked_cb(scheduler, scheduled):
             print 'seeking to %r' % scheduled
             where = scheduled.start
             self._player.seek(where)
-        sui.connect('clicked', scheduler_clicked_cb)
+        self.sui.connect('clicked', scheduler_clicked_cb)
 
-        sui.set_scheduler(player.scheduler)
+        self.sui.set_scheduler(player.scheduler)
 
         box = gtk.VBox()
         box.set_homogeneous(False)
-        box.add(sui)
+        box.add(self.sui)
 
         self._seekui = seek.SeekUI()
         box.pack_end(self._seekui, expand=False, fill=False)
@@ -65,6 +49,20 @@ class GTKPlayerView(player.PlayerView):
             if self._playing is not None:
                 self._seekui.set_track_position(
                     float(position - self._playing.start) / gst.SECOND)
+
+    def scheduled_started(self, scheduled):
+        self.sui.started(scheduled)
+        import gst
+        self._seekui.set_track_length(
+            float(scheduled.duration) / gst.SECOND)
+        self._seekui.set_track_offset(
+            float(scheduled.start) / gst.SECOND)
+        self._seekui.set_schedule_length(
+            float(self._player.scheduler.duration) / gst.SECOND)
+        self._playing = scheduled
+        self._window.set_title('dad: %s' % scheduled.description)
+
+
 
     def set_title(self, title):
         self._window.set_title(title)
