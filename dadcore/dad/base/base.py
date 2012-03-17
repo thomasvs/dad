@@ -28,7 +28,9 @@ class View(log.Loggable):
     """
     I am a base class for views.
 
-    @ivar controller: L{Controller}
+    The controller sets itself on me when added through addView.
+
+    @type controller: L{Controller}
     """
 
     controller = None
@@ -56,6 +58,8 @@ class Controller(log.Loggable):
 
     def __init__(self, model):
         """
+        Sets the model's controller to self.
+
         @type  model: L{Model}
         """
         self._model = model
@@ -68,6 +72,9 @@ class Controller(log.Loggable):
 
     def addView(self, view):
         """
+        Adds the view to the controller.
+        Will also set the view's controller to self.
+
         @type  view: L{View}
         """
         self._views.append(view)
