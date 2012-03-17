@@ -37,6 +37,8 @@ class WebSocketPlayer(player.Player):
 
         self._scheduling = False
 
+        self.url = None
+
     def setup(self, options):
 
         port = int(options.port)
@@ -62,6 +64,7 @@ class WebSocketPlayer(player.Player):
 
         p = reactor.listenTCP(port, site)
         self.debug('setup: listening on port %d', p.port)
+        self.url = 'http://localhost:%d' % p.port
 
     def start(self):
         self._started = time.time()
@@ -171,15 +174,11 @@ class WebSocketPlayer(player.Player):
         self._lastend = scheduled.start + scheduled.duration
         # make it available for download
         from twisted.web import static
-        print 'THOMAS: publishing', scheduled.path
+        self.debug('publishing path %r', scheduled.path)
         # FIXME: putChild with nested path does not seem to work
-        c = self._media.putChild(urllib.quote(scheduled.path.encode('utf-8')), static.File(scheduled.path))
-        # this works
-        c = self._media.putChild('a', static.File(scheduled.path))
-        # this doesn't
-        c = self._media.putChild('b/b', static.File(scheduled.path))
-        print c
-#        import code; code.interact(local=locals())
+        uri = urllib.quote(scheduled.path.encode('utf-8'))
+        c = self._media.putChild(uri, static.File(scheduled.path))
+        self.debug('published as %s/media/%s', self.url, uri)
 
     def addClient(self, transport):
         self.debug('addClient: %r', transport)

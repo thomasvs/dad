@@ -46,6 +46,7 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
         self._port = port
         self.debug('handler: init')
 
+    # FIXME: remove
     def __del__(self):
         print 'Deleting handler'
 
@@ -68,7 +69,7 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
 
 
     def frameReceived(self, frame):
-        print 'Peer: ', self.transport.getPeer()
+        self.debug('Peer: %r', self.transport.getPeer())
         # self.transport.write(frame)
 
     def schedule(self, scheduled):
@@ -83,12 +84,12 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
 
 
     def connectionMade(self):
-        print 'Connected to client.'
+        self.debug('Connected to client.')
         # here would be a good place to register this specific handler
         # in a dictionary mapping some client identifier (like IPs) against
         # self (this handler object)
         self._player.addClient(self)
 
     def connectionLost(self, reason):
-        print 'Lost connection.'
+        self.debug('Lost connection.')
         # here is a good place to deregister this handler object
