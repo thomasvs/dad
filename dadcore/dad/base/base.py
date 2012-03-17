@@ -10,7 +10,7 @@ from dad.extern.log import log
 # base class for model
 
 
-class Model:
+class Model(object):
     """
     I am a base class for models.
     I hold data coming from a database that can be presented in a view through
@@ -99,7 +99,7 @@ class SelectorView(View):
         @param display: the display name of the item
         @type  display: C{unicode}
         @type  sort:    C{unicode}
-        @param tracks:  the number of tracks 
+        @param tracks:  the number of tracks
         @type  tracks:  int
         """
         raise NotImplementedError
@@ -117,6 +117,12 @@ class Controller(log.Loggable):
     """
     I am a base class for controllers.
     I interact with one model and one or more views.
+
+    Controllers can be nested to form an application hierarchy.
+
+    Controllers have a reference to their model.
+
+    Controllers can invoke methods on all views.
 
     @type parent: L{Controller}
     """
