@@ -7,6 +7,7 @@ import gobject
 import gtk
 
 from dad.base import base
+from dad.view import selector
 
 (
     COLUMN_MID,
@@ -54,7 +55,7 @@ class GTKView(base.View):
             dialog.destroy()
  
 
-class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
+class GTKSelectorView(gtk.VBox, GTKView, selector.SelectorView):
     """
     I am a selector widget for a list of objects.
 
@@ -240,7 +241,7 @@ class GTKSelectorView(gtk.VBox, GTKView, base.SelectorView):
             COLUMN_DISPLAY, template % (albums, tracks),
             COLUMN_SORT, None)
 
-    ### base.SelectorView implementations
+    ### selector.SelectorView implementations
     def add_row(self, model, mid, display, sort, tracks):
         assert model, 'artist model %r is empty' % model
         self.log('add_row: model %r, mid %r, display %r', model, mid, display)
