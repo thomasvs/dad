@@ -16,7 +16,12 @@
 		      $("#clock").clock({"timestamp": new Date().getTime()});
 
                 //WebSocket = MozWebSocket;
-                var ws = new WebSocket("ws://localhost:8800/test");
+                var ws;
+                if (typeof MozWebSocket != "undefined") {
+                    ws = new MozWebSocket("ws://localhost:8080/test");
+                } else {
+                    ws = new WebSocket("ws://localhost:8080/test");
+                }
                 ws.onmessage = function(evt) {
                     console.log(evt.data);
                     var message = jQuery.parseJSON(evt.data);

@@ -11,7 +11,8 @@ from dad.common import player
 
 SCHEDULE_DURATION = 1800L # in seconds
 
-_DEFAULT_PORT = 8800
+_DEFAULT_PORT = 8080
+
 ws_player_option_list = [
     optparse.Option('-p', '--port',
         action="store", dest="port",
