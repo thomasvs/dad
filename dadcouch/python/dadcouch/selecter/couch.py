@@ -48,6 +48,10 @@ couchdb_option_list = [
             action="store", dest="database",
             help="CouchDB database name (defaults to %s)" % _DEFAULT_DB,
             default=_DEFAULT_DB),
+        optparse.Option('-e', '--extensions',
+            action="store", dest="extensions",
+            help="file extensions to allow scheduling",
+            default=None),
 ]
 
 user_option_list = [
@@ -105,6 +109,9 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self._random = options.random
         self.debug('Selecting randomly: %r', self._random)
         self._loop = 0
+        exts = options.extensions
+        self._extensions = exts and exts.split(',') or []
+        self.debug('Selecting extensions: %r', self._extensions)
 
         self._loops = options.loops
 
@@ -153,9 +160,11 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         for track in result:
             if track not in self._tracks:
                 # make sure the track is here
-                best = track.getFragmentFileByHost(host)
+                best = track.getFragmentFileByHost(host,
+                    extensions=self._extensions)
                 if not best:
-                    self.debug('track %r not on host %r, skipping',
+                    self.debug('track %r not on host %r for given extensions'
+                        ', skipping',
                         track, host)
                     continue
 

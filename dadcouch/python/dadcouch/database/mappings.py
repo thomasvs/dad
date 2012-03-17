@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import os.path
 import datetime
 
 from dad.audio import level
@@ -359,7 +360,10 @@ class Track(mapping.Document, track.TrackModel):
         return None
 
     # FIXME: add to iface
-    def getFragmentFileByHost(self, host):
+    def getFragmentFileByHost(self, host, extensions=None):
+        """
+        @type  extensions: list of str or None
+        """
         # for the given track, select the highest quality file on this host
 
         best = None
@@ -369,6 +373,10 @@ class Track(mapping.Document, track.TrackModel):
             for file in fragment.files:
                 if file.info.host != host:
                     continue
+                if extensions:
+                    ext = os.path.splitext(file.info.path)[1][1:]
+                    if ext not in extensions:
+                        continue
 
                 rate = fragment.rate or 44100 # FIXME: hack
                 if not file.info.size or file.metadata.length:
