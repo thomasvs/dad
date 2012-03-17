@@ -5,8 +5,10 @@ from twisted.internet import defer
 
 from dadcouch.extern.paisley import views
 
-from dadcouch.database import mappings
 from dad.model import album
+
+from dadcouch.database import mappings
+# FIXME: rename to scorable
 from dadcouch.model import base
 
 

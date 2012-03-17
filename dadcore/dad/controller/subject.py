@@ -7,6 +7,7 @@ from dad.base import base
 
 # match to scorable
 # FIXME; model should not be couchdb-specific
+# FIXME: rename to scorable ?
 class SubjectController(base.Controller):
     # FIXME: decide subject type
     """
@@ -28,7 +29,7 @@ class SubjectController(base.Controller):
         """
         Populate the views with the model information.
 
-        @type  subject: subclass of L{dad.model.base.ScorableModel}
+        @type  subject: subclass of L{dad.model.scorable.ScorableModel}
 
         @rtype: L{defer.Deferred}
         """

@@ -2,6 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 from dad.base import base
+from dad.model import scorable
 from dad.common import log
 
 class FileModel(base.Model):
@@ -17,7 +18,7 @@ class FragmentModel(base.Model):
     def __init__(self):
         self.files = []
 
-class TrackModel(base.ScorableModel):
+class TrackModel(scorable.ScorableModel):
     """
     I am a model for a track.
 

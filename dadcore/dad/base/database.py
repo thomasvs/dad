@@ -7,8 +7,7 @@ Base implementation of common database methods.
 
 from twisted.internet import defer
 
-from dad.base import base
-from dad.model import track
+from dad.model import scorable, track
 from dad.common import log
 
 class Database(log.Loggable):
@@ -21,7 +20,7 @@ class Database(log.Loggable):
         Score the given model.
         Recalculates track scores if needed.
         """
-        assert isinstance(model, base.ScorableModel), \
+        assert isinstance(model, scorable.ScorableModel), \
             "Cannot score %r" % model
         self.debug('score: model %r', model)
         yield model.setScore(userName, categoryName, score)

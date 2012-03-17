@@ -4,9 +4,10 @@
 from twisted.internet import defer
 
 from dad.base import base
+from dad.model import scorable
 from dad.common import log
 
-class AlbumModel(base.ScorableModel):
+class AlbumModel(scorable.ScorableModel):
 
     """
     I am a model for an album.
