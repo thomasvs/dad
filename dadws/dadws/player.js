@@ -1,7 +1,11 @@
 $(document).ready(function() {
+    var API_KEY = 'N6E4NIOVYMTHNDM8J';
+    var echonest = new EchoNest(API_KEY);
+
     document.audios = {};
     document.start = new Date().getTime();
     console.log('Document ready at ' + document.start);
+
 
     $("#clock").clock({"timestamp": new Date().getTime()});
 
@@ -48,6 +52,20 @@ $(document).ready(function() {
                 audio.addEventListener('loadedmetadata', loadSeek, false);
                 a.play();
 
+	    echonest.artist(message.artists[0]).images( function(imageCollection) {
+		console.log(imageCollection);
+		var images = [];
+		for (i in imageCollection.data.images) {
+		    images.push(imageCollection.data.images[i].url);
+		}
+		// Initialize Backgound Stretcher
+		$('BODY').bgStretcher({
+			images: images,
+			resizeProportionally: true,
+			nextSlideDelay: 10000,
+		 })
+	    });
+
             }, when);
             console.log('load: id ' + message.id + ': scheduled play at ' + when + ' epoch sec in ' + remaining + ' msec');
         }
@@ -63,15 +81,17 @@ $(document).ready(function() {
         }
 
 
-    }
+    };
     ws.onopen = function(evt) {
         $('#conn_status').html('<b>Connected</b>');
         ws.send('Test data');
-    }
+    };
     ws.onerror = function(evt) {
         $('#conn_status').html('<b>Error</b>');
-    }
+    };
     ws.onclose = function(evt) {
         $('#conn_status').html('<b>Closed</b>');
-    }
+    };
+
+
 });
