@@ -9,7 +9,7 @@ import optparse
 
 from dad.common import player
 
-SCHEDULE_DURATION = 1800L # in seconds
+SCHEDULE_DURATION = 600L # in seconds
 
 _DEFAULT_PORT = 8080
 
