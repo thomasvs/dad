@@ -31,8 +31,17 @@ $(document).ready(function() {
             var audio = $('#audio-' + message.id).get(0);
             document.audios[message.id] = audio;
 
+            // clean up when playback ends
+            $('#audio-' + message.id).bind('ended', function()  {
+                console.log('ended: id ' + message.id);
+                $('#tr-' + message.id).remove();
+                delete document.audios[message.id];
+            });
+
             whenMs = message.when * 1000;
             var remainingMs = whenMs - new Date().getTime();
+
+            // play the track at the scheduled time
             at.at(function() {
                 var a = document.audios[message.id];
                 console.log('at.at: id ' + message.id + ': play after ' + (new Date().getTime() - document.start) + ' sec since document.start');
@@ -52,27 +61,28 @@ $(document).ready(function() {
                 }
                 audio.addEventListener('loadedmetadata', loadSeek, false);
                 a.play();
+                $('#tr-' + message.id).css('font-weight', 'bold');
 
-        // get and show images for this artist
-	    echonest.artist(message.artists[0]).images( function(imageCollection) {
-		var images = [];
-		for (i in imageCollection.data.images) {
-		    images.push({
-                        src: imageCollection.data.images[i].url,
-                        fade: 3000
-                    });
-		}
-                $.vegas('slideshow', {
-                delay:       10000,
-                backgrounds: images
-                })('overlay', {
-                    src: 'vegas/overlays/13.png',
-                    opacity: 0.5
+                // get and show images for this artist
+                echonest.artist(message.artists[0]).images( function(imageCollection) {
+                var images = [];
+                for (i in imageCollection.data.images) {
+                    images.push({
+                                src: imageCollection.data.images[i].url,
+                                fade: 3000
+                            });
+                }
+                        $.vegas('slideshow', {
+                        delay:       10000,
+                        backgrounds: images
+                        })('overlay', {
+                            src: 'vegas/overlays/13.png',
+                            opacity: 0.5
+                        });
+
                 });
-
-	    });
-
             }, whenMs);
+
             console.log('load: id ' + message.id + ': scheduled play at ' + whenMs + ' epoch msec in ' + remainingMs + ' msec');
         }
 
