@@ -7,9 +7,6 @@
 [submodule "dadws/dadws/www/echonest"]
 	path = dadws/dadws/www/echonest
 	url = https://github.com/Rodeoclash/Echonest-jQuery-Plugin.git
-[submodule "dadws/dadws/www/supersized"]
-	path = dadws/dadws/www/supersized
-	url = https://github.com/buildinternet/supersized.git
 [submodule "dadws/dadws/www/vegas"]
 	path = dadws/dadws/www/vegas
 	url = https://github.com/jaysalvat/vegas.git
