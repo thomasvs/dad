@@ -10,3 +10,6 @@
 [submodule "dadws/dadws/www/supersized"]
 	path = dadws/dadws/www/supersized
 	url = https://github.com/buildinternet/supersized.git
+[submodule "dadws/dadws/www/vegas"]
+	path = dadws/dadws/www/vegas
+	url = https://github.com/jaysalvat/vegas.git

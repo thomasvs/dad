@@ -56,13 +56,18 @@ $(document).ready(function() {
 		console.log(imageCollection);
 		var images = [];
 		for (i in imageCollection.data.images) {
-		    images.push(imageCollection.data.images[i].url);
+		    images.push({
+                        src: imageCollection.data.images[i].url,
+                        fade: 3000
+                    });
 		}
-		$('.background').bgStretcher({
-			images: images,
-			resizeProportionally: true,
-			nextSlideDelay: 10000,
-		 })
+                $.vegas('slideshow', {
+                delay:       10000,
+                backgrounds: images
+                })('overlay', {
+                    src: 'vegas/overlays/04.png',
+                    opacity: 0.9
+                });
 
 	    });
 
@@ -79,16 +84,17 @@ $(document).ready(function() {
 
             }, message.when * 1000);
         }
-
-
     };
+
     ws.onopen = function(evt) {
         $('#conn_status').html('<b>Connected</b>');
         ws.send('Test data');
     };
+
     ws.onerror = function(evt) {
         $('#conn_status').html('<b>Error</b>');
     };
+
     ws.onclose = function(evt) {
         $('#conn_status').html('<b>Closed</b>');
     };
