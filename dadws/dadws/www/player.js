@@ -65,8 +65,8 @@ $(document).ready(function() {
                 delay:       10000,
                 backgrounds: images
                 })('overlay', {
-                    src: 'vegas/overlays/04.png',
-                    opacity: 0.9
+                    src: 'vegas/overlays/13.png',
+                    opacity: 0.5
                 });
 
 	    });
