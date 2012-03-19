@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import socket
 import sys
 import optparse
 
@@ -34,6 +35,7 @@ _DEFAULT_DB = 'dad'
 _DEFAULT_ABOVE = 0.7
 _DEFAULT_BELOW = 1.0
 _DEFAULT_CATEGORY = 'Good'
+_DEFAULT_MY_HOSTNAME = unicode(socket.gethostname())
 
 couchdb_option_list = [
         optparse.Option('-H', '--host',
@@ -52,6 +54,11 @@ couchdb_option_list = [
             action="store", dest="extensions",
             help="file extensions to allow scheduling",
             default=None),
+        optparse.Option('-m', '--my-hostname',
+            action="store", dest="my_hostname",
+            help="my own hostname (defaults to %default)",
+            default=_DEFAULT_MY_HOSTNAME),
+
 ]
 
 user_option_list = [
@@ -101,9 +108,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self._category = options.category
         self._user = options.user
         self.debug('Selecting for user %r', self._user)
-        import socket
-        self._host = unicode(socket.gethostname())
-        self.debug('Selecting for host %r', self._host)
+        self._host = options.my_hostname
+        self.debug('Selecting for my hostname %r', self._host)
         self._above = options.above
         self._below = options.below
         self._random = options.random
