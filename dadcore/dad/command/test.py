@@ -169,7 +169,11 @@ class JukeboxMain(log.Loggable):
         # FIXME: remove init argument for player in view ?
         self._player.addView(player.CommandPlayerView(self._player))
 
-        self._setup_mediakeys()
+        try:
+            self._setup_mediakeys()
+        except Exception, e:
+            self.warning('Could not add mediakeys: %r',
+                log.getExceptionMessage(e))
 
         # now we can start triggering setup calls
         self._player.setup(playerOptions)
