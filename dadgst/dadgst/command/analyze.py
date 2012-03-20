@@ -84,7 +84,9 @@ class ChromaPrint(logcommand.LogCommand):
             import simplejson
 
             if not resp:
-                self.debug('Failed to look up %r', lookup)
+                self.stdout.write(
+                    'Failed to look up track with fingerprint %s\n' %
+                    lookup['fingerprint'])
                 continue
 
             try:
