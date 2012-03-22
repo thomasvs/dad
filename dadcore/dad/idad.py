@@ -7,6 +7,11 @@ from zope import interface
 Interfaces for functionality provided by add-on modules.
 """
 
+class NoPlugin(Exception):
+    """
+    No plugin found for the given plugin interface.
+    """
+
 class ICommand(interface.Interface):
     def addCommands(commandClass):
         pass
@@ -197,7 +202,7 @@ class IDatabase(interface.Interface):
         @rtype: a L{twisted.internet.defer.Deferred} firing a subclass of the
                 update L{dad.model.track.TrackModel} or other
         """
- 
+
 class IMetadataGetter(interface.Interface):
     def getMetadata(path, runner=None):
         """
@@ -216,4 +221,14 @@ class ILeveller(interface.Interface):
         @type path: C{unicode}
 
         @rtype: list of L{dad.audio.mix.TrackMix}
+        """
+
+class IChromaPrinter(interface.Interface):
+    def getChromaPrint(path, runner=None):
+        """
+        Get chromaprint from the given path.
+
+        @type path: C{unicode}
+
+        @rtype: C{str}
         """

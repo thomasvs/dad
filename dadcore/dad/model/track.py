@@ -5,7 +5,20 @@ from dad.base import base
 from dad.model import scorable
 from dad.common import log
 
+class ChromaModel(base.Model):
+    chromaprint = None
+    duration = None
+    mbid = None
+    artist = None
+    title = None
+    lookedup = None
+
+
+# FIXME: move FileInfo from dad.logic.database somewhere else ?
 class FileModel(base.Model):
+    """
+    @type info: FileInfo
+    """
 
     info = None
     metadata = None
@@ -17,6 +30,7 @@ class FragmentModel(base.Model):
 
     def __init__(self):
         self.files = []
+        self.chroma = {}
 
 class TrackModel(scorable.ScorableModel):
     """

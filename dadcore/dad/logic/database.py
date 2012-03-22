@@ -2,7 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 """
-Interaction with the database.
+Interaction between application and the database.
 """
 
 import os
@@ -22,6 +22,7 @@ from dad.task import md5task
 class PathError(Exception):
     pass
 
+# FIXME: make hostname an attribute here ?
 class DatabaseInteractor(logcommand.LogCommand):
     """
     Interact with a database.
@@ -186,6 +187,101 @@ class DatabaseInteractor(logcommand.LogCommand):
             yield
 
         defer.returnValue(ret)
+
+    @defer.inlineCallbacks
+    def _chromaPrintOne(self, printer, track, fragment, f):
+        if not fragment.chroma.chromaprint:
+            try:
+                fingerprint = printer.getChromaPrint(f.info.path,
+                    runner=self._runner)
+            except task.TaskException, e:
+                print 'ERROR:', log.getExceptionMessage(e)
+                print 'skipping', f.info.path.encode('utf-8')
+                return
+
+            self.debug('Got fingerprint: %r', fingerprint)
+
+            # store fingerprint before looking up
+            printed = yield self.database.trackAddFragmentChromaPrint(
+                track, f.info, fingerprint)
+            defer.returnValue(printed)
+        else:
+            defer.returnValue(track)
+
+
+    @defer.inlineCallbacks
+    def chromaprint(self, path, hostname=None):
+        """
+        Chromaprint the given path, look up, and store in database.
+
+        @type  path:     C{unicode}
+        @type  hostname: C{unicode}
+        """
+        ret = []
+
+        from dad import plugins
+        printer = None
+        for printer in plugin.getPlugins(idad.IChromaPrinter, plugins):
+            continue
+
+        if not printer:
+            raise idad.NoPlugin(idad.IChromaPrinter)
+
+
+        self.debug('Chromaprinting %r', path)
+        if not os.path.exists(path):
+            raise PathError(path)
+
+        # look up first
+        if not hostname:
+            hostname = self._hostname()
+
+        res = yield self.lookup(path, hostname=hostname)
+
+        print 'res', res
+
+        res = list(res)
+        self.debug('Looked up: %r', res)
+        if not res:
+            self.debug('%r not yet in database', path)
+            defer.returnValue(ret)
+            return
+
+        for trackModel in res:
+            for fragment in trackModel.getFragments():
+                for f in fragment.files:
+                    if f.info.host == hostname and f.info.path == path:
+                        r = yield self._chromaPrintOne(printer, trackModel,
+                            fragment, f)
+                        ret.append(r)
+
+        defer.returnValue(ret)
+
+
+    @defer.inlineCallbacks
+    def lookup(self, path, hostname=None):
+        """
+        @type  path:     C{unicode}
+        @type  hostname: C{unicode}
+
+        @returns:
+          - a generator firing L{TrackModel}
+        """
+        self.debug('Looking up %s', path)
+        if not os.path.exists(path):
+            raise PathError(path)
+
+        if not hostname:
+            hostname = self._hostname()
+
+        res = yield self.database.getTracksByHostPath(
+            hostname, path)
+
+        # FIXME: empty generator ?
+        if not res:
+            res = []
+
+        defer.returnValue(res)
 
     def score(self, model, userName, categoryName, score):
         """

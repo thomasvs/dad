@@ -3,13 +3,13 @@
 
 # plug-in adding GStreamer-based functionality to dad command
 
-import os
-
 from zope import interface
 from twisted import plugin
 
+from dad.extern.task import task
+
 from dad.common import log
-from dadgst.task import level
+from dadgst.task import level, fingerprint
 from dad import idad
 
 from dadgst.command import analyze
@@ -20,6 +20,21 @@ class CommandAppender(object):
 
     def addCommands(self, commandClass):
         commandClass.subCommandClasses.append(analyze.Analyze)
+
+class GstChromaPrinter(log.Loggable):
+    interface.implements(plugin.IPlugin, idad.IChromaPrinter)
+
+    def getChromaPrint(self, path, runner=None):
+        if not runner:
+            runner = task.SyncRunner()
+
+        import gobject
+        gobject.threads_init()
+
+        t = fingerprint.ChromaPrintTask(path)
+        runner.run(t)
+
+        return t.fingerprint
 
 
 class GstMetadataGetter(log.Loggable):
@@ -63,14 +78,14 @@ class GstMetadataGetter(log.Loggable):
             if key in t.taglist:
                 setattr(metadata, value, t.taglist[key])
 
-        # date handling: we have GstDate with .date, .month, .year 
+        # date handling: we have GstDate with .date, .month, .year
         if gst.TAG_DATE in t.taglist:
             for key in ['year', 'month', 'day']:
                 setattr(metadata, key, getattr(t.taglist[gst.TAG_DATE], key))
 
 
         return metadata
-    
+
 
 class GstLeveller(object):
     interface.implements(plugin.IPlugin, idad.ILeveller)
@@ -86,7 +101,7 @@ class GstLeveller(object):
         runner.run(t)
 
         return t.get_track_mixes()
-    
+
 class GstPlayerProvider(object):
     interface.implements(plugin.IPlugin, idad.IPlayerProvider)
 
@@ -105,4 +120,5 @@ class GstPlayerProvider(object):
 _ca = CommandAppender()
 _gmg = GstMetadataGetter()
 _gl = GstLeveller()
+_gc = GstChromaPrinter()
 _gpp = GstPlayerProvider()

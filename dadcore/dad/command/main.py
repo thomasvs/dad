@@ -62,6 +62,33 @@ def _hostname():
     return unicode(socket.gethostname())
 
 
+def _expandPaths(args, stderr):
+    paths = []
+
+    for path in args:
+        path = path.decode('utf-8')
+        if not os.path.exists(path):
+            stderr.write('Could not find %s\n' % path.encode('utf-8'))
+            continue
+
+        # handle playlist
+        if path.endswith('.m3u'):
+            handle = open(path, 'r')
+            for line in handle.readlines():
+                if line.startswith('#'):
+                    continue
+                filePath = line.decode('utf-8').strip()
+                if not os.path.exists(filePath):
+                    stderr.write('Could not find %s\n' %
+                        filePath.encode('utf-8'))
+                    continue
+                paths.append(filePath)
+        else:
+            paths.append(path)
+
+    return paths
+
+
 class List(tcommand.TwistedCommand):
 
     @defer.inlineCallbacks
@@ -105,36 +132,17 @@ class Add(tcommand.TwistedCommand):
         # FIXME: imports reactor
         from twisted.web import error
 
-        paths = []
-
-        for path in args:
-            path = path.decode('utf-8')
-            if not os.path.exists(path):
-                self.stderr.write('Could not find %s\n' % path.encode('utf-8'))
-                continue
-        
-            # handle playlist
-            if path.endswith('.m3u'):
-                handle = open(path, 'r')
-                for line in handle.readlines():
-                    if line.startswith('#'):
-                        continue
-                    filePath = line.decode('utf-8').strip()
-                    if not os.path.exists(filePath):
-                        self.stderr.write('Could not find %s\n' %
-                            filePath.encode('utf-8'))
-                        continue
-                    paths.append(filePath)
-            else:
-                paths.append(path)
+        paths = _expandPaths(args, self.stderr)
 
         failed = []
         for path in paths:
             path = os.path.abspath(path)
             self.stdout.write('%s\n' % path.encode('utf-8'))
 
+            d = interactor.add(path, hostname=self.hostname)
+            d.addErrback(log.warningFailure)
             try:
-                res = yield interactor.add(path, hostname=self.hostname)
+                res = yield d
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
@@ -142,6 +150,7 @@ class Add(tcommand.TwistedCommand):
                     defer.returnValue(3)
                     return
             except Exception, e:
+                self.debug("Failed to add: %r", log.getExceptionMessage(e))
                 failed.append((path, e))
                 continue
 
@@ -159,6 +168,72 @@ class Add(tcommand.TwistedCommand):
         if failed:
             for path, e in failed:
                 self.stdout.write('Failed to add %s:\n' % path.encode('utf-8'))
+                self.stdout.write('%s\n' % log.getExceptionMessage(e))
+
+class Chromaprint(tcommand.TwistedCommand):
+    """
+    @type hostname: unicode
+    """
+
+    description = """Chromaprint an audio file in the database."""
+    hostname = None
+
+    def addOptions(self):
+        self.parser.add_option('-H', '--hostname',
+                          action="store", dest="hostname",
+                          default=_hostname(),
+                          help="override hostname (%default)")
+
+    def handleOptions(self, options):
+        self.hostname = options.hostname.decode('utf-8')
+
+    @defer.inlineCallbacks
+    def doLater(self, args):
+        if not args:
+            self.stderr.write('Please give path to chromaprint.\n')
+            defer.returnValue(3)
+            return
+
+        interactor = database.DatabaseInteractor(
+            self.parentCommand.database,
+            self.parentCommand.runner)
+
+        # FIXME: database-specific, should be replaced by more generic things
+        # FIXME: imports reactor
+        from twisted.web import error
+
+        paths = _expandPaths(args, self.stderr)
+
+        failed = []
+        for path in paths:
+            path = os.path.abspath(path)
+            self.stdout.write('%s\n' % path.encode('utf-8'))
+
+            try:
+                res = yield interactor.chromaprint(path, hostname=self.hostname)
+            except error.Error, e:
+                if e.status == 404:
+                    self.stderr.write('Database or view does not exist.\n')
+                    self.reactor.stop()
+                    defer.returnValue(3)
+                    return
+            except Exception, e:
+                failed.append((path, e))
+                continue
+
+            found = False
+            for r in res:
+                found = True
+                print r
+            if not found:
+                self.stdout.write('%s not in database.\n' %
+                    path.encode('utf-8'))
+
+
+        if failed:
+            for path, e in failed:
+                self.stdout.write('Failed to chromaprint %s:\n' %
+                    path.encode('utf-8'))
                 self.stdout.write('%s\n' % log.getExceptionMessage(e))
 
 
@@ -203,7 +278,7 @@ class Database(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Add, List, Lookup, category.Category]
+    subCommandClasses = [Add, Chromaprint, List, Lookup, category.Category]
 
     description = 'Interact with database backend.'
 
@@ -221,9 +296,9 @@ class Database(logcommand.LogCommand):
     def addOptions(self):
         self.parser.add_option('-d', '--database',
                           action="store", dest="database",
-                          default="couchdb", # FIXME: don't hardcode?
-                          help="select database and arguments (from %s)" % (
-                            ", ".join(self._getProviders().keys())))
+                          help="select database and arguments (from %s, defaults to %s)" % (
+                            ", ".join(self._getProviders().keys()), "couchdb"),
+                          default="couchdb") # FIXME: don't hardcode?
 
     def handleOptions(self, options):
         

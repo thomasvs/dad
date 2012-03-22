@@ -133,8 +133,9 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
 
 
-    def addFragment(self, info, metadata=None, mix=None, number=None):
-        return self.document.addFragment(info, metadata, mix, number)
+    def addFragment(self, info, metadata=None, mix=None, number=None,
+            chroma=None):
+        return self.document.addFragment(info, metadata, mix, number, chroma)
 
     def getFragments(self):
         return self.document.getFragments()

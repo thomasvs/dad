@@ -510,6 +510,34 @@ class InternalDB(log.Loggable):
         track = yield self.db.map(self.dbName, stored['id'], mappings.Track)
         defer.returnValue(track)
 
+    @defer.inlineCallbacks
+    def trackAddFragmentChromaPrint(self, track, info, chromaprint):
+        """
+        Add the given chromaprint to the given track for the given info.
+        """
+        self.debug('get track for track %r', track.id)
+
+        track = yield self.db.map(self.dbName, track.id, mappings.Track)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.md5sum == info.md5sum:
+                    if fragment.chroma.chromaprint:
+                        self.debug('Fragment %r already has chromaprint %r',
+                            fragment, fragment.chroma.chromaprint)
+                        if fragment.chroma.chromaprint != chromaprint:
+                            self.warning('New chromaprint differs: %r',
+                                chromaprint)
+                    else:
+                        self.debug('Setting chromaprint on fragment %r', fragment)
+                        fragment.chroma.chromaprint = chromaprint
+
+        track = yield self.save(track)
+        defer.returnValue(track)
+
     # FIXME: docstring, is now a generator, not ordered ?
     @defer.inlineCallbacks
     def getPlaylist(self, hostName, userName, categoryName, above, below, limit=None,

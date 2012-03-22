@@ -24,6 +24,12 @@ class File(track.FileModel):
         self.info = database.FileInfo(file.host, file.path, md5sum=file.md5sum)
         # FIXME: more
 
+class Chroma(track.ChromaModel):
+    def __init__(self, chroma):
+        for key in ['chromaprint', 'duration', 'mbid', 'artist', 'title',
+            'lookedup']:
+            setattr(self, key, getattr(chroma, key))
+
 class Fragment(track.FragmentModel):
     def __init__(self, fragment):
         """
@@ -32,6 +38,7 @@ class Fragment(track.FragmentModel):
         self.files = []
         self.rate = fragment.rate
         self.level = fragment.level
+        self.chroma = Chroma(fragment.chroma)
 
         for file in fragment.files:
             self.files.append(File(file))
@@ -41,7 +48,7 @@ class Fragment(track.FragmentModel):
     def getTrackMix(self):
         from dad.audio import mixing
         trackmix = mixing.TrackMix()
-        
+
         trackmix.start = self.level.start
         trackmix.end = self.level.end
         trackmix.peak = self.level.peak
@@ -202,7 +209,8 @@ class Track(mapping.Document, track.TrackModel):
 
         return camel
  
-    def addFragment(self, info, metadata=None, mix=None, number=None):
+    def addFragment(self, info, metadata=None, mix=None, number=None,
+            chroma=None):
         files = []
         self.filesAppend(files, info, metadata, number)
         fragment = {
@@ -218,6 +226,9 @@ class Track(mapping.Document, track.TrackModel):
 
         if mix:
             self.fragmentSetMix(fragment, mix)
+
+        if chroma:
+            self.fragmentSetChroma(fragment, chroma)
 
         self.fragments.append(fragment)
 
@@ -261,6 +272,17 @@ class Track(mapping.Document, track.TrackModel):
 
         fragment['level'] = m
 
+    def fragmentSetChroma(self, fragment, chroma):
+        m = {}
+
+        if chroma:
+            for key in ['chromaprint', 'duration', 'mbid', 'artist', 'title',
+                'lookedup']:
+                m[key] = getattr(chroma, key, None)
+
+        fragment['chroma'] = m
+
+
     def get(self, trackId):
         """
         Get a track by id.
@@ -269,7 +291,7 @@ class Track(mapping.Document, track.TrackModel):
         """
         return self._daddb.map(trackId, couch.Track)
 
-     
+
     def getArtistNames(self):
         # FIXME: artists is a list of dict of ArtistModel ?
         if self.artists:
