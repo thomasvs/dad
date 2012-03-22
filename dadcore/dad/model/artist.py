@@ -87,6 +87,7 @@ class ArtistModel(scorable.ScorableModel):
             defer.returnValue('artist:name:' + name)
             return
 
+        self.debug('Could not getMid')
         raise KeyError
 
     def getTracks(self):
