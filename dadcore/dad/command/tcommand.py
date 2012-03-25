@@ -26,6 +26,7 @@ class TwistedCommand(logcommand.LogCommand):
         def later():
             d = self.doLater(args)
             d.addCallback(lambda _: self.reactor.stop())
+            d.addErrback(lambda _: self.reactor.stop())
 
         self.reactor.callLater(0, later)
 
