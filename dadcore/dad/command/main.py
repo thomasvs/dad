@@ -66,7 +66,12 @@ def _expandPaths(args, stderr):
     paths = []
 
     for path in args:
-        path = path.decode('utf-8')
+        try:
+            path = path.decode('utf-8')
+        except UnicodeDecodeError, e:
+            stderr.write('Invalid path %r, skipping\n' % path)
+            continue
+
         if not os.path.exists(path):
             stderr.write('Could not find %s\n' % path.encode('utf-8'))
             continue
