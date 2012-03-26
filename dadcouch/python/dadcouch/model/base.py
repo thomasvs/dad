@@ -43,6 +43,9 @@ class CouchDocModel(CouchDBModel):
         return model
     new = classmethod(new)
 
+    def getUrl(self):
+        return self.database.getUrl(self)
+        
 
 class ScorableModel(CouchDocModel):
     """

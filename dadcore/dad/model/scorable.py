@@ -32,6 +32,13 @@ class BackedModel(base.Model):
         raise NotImplementedError, '%r does not implement getOrCreate' % self.__class__
 
 
+    def getUrl(self):
+        """
+        Return a URL to the database object, if applicable.
+        used for debugging.
+        """
+        pass
+
 class ScorableModel(BackedModel):
     """
     I am a base class for models that can be given scores.

@@ -30,9 +30,11 @@ class TrackController(subject.SubjectController):
             self.debug('populating')
             artists = yield self._model.getArtistNames()
             name = yield self._model.getName()
+            url = self._model.getUrl()
 
             self.doViews('set_artist', " & ".join(artists))
             self.doViews('set_title', name)
+            self.doViews('set_url', url)
             self.debug('populated')
         except Exception, e:
             self.warning('Exception %r', log.getExceptionMessage(e, frame=-1))

@@ -289,6 +289,10 @@ class DADDB(database.Database):
             if not skipping:
                 yield t
 
+    def getUrl(self, model):
+        return self.db.url_template % ('/_utils/document.html?%s/%s' % (
+            self.dbName, model.document.id))
+
 
     ### own instance methods
     def map(self, docId, objectFactory):

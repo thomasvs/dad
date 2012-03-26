@@ -109,6 +109,12 @@ class TrackView(views.GTKView, ScorableView):
         entry = self._builder.get_object("track_info_artist")
         entry.set_text(name)
 
+    def set_url(self, url):
+        button = self._builder.get_object("track_info_url")
+        # button.show()
+        button.set_label(url)
+        button.set_uri(url)
+
 if __name__ == '__main__':
     view = TrackView()
 

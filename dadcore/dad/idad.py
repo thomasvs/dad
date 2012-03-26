@@ -203,6 +203,12 @@ class IDatabase(interface.Interface):
                 update L{dad.model.track.TrackModel} or other
         """
 
+    def getUrl(model):
+        """
+        Get a URL to the database object.
+        Used for debugging.
+        """
+
 class IMetadataGetter(interface.Interface):
     def getMetadata(path, runner=None):
         """
