@@ -59,9 +59,9 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
             self.getId()
         ]
 
-        v = views.View(self._daddb.db, self._daddb.dbName,
+        v = views.View(self.database.db, self.database.dbName,
             'dad', 'view-tracks-by-artist',
-            self._daddb.modelFactory(ItemTracksByArtist), keys=keys)
+            self.database.modelFactory(ItemTracksByArtist), keys=keys)
         try:
             result = yield v.queryView()
         except Exception, e:
@@ -71,14 +71,14 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         # FIXME: instead of doing a loop, create them from the view directly
         tracks = []
         for r in result:
-            tm = yield self._daddb.getTrack(r.trackId)
+            tm = yield self.database.getTrack(r.trackId)
             tracks.append(tm)
 
         defer.returnValue(tracks)
 
 
     def save(self):
-        return self._daddb.save(self)
+        return self.database.save(self)
 
     ### FIXME: to be added to iface ?
 
@@ -94,22 +94,22 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         mid = yield self.getMid()
         self.debug('getting mid %r', mid)
         try:
-            self.document = yield self._daddb.db.map(
-                self._daddb.dbName, mid, mappings.Artist)
+            self.document = yield self.database.db.map(
+                self.database.dbName, mid, mappings.Artist)
         except error.Error, e:
             # FIXME: trap error.Error with 404
             self.debug('aid %r does not exist as doc, viewing', mid)
 
             # get it by aid instead
             # FIXME: _internal
-            ret = yield self._daddb._internal.viewDocs('view-artist-docs', mappings.Artist,
+            ret = yield self.database._internal.viewDocs('view-artist-docs', mappings.Artist,
                 key=mid, include_docs=True)
             artistDocs = list(ret)
             if not artistDocs:
                 self.debug('aid %r can not be viewed, creating temp', mid)
                 # create an empty one
                 # raise IndexError(mid)
-                artist = yield CouchArtistModel.new(self._daddb,
+                artist = yield CouchArtistModel.new(self.database,
                     self.getName(), self.getSortName(), self.getMbId())
                 # FIXME: based on aid, fill in mbid or name ?
                 artists = [artist, ]
@@ -117,7 +117,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
                 self.debug('Found artists: %r', artistDocs)
                 artists = []
                 for doc in artistDocs:
-                    am = CouchArtistModel(self._daddb)
+                    am = CouchArtistModel(self.database)
                     am.document = doc
                     artists.append(am)
  
@@ -146,8 +146,6 @@ class ItemTracksByArtist(CouchArtistModel):
     id = None
     mbid = None
     trackId = None
-
-    _daddb = None
 
     # map view-tracks-by-artist
     def fromDict(self, d):
@@ -183,9 +181,9 @@ class CouchArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
         """
         start = time.time()
         self.debug('get')
-        v = views.View(self._daddb.db, self._daddb.dbName,
+        v = views.View(self.database.db, self.database.dbName,
             'dad', 'view-tracks-by-artist',
-            self._daddb.modelFactory(ItemTracksByArtist))
+            self.database.modelFactory(ItemTracksByArtist))
         try:
             d = v.queryView()
         except Exception, e:

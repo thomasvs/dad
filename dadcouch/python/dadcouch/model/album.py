@@ -42,9 +42,9 @@ class CouchAlbumModel(base.ScorableModel, album.AlbumModel):
             self.getId()
         ]
 
-        v = views.View(self._daddb.db, self._daddb.dbName,
+        v = views.View(self.database.db, self.database.dbName,
             'dad', 'view-tracks-by-album',
-            self._daddb.modelFactory(ItemTracksByAlbum), keys=keys)
+            self.database.modelFactory(ItemTracksByAlbum), keys=keys)
         try:
             result = yield v.queryView()
         except Exception, e:
@@ -54,7 +54,7 @@ class CouchAlbumModel(base.ScorableModel, album.AlbumModel):
         # FIXME: instead of doing a loop, create them from the view directly
         tracks = []
         for r in result:
-            tm = yield self._daddb.getTrack(r.trackId)
+            tm = yield self.database.getTrack(r.trackId)
             tracks.append(tm)
 
         defer.returnValue(tracks)
@@ -72,22 +72,22 @@ class CouchAlbumModel(base.ScorableModel, album.AlbumModel):
         mid = yield self.getMid()
         self.debug('getting mid %r', mid)
         try:
-            self.document = yield self._daddb.db.map(
-                self._daddb.dbName, mid, mappings.Album)
+            self.document = yield self.database.db.map(
+                self.database.dbName, mid, mappings.Album)
         except error.Error, e:
             # FIXME: trap error.Error with 404
             self.debug('album mid %r does not exist as doc, viewing', mid)
 
             # get it by mid instead
             # FIXME: _internal
-            ret = yield self._daddb._internal.viewDocs('view-album-docs', mappings.Album,
+            ret = yield self.database._internal.viewDocs('view-album-docs', mappings.Album,
                 key=mid, include_docs=True)
             albumDocs = list(ret)
             if not albumDocs:
                 self.debug('aid %r can not be viewed, creating temp', mid)
                 # create an empty one
                 # raise IndexError(mid)
-                album = yield CouchAlbumModel.new(self._daddb,
+                album = yield CouchAlbumModel.new(self.database,
                     self.getName(), self.getSortName(), self.getMbId())
                 # FIXME: based on aid, fill in mbid or name ?
                 albums = [album, ]
@@ -95,14 +95,14 @@ class CouchAlbumModel(base.ScorableModel, album.AlbumModel):
                 self.debug('Found albums: %r', albumDocs)
                 albums = []
                 for doc in albumDocs:
-                    am = CouchAlbumModel(self._daddb)
+                    am = CouchAlbumModel(self.database)
                     am.document = doc
                     albums.append(am)
- 
+
             # FIXME: multiple matches, find best one ? maybe mbid first ?
             defer.returnValue(albums[0])
             return
-            
+
         except Exception, e:
                 self.warningFailure(failure.Failure(e))
                 self.controller.doViews('error', "failed to populate",
@@ -133,9 +133,6 @@ class ItemAlbumsByArtist(CouchAlbumModel):
     artistName = None
     artistSortname = None
     artistMbId = None
-
-
-    _daddb = None
 
     # map view-albums-by-artist
     def fromDict(self, d):
@@ -188,8 +185,6 @@ class ItemTracksByAlbum(CouchAlbumModel):
     mbid = None
     trackId = None
 
-    _daddb = None
-
     # map view-tracks-by-album
     def fromDict(self, d):
         for key, value in d['value'].items():
@@ -236,9 +231,9 @@ class CouchAlbumSelectorModel(base.CouchDBModel):
         viewName = 'view-albums-by-artist'
         self.debug('Querying view %r', viewName)
 
-        view = views.View(self._daddb.db, self._daddb.dbName,
+        view = views.View(self.database.db, self.database.dbName,
             'dad', viewName,
-            self._daddb.modelFactory(ItemAlbumsByArtist), group=True)
+            self.database.modelFactory(ItemAlbumsByArtist), group=True)
         d.addCallback(lambda _, v: v.queryView(), view)
         
         def cb(result):

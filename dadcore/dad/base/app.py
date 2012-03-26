@@ -16,6 +16,9 @@ class AppModel(base.Model):
 
     logCategory = 'appmodel'
 
+    def __init__(self, database):
+        self.database = database
+
     def getModel(self, what):
         """
         Get a model from the application for the given item.

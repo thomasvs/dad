@@ -295,4 +295,4 @@ class DADDB(database.Database):
         return self.db.map(self.dbName, docId, objectFactory)
 
     def modelFactory(self, modelClass):
-        return lambda: modelClass(daddb=self)
+        return lambda: modelClass(database=self)

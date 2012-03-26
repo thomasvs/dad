@@ -30,9 +30,9 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
         @returns: a deferred firing a L{CouchTrackModel} object.
         """
-        model = CouchTrackModel(self._daddb)
+        model = CouchTrackModel(self.database)
         trackId = self.getId()
-        model.document = yield self._daddb.map(trackId, mappings.Track)
+        model.document = yield self.database.map(trackId, mappings.Track)
         defer.returnValue(model)
 
     def getById(self, db, trackId):
@@ -41,7 +41,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
 
         @returns: a deferred firing a L{CouchTrackModel} object.
         """
-        model = CouchTrackModel(self._daddb)
+        model = CouchTrackModel(self.database)
         model.document = yield db.map(trackId, mappings.Track)
         defer.returnValue(model)
 
@@ -61,7 +61,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         if self.document.artists:
             for artist in self.document.artists:
                 # FIXME: sort name ? id ?
-                model = self._daddb.newArtist(
+                model = self.database.newArtist(
                     name=artist.name, mbid=artist.mbid)
                 models.append(model)
 
@@ -70,7 +70,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
                 if not file.metadata:
                     continue
                 # FIXME: why is this a dict and not something with attrs?
-                model = yield self._daddb.getOrCreateArtist(
+                model = yield self.database.getOrCreateArtist(
                     name=file.metadata.artist, mbid=file.metadata.mb_artist_id)
                 models.append(model)
 
@@ -84,7 +84,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         if self.document.albums:
             for album in self.document.albums:
                 # FIXME: sort name ? id ?
-                model = self._daddb.newAlbum(
+                model = self.database.newAlbum(
                     name=album.name, mbid=getattr(album, 'mbid', None))
                 models.append(model)
 
@@ -93,7 +93,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
                 if not file.metadata:
                     continue
                 # FIXME: why is this a dict and not something with attrs?
-                model = yield self._daddb.getOrCreateAlbum(
+                model = yield self.database.getOrCreateAlbum(
                     name=file.metadata.album, mbid=file.metadata.mb_album_id)
                 models.append(model)
 
@@ -129,8 +129,7 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
         """
         Set calculated score on a track.
         """
-        return self._daddb.setCalculatedScore(self, userName, categoryName, score)
-
+        return self.database.setCalculatedScore(self, userName, categoryName, score)
 
 
     def addFragment(self, info, metadata=None, mix=None, number=None,
@@ -156,7 +155,7 @@ class CouchTrackSelectorModel(base.CouchDBModel):
 
         # FIXME: don't poke at the internals
         def loadTracks(_):
-            vd = self._daddb._internal.viewDocs('view-tracks-title-artistid', mappings.TrackRow)
+            vd = self.database._internal.viewDocs('view-tracks-title-artistid', mappings.TrackRow)
             def eb(f):
                 print 'THOMAS: failure', f
                 return f
@@ -183,7 +182,7 @@ class CouchTrackSelectorModel(base.CouchDBModel):
                     'albums': trackRow.albums,
                 }
                 track.fromDict(d)
-                tm = CouchTrackModel(self._daddb)
+                tm = CouchTrackModel(self.database)
                 # FIXME: remove track attribute
                 tm.track = track
                 tm.document = track

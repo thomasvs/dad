@@ -69,7 +69,7 @@ class Score(mapping.Mapping):
     user = mapping.TextField()
     category = mapping.TextField()
     score = mapping.FloatField() # between 0.0 and 1.0
- 
+
 class Artist(mapping.Document):
     type = mapping.TextField(default="artist")
 
@@ -112,7 +112,7 @@ class Track(mapping.Document, track.TrackModel):
 
 
     added = mapping.DateTimeField(default=datetime.datetime.now)
-    
+
     # a track is represented by one or more fragments of files
     fragments = mapping.ListField(
         mapping.DictField(mapping.Mapping.build(
@@ -197,7 +197,7 @@ class Track(mapping.Document, track.TrackModel):
 
     # scores calculated from track/artist/album
     calculated_scores = mapping.ListField(mapping.DictField(Score))
- 
+
     def _camelCaseFields(self, fieldName):
         """
         Return camel case variant of dashed field names.
@@ -208,7 +208,7 @@ class Track(mapping.Document, track.TrackModel):
         camel = ''.join(parts)
 
         return camel
- 
+
     def addFragment(self, info, metadata=None, mix=None, number=None,
             chroma=None):
         files = []
@@ -289,7 +289,7 @@ class Track(mapping.Document, track.TrackModel):
 
         @returns: a deferred firing a L{couch.Track} object.
         """
-        return self._daddb.map(trackId, couch.Track)
+        return self.database.map(trackId, couch.Track)
 
 
     def getArtistNames(self):
@@ -431,7 +431,7 @@ class OldScore(mapping.Document):
     type = mapping.TextField(default="score")
 
     user_id = mapping.TextField()
-    
+
     subject_type = mapping.TextField() # what are we scoring ?
     subject_id = mapping.TextField() # which one are we scoring ?
 
@@ -495,7 +495,7 @@ class Directory(mapping.Document):
 
     volume_id = mapping.TextField()
     # directory id; can be None if parent is volume
-    parent_id = mapping.TextField() 
+    parent_id = mapping.TextField()
 
     mtime = mapping.DateTimeField()
     inode = mapping.IntegerField()

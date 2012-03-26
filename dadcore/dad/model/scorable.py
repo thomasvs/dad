@@ -7,29 +7,37 @@ Base classes for model/view/controller.
 
 from dad.base import base
 
-
-class ScorableModel(base.Model):
+class BackedModel(base.Model):
     """
-    I am a base class for models that can be given scores.
+    I hold data coming from a database.
     """
 
-    subjectType = 'none'
+    def __init__(self, database):
+        """
+        @type  database: L{dad.base.database.Database}
+        """
+        # import here to avoid circular import
+        from dad.base import database as db
+        assert isinstance(database, db.Database)
+        self.database = database
 
-    # FIXME: this is more a method for any database-backed model,
-    # but for now we only deal with scorables
     def getOrCreate(self):
         """
         Look up a database-backed model, or create a new one.
 
         The returned model can then be changed and saved to the database.
 
-        @type  name: C{unicode}
-        @type  sort: C{unicode}
-        @type  mbid: C{unicode}
-
-        @rtype: L{dad.model.artist.ArtistModel}
+        @rtype: instance of subclass of L{BackedModel}
         """
         raise NotImplementedError, '%r does not implement getOrCreate' % self.__class__
+
+
+class ScorableModel(BackedModel):
+    """
+    I am a base class for models that can be given scores.
+    """
+
+    subjectType = 'none'
 
     def getCategories(self):
         """

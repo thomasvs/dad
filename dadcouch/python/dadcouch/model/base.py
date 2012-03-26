@@ -4,14 +4,13 @@
 
 from twisted.internet import defer
 
-from dad.base import base
+from dad.model import scorable
 from dad.common import log
 
 
-class CouchDBModel(base.Model, log.Loggable):
+class CouchDBModel(scorable.BackedModel, log.Loggable):
+    pass
 
-    def __init__(self, daddb):
-        self._daddb = daddb
 
 class CouchDocModel(CouchDBModel):
     """
@@ -55,7 +54,7 @@ class ScorableModel(CouchDocModel):
 
 
     def getCategories(self):
-        return self._daddb.getCategories()
+        return self.database.getCategories()
 
     @defer.inlineCallbacks
     def getScores(self, userName=None):
@@ -74,9 +73,9 @@ class ScorableModel(CouchDocModel):
             defer.returnValue([])
             return
 
-        scores = yield self._daddb.getScores(self)
+        scores = yield self.database.getScores(self)
         #import code; code.interact(local=locals())
-        #scores = yield self._daddb.getScores(self.subject)
+        #scores = yield self.database.getScores(self.subject)
 
         scores = list(scores)
         if userName:
@@ -84,7 +83,7 @@ class ScorableModel(CouchDocModel):
         defer.returnValue(scores)
 
     def setScore(self, userName, categoryName, score):
-        return self._daddb.setScore(self, userName, categoryName, score)
+        return self.database.setScore(self, userName, categoryName, score)
 
     def score(self, userName, categoryName, score):
-        return self._daddb.score(self, userName, categoryName, score)
+        return self.database.score(self, userName, categoryName, score)
