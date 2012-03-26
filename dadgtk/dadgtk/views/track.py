@@ -13,7 +13,7 @@ from dadgtk.views import views
 class ScorableView(gobject.GObject):
 
     __gsignals__ = {
-        'scored': 
+        'scored':
             (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
                 (str, float))
     }
@@ -32,7 +32,7 @@ class ScorableView(gobject.GObject):
         self._score.foreach(self._score.remove)
         self._scores = {} # category -> widget
         self._timeouts = {} # category -> timeout
- 
+
     # scores are dynamic
     def set_score(self, category, value):
         """
@@ -58,7 +58,7 @@ class ScorableView(gobject.GObject):
             self._score.attach(spin, 1, 2, top, top + 1)
 
             self._score.show_all()
-        
+
     def _highlight_score(self, category):
         style = self._scores[category]
         style.bg[gtk.STATE_NORMAL] = gdk.Color.parse('#0A0A6A')
@@ -70,7 +70,7 @@ class ScorableView(gobject.GObject):
         if category in self._timeouts:
             glib.source_remove(self._timeouts[category])
 
-        i = glib.timeout_add_seconds(self.score_delay, 
+        i = glib.timeout_add_seconds(self.score_delay,
             self._emit_score, category, value)
         self._timeouts[category] = i
 
@@ -92,13 +92,12 @@ class TrackView(views.GTKView, ScorableView):
         ScorableView.__init__(self)
 
         self._builder = gtk.Builder()
-        path = os.path.join(os.path.dirname(__file__), "track-info.ui") 
+        path = os.path.join(os.path.dirname(__file__), "track-info.ui")
         self._builder.add_from_file(path)
         self.widget = self._builder.get_object("track_info")
 
         self.init_score()
 
-    
     def set_title(self, title):
         """
         @type  title: unicode
