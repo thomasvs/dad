@@ -83,6 +83,7 @@ def _expandPaths(args, stderr):
                 if line.startswith('#'):
                     continue
                 filePath = line.decode('utf-8').strip()
+                # FIXME: handle relative paths here
                 if not os.path.exists(filePath):
                     stderr.write('Could not find %s\n' %
                         filePath.encode('utf-8'))
