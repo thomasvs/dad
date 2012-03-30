@@ -2,8 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 from dad.base import base
-from dad.model import scorable
-from dad.common import log
+from dad.model import scorable, selector
 
 class ChromaModel(base.Model):
     chromaprint = None
@@ -132,7 +131,7 @@ class TrackModel(scorable.ScorableModel):
             " & ".join(self.getArtistNames() or []),
             self.getName())
 
-class TrackSelectorModel(base.Model, log.Loggable):
+class TrackSelectorModel(selector.SelectorModel):
     """
     I am a base class for a model listing all artists in the database,
     and their track count.

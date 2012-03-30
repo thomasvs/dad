@@ -7,6 +7,9 @@ from dad.base import base
 
 # move to base class
 class SelectorController(base.Controller):
+    """
+    I am a controller to select items from a list.
+    """
     def __init__(self, model):
         base.Controller.__init__(self, model)
 
@@ -62,6 +65,10 @@ class SelectorController(base.Controller):
         return d
 
     def addItem(self, item):
+        """
+        Subclasses should implement this to add specific items
+        this is a selector for.
+        """
         raise NotImplementedError, \
             "implement addItem using self.doViews('add_row', ...)"
 

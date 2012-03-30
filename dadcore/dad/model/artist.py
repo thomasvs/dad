@@ -3,9 +3,7 @@
 
 from twisted.internet import defer
 
-from dad.base import base
-from dad.model import scorable
-from dad.common import log
+from dad.model import scorable, selector
 
 class ArtistModel(scorable.ScorableModel):
 
@@ -107,7 +105,7 @@ class ArtistModel(scorable.ScorableModel):
     def __repr__(self):
         return '<ArtistModel %r>' % (self.getName(), )
 
-class ArtistSelectorModel(base.Model, log.Loggable):
+class ArtistSelectorModel(selector.SelectorModel):
     """
     I am a base class for a model listing all artists in the database,
     and their track count.

@@ -3,9 +3,7 @@
 
 from twisted.internet import defer
 
-from dad.base import base
-from dad.model import scorable
-from dad.common import log
+from dad.model import scorable, selector
 
 class AlbumModel(scorable.ScorableModel):
 
@@ -60,7 +58,7 @@ class AlbumModel(scorable.ScorableModel):
         raise KeyError
 
 
-class AlbumSelectorModel(base.Model, log.Loggable):
+class AlbumSelectorModel(selector.SelectorModel):
     """
     I am a base class for a model listing all albums in the database,
     and their track count.
