@@ -66,6 +66,8 @@ class SelectorController(base.Controller):
 
     def addItem(self, item):
         """
+        @type  item: L{base.Model}
+
         Subclasses should implement this to add specific items
         this is a selector for.
         """
