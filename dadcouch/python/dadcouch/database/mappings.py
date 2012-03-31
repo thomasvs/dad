@@ -105,6 +105,7 @@ class Track(mapping.Document, track.TrackModel):
             name = mapping.TextField(),
             sortname = mapping.TextField(),
             id = mapping.TextField(),
+            mbid = mapping.TextField(),
             number = mapping.IntegerField(),
             # tracks can be fragments of album numbers, so count them
             fragment = mapping.IntegerField(),
@@ -556,6 +557,7 @@ class Slice(mapping.Document):
 class TrackRow(mapping.Document):
     id = mapping.TextField()
     name = mapping.TextField()
+# FIXME: are these fields used ?
     artist_ids = mapping.ListField(mapping.TextField())
 
     artist = mapping.DictField(mapping.Mapping.build(
