@@ -70,7 +70,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             album = False
 
             if self._artist_mids:
-                self.debug('Filtering on artists %r', self._artist_mids)
+                self.log('Filtering on artists %r', self._artist_mids)
                 # only show tracks matching the current selection
                 value = model.get_value(iter, COLUMN_ARTIST_MIDS)
 
@@ -122,6 +122,7 @@ class TracksUI(gtk.VBox, log.Loggable):
 
     def _show_count(self, tracks=None):
         count = tracks or self._count
+        self.debug('_show_count: %r', count)
         self._store.set(self._first_iter,
             COLUMN_TITLE, "All %d tracks" % count,
             COLUMN_SORT, "")
@@ -200,7 +201,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             assert type(i) is unicode, "artist mid %r is not unicode" % i
 
         # used when an artist is selected and only its tracks
-        self.debug('set_artist_ids: %r', mids)
+        self.log('set_artist_ids: %r', mids)
         self._artist_mids = mids
         self._filter_path = {}
         self._filter.refilter()
@@ -228,7 +229,7 @@ class TracksUI(gtk.VBox, log.Loggable):
             assert type(i) is unicode, "album mid %r is not unicode" % i
 
         # used when an album is selected and only its tracks
-        self.debug('set_album_mids: %r', mids)
+        self.log('set_album_mids: %r', mids)
         self._album_mids = mids
         self._filter_path = {}
         self._filter.refilter()
