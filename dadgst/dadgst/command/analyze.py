@@ -6,18 +6,14 @@
 import os
 
 from twisted.internet import defer
-from twisted.web import client
 
 from dad.audio import common
-from dad.common import log, logcommand, chromaprint
+from dad.common import logcommand, chromaprint
 from dad.command import tcommand
-from dad.base import data
 
 from dadgst.task import level, fingerprint
 
 from dad.extern.task import task
-
-CHROMAPRINT_APIKEY = 'pmla1DI5' # for DAD 0.0.0
 
 def filterFiles(outer, args):
     paths = []
