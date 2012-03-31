@@ -5,8 +5,12 @@
 
 import os
 
+from twisted.internet import defer
+from twisted.web import client
+
 from dad.audio import common
 from dad.common import log, logcommand
+from dad.command import tcommand
 from dad.base import data
 
 from dadgst.task import level, fingerprint
@@ -34,7 +38,7 @@ def filterFiles(outer, args):
     return paths
 
  
-class ChromaPrint(logcommand.LogCommand):
+class ChromaPrint(tcommand.TwistedCommand):
     description = """Calculates acoustid chromaprint fingerprint."""
 
     def addOptions(self):
@@ -42,7 +46,8 @@ class ChromaPrint(logcommand.LogCommand):
             action="store_true", dest="no_lookup",
             help="don't look up the fingerprint, only show it")
 
-    def do(self, args):
+    @defer.inlineCallbacks
+    def doLater(self, args):
         import gobject
         gobject.threads_init()
 
@@ -66,21 +71,23 @@ class ChromaPrint(logcommand.LogCommand):
                 'fingerprint': t.fingerprint
             }
             import urllib
-            import urllib2
 
             url = 'http://api.acoustid.org/v2/lookup'
             resp = None
             for i in range(0, 3):
                 try:
-                    resp = urllib2.urlopen(url, urllib.urlencode(lookup))
+                    d = client.getPage(url, method='POST',
+                        postdata=urllib.urlencode(lookup),
+                        headers={'Content-Type':'application/x-www-form-urlencoded'})
+                    resp = yield d
                     # uncomment for a quick debug that you can paste in tests
                     # print resp.read()
                     break
                 except Exception, e:
+                    print 'ouch'
                     self.debug('Failed to open %r',
                         log.getExceptionMessage(e))
                     
-
             import simplejson
 
             if not resp:
@@ -90,9 +97,11 @@ class ChromaPrint(logcommand.LogCommand):
                 continue
 
             try:
-                decoded = simplejson.load(resp)
+                decoded = simplejson.loads(resp)
             except Exception, e:
-                    self.debug('Failed to json-decode %r', resp)
+                    self.debug('Failed to json-decode %r: %r',
+                        resp, log.getExceptionMessage(e))
+                    self.stdout.write('Failed to decode %r\n' % resp)
                     continue
 
             if decoded['status'] == 'ok':
@@ -126,6 +135,8 @@ class ChromaPrint(logcommand.LogCommand):
                 self.stdout.write('%r\n' % fp.metadata)
             else:
                 print 'ERROR:', result
+
+        defer.returnValue(None)
 
 
 class OFAPrint(logcommand.LogCommand):
