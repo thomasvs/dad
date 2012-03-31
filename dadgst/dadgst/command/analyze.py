@@ -9,7 +9,7 @@ from twisted.internet import defer
 from twisted.web import client
 
 from dad.audio import common
-from dad.common import log, logcommand
+from dad.common import log, logcommand, chromaprint
 from dad.command import tcommand
 from dad.base import data
 
@@ -53,6 +53,8 @@ class ChromaPrint(tcommand.TwistedCommand):
 
         runner = task.SyncRunner()
 
+        cpc = chromaprint.ChromaPrintClient()
+
         for path in filterFiles(self, args):
             t = fingerprint.ChromaPrintTask(path)
             runner.run(t)
@@ -62,47 +64,13 @@ class ChromaPrint(tcommand.TwistedCommand):
                 self.stdout.write('chromaprint:\n%s\n' % t.fingerprint)
                 continue
 
-            # now look it up
-            # FIXME: translate to twisted-y code
-            lookup = {
-                'client': CHROMAPRINT_APIKEY,
-                'meta':   '2',
-                'duration': str(t.duration),
-                'fingerprint': t.fingerprint
-            }
-            import urllib
-
-            url = 'http://api.acoustid.org/v2/lookup'
-            resp = None
-            for i in range(0, 3):
-                try:
-                    d = client.getPage(url, method='POST',
-                        postdata=urllib.urlencode(lookup),
-                        headers={'Content-Type':'application/x-www-form-urlencoded'})
-                    resp = yield d
-                    # uncomment for a quick debug that you can paste in tests
-                    # print resp.read()
-                    break
-                except Exception, e:
-                    print 'ouch'
-                    self.debug('Failed to open %r',
-                        log.getExceptionMessage(e))
-                    
-            import simplejson
-
-            if not resp:
-                self.stdout.write(
-                    'Failed to look up track with fingerprint %s\n' %
-                    lookup['fingerprint'])
+            result = yield cpc.lookup(t.duration, t.fingerprint)
+            if not result:
+                self.stdout.write('Could not look up for fingerprint %r\n',
+                    t.fingerprint)
                 continue
 
-            try:
-                decoded = simplejson.loads(resp)
-            except Exception, e:
-                    self.debug('Failed to json-decode %r: %r',
-                        resp, log.getExceptionMessage(e))
-                    self.stdout.write('Failed to decode %r\n' % resp)
-                    continue
+            fp, decoded = result
 
             if decoded['status'] == 'ok':
                 results = decoded['results']
@@ -130,8 +98,6 @@ class ChromaPrint(tcommand.TwistedCommand):
                             # since it's the same musicbrainz id
                             break
 
-                fp = data.ChromaPrint()
-                fp.fromResults(results)
                 self.stdout.write('%r\n' % fp.metadata)
             else:
                 print 'ERROR:', result
