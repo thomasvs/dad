@@ -174,42 +174,38 @@ class ItemTracksByArtist(CouchArtistModel):
 
 
 class CouchArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
+
+    @defer.inlineCallbacks
     def get(self):
         """
         @returns: a deferred firing a list of L{daddb.ItemTracksByArtist}
                   objects representing only artists and their track count.
         """
         start = time.time()
+
         self.debug('get')
         v = views.View(self.database.db, self.database.dbName,
             'dad', 'view-tracks-by-artist',
             self.database.modelFactory(ItemTracksByArtist))
         try:
-            d = v.queryView()
+            itemTracks = yield v.queryView()
         except Exception, e:
             self.warning('get: exception: %r', log.getExceptionMessage(e))
-            return defer.fail(e)
+            raise
 
-        def cb(itemTracks):
-            # convert list of ordered itemTracks
-            # into a list of ItemTracks with track counts
-            artists = {} # artist sortname -> name, id, count
+        # convert list of ordered itemTracks
+        # into a list of ItemTracks with track counts
+        artists = {} # mid -> name, id, count
 
-            for item in itemTracks:
-                if item.sortname not in artists:
-                    artists[item.sortname] = item
-                artists[item.sortname].tracks += 1
+        for item in itemTracks:
+            mid = yield item.getMid()
+            if mid not in artists:
+                artists[mid] = item
+            artists[mid].tracks += 1
 
-            ret = artists.values()
+        ret = artists.values()
 
-            self.debug('get: got %d artists in %.3f seconds',
-                len(ret), time.time() - start)
-            return ret
-        d.addCallback(cb)
+        self.debug('get: got %d artists in %.3f seconds',
+            len(ret), time.time() - start)
 
-        def eb(failure):
-            print 'THOMAS: Failure:', failure
-            return failure
-        d.addErrback(eb)
-
-        return d
+        defer.returnValue(ret)
