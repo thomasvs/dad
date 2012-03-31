@@ -155,7 +155,8 @@ class CouchTrackSelectorModel(base.CouchDBModel):
 
         # FIXME: don't poke at the internals
         def loadTracks(_):
-            vd = self.database._internal.viewDocs('view-tracks-title-artistid', mappings.TrackRow)
+            vd = self.database._internal.viewDocs('view-tracks-title-artistid',
+                mappings.TrackRow)
             def eb(f):
                 print 'THOMAS: failure', f
                 return f
