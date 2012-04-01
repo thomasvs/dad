@@ -26,9 +26,9 @@ class File(track.FileModel):
 
 class Chroma(track.ChromaModel):
     def __init__(self, chroma):
-        for key in ['chromaprint', 'duration', 'mbid', 'artist', 'title',
+        for key in ['chromaprint', 'duration', 'mbid', 'artists', 'title',
             'lookedup']:
-            setattr(self, key, getattr(chroma, key))
+            setattr(self, key, getattr(chroma, key, None))
 
 class Fragment(track.FragmentModel):
     def __init__(self, fragment):
@@ -162,7 +162,7 @@ class Track(mapping.Document, track.TrackModel):
             # each fragment shares some properties
             rate = mapping.IntegerField(),
             channels = mapping.IntegerField(),
-            # FIXME: this would be different foragmentr different encodings ?
+            # FIXME: this would be different for different encodings ?
             audio_md5sum = mapping.TextField(),
 
             # fingerprints
@@ -171,7 +171,12 @@ class Track(mapping.Document, track.TrackModel):
                     duration = mapping.TextField(),
                     # looked up on musicbrainz
                     mbid = mapping.TextField(),
-                    artist = mapping.TextField(),
+                    artists = mapping.ListField(
+                        mapping.DictField(mapping.Mapping.build(
+                            mbid = mapping.TextField(),
+                            name = mapping.TextField()
+                        ))
+                    ),
                     title = mapping.TextField(),
                     lookedup = mapping.DateTimeField(),
             )),
@@ -198,6 +203,23 @@ class Track(mapping.Document, track.TrackModel):
 
     # scores calculated from track/artist/album
     calculated_scores = mapping.ListField(mapping.DictField(Score))
+
+    def __repr__(self):
+        artists = self.getArtistNames()
+        name = self.getName()
+
+        if artists and name:
+            return "<Track %r %r - %r>" % (self.getId(), artists, name)
+
+        files = []
+        for fragment in self.fragments:
+            files.extend(fragment.files)
+
+        if files:
+            return "<Track %r for host %r, path %r>" % (
+                self.getId(), files[0].host, files[0].path)
+
+        return mapping.Document.__repr__(self)
 
     def _camelCaseFields(self, fieldName):
         """
@@ -274,10 +296,20 @@ class Track(mapping.Document, track.TrackModel):
         fragment['level'] = m
 
     def fragmentSetChroma(self, fragment, chroma):
+        """
+        @param fragment: a fragment in the fragments key
+        @type  fragment: L{mapping.AnonymousStruct}
+        @type  chroma:   L{track.ChromaModel}
+        """
+        # AnonymousStruct does not actually exist as a class
+        assert fragment.__class__.__name__  == 'AnonymousStruct', \
+            "fragment %r is not a paisley.mapping.AnonymousStruct" % fragment
+        assert isinstance(chroma, track.ChromaModel)
+
         m = {}
 
         if chroma:
-            for key in ['chromaprint', 'duration', 'mbid', 'artist', 'title',
+            for key in ['chromaprint', 'duration', 'mbid', 'artists', 'title',
                 'lookedup']:
                 m[key] = getattr(chroma, key, None)
 

@@ -3,6 +3,7 @@
 
 import os
 import sys
+import datetime
 
 from twisted.internet import defer
 
@@ -11,6 +12,7 @@ from dadcouch.extern.paisley import views
 
 from dad.base import data
 from dad.common import log
+from dad.model import track as mtrack
 
 from dadcouch.common import manydef
 from dadcouch.database import mappings
@@ -511,10 +513,16 @@ class InternalDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def trackAddFragmentChromaPrint(self, track, info, chromaprint):
+    def trackAddFragmentChromaPrint(self, track, info, chromaprint, duration):
         """
         Add the given chromaprint to the given track for the given info.
+
+        @type  track: L{dad.model.track.TrackModel}
         """
+        assert isinstance(track, mappings.Track)
+        from dad.model import track as mtrack
+        assert isinstance(track, mtrack.TrackModel)
+
         self.debug('get track for track %r', track.id)
 
         track = yield self.db.map(self.dbName, track.id, mappings.Track)
@@ -525,18 +533,61 @@ class InternalDB(log.Loggable):
         for fragment in track.fragments:
             for f in fragment.files:
                 if f.md5sum == info.md5sum:
-                    if fragment.chroma.chromaprint:
+                    if fragment.chroma and fragment.chroma.chromaprint:
                         self.debug('Fragment %r already has chromaprint %r',
                             fragment, fragment.chroma.chromaprint)
                         if fragment.chroma.chromaprint != chromaprint:
                             self.warning('New chromaprint differs: %r',
                                 chromaprint)
-                    else:
-                        self.debug('Setting chromaprint on fragment %r', fragment)
-                        fragment.chroma.chromaprint = chromaprint
+
+                    self.debug('Setting chromaprint on fragment %r',
+                        fragment)
+                    chroma = mtrack.ChromaModel()
+                    chroma.chromaprint = chromaprint
+                    chroma.duration = duration
+                    track.fragmentSetChroma(fragment, chroma)
 
         track = yield self.save(track)
         defer.returnValue(track)
+
+    @defer.inlineCallbacks
+    def trackAddFragmentChromaPrintLookup(self, track, info, chromaprint):
+        """
+        Add the given chromaprint lookup information to the given track for the
+        given info.
+
+        @type  chromaprint: L{dad.base.data.ChromaPrint}
+        """
+        assert isinstance(chromaprint, data.ChromaPrint)
+        self.debug('trackAddFragmentChromaPrintLookup: '
+            'get track for track %r', track.id)
+
+        track = yield self.db.map(self.dbName, track.id, mappings.Track)
+
+        # FIXME: possibly raise if we don't find it ?
+        found = False
+
+        for fragment in track.fragments:
+            for f in fragment.files:
+                if f.md5sum == info.md5sum:
+                    self.debug('trackAddFragmentChromaPrintLookup: '
+                        'found fragment')
+
+                    # found the fragment
+                    found = True
+
+                    fragment.chroma.mbid = chromaprint.mbid
+                    fragment.chroma.title = chromaprint.metadata.title
+                    fragment.chroma.artists = chromaprint.artists
+                    fragment.chroma.lookedup = datetime.datetime.now()
+
+                    track = yield self.save(track)
+                    break
+
+        self.debug('trackAddFragmentChromaPrintLookup: returning track %r',
+            track)
+        defer.returnValue(track)
+
 
     # FIXME: docstring, is now a generator, not ordered ?
     @defer.inlineCallbacks

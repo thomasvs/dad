@@ -34,7 +34,7 @@ class GstChromaPrinter(log.Loggable):
         t = fingerprint.ChromaPrintTask(path)
         runner.run(t)
 
-        return t.fingerprint
+        return t.fingerprint, t.duration
 
 
 class GstMetadataGetter(log.Loggable):

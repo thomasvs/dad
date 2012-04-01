@@ -8,6 +8,7 @@ Base classes for data exchange.
 class ChromaPrint:
     fingerprint = None
     duration = None # int
+    artists = None # list of dict of mbid, name
 
     metadata = None # Metadata
     mbid = None
@@ -40,7 +41,15 @@ class ChromaPrint:
         mbid, artists, title = ordered[0][0]
 
         self.metadata = TrackMetadata()
+        # FIXME: do we really need metadata here ?
         self.metadata.artists = [a['name'] for a in artist[artists]]
+
+        self.artists = []
+        for a in artist[artists]:
+            self.artists.append({
+                'name': a['name'],
+                'mbid': a['id'],
+            })
         self.metadata.title = title
         self.mbid = mbid
 

@@ -15,6 +15,7 @@ from dad.extern.task import task
 
 
 from dad import idad
+from dad.model import track as mtrack
 from dad.common import log
 from dad.common import logcommand
 from dad.task import md5task
@@ -190,9 +191,17 @@ class DatabaseInteractor(logcommand.LogCommand):
 
     @defer.inlineCallbacks
     def _chromaPrintOne(self, printer, track, fragment, f):
-        if not fragment.chroma.chromaprint:
+        """
+        @type  track:    L{dad.model.track.TrackModel}
+        @type  fragment: L{dad.model.track.FragmentModel}
+        @type  f:        L{dad.model.track.FileModel}
+        """
+
+        assert isinstance(track, mtrack.TrackModel)
+        self.debug("_chromaPrintOne %r, %r, %r", track, fragment, f)
+        if not fragment.chroma.chromaprint or not fragment.chroma.duration:
             try:
-                fingerprint = printer.getChromaPrint(f.info.path,
+                fingerprint, duration = printer.getChromaPrint(f.info.path,
                     runner=self._runner)
             except task.TaskException, e:
                 print 'ERROR:', log.getExceptionMessage(e)
@@ -203,10 +212,36 @@ class DatabaseInteractor(logcommand.LogCommand):
 
             # store fingerprint before looking up
             printed = yield self.database.trackAddFragmentChromaPrint(
-                track, f.info, fingerprint)
-            defer.returnValue(printed)
+                track, f.info, fingerprint, duration)
+
         else:
-            defer.returnValue(track)
+            self.debug('Already fingerprinted')
+            printed = track
+
+
+        # now lookup
+        if True: #if not fragment.chroma.mbid:
+            self.debug('Looking up track %r', printed)
+            from dad.common import chromaprint
+            cpc = chromaprint.ChromaPrintClient()
+            result = yield cpc.lookup(duration=fragment.chroma.duration,
+                fingerprint=fragment.chroma.chromaprint)
+
+            try:
+                cp, _ = result
+            except Exception, e:
+                self.warning('No result')
+                defer.returnValue(None)
+                return
+
+            lookedup = yield self.database.trackAddFragmentChromaPrintLookup(
+                track, f.info, cp)
+
+        else:
+            self.debug('Already looked up')
+            lookedup = printed
+
+        defer.returnValue(lookedup)
 
 
     @defer.inlineCallbacks
@@ -238,8 +273,6 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         res = yield self.lookup(path, hostname=hostname)
 
-        print 'res', res
-
         res = list(res)
         self.debug('Looked up: %r', res)
         if not res:
@@ -248,8 +281,11 @@ class DatabaseInteractor(logcommand.LogCommand):
             return
 
         for trackModel in res:
+            assert isinstance(trackModel, mtrack.TrackModel)
             for fragment in trackModel.getFragments():
+                assert isinstance(fragment, mtrack.FragmentModel)
                 for f in fragment.files:
+                    assert isinstance(f, mtrack.FileModel)
                     if f.info.host == hostname and f.info.path == path:
                         r = yield self._chromaPrintOne(printer, trackModel,
                             fragment, f)

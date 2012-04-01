@@ -5,10 +5,14 @@ from dad.base import base
 from dad.model import scorable, selector
 
 class ChromaModel(base.Model):
+    """
+    @type  chromaprint: C{str}
+    @type  artists:     list of C{unicode}
+    """
     chromaprint = None
     duration = None
     mbid = None
-    artist = None
+    artists = None
     title = None
     lookedup = None
 
@@ -29,7 +33,7 @@ class FragmentModel(base.Model):
 
     def __init__(self):
         self.files = []
-        self.chroma = {}
+        self.chroma = ChromaModel()
 
 class TrackModel(scorable.ScorableModel):
     """
