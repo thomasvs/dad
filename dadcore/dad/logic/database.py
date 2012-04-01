@@ -165,7 +165,9 @@ class DatabaseInteractor(logcommand.LogCommand):
             if metadata and metadata.title:
                 name = metadata.title
 
-            track = self.database.newTrack(name=name)
+            # FIXME: do we prefer a bad name, or no name ?
+            # track = self.database.newTrack(name=name)
+            track = self.database.newTrack(name=None)
             self.debug('Adding new track %r, number %r', track, i + 1)
             self.database.trackAddFragment(track, info, metadata=metadata, mix=mix, number=i + 1)
 
