@@ -37,7 +37,7 @@ class TracksUI(gtk.VBox, log.Loggable):
 
         self._selector = selector
         self._first_iter = None
-        self._count = 0
+        self._count = 0 # total count of tracks
 
         self._filter_path = {}
 
@@ -121,8 +121,13 @@ class TracksUI(gtk.VBox, log.Loggable):
             self._show_count()
 
     def _show_count(self, tracks=None):
-        count = tracks or self._count
-        self.debug('_show_count: %r', count)
+        """
+        @type  tracks: C{int} or None
+        """
+        count = tracks
+        if tracks is None:
+            count = self._count
+        self.debug('_show_count: %r, tracks %r', count, tracks)
         self._store.set(self._first_iter,
             COLUMN_TITLE, "All %d tracks" % count,
             COLUMN_SORT, "")
