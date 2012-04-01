@@ -1,71 +1,17 @@
 // For each track
 //   for each artist
-//     emit
-//       key artist mid
+//     for each album
+//       emit
+//       key
+//         artist mid
+//         dict for artist of name/sortname/id/mid/mbid
+//         dict for album of name/sortname/id/mid/mbid
 //       value:
-//          name
-//          sortname
-//          id
-//          mbid
+//          1
 
 // FIXME: share code between views
 
 
-function getArtistMid(artist) {
-    mid = null;
-
-    if (artist.id) {
-        mid = artist.id;
-    } else if (artist.mbid) {
-        mid = 'artist:mbid:' + artist.mbid;
-    } else if (artist.name) {
-        mid = 'artist:name:' + artist.name;
-    }
-
-    return mid;
-}
-
-function getMetadataArtistMid(metadata) {
-    mid = null;
-
-    if (metadata) {
-        if (metadata.mb_artist_id) {
-            mid = 'artist:mbid:' + metadata.mb_artist_id;
-        } else if (metadata.artist) {
-            mid = 'artist:name:' + metadata.artist;
-        }
-    }
-
-    return mid;
-}
-
-function getAlbumMid(album) {
-    mid = null;
-
-    if (album.id) {
-        mid = album.id;
-    } else if (album.mbid) {
-        mid = 'album:mbid:' + album.mbid;
-    } else if (album.name) {
-        mid = 'album:name:' + album.name;
-    }
-
-    return mid;
-}
-
-function getMetadataAlbumMid(metadata) {
-    mid = null;
-
-    if (metadata) {
-        if (metadata.mb_album_id) {
-            mid = 'album:mbid:' + metadata.mb_album_id;
-        } else if (metadata.album) {
-            mid = 'album:name:' + metadata.album;
-        }
-    }
-
-    return mid;
-}
 
 function emitAlbumArtistRow(mid, artist, album) {
     emit([mid, 
@@ -86,6 +32,9 @@ function emitAlbumArtistRow(mid, artist, album) {
 }
 
 function(doc) {
+
+    // !code lib/dad/track.js
+    
     if (doc.type == 'track') {
 	    // first, collect all artists
 	    var artists = {}; // dict of mid -> name, sort, id, mbid
@@ -93,7 +42,7 @@ function(doc) {
         if (doc.artists && doc.artists.length > 0) {
             doc.artists.forEach(
                 function(artist) {
-                    artists[getArtistMid(artist)] = [artist.name, artist.sortname, artist.id, getArtistMid(artist), artist.mbid];
+                    artists[track.getArtistMid(artist)] = [artist.name, artist.sortname, artist.id, track.getArtistMid(artist), artist.mbid];
                 }
             );
         } else {
@@ -104,7 +53,7 @@ function(doc) {
                             function(file) {
                                 if (file.metadata && file.metadata.artist) {
                                         // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
-                                    artists[getMetadataArtistMid(file.metadata)] = [file.metadata.artist, file.metadata.artist, null, getMetadataArtistMid(file.metadata), file.metadata.mb_artist_id];
+                                    artists[track.getMetadataArtistMid(file.metadata)] = [file.metadata.artist, file.metadata.artist, null, track.getMetadataArtistMid(file.metadata), file.metadata.mb_artist_id];
                                 }
                             }
                         );
@@ -120,7 +69,7 @@ function(doc) {
                     function(album) {
                         a = artists[artist];
                         emitAlbumArtistRow(artist, a,
-                            [album.name, album.sortname, album.id, getAlbumMid(album), album.mbid]);
+                            [album.name, album.sortname, album.id, track.getAlbumMid(album), album.mbid]);
                     }
                 );
             } else {
@@ -134,7 +83,7 @@ function(doc) {
                         a = artists[artist];
 
                         emitAlbumArtistRow(artist, a, 
-                            [file.metadata.album, file.metadata.album, null, getMetadataAlbumMid(file.metadata), file.metadata.mb_album_id]);
+                            [file.metadata.album, file.metadata.album, null, track.getMetadataAlbumMid(file.metadata), file.metadata.mb_album_id]);
                                     }
                                 }
                             );
