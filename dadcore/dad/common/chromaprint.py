@@ -4,7 +4,6 @@
 import urllib
 
 from twisted.internet import defer
-from twisted.web import client
 
 from dad.common import log
 from dad.base import data
@@ -25,6 +24,7 @@ class ChromaPrintClient(log.Loggable):
         }
 
         resp = None
+        from twisted.web import client
         for i in range(0, 3):
             try:
                 d = client.getPage(CHROMAPRINT_URL, method='POST',
@@ -32,7 +32,7 @@ class ChromaPrintClient(log.Loggable):
                     headers={'Content-Type':'application/x-www-form-urlencoded'})
                 resp = yield d
                 # uncomment for a quick debug that you can paste in tests
-                # print resp.read()
+                # print resp
                 break
             except Exception, e:
                 self.debug('Failed to open %r',
@@ -83,7 +83,7 @@ class ChromaPrintClient(log.Loggable):
             fp = data.ChromaPrint()
             fp.fromResults(results)
             self.debug('metadata: %r', fp.metadata)
-            defer.returnValue(fp, decoded)
+            defer.returnValue((fp, decoded))
         else:
             print 'ERROR:', result
             defer.returnValue(None)
