@@ -331,17 +331,17 @@ class Track(mapping.Document, track.TrackModel):
             # return self.artists
             return [artist.name for artist in self.artists]
 
-        # FIXME: better ? faster ? stronger ?
-        if not self.fragments:
-            return
-        if not self.fragments[0].files:
-            return
-        if not self.fragments[0].files[0].metadata:
-            return
-        if not self.fragments[0].files[0].metadata.artist:
-            return
+        for fragment in self.fragments:
+            if fragment.chroma and fragment.chroma.artists:
+                return [artist.name for artist in fragment.chroma.artists]
 
-        return [self.fragments[0].files[0].metadata.artist, ]
+        for fragment in self.fragments:
+            if fragment.files:
+                for file in fragment.files:
+                    if file.metadata and file.metadata.artist:
+                        return [file.metadata.artist, ]
+
+        return None
 
     # FIXME: proper artist ids ?
     def getArtistIds(self):
@@ -395,14 +395,15 @@ class Track(mapping.Document, track.TrackModel):
         if self.name:
             return self.name
 
-        # FIXME: better ? faster ? stronger ?
-        if not self.fragments:
-            return
-        if not self.fragments[0].files:
-            return
-        if not self.fragments[0].files[0].metadata:
-            return
-        return self.fragments[0].files[0].metadata.title
+        for fragment in self.fragments:
+            if fragment.chroma and fragment.chroma.title:
+                return fragment.chroma.title
+
+        for fragment in self.fragments:
+            if fragment.files:
+                for file in fragment.files:
+                    if file.metadata and file.metadata.title:
+                        return file.metadata.title
 
     def getFragments(self):
         return [Fragment(f) for f in self.fragments]
