@@ -8,34 +8,10 @@
 //         id
 //         mbid
 
-function getArtistMid(artist) {
-    mid = null;
-
-    if (artist.id) {
-        mid = artist.id;
-    } else if (artist.mbid) {
-        mid = 'artist:mbid:' + artist.mbid;
-    } else if (artist.name) {
-        mid = 'artist:name:' + artist.name;
-    }
-
-    return mid;
-}
+// !code lib/dad/track.js
 
 
-function getMetadataArtistMid(metadata) {
-    mid = null;
 
-    if (metadata) {
-        if (metadata.mb_artist_id) {
-            mid = 'artist:mbid:' + metadata.mb_artist_id;
-        } else if (metadata.artist) {
-            mid = 'artist:name:' + metadata.artist;
-        }
-    }
-
-    return mid;
-}
 
 function emitRow(name, sortname, id, mid, mbid, docid) {
     emit(mid, {
@@ -49,40 +25,13 @@ function emitRow(name, sortname, id, mid, mbid, docid) {
 }
 
 function(doc) {
-    var seen = {}
-
     if (doc.type == 'track') {
-        if (doc.artists && doc.artists.length > 0) {
-            doc.artists.forEach(
-                function(artist) {
-                    emitRow(artist.name, artist.sortname, artist.id, getArtistMid(artist), artist.mbid, doc._id);
-                    seen[artist.name] = 1;
-                }
-            )
-        } else {
-            if (doc.fragments) {
-                doc.fragments.forEach(
-                    function(fragment) {
-                        fragment.files.forEach(
-                            function(file) {
-                                if (file.metadata) {
-                                    // FIXME: seen should be on mid
-                                    if (!(file.metadata.artist in seen)) {
-                                        // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
-                                        aid = getMetadataArtistMid(file.metadata);
-                                        if (aid) {
-                                            emitRow(file.metadata.artist, file.metadata.artist, null, aid, file.metadata.mb_artist_id, doc._id);
+        var artistList = track.getArtists(doc);
 
-                                            seen[file.metadata.artist] = 1;
-                                        }
-                                    }
-                                }
-                            }
-                        )
-                    }
-                )
+        artistList.forEach(
+            function(artist) {
+                emitRow(artist.name, artist.sortname, artist.id, track.getArtistMid(artist), artist.mbid, doc._id);
             }
-
-        }
+        );
     }
 }

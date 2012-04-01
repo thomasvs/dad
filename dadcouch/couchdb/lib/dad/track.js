@@ -56,6 +56,18 @@ function getMetadataAlbumMid(metadata) {
     return mid;
 }
 
+function getAlbumFromTrackAlbum(album) {
+    var o = {};
+
+    o.name = album.name;
+    o.sortname = album.sortname;
+    o.id = album.id;
+    o.mbid = album.mbid;
+
+    o.mid = getAlbumMid(album);
+
+    return o;
+}
 
 function getArtistFromTrackArtist(artist) {
     var o = {};
@@ -83,6 +95,43 @@ function getArtistFromMetadata(metadata) {
     return o;
 }
 
+function getAlbumFromMetadata(metadata) {
+    var o = {};
+
+    o.name = metadata.album;
+    o.sortname = metadata.album;
+    o.id = null;
+    o.mbid = metadata.mb_album_id;
+
+    o.mid = getMetadataAlbumMid(metadata);
+
+    return o;
+}
+
+// FIXME: should getArtistFromTrackArtist be on doc instead too ?
+function getArtistsFromChroma(chroma) {
+    var artists = [];
+
+    if (!chroma.artists) return artists;
+
+    chroma.artists.forEach(
+        function(artist) {
+
+            var o = {};
+
+            o.name = artist.name;
+            o.sortname = artist.name;
+            o.id = null;
+            o.mbid = artist.mbid;
+
+            o.mid = 'artist:mbid:' + o.mbid;
+
+            artists.push(o);
+        }
+    );
+
+    return artists;
+}
 var track = {
 
     getArtistMid: getArtistMid,
@@ -108,15 +157,25 @@ var track = {
             if (doc.fragments) {
                 doc.fragments.forEach(
                     function(fragment) {
-                        fragment.files.forEach(
-                            function(file) {
-                                if (file.metadata && file.metadata.artist) {
-                                    // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
-                                    a = getArtistFromMetadata(file.metadata);
-                                    artists[a.mid] = a;
+                        // chromaprint values take precedence over metadata
+                        chromaArtists = getArtistsFromChroma(fragment.chroma);
+                        if (chromaArtists && chromaArtists.length > 0) {
+                            chromaArtists.forEach(
+                                function(artist) {
+                                    artists[artist.mid] = artist;
                                 }
-                            }
-                        );
+                            );
+                        } else {
+                            fragment.files.forEach(
+                                function(file) {
+                                    if (file.metadata && file.metadata.artist) {
+                                        // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
+                                        a = getArtistFromMetadata(file.metadata);
+                                        artists[a.mid] = a;
+                                    }
+                                }
+                            );
+                        }
                     }
                 );
             }
@@ -124,8 +183,8 @@ var track = {
 
 
         var artistList = [];
-        for (var artist in artists) {
-            artistList.push(artists[artist]);
+        for (var key in artists) {
+            artistList.push(artists[key]);
         }
 
         return artistList;
@@ -139,12 +198,8 @@ var track = {
         if (doc.albums && doc.albums.length > 0) {
             doc.albums.forEach(
                 function(album) {
-                    albums[album.name] = {
-                        'name': album.name,
-                        'sortname': album.sortname,
-                        'id': album.id,
-                        'mbid': album.mbid
-                    };
+                    a = getAlbumFromTrackAlbum(album);
+                    albums[a.mid] = a;
                 }
             );
         } else {
@@ -155,12 +210,8 @@ var track = {
                             function(file) {
                                 if (file.metadata && file.metadata.album) {
                                         // FIXME: for now we emit album as id, but maybe we should do null and adapt the code ?
-                                    albums[file.metadata.album] = {
-                                        'name': file.metadata.album,
-                                        'sortname': file.metadata.album,
-                                        'id': null,
-                                        'mbid': file.metadata.mb_album_id
-                                    };
+                                    a = getAlbumFromMetadata(file.metadata);
+                                    albums[a.mid] = a;
                                 }
                             }
                         );
@@ -217,5 +268,6 @@ if (typeof(exports) === 'object') {
     exports.getMetadataArtistMid = track.getMetadataArtistMid;
     exports.getAlbumMid = track.getAlbumMid;
     exports.getMetadataAlbumMid = track.getMetadataAlbumMid;
+    exports.getArtistFromTrackArtist = track.getArtistFromTrackArtist;
     exports.getArtistFromMetadata = track.getArtistFromMetadata;
 }
