@@ -92,7 +92,7 @@ class DADDB(database.Database):
             item.document = yield self._internal.db.map(
                 self.dbName, stored['id'],
                 item.document.__class__)
-            self.debug('saved item doc %r', item.document)
+            self.debug('saved doc %r for item %r', item.document, item)
             defer.returnValue(item)
         else:
             raise AttributeError, \
