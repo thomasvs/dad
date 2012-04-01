@@ -41,7 +41,6 @@ class TrackModel(scorable.ScorableModel):
 
     My controller is L{dad.controller.track.TrackController}
 
-    @ivar id:        id of the track
     @type scores:    list of L{data.Score}
     @type fragments: list of subclasses of L{FragmentModel}
 
@@ -49,7 +48,7 @@ class TrackModel(scorable.ScorableModel):
 
     # FIXME: scores ?
 
-    id = None
+    # FIXME: remove fragments, use getter
     fragments = None
 
     def new(self, db, name, sort=None, mbid=None):
@@ -64,6 +63,14 @@ class TrackModel(scorable.ScorableModel):
         """
     new = classmethod(new)
 
+
+    def getId(self):
+        """
+        Return the id of the model, as used by the database backend.
+
+        @rtype: C{unicode}
+        """
+        raise NotImplementedError
 
     def getName(self):
         """
@@ -81,7 +88,7 @@ class TrackModel(scorable.ScorableModel):
 
     def getArtistNames(self):
         """
-        @rtype: list of L{unicode}
+        @rtype: list of L{unicode}, even if empty.
         """
         raise NotImplementedError
 
@@ -131,7 +138,7 @@ class TrackModel(scorable.ScorableModel):
         raise NotImplementedError
 
     def __repr__(self):
-        return '<TrackModel %r for %r - %r>' % (self.id,
+        return '<%s %r for %r - %r>' % (self.__class__.__name__, self.getId(),
             " & ".join(self.getArtistNames() or []),
             self.getName())
 
