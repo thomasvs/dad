@@ -239,16 +239,24 @@ var track = {
             if (doc.fragments) {
                 doc.fragments.forEach(
                     function(fragment) {
-                        fragment.files.forEach(
-                            function(file) {
-                                if (file.metadata && file.metadata.title) {
-                                    if (!(file.metadata.title in seen)) {
-                                        titles.push(file.metadata.title);
-                                        seen[file.metadata.title] = 1;
+                        // chromaprint values take precedence over metadata
+                        if (fragment.chroma && fragment.chroma.title) {
+                            if (!(fragment.chroma.title in seen)) {
+                                titles.push(fragment.chroma.title);
+                                seen[fragment.chroma.title] = 1;
+                            }
+                        } else {
+                            fragment.files.forEach(
+                                function(file) {
+                                    if (file.metadata && file.metadata.title) {
+                                        if (!(file.metadata.title in seen)) {
+                                            titles.push(file.metadata.title);
+                                            seen[file.metadata.title] = 1;
+                                        }
                                     }
                                 }
-                            }
-                        );
+                            );
+                        }
                     }
                 );
             }
