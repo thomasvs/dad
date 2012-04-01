@@ -236,5 +236,5 @@ class IChromaPrinter(interface.Interface):
 
         @type path: C{unicode}
 
-        @rtype: C{str}
+        @rtype: C{list} of C{str}, C{float}
         """
