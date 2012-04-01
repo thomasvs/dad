@@ -69,6 +69,9 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
             for file in fragment.files:
                 if not file.metadata:
                     continue
+                if not file.metadata.artist and not file.metadata.mb_artist_id:
+                    continue
+
                 # FIXME: why is this a dict and not something with attrs?
                 model = yield self.database.getOrCreateArtist(
                     name=file.metadata.artist, mbid=file.metadata.mb_artist_id)
