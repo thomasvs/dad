@@ -47,6 +47,7 @@ class Database(log.Loggable):
 
         @type  tm: L{dad.model.track.TrackModel}
         """
+        self.debug('recalculateTrackScore for %r', tm)
         def _calculate(track, artists, albums):
             """
             Calculate an aggregate score given the inputs.
@@ -101,7 +102,10 @@ class Database(log.Loggable):
                 elif which == 'artist':
                     artists.append(value)
 
+            # FIXME: albums
             value = _calculate(track, artists, [])
             self.debug('Setting score on %r to %r, %r, %r',
                 tm, user, category, value)
             tm = yield tm.setCalculatedScore(user, category, value)
+
+        self.debug('recalculateTrackScore done for %r', tm)
