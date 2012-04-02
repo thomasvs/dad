@@ -220,12 +220,12 @@ class DADDB(database.Database):
         return self._internal.trackAddFragmentFileByMBTrackId(
             track.document, info, metadata, mix, number)
 
-    def trackAddFragmentChromaPrint(self, track, info, chromaprint, duration):
+    def trackAddFragmentChromaPrint(self, track, info, chromaprint):
         """
         Add the given chromaprint to the given track for the given info.
         """
         return self._internal.trackAddFragmentChromaPrint(
-            track.document, info, chromaprint, duration)
+            track.document, info, chromaprint)
 
     def trackAddFragmentChromaPrintLookup(self, track, info, chromaprint):
         return self._internal.trackAddFragmentChromaPrintLookup(

@@ -513,14 +513,16 @@ class InternalDB(log.Loggable):
         defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def trackAddFragmentChromaPrint(self, track, info, chromaprint, duration):
+    def trackAddFragmentChromaPrint(self, track, info, chromaprint):
         """
         Add the given chromaprint to the given track for the given info.
 
-        @type  track: L{dad.model.track.TrackModel}
+        @type  track:       L{dad.model.track.TrackModel}
+        @type  chromaprint: L{dad.model.track.ChromaPrintModel}
         """
         assert isinstance(track, mappings.Track)
         assert isinstance(track, mtrack.TrackModel)
+        assert isinstance(chromaprint, mtrack.ChromaPrintModel)
 
         self.debug('get track for track %r', track.id)
 
@@ -535,16 +537,13 @@ class InternalDB(log.Loggable):
                     if fragment.chroma and fragment.chroma.chromaprint:
                         self.debug('Fragment %r already has chromaprint %r',
                             fragment, fragment.chroma.chromaprint)
-                        if fragment.chroma.chromaprint != chromaprint:
+                        if fragment.chroma.chromaprint != chromaprint.chromaprint:
                             self.warning('New chromaprint differs: %r',
-                                chromaprint)
+                                chromaprint.chromaprint)
 
                     self.debug('Setting chromaprint on fragment %r',
                         fragment)
-                    chroma = mtrack.ChromaPrintModel()
-                    chroma.chromaprint = chromaprint
-                    chroma.duration = duration
-                    track.fragmentSetChroma(fragment, chroma)
+                    track.fragmentSetChroma(fragment, chromaprint)
 
         track = yield self.save(track)
         defer.returnValue(track)

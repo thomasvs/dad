@@ -203,6 +203,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         self.debug("_chromaPrintOne %r, %r, %r", track, fragment, f)
         if not fragment.chroma.chromaprint or not fragment.chroma.duration:
             try:
+                # FIXME: maybe getChromaPrint should return a model ?
                 fingerprint, duration = printer.getChromaPrint(f.info.path,
                     runner=self._runner)
             except task.TaskException, e:
@@ -213,8 +214,11 @@ class DatabaseInteractor(logcommand.LogCommand):
             self.debug('Got fingerprint: %r', fingerprint)
 
             # store fingerprint before looking up
+            cp = mtrack.ChromaPrintModel()
+            cp.chromaprint = fingerprint
+            cp.duration = duration
             printed = yield self.database.trackAddFragmentChromaPrint(
-                track, f.info, fingerprint, duration)
+                track, f.info, cp)
 
         else:
             self.debug('Already fingerprinted')
