@@ -80,6 +80,10 @@ class ChromaPrintClient(log.Loggable):
                         # since it's the same musicbrainz id
                         break
 
+            if not results:
+                defer.returnValue(None)
+                return
+
             fp = data.ChromaPrint()
             fp.fromResults(results)
             self.debug('metadata: %r', fp.metadata)
