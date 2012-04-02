@@ -24,7 +24,7 @@ class File(track.FileModel):
         self.info = database.FileInfo(file.host, file.path, md5sum=file.md5sum)
         # FIXME: more
 
-class Chroma(track.ChromaModel):
+class Chroma(track.ChromaPrintModel):
     def __init__(self, chroma):
         for key in ['chromaprint', 'duration', 'mbid', 'artists', 'title',
             'lookedup']:
@@ -304,7 +304,7 @@ class Track(mapping.Document, track.TrackModel):
         # AnonymousStruct does not actually exist as a class
         assert fragment.__class__.__name__  == 'AnonymousStruct', \
             "fragment %r is not a paisley.mapping.AnonymousStruct" % fragment
-        assert isinstance(chroma, track.ChromaModel)
+        assert isinstance(chroma, track.ChromaPrintModel)
 
         m = {}
 

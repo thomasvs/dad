@@ -6,7 +6,7 @@ import urllib
 from twisted.internet import defer
 
 from dad.common import log
-from dad.base import data
+from dad.model import track
 
 
 CHROMAPRINT_APIKEY = 'pmla1DI5' # for DAD 0.0.0
@@ -69,12 +69,12 @@ class ChromaPrintClient(log.Loggable):
                         '  - URL: http://musicbrainz.org/recording/%s\n' %
                             recording['id'])
 
-                    for track in recording.get('tracks', []):
-                        for artist in track['artists']:
+                    for t in recording.get('tracks', []):
+                        for artist in t['artists']:
                             self.debug('    - artist: %s\n' %
                                 artist['name'].encode('utf-8'))
                         self.debug('    - title: %s\n' %
-                            track['title'].encode('utf-8'))
+                            t['title'].encode('utf-8'))
 
                         # these all ought to contain the same info,
                         # since it's the same musicbrainz id
@@ -84,10 +84,10 @@ class ChromaPrintClient(log.Loggable):
                 defer.returnValue(None)
                 return
 
-            fp = data.ChromaPrint()
-            fp.fromResults(results)
-            self.debug('metadata: %r', fp.metadata)
-            defer.returnValue((fp, decoded))
+            cp = track.ChromaPrintModel()
+            cp.fromResults(results)
+            self.debug('title: %r', cp.title)
+            defer.returnValue((cp, decoded))
         else:
             print 'ERROR:', result
             defer.returnValue(None)

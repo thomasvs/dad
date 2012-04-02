@@ -10,8 +10,8 @@ from twisted.internet import defer
 from dadcouch.extern.paisley import mapping
 from dadcouch.extern.paisley import views
 
-from dad.base import data
 from dad.common import log
+from dad.base import data
 from dad.model import track as mtrack
 
 from dadcouch.common import manydef
@@ -520,7 +520,6 @@ class InternalDB(log.Loggable):
         @type  track: L{dad.model.track.TrackModel}
         """
         assert isinstance(track, mappings.Track)
-        from dad.model import track as mtrack
         assert isinstance(track, mtrack.TrackModel)
 
         self.debug('get track for track %r', track.id)
@@ -542,7 +541,7 @@ class InternalDB(log.Loggable):
 
                     self.debug('Setting chromaprint on fragment %r',
                         fragment)
-                    chroma = mtrack.ChromaModel()
+                    chroma = mtrack.ChromaPrintModel()
                     chroma.chromaprint = chromaprint
                     chroma.duration = duration
                     track.fragmentSetChroma(fragment, chroma)
@@ -556,9 +555,9 @@ class InternalDB(log.Loggable):
         Add the given chromaprint lookup information to the given track for the
         given info.
 
-        @type  chromaprint: L{dad.base.data.ChromaPrint}
+        @type  chromaprint: L{dad.model.track.ChromaPrintModel}
         """
-        assert isinstance(chromaprint, data.ChromaPrint)
+        assert isinstance(chromaprint, mtrack.ChromaPrintModel)
         self.debug('trackAddFragmentChromaPrintLookup: '
             'get track for track %r', track.id)
 
@@ -577,7 +576,7 @@ class InternalDB(log.Loggable):
                     found = True
 
                     fragment.chroma.mbid = chromaprint.mbid
-                    fragment.chroma.title = chromaprint.metadata.title
+                    fragment.chroma.title = chromaprint.title
                     fragment.chroma.artists = chromaprint.artists
                     fragment.chroma.lookedup = datetime.datetime.now()
 

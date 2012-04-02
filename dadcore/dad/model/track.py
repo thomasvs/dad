@@ -4,10 +4,15 @@
 from dad.base import base
 from dad.model import scorable, selector
 
-class ChromaModel(base.Model):
+# FIXME: add tests for fromResults
+class ChromaPrintModel(base.Model):
     """
     @type  chromaprint: C{str}
-    @type  artists:     list of C{unicode}
+    @type  mbid:        C{str}
+    @param artists:     list of dict of name, mbid of artists
+    @type  artists:     list of dict of C{unicode} -> C{unicode}
+    @type  title:       C{unicode}
+    type  lookedup:     L{datetime.datetime}
     """
     chromaprint = None
     duration = None
@@ -15,6 +20,46 @@ class ChromaModel(base.Model):
     artists = None
     title = None
     lookedup = None
+
+    def fromResults(self, results):
+        """
+        Set our chromaprint from the results returned by the acoustid
+        web service.
+        """
+        count = {}
+        # lists are not hashable, sadly
+        artist = {} # repr -> list
+
+
+        for result in results:
+            # highest-scoring result comes first ?
+            recordings = result.get('recordings', [])
+            for recording in recordings:
+                for track in recording.get('tracks', []):
+                    artists = track['artists']
+                    artist[repr(artists)] = artists
+                    key = (recording['id'], repr(artists), track['title'])
+                    if not key in count:
+                        count[key] = 0
+                    count[key] += 1
+
+        frequencies = count.items()
+        ordered = sorted(frequencies, key=lambda x: -x[1])
+
+        if not ordered:
+            # no results
+            return
+
+        mbid, artists, title = ordered[0][0]
+
+        self.artists = []
+        for a in artist[artists]:
+            self.artists.append({
+                'name': a['name'],
+                'mbid': a['id'],
+            })
+        self.title = title
+        self.mbid = mbid
 
 
 # FIXME: move FileInfo from dad.logic.database somewhere else ?
