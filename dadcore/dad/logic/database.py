@@ -222,16 +222,18 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         else:
             self.debug('Already fingerprinted')
+            cp = yield self.database.trackGetFragmentChromaPrint(
+                track, f.info)
             printed = track
 
 
         # now lookup
         if True: #if not fragment.chroma.mbid:
-            self.debug('Looking up track %r', printed)
+            self.debug('Looking up track %r and duration %r', printed,
+                cp.duration)
             from dad.common import chromaprint
             cpc = chromaprint.ChromaPrintClient()
-            result = yield cpc.lookup(duration=fragment.chroma.duration,
-                fingerprint=fragment.chroma.chromaprint)
+            result = yield cpc.lookup(cp)
 
             try:
                 cp, _ = result
@@ -240,7 +242,7 @@ class DatabaseInteractor(logcommand.LogCommand):
                 defer.returnValue(None)
                 return
 
-            lookedup = yield self.database.trackAddFragmentChromaPrintLookup(
+            lookedup = yield self.database.trackAddFragmentChromaPrint(
                 track, f.info, cp)
 
         else:

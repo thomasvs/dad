@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import datetime
 import urllib
 
 from twisted.internet import defer
@@ -15,12 +16,12 @@ CHROMAPRINT_URL = 'http://api.acoustid.org/v2/lookup'
 class ChromaPrintClient(log.Loggable):
 
     @defer.inlineCallbacks
-    def lookup(self, duration, fingerprint):
+    def lookup(self, chromaprint):
         postdata = {
             'client': CHROMAPRINT_APIKEY,
             'meta':   '2',
-            'duration': str(duration),
-            'fingerprint': fingerprint
+            'duration': str(chromaprint.duration),
+            'fingerprint': chromaprint.chromaprint
         }
 
         resp = None
@@ -42,9 +43,11 @@ class ChromaPrintClient(log.Loggable):
 
         if not resp:
             self.debug('Failed to look up track with fingerprint %s\n' %
-                fingerprint)
+                chromaprint.chromaprint)
             defer.returnValue(None)
             return
+
+        self.log('JSON response: %r', resp)
 
         try:
             decoded = simplejson.loads(resp)
@@ -84,7 +87,12 @@ class ChromaPrintClient(log.Loggable):
                 defer.returnValue(None)
                 return
 
+            # FIXME: do we want to add to the original object ? Is that dirty?
             cp = track.ChromaPrintModel()
+            # FIXME: when getting it back from couchdb, this should be
+            # converted to int instead
+            cp.duration = int(chromaprint.duration)
+            cp.lookedup = datetime.datetime.now()
             cp.fromResults(results)
             self.debug('title: %r', cp.title)
             defer.returnValue((cp, decoded))

@@ -223,13 +223,29 @@ class DADDB(database.Database):
     def trackAddFragmentChromaPrint(self, track, info, chromaprint):
         """
         Add the given chromaprint to the given track for the given info.
+
+        The chromaprint may contain only chromaprint data
+        (chromaprint/duration), or chromaprint lookup data.
+
+        @type  track:       L{dad.model.track.TrackModel}
+        @type  chromaprint: L{dad.model.track.ChromaPrintModel}
         """
         return self._internal.trackAddFragmentChromaPrint(
             track.document, info, chromaprint)
 
-    def trackAddFragmentChromaPrintLookup(self, track, info, chromaprint):
-        return self._internal.trackAddFragmentChromaPrintLookup(
-            track.document, info, chromaprint)
+    def trackGetFragmentChromaPrint(self, track, info):
+        """
+        Get the stored chromaprint to the given track for the given info.
+
+        The chromaprint may contain only chromaprint data
+        (chromaprint/duration), or chromaprint lookup data.
+
+        @type  track: L{dad.model.track.TrackModel}
+
+        @rtype: L{dad.model.track.ChromaPrintModel}
+        """
+        return self._internal.trackGetFragmentChromaPrint(
+            track.document, info)
 
 
     @defer.inlineCallbacks

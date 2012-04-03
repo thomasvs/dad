@@ -234,7 +234,7 @@ class InternalDB(log.Loggable):
             # FIXME: for now, look it up again to maintain the track illusion
             doc = yield self.db.map(self.dbName, stored['id'],
                 doc.__class__)
-            self.debug('saved doc %r', doc)
+            self.debug('saved doc %r with revision %r', doc, doc.rev)
             defer.returnValue(doc)
         else:
             raise AttributeError, \
@@ -517,8 +517,6 @@ class InternalDB(log.Loggable):
         """
         Add the given chromaprint to the given track for the given info.
 
-        @type  track:       L{dad.model.track.TrackModel}
-        @type  chromaprint: L{dad.model.track.ChromaPrintModel}
         """
         assert isinstance(track, mappings.Track)
         assert isinstance(track, mtrack.TrackModel)
@@ -530,61 +528,65 @@ class InternalDB(log.Loggable):
 
         # FIXME: possibly raise if we don't find it ?
         found = False
+        changed = False
 
         for fragment in track.fragments:
             for f in fragment.files:
                 if f.md5sum == info.md5sum:
+                    found = True
+                    self.debug('trackAddFragmentChromaPrint: '
+                        'found fragment')
                     if fragment.chroma and fragment.chroma.chromaprint:
                         self.debug('Fragment %r already has chromaprint %r',
                             fragment, fragment.chroma.chromaprint)
-                        if fragment.chroma.chromaprint != chromaprint.chromaprint:
+                        if chromaprint.chromaprint and \
+                            fragment.chroma.chromaprint \
+                            != chromaprint.chromaprint:
                             self.warning('New chromaprint differs: %r',
                                 chromaprint.chromaprint)
 
                     self.debug('Setting chromaprint on fragment %r',
                         fragment)
-                    track.fragmentSetChroma(fragment, chromaprint)
+                    changed = track.fragmentSetChroma(fragment, chromaprint)
 
-        track = yield self.save(track)
+
+        if found and changed:
+            self.debug('Chromaprint changed, saving')
+            track = yield self.save(track)
+
         defer.returnValue(track)
 
     @defer.inlineCallbacks
-    def trackAddFragmentChromaPrintLookup(self, track, info, chromaprint):
+    def trackGetFragmentChromaPrint(self, track, info):
         """
-        Add the given chromaprint lookup information to the given track for the
-        given info.
+        Get the stored chromaprint to the given track for the given info.
 
-        @type  chromaprint: L{dad.model.track.ChromaPrintModel}
+        @type  track: L{dad.model.track.TrackModel}
+
+        @rtype: L{dad.model.track.ChromaPrintModel}
         """
-        assert isinstance(chromaprint, mtrack.ChromaPrintModel)
-        self.debug('trackAddFragmentChromaPrintLookup: '
-            'get track for track %r', track.id)
+        assert isinstance(track, mappings.Track)
+        assert isinstance(track, mtrack.TrackModel)
+
+        self.debug('get track for track %r', track.id)
 
         track = yield self.db.map(self.dbName, track.id, mappings.Track)
-
-        # FIXME: possibly raise if we don't find it ?
-        found = False
 
         for fragment in track.fragments:
             for f in fragment.files:
                 if f.md5sum == info.md5sum:
-                    self.debug('trackAddFragmentChromaPrintLookup: '
+                    self.debug('trackAddFragmentChromaPrint: '
                         'found fragment')
+                    if fragment.chroma and fragment.chroma.chromaprint:
+                        cp = mtrack.ChromaPrintModel()
+                        for key in cp.KEYS:
+                            value = getattr(fragment.chroma, key, None)
+                            if value is not None:
+                                setattr(cp, key,
+                                    getattr(fragment.chroma, key))
 
-                    # found the fragment
-                    found = True
+                        defer.returnValue(cp)
 
-                    fragment.chroma.mbid = chromaprint.mbid
-                    fragment.chroma.title = chromaprint.title
-                    fragment.chroma.artists = chromaprint.artists
-                    fragment.chroma.lookedup = datetime.datetime.now()
-
-                    track = yield self.save(track)
-                    break
-
-        self.debug('trackAddFragmentChromaPrintLookup: returning track %r',
-            track)
-        defer.returnValue(track)
 
 
     # FIXME: docstring, is now a generator, not ordered ?

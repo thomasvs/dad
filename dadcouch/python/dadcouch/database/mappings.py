@@ -70,6 +70,22 @@ class Score(mapping.Mapping):
     category = mapping.TextField()
     score = mapping.FloatField() # between 0.0 and 1.0
 
+# FIXME: if this one is called ChromaPrint, why is the doc's key called chroma ?
+class _ChromaPrint(mapping.Mapping):
+    chromaprint = mapping.TextField()
+    duration = mapping.IntegerField()
+    # looked up on musicbrainz
+    mbid = mapping.TextField()
+    artists = mapping.ListField(
+        mapping.DictField(mapping.Mapping.build(
+            mbid = mapping.TextField(),
+            name = mapping.TextField()
+        ))
+    )
+    title = mapping.TextField()
+    lookedup = mapping.DateTimeField()
+
+
 class Artist(mapping.Document):
     type = mapping.TextField(default="artist")
 
@@ -166,21 +182,7 @@ class Track(mapping.Document, track.TrackModel):
             audio_md5sum = mapping.TextField(),
 
             # fingerprints
-            chroma = mapping.DictField(mapping.Mapping.build(
-                    chromaprint = mapping.TextField(),
-                    duration = mapping.TextField(),
-                    # looked up on musicbrainz
-                    mbid = mapping.TextField(),
-                    artists = mapping.ListField(
-                        mapping.DictField(mapping.Mapping.build(
-                            mbid = mapping.TextField(),
-                            name = mapping.TextField()
-                        ))
-                    ),
-                    title = mapping.TextField(),
-                    lookedup = mapping.DateTimeField(),
-            )),
-
+            chroma = mapping.DictField(_ChromaPrint),
 
             # fragment level info
             level = mapping.DictField(mapping.Mapping.build(
@@ -300,21 +302,33 @@ class Track(mapping.Document, track.TrackModel):
         @param fragment: a fragment in the fragments key
         @type  fragment: L{mapping.AnonymousStruct}
         @type  chroma:   L{track.ChromaModel}
+
+        @returns: whether any field got changed
         """
         # AnonymousStruct does not actually exist as a class
         assert fragment.__class__.__name__  == 'AnonymousStruct', \
             "fragment %r is not a paisley.mapping.AnonymousStruct" % fragment
         assert isinstance(chroma, track.ChromaPrintModel)
 
-        m = {}
+        changed = False
 
-        if chroma:
-            for key in ['chromaprint', 'duration', 'mbid', 'artists', 'title',
-                'lookedup']:
-                m[key] = getattr(chroma, key, None)
+        if not 'chroma' in fragment:
+            fragment.chroma = _ChromaPrint()
 
-        fragment['chroma'] = m
+        
+        LOOKUP_FIELDS = ['mbid', 'artists', 'title']
+        KEYS = ['chromaprint', 'duration', 'lookedup']
+        for key in LOOKUP_FIELDS + KEYS:
+            orig = getattr(fragment.chroma, key, None)
+            value = getattr(chroma, key, None)
+            if value and orig != value:
+                setattr(fragment.chroma, key, value)
+                # if all that changed was the lookedup time, we don't
+                # consider it a change
+                if key != 'lookedup':
+                    changed = True
 
+        return changed
 
     def get(self, trackId):
         """

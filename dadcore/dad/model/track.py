@@ -3,11 +3,14 @@
 
 from dad.base import base
 from dad.model import scorable, selector
+from dad.common import log
 
 # FIXME: add tests for fromResults
 class ChromaPrintModel(base.Model):
     """
     @type  chromaprint: C{str}
+    @param duration:    duration of the track, in seconds
+    @type  duration:    C{float}
     @type  mbid:        C{str}
     @param artists:     list of dict of name, mbid of artists
     @type  artists:     list of dict of C{unicode} -> C{unicode}
@@ -21,30 +24,55 @@ class ChromaPrintModel(base.Model):
     title = None
     lookedup = None
 
+    KEYS = ['chromaprint', 'duration', 'mbid', 'artists', 'title', 'lookedup']
+
     def fromResults(self, results):
         """
         Set our chromaprint from the results returned by the acoustid
         web service.
         """
-        count = {}
-        # lists are not hashable, sadly
+        count = {} # key -> number of occurrences
+        delta = {} # key -> smallest delta to duration
+        # lists are not hashable, sadly; so we repr them
         artist = {} # repr -> list
 
 
         for result in results:
-            # highest-scoring result comes first ?
+            # FIXME: highest-scoring result comes first ?
             recordings = result.get('recordings', [])
             for recording in recordings:
                 for track in recording.get('tracks', []):
+                    if not track['duration']:
+                        continue
+
                     artists = track['artists']
                     artist[repr(artists)] = artists
                     key = (recording['id'], repr(artists), track['title'])
+
                     if not key in count:
                         count[key] = 0
                     count[key] += 1
 
-        frequencies = count.items()
-        ordered = sorted(frequencies, key=lambda x: -x[1])
+                    if self.duration and track['duration']:
+                        if not key in delta:
+                            delta[key] = None
+                            d = abs(self.duration - track['duration'])
+                            if delta[key] is None or delta[key] > d:
+                                delta[key] = d
+
+
+        if self.duration:
+            deltas = delta.items()
+            ordered = sorted(deltas, key=lambda x: x[1])
+            log.debug('chromaprint',
+                'Picking closest in duration out of %d: delta %r',
+                len(ordered), ordered[0][1])
+        else:
+            frequencies = count.items()
+            ordered = sorted(frequencies, key=lambda x: -x[1])
+            log.debug('chromaprint',
+                'Picking highest in frequency out of %d: %r',
+                len(ordered), ordered[0][1])
 
         if not ordered:
             # no results
@@ -78,7 +106,7 @@ class FragmentModel(base.Model):
 
     def __init__(self):
         self.files = []
-        self.chroma = ChromaModel()
+        self.chroma = ChromaPrintModel()
 
 class TrackModel(scorable.ScorableModel):
     """
