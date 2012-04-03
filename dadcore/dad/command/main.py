@@ -224,7 +224,7 @@ class Chromaprint(tcommand.TwistedCommand):
                     defer.returnValue(3)
                     return
             except Exception, e:
-                failed.append((path, e))
+                failed.append((path, log.getExceptionMessage(e)))
                 continue
 
             found = False
@@ -237,10 +237,10 @@ class Chromaprint(tcommand.TwistedCommand):
 
 
         if failed:
-            for path, e in failed:
+            for path, message in failed:
                 self.stdout.write('Failed to chromaprint %s:\n' %
                     path.encode('utf-8'))
-                self.stdout.write('%s\n' % log.getExceptionMessage(e))
+                self.stdout.write('%s\n' % message)
 
 
 class Lookup(tcommand.TwistedCommand):
