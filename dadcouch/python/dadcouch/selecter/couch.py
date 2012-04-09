@@ -21,6 +21,7 @@
 import socket
 import sys
 import optparse
+import getpass
 
 from twisted.internet import defer
 
@@ -36,6 +37,7 @@ _DEFAULT_ABOVE = 0.7
 _DEFAULT_BELOW = 1.0
 _DEFAULT_CATEGORY = 'Good'
 _DEFAULT_MY_HOSTNAME = unicode(socket.gethostname())
+_DEFAULT_USER = getpass.getuser()
 
 couchdb_option_list = [
         optparse.Option('-H', '--host',
@@ -64,7 +66,8 @@ couchdb_option_list = [
 user_option_list = [
         optparse.Option('-u', '--user',
             action="store", dest="user",
-            help="user"),
+            help="user (defaults to current user %default)",
+            default=_DEFAULT_USER),
 ]
 
 class OptionParser(selecter.OptionParser):
@@ -124,10 +127,6 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         # list of L{couch.Track}; private cache of selected tracks
         self._tracks = []
 
-    def setup(self):
-        self.debug('setup')
-        return self.load()
-
     def load(self):
         return self._loadLimited(4)
 
@@ -161,6 +160,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
 
         candidates = 0
+        local = 0
         kept = 0
 
         # FIXME: this logic about selecting should go somewhere else ?
@@ -175,6 +175,8 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                         ', skipping',
                         track, host)
                     continue
+
+                local += 1
 
                 artists = track.getArtistNames()
 
@@ -211,7 +213,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                     self._cache.lookups, self._cache.hits,
                     self._cache.cached)
 
-        self.debug('%d candidates, %d kept', candidates, kept)
+        self.debug('%d candidates, %d local, %d kept', candidates, local, kept)
         if kept == 0:
             return False
 
