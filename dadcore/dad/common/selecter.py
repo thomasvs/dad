@@ -75,7 +75,8 @@ class Selecter(log.Loggable):
     option_parser_class = OptionParser
 
     # loadDeferred should return a count of tracks loaded
-    loadDeferred = None # set when a complete load is in progress in backend
+    # set by subclass when a complete load is in progress in backend
+    loadDeferred = None
 
 
     def __init__(self, options):
@@ -108,17 +109,23 @@ class Selecter(log.Loggable):
             d = defer.Deferred()
             # wait for results to come in
 
-            def loadCb(_):
+            def loadCb(result):
+                self.debug('get(): loaded, result %r', result)
+                if not result:
+                    raise KeyError('No tracks loaded')
+
                 self.debug('get(): loaded, returning a recursive get')
                 # recursively get
                 d2 = self.get()
                 d2.addCallback(lambda r: d.callback(r))
                 return d2
             self.loadDeferred.addCallback(loadCb)
+            self.loadDeferred.addErrback(log.warningFailure, swallow=False)
+            self.loadDeferred.addErrback(lambda failure: d.errback(failure))
 
             return d
 
-        # reload 
+        # reload
         self.debug('get(): ran out of selected tracks, %d/%d loops',
             self._loop, self._loops)
         if self._loop == self._loops:
@@ -174,6 +181,7 @@ class Selecter(log.Loggable):
 
         return d
 
+    # FIXME: doesn't seem to be used
     def selectNow(self):
         t = self.getNow()
         if t:
@@ -183,6 +191,9 @@ class Selecter(log.Loggable):
         return t
 
     def selected(self, selected):
+        """
+        Called by subclass when a track has been selected.
+        """
         assert isinstance(selected, Selected)
         self._selected.append(selected)
 
@@ -199,7 +210,9 @@ class Selecter(log.Loggable):
 
         Can return a deferred which will be waited on.
         """
-        raise NotImplementedError
+        self._loop += 1
+        self.debug('setup')
+        return self.load()
 
     def load(self):
         """
@@ -316,7 +329,7 @@ class SimplePlaylistSelecter(Selecter):
         selectables.reverse()
         for selectable in selectables:
             self.selected(selectable)
-        
+
         return True
 
 class SpreadingArtistSelecter(SimplePlaylistSelecter):
