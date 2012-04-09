@@ -102,7 +102,7 @@ class Scheduler(log.Loggable, gobject.GObject):
         self._added = [] # list of Scheduled
         self._scheduled = {} # hash of number -> Scheduled
 
-        self._counter = 0 # counter for how many tracks where added
+        self._lastAdded = 0 # counter for how many tracks where added
         self._lastScheduled = 0 # counter for last track that was scheduled
 
         self._position = 0L
@@ -130,11 +130,11 @@ class Scheduler(log.Loggable, gobject.GObject):
 
         assert isinstance(trackmix, mixing.TrackMix)
 
-        self.debug('Adding track %d: %s', self._counter, path)
+        self.debug('Adding track %d: %s', self._lastAdded, path)
         
-        s = Scheduled(path, trackmix, self._counter, artists=artists, title=title)
+        s = Scheduled(path, trackmix, self._lastAdded, artists=artists, title=title)
         self._added.append(s)
-        self._counter += 1
+        self._lastAdded += 1
 
         self._process()
 
