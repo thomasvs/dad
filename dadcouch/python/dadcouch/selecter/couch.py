@@ -160,10 +160,12 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         self.debug('Got playlist generator %r', result)
 
 
-        i = 0
+        candidates = 0
+        kept = 0
 
         # FIXME: this logic about selecting should go somewhere else ?
         for track in result:
+            candidates += 1
             if track not in self._tracks:
                 # make sure the track is here
                 best = track.getFragmentFileByHost(host,
@@ -194,9 +196,9 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                     continue
 
                 fragment, file = best
-                i += 1
+                kept += 1
                 artists.sort()
-                self.debug('Got track %d: %r - %r', i, track.getName(),
+                self.debug('Got track %d: %r - %r', kept, track.getName(),
                     artists)
                 self._tracks.append((track, fragment, file))
                 trackmix = fragment.getTrackMix()
@@ -208,6 +210,10 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
                 self.log('cache stats: %r lookups, %r hits, %r cached',
                     self._cache.lookups, self._cache.hits,
                     self._cache.cached)
+
+        self.debug('%d candidates, %d kept', candidates, kept)
+        if kept == 0:
+            return False
 
         return True # len(resultList)
 
@@ -267,15 +273,28 @@ def main():
             return d
 
         # trigger the chained selects
-        select(True)
+        d = select(True)
+        d.addErrback(log.warningFailure, swallow=False)
+        d.addErrback(lambda failure: selectD.errback(failure))
 
         return selectD
 
     d.addCallback(lambda _: startSelecting())
+    def cb(ret):
+        log.debug('main', 'done selecting, ret %r', ret)
+        return ret
+    d.addBoth(cb)
 
-    d.addErrback(log.warningFailure)
+    d.addErrback(log.warningFailure, swallow=False)
+    def eb(failure):
+        if isinstance(failure.value, KeyError):
+            sys.stderr.write('Failure getting playlist: %r\n' % failure.value)
+        else:
+            sys.stderr.write('Failure getting playlist: %r\n' % failure)
+        return failure
+    d.addErrback(eb)
 
-    d.addCallback(lambda _: reactor.stop())
+    d.addBoth(lambda _: reactor.stop())
 
     # start the reactor
     from twisted.internet import reactor
