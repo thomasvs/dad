@@ -297,15 +297,19 @@ class DADDB(database.Database):
             if not score:
                 print 'THOMAS: ERROR: no score for', t
                 continue
+            # FIXME: this gives probability 0 to tracks at above
             prob = float(score.score - above) / float(below - above)
+            prob = float(abs(score.score - 0.5) / float(1.0 - 0.5))
             r = random.random()
 
             skipping = True
             if r < prob:
                 skipping = False
 
-            self.debug('Track %r with probability %.3f and random %.3f, %s',
-                t.getName(), prob, r, skipping and 'skipping' or 'yielding')
+            self.debug('Track %r with score %r, '
+                'probability %.3f and random %.3f, %s',
+                t.getName(), score.score, prob, r,
+                skipping and 'skipping' or 'yielding')
             if not skipping:
                 yield t
 
