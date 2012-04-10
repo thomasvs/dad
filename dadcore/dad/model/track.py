@@ -64,19 +64,21 @@ class ChromaPrintModel(base.Model):
         if self.duration:
             deltas = delta.items()
             ordered = sorted(deltas, key=lambda x: x[1])
-            log.debug('chromaprint',
-                'Picking closest in duration out of %d: delta %r',
-                len(ordered), ordered[0][1])
         else:
             frequencies = count.items()
             ordered = sorted(frequencies, key=lambda x: -x[1])
-            log.debug('chromaprint',
-                'Picking highest in frequency out of %d: %r',
-                len(ordered), ordered[0][1])
 
         if not ordered:
             # no results
             return
+        if self.duration:
+            log.debug('chromaprint',
+                'Picking closest in duration out of %d: delta %r',
+                len(ordered), ordered[0][1])
+        else:
+            log.debug('chromaprint',
+                'Picking highest in frequency out of %d: %r',
+                len(ordered), ordered[0][1])
 
         mbid, artists, title = ordered[0][0]
 
