@@ -142,6 +142,7 @@ $(document).ready(function() {
         console.log('clicked');
 
         // remove all newer audio objects not yet playing
+        // FIXME: this should probably done to us by the server instead
         $('#audio > tbody > tr').each(
             function(i, n) {
                 id = $(n)[0].id;
