@@ -458,6 +458,7 @@ class InternalDB(log.Loggable):
 
         defer.returnValue(ret)
 
+    # FIXME: mix is unused?
     @defer.inlineCallbacks
     def trackAddFragmentFileByMD5Sum(self, track, info, metadata=None, mix=None, number=None):
         """
