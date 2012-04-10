@@ -5,6 +5,7 @@
 A helper class for Twisted commands.
 """
 
+from dad.extern.log import log
 
 from dad.common import logcommand
 
@@ -24,9 +25,21 @@ class TwistedCommand(logcommand.LogCommand):
 
 
         def later():
-            d = self.doLater(args)
+            try:
+                d = self.doLater(args)
+            except Exception, e:
+                self.warning('Exception during doLater: %r',
+                    log.getExceptionMessage(e))
+                self.reactor.stop()
+                return 3
+
             d.addCallback(lambda _: self.reactor.stop())
-            d.addErrback(lambda _: self.reactor.stop())
+            d.addErrback(log.warningFailure, swallow=False)
+            def eb(failure):
+                self.stderr.write('Failure: %s\n' %
+                    log.getFailureMessage(failure))
+                self.reactor.stop()
+            d.addErrback(eb)
 
         self.reactor.callLater(0, later)
 
