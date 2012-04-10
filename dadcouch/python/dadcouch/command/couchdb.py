@@ -8,15 +8,16 @@ import os
 from twisted.internet import defer
 
 from dad.common import logcommand
+from dad.command import tcommand
 from dad.task import md5task
 
 from dad.extern.task import task
 
 from dadcouch.database import couch
-from dadcouch.database import couch, mappings
+from dadcouch.database import mappings
 
 
-class CouchDBCommand(logcommand.LogCommand):
+class CouchDBCommand(tcommand.TwistedCommand):
 
     def addOptions(self):
         # FIXME: move these options to a place where they don't import reactor
@@ -24,18 +25,10 @@ class CouchDBCommand(logcommand.LogCommand):
         self.parser.add_options(scouch.couchdb_option_list)
 
     def do(self, args):
-        from twisted.internet import reactor
         from dadcouch.extern.paisley import client
         self.db = client.CouchDB(self.options.host, int(self.options.port))
         self.daddb = couch.DADDB(self.db, self.options.database)
-
-        def later():
-            d = self.doLater(args)
-            d.addCallback(lambda _: reactor.stop())
-
-        reactor.callLater(0, later)
-
-        reactor.run()
+        return tcommand.TwistedCommand.do(self, args)
 
     def hostname(self):
         import socket
