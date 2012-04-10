@@ -140,6 +140,19 @@ $(document).ready(function() {
     // hook up the buttons
     $('#controls > tbody > tr > td > #playlist').bind('click', function() {
         console.log('clicked');
+
+        // remove all newer audio objects not yet playing
+        $('#audio > tbody > tr').each(
+            function(i, n) {
+                id = $(n)[0].id;
+                count = Number(id.substr(3))
+                if (count > playingId) {
+                    console.log('Removing track ' + count);
+                    $(n).remove();
+                }
+            }
+        );
+
         flavor = $('#controls > tbody > tr > td > #flavors').val();
         console.log('rescheduling with flavor ' + flavor);
 
