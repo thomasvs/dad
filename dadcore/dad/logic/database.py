@@ -61,6 +61,7 @@ class DatabaseInteractor(logcommand.LogCommand):
         if not hostname:
             hostname = self._hostname()
 
+        self.debug('Looking up: host %r, path %r', hostname, path)
         res = yield self.database.getTracksByHostPath(
             hostname, path)
         if not res:
@@ -68,11 +69,27 @@ class DatabaseInteractor(logcommand.LogCommand):
 
         res = list(res)
         self.debug('Looked up: %r', res)
+
+        t = md5task.MD5Task(path)
+        self._runner.run(t)
+
         if len(res) > 0:
             if not force:
-                self.debug('%s already in database: %r', path, res[0])
+                # FIXME: verify md5sum
+                self.debug('%r already in database: %r', path, res[0])
                 defer.returnValue(ret)
                 return
+
+        # check if it exists by md5sum on any other host
+        res = yield self.database.getTracksByMD5Sum(t.md5sum)
+        res = list(res)
+        self.debug('Looked up by md5sum: %r', res)
+        if len(res) > 0:
+            self.debug('%r exists by md5sum: %r', path, res[0])
+            # FIXME: add by md5sum only, copying from another file
+            # defer.returnValue(ret)
+            # return
+
 
         # doesn't exist, so add it
 
@@ -94,8 +111,6 @@ class DatabaseInteractor(logcommand.LogCommand):
         self.debug('Got metadata: %r', metadata)
 
         # get fileinfo
-        t = md5task.MD5Task(path)
-        self._runner.run(t)
 
         info = FileInfo(hostname, path, md5sum=t.md5sum)
 

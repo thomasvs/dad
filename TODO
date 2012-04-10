@@ -1,4 +1,5 @@
-- write code to chromaprint a fragment and save in database
 - write code to get the todo view for chromaprints, and start chromaprinting
   - as a command
   - as a unit that can be called from a GUI too as background tasks
+- when a file already is in the database for another host, with same md5sum,
+  don't level
