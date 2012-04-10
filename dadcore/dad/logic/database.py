@@ -17,14 +17,13 @@ from dad.extern.task import task
 from dad import idad
 from dad.model import track as mtrack
 from dad.common import log
-from dad.common import logcommand
 from dad.task import md5task
 
 class PathError(Exception):
     pass
 
 # FIXME: make hostname an attribute here ?
-class DatabaseInteractor(logcommand.LogCommand):
+class DatabaseInteractor(log.Loggable):
     """
     Interact with a database.
     """
