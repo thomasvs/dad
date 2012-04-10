@@ -2,6 +2,7 @@ $(document).ready(function() {
     var API_KEY = 'N6E4NIOVYMTHNDM8J';
     var echonest = new EchoNest(API_KEY);
 
+    var playingId = 0;
     document.audios = {};
     document.start = new Date().getTime();
     console.log('Document ready at ' + document.start);
@@ -22,6 +23,15 @@ $(document).ready(function() {
         if (message.command == 'load') {
             // load a new track
             console.log('ws: load: id ' + message.id + ': ' + message.artists + ' - ' + message.title);
+
+            // remove a previous one with the same id
+            $('#tr-' + message.id).remove();
+            if (message.id in document.audios) {
+                console.log('deleting previous audio for id ' + message.id);
+                delete document.audios[message.id];
+            }
+
+            // add the new one
             $('#audio > tbody:last').append(
                         '<tr id="tr-' + message.id + '"><td>' + message.id + '</td>' +
                     '<td>' + message.artists + '</td>' +
@@ -43,6 +53,10 @@ $(document).ready(function() {
 
             // play the track at the scheduled time
             at.at(function() {
+                // fixme: how to unschedule ?
+                if (message.id > playingId) {
+                    playingId = message.id;
+                }
                 var a = document.audios[message.id];
                 console.log('at.at: id ' + message.id + ': play after ' + (new Date().getTime() - document.start) + ' sec since document.start');
 
@@ -86,6 +100,17 @@ $(document).ready(function() {
             console.log('load: id ' + message.id + ': scheduled play at ' + whenMs + ' epoch msec in ' + remainingMs + ' msec');
         }
 
+        if (message.command == 'setFlavors') {
+            console.log('setting flavors');
+            $.each(message.flavors, function(key, value) {
+                console.log('setting flavor key ' + key + ', value ' + value);
+                name = value[0];
+                desc = value[1];
+                $('#controls > tbody > tr > td > #flavors').append(
+                    $('<option>', { value : name }).text(desc));
+            });
+        }
+
         // FIXME: currently not used
         if (message.command == 'play') {
                 console.log('Schedule play of ' + message.id +
@@ -101,7 +126,7 @@ $(document).ready(function() {
 
     ws.onopen = function(evt) {
         $('#conn_status').html('<b>Connected</b>');
-        ws.send('Test data');
+        //ws.send({command: 'Test data'});
     };
 
     ws.onerror = function(evt) {
@@ -112,4 +137,17 @@ $(document).ready(function() {
         $('#conn_status').html('<b>Closed</b>');
     };
 
+    // hook up the buttons
+    $('#controls > tbody > tr > td > #playlist').bind('click', function() {
+        console.log('clicked');
+        flavor = $('#controls > tbody > tr > td > #flavors').val();
+        console.log('rescheduling with flavor ' + flavor);
+
+        ws.send(JSON.stringify({
+            'command': 'reschedule',
+            'since': playingId + 1,
+            'flavor': flavor
+        }));
+        //ws.send('{ "command": "reschedule" }');
+    });
 });

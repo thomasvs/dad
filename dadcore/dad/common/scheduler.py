@@ -40,6 +40,7 @@ def TIME_ARGS(nanoseconds):
 
     return "%d:%02d:%02d.%09d" % (h, m, s, nanoseconds)
 
+# FIXME: subclass and extend Selected ?
 class Scheduled(object):
     """
     I represent a scheduled object.
@@ -239,5 +240,34 @@ class Scheduler(log.Loggable, gobject.GObject):
         d.addCallback(lambda _: self._selecter.select())
         d.addCallback(lambda (s): self.add_track(s))
         return d
+
+    def reschedule(self, counter, flavor=None):
+        """
+        Reschedule all tracks from the given track on.
+        """
+        self.info('asked to reschedule')
+        self.debug('unwinding %d tracks from added',
+            self._lastAdded - counter)
+        for i in range(counter, self._lastAdded, -1):
+            self.debug('removing %r', self._added[i])
+            del self._added[i]
+
+        self._lastAdded = counter
+
+        for i in range(counter, self._lastScheduled, -1):
+            self.debug('removing %r', self._scheduled[i])
+            del self._scheduled[i]
+
+        # tell the selecter too
+        self._selecter.unselect(counter)
+
+        self._lastScheduled = counter
+        if flavor:
+            self._selecter.setFlavor(flavor)
+
+        self.schedule()
+
+    def getFlavors(self):
+        return self._selecter.getFlavors()
 
 gobject.type_register(Scheduler) 

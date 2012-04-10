@@ -42,13 +42,15 @@ class Selected(object):
     """
     path = None
     trackmix = None
+    number = None
 
     artists = None
     title = None
 
-    def __init__(self, path, trackmix, artists=None, title=None):
+    def __init__(self, path, trackmix, number=None, artists=None, title=None):
         self.path = path
         self.trackmix = trackmix
+        self.number = number
         self.artists = artists or []
         self.title = title
 
@@ -69,6 +71,8 @@ class OptionParser(optparse.OptionParser):
 class Selecter(log.Loggable):
     """
     I implement a selection strategy.
+
+    Set me up by calling setup(), then use get() to get a track.
     """
     logCategory = 'selecter'
 
@@ -80,21 +84,22 @@ class Selecter(log.Loggable):
 
 
     def __init__(self, options):
-        self._selected = [] # list of Selected objects
+        self._selected = [] # list of internally Selected objects
 
         if not options:
             parser = self.option_parser_class()
             options, _ = parser.parse_args([])
         self.options = options
 
+        self._number = 0
 
     ### base method implementations
 
     def get(self):
         """
-        Get a track to play, possibly waiting to (re)query the backend.
+        Get a selected track, possibly waiting to (re)query the backend.
 
-        @rtype: deferred firing tuple of (str, L{TrackMix}) or None when done.
+        @rtype: L{defer.deferred} firing L{Selected}
         """
         # if we still have tracks loaded, return them
         res = self.getNow()
@@ -155,15 +160,16 @@ class Selecter(log.Loggable):
         """
         Get a track to play, or return False if none are ready to be selected.
 
-        @rtype: tuple of (str, L{TrackMix})
+        @rtype: L{defer.deferred} firing L{Selected}
         """
         if not self._selected:
             return None
 
-        tuple = self._selected[0]
+        selected = self._selected[0]
         del self._selected[0]
 
-        return tuple
+        self.debug('getNow: returning %d: %r', selected.number, selected)
+        return selected
 
     def select(self):
         """
@@ -190,11 +196,24 @@ class Selecter(log.Loggable):
             self.info('could not select a track now')
         return t
 
+    def unselect(self, counter):
+        """
+        Unselect all tracks from the given counter on.
+
+        Used by scheduler to inform us that previously selected tracks
+        have been discarded and their history should not be taken into
+        account.
+        """
+        pass
+
     def selected(self, selected):
         """
         Called by subclass when a track has been selected.
         """
         assert isinstance(selected, Selected)
+        self._number += 1
+        selected.number = self._number
+        self.debug('selected: selected %d: %r', selected.number, selected)
         self._selected.append(selected)
 
     ### overridable methods
@@ -222,6 +241,12 @@ class Selecter(log.Loggable):
         @rtype:   L{defer.Deferred} firing bool
         """
         raise NotImplementedError
+
+    def setFlavor(self, flavor):
+        pass
+
+    def getFlavors(self):
+        pass
 
 
 class SimplePlaylistOptionParser(OptionParser):
@@ -266,7 +291,7 @@ class SimplePlaylistSelecter(Selecter):
         self.debug('Random: %r', self._random)
 
         self._selectables = [] # list of Selected
- 
+
     def setup(self):
         # this loads all synchronously, but should be fast
         self._load()

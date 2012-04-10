@@ -7,9 +7,10 @@ import time
 import urllib
 import optparse
 
+from twisted.internet import defer
 from dad.common import player
 
-SCHEDULE_DURATION = 600L # in seconds
+SCHEDULE_DURATION = 1200L # in seconds
 
 _DEFAULT_PORT = 8888
 
@@ -180,6 +181,7 @@ class WebSocketPlayer(player.Player):
         c = self._media.putChild(uri, static.File(scheduled.path))
         self.debug('published as %s/media%s', self.url, uri)
 
+    @defer.inlineCallbacks
     def addClient(self, transport):
         self.debug('addClient: %r', transport)
         self._clients.append(transport)
@@ -193,6 +195,11 @@ class WebSocketPlayer(player.Player):
                 continue
             self.debug('Scheduling %r', scheduled)
             transport.schedule(scheduled)
+
+        # send flavors
+        flavors = yield self._scheduler.getFlavors()
+        transport.setFlavors(flavors)
+
 
     # specific methods
     def isAllowed(self, path):
@@ -218,7 +225,11 @@ class WebSocketPlayer(player.Player):
         # FIXME: instead of always calling this again, wait for the result
         # of the previous schedule, but keep scheduling
         reactor.callLater(10L, self.keepScheduled)
- 
+
+    def reschedule(self, since, category=None):
+        self._scheduler.reschedule(since, category)
+        # FIXME: _lastend ?
+
     def position(self):
         return time.time() - self._started
 

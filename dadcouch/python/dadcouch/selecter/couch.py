@@ -219,6 +219,25 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
 
         return True # len(resultList)
 
+    def unselect(self, counter):
+        self.debug('unselect from counter %r', counter)
+        del self._tracks[counter:]
+
+    def getFlavors(self):
+        return [
+            ('Good', 'good songs'),
+            ('Sleep', 'sleepy songs'),
+        ]
+
+
+    def setFlavor(self, flavor):
+        self.debug('setting flavor %r', flavor)
+        self._category = flavor
+        self._tracks = []
+        # FIXME: don't poke privately
+        self._selected = []
+        self.setup()
+
 def main():
     log.init()
 

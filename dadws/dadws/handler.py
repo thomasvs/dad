@@ -89,6 +89,18 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
     def frameReceived(self, frame):
         self.debug('Peer: %r', self.transport.getPeer())
         # self.transport.write(frame)
+        print 'received frame', frame
+        import json
+        received = json.loads(frame)
+        if 'command' in received:
+            method = getattr(self, 'receive_' + received['command'])
+            del received['command']
+            print 'received', received
+            method(**received)
+
+    def receive_reschedule(self, since, flavor=None):
+        print 'ask scheduler to reschedule', since, flavor
+        self._player.reschedule(since, flavor)
 
     def schedule(self, scheduled):
         path = '/media' + urllib.quote(scheduled.path.encode('utf-8'))
@@ -102,6 +114,9 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
             volume=scheduled.volume)
 
 
+    def setFlavors(self, flavors):
+        # tell the client about the flavors he can select
+        self._send(command='setFlavors', flavors=flavors)
 
     def connectionMade(self):
         self.debug('Connected to client.')
