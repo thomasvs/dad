@@ -271,6 +271,8 @@ class Jukebox(Gtk2Command):
 
     def doLater(self, args):
         scheduler = self._main._getScheduler(self.options)
+        if not scheduler:
+            return defer.succeed(None)
 
         player = self._playerProvider.getPlayer(scheduler, self._playerOptions)
         self.player = player
