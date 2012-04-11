@@ -11,6 +11,26 @@ from dad.common import log
 class CouchDBModel(scorable.BackedModel, log.Loggable):
     pass
 
+# FIXME: split up further now for selection
+
+class CouchBaseDocModel(CouchDBModel):
+    """
+    I represent an object in a CouchDB database that can be
+    stored as a document.
+
+    @type document: L{paisley.mapping.Document}
+    """
+
+    document = None
+    documentClass = None # set by subclass
+
+    def new(self, db):
+        """
+        @type  db:   L{dadcouch.database.couch.DADDB}
+        """
+        model = self(db)
+        model.document = self.documentClass()
+
 
 class CouchDocModel(CouchDBModel):
     """
@@ -30,11 +50,10 @@ class CouchDocModel(CouchDBModel):
         @type  sort: C{unicode}
         @type  mbid: C{unicode}
         """
+        model = CouchDBModel.new(db)
+
         if not sort:
             sort = name
-
-        model = self(db)
-        model.document = self.documentClass()
 
         model.document.name = name
         model.document.sortName = sort

@@ -318,6 +318,25 @@ class DADDB(database.Database):
             self.dbName, model.document.id))
 
 
+    @defer.inlineCallbacks
+    def getSelections(self):
+        gen = yield self._internal.viewDocs('view-selections',
+            mappings.SelectionRow)
+
+        defer.returnValue((s.name for s in gen))
+
+
+    @defer.inlineCallbacks
+    def getSelection(self, name):
+        gen = yield self._internal.viewDocs('view-selections',
+            mappings.Selection, key=name, include_docs=True)
+
+        from dadcouch.model import selection
+        m = selection.CouchSelectionModel(self)
+        m.document = list(gen)[0]
+
+        defer.returnValue(m)
+
     ### own instance methods
     def map(self, docId, objectFactory):
         return self.db.map(self.dbName, docId, objectFactory)

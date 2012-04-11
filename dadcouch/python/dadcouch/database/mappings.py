@@ -617,3 +617,18 @@ class TrackRow(mapping.Document):
         self.id = d['id']
         self.name = d['key']
         self.artists, self.albums = d['value']
+
+class Selection(mapping.Document):
+    type = mapping.TextField(default="selection")
+
+    name = mapping.TextField()
+    artist_mids = mapping.ListField(mapping.TextField())
+
+# map view-selections
+class SelectionRow(mapping.Document):
+    id = mapping.TextField()
+    name = mapping.TextField()
+
+    def fromDict(self, d):
+        self.id = d['id']
+        self.name = d['key']
