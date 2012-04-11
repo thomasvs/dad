@@ -10,6 +10,7 @@ from twisted.internet import defer
 from dad.model import scorable, track
 from dad.common import log
 
+# FIXME: missing a lot of base/interface methods from database.couch
 class Database(log.Loggable):
     """
     Base class for database.
@@ -109,3 +110,8 @@ class Database(log.Loggable):
             tm = yield tm.setCalculatedScore(user, category, value)
 
         self.debug('recalculateTrackScore done for %r', tm)
+
+    def getSelections(self):
+        """
+        """
+        raise NotImplementedError
