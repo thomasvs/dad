@@ -14,7 +14,7 @@ from twisted import plugin
 from dad import idad
 
 from dad.base import app
-from dad.common import log, player
+from dad.common import log, player, selecter
 from dad.common import logcommand
 from dad.command import tcommand
 
@@ -128,33 +128,11 @@ class JukeboxMain(log.Loggable):
     def _getScheduler(self, options):
         from dad.common import scheduler
         # parse selecter class and arguments
+        self._selecter = selecter.getSelecter(options.selecter)
 
-        selecterArgs = []
-        selecterClassName = options.selecter
+        if not self._selecter:
+            return None
 
-        if ':' in options.selecter:
-            selecterClassName, line = options.selecter.split(':', 1)
-            selecterArgs = line.split(':')
-        selecterClass = reflect.namedAny(selecterClassName)
-        parser = selecterClass.option_parser_class()
-        self.debug('Creating selecter %r with args %r',
-            selecterClass, selecterArgs)
-
-        if 'help' in selecterArgs:
-            print 'Options for selecter %s' % selecterClassName
-            parser.print_help()
-            return defer.fail(False)
-
-        selOptions, selArgs = parser.parse_args(selecterArgs)
-        # FIXME: handle this nicer, too easy to hit
-        if selArgs:
-            print "WARNING: make sure you specify options with dashes"
-            print "Did not parse %r" % selArgs
-
-        self._selecter = selecterClass(selOptions)
-        
-        #sel = selecter.SimplePlaylistSelecter(
-        #    tracks, options.playlist, options.random, loops=int(options.loops))
         self._scheduler = scheduler.Scheduler(self._selecter,
             begin=options.begin)
 

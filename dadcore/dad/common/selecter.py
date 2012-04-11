@@ -25,10 +25,51 @@ import optparse
 import pickle
 
 from twisted.internet import defer
+from twisted.python import reflect
 
 from dad.common import pathscan
 
 from dad.extern.log import log
+
+
+def getSelecter(spec, stdout=None):
+    """
+    Parse a specification of a selecter to an actual selecter instance.
+
+    @param spec:   a spec to parse
+    @param stdout: a file object to output help to if needed
+
+    @rtype: L{Selecter}
+    """
+    selecterArgs = []
+    selecterClassName = spec
+
+    if ':' in spec:
+        selecterClassName, line = spec.split(':', 1)
+        selecterArgs = line.split(':')
+    selecterClass = reflect.namedAny(selecterClassName)
+    parser = selecterClass.option_parser_class()
+    log.debug('getSelecter', 'Creating selecter %r with args %r',
+        selecterClass, selecterArgs)
+
+    if 'help' in selecterArgs:
+        if stdout:
+            stdout.write('Options for selecter %s\n' % selecterClassName)
+            parser.print_help(file=stdout)
+        return None
+
+    try:
+        selOptions, selArgs = parser.parse_args(selecterArgs)
+    except SystemExit:
+        return None
+
+    # FIXME: handle this nicer, too easy to hit
+    if selArgs:
+        print "WARNING: make sure you specify options with dashes"
+        print "Did not parse %r" % selArgs
+
+    return selecterClass(selOptions)
+
 
 _DEFAULT_LOOPS = -1
 _DEFAULT_RANDOM = True
