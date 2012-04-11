@@ -52,6 +52,7 @@ couchdb_option_list = [
             action="store", dest="database",
             help="CouchDB database name (defaults to %s)" % _DEFAULT_DB,
             default=_DEFAULT_DB),
+
         optparse.Option('-e', '--extensions',
             action="store", dest="extensions",
             help="file extensions to allow scheduling",

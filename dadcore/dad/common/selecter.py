@@ -113,7 +113,9 @@ class Selecter(log.Loggable):
     """
     I implement a selection strategy.
 
-    Set me up by calling setup(), then use get() to get a track.
+    Initialize me with an options provided by an OptionParser.
+
+    Set me up by calling setup(), then use select() to select a track.
     """
     logCategory = 'selecter'
 
@@ -136,6 +138,7 @@ class Selecter(log.Loggable):
 
     ### base method implementations
 
+    # FIXME: decide if we want get or select as our public interface
     def get(self):
         """
         Get a selected track, possibly waiting to (re)query the backend.
@@ -214,6 +217,9 @@ class Selecter(log.Loggable):
 
     def select(self):
         """
+        Select the next track to play.
+
+
         @rtype: L{Selected}
         """
         d = self.get()
@@ -247,6 +253,7 @@ class Selecter(log.Loggable):
         """
         pass
 
+    ### methods for subclasses
     def selected(self, selected):
         """
         Called by subclass when a track has been selected.
