@@ -29,6 +29,9 @@ class DatabaseInteractor(log.Loggable):
     """
 
     def __init__(self, database, runner=None):
+        """
+        @type  database: L{dad.base.database.Database}
+        """
         self.database = database
         if not runner:
             runner = task.SyncRunner()
