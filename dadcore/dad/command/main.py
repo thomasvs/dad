@@ -18,7 +18,7 @@ from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
-from dad.command import test, tcommand, category
+from dad.command import test, tcommand, category, selection
 from dad.task import md5task
 from dad.logic import database
 
@@ -96,6 +96,8 @@ def _expandPaths(args, stderr):
 
 
 class List(tcommand.TwistedCommand):
+
+    description = """List all tracks in the database."""
 
     @defer.inlineCallbacks
     def doLater(self, args):
@@ -284,7 +286,8 @@ class Database(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Add, Chromaprint, List, Lookup, category.Category]
+    subCommandClasses = [Add, Chromaprint, List, Lookup, category.Category,
+        selection.Selection]
 
     description = 'Interact with database backend.'
 
