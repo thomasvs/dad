@@ -227,6 +227,7 @@ class CouchSelecter(selecter.Selecter, log.Loggable):
         return [
             ('Good', 'good songs'),
             ('Sleep', 'sleepy songs'),
+            ('Rock', 'rock songs'),
         ]
 
 
