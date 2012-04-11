@@ -58,7 +58,7 @@ $(document).ready(function() {
                     playingId = message.id;
                 }
                 var a = document.audios[message.id];
-                console.log('at.at: id ' + message.id + ': play after ' + (new Date().getTime() - document.start) + ' sec since document.start');
+                console.log('at.at: id ' + message.id + ': play after ' + (new Date().getTime() - document.start) + ' msec since document.start');
 
                 offsetS = message.offset;
                 console.log('at.at: id ' + message.id + ': start track at ' + offsetS + ' sec');
