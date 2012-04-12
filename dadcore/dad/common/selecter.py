@@ -456,30 +456,6 @@ database_selecter_option_list = [
         default=_DEFAULT_MY_HOSTNAME),
 ]
 
-_DEFAULT_ABOVE = 0.7
-_DEFAULT_BELOW = 1.0
-_DEFAULT_CATEGORY = 'Good'
-_DEFAULT_USER = getpass.getuser()
-
-score_selecter_option_list = [
-    optparse.Option('-u', '--user',
-        action="store", dest="user",
-        help="user (defaults to current user %default)",
-        default=_DEFAULT_USER),
-   optparse.Option('-c', '--category',
-        action="store", dest="category",
-        help="category to make playlist for (defaults to %default)",
-        default=_DEFAULT_CATEGORY),
-    optparse.Option('-a', '--above',
-        action="store", dest="above", type="float",
-        help="lower bound for scores (defaults to %default)",
-        default=_DEFAULT_ABOVE),
-    optparse.Option('-b', '--below',
-        action="store", dest="below", type="float",
-        help="upper bound for scores (defaults to %default)",
-        default=_DEFAULT_BELOW),
-]
-
 class DatabaseSelecter(Selecter):
     """
     Abstract base class for selecters using the database.
@@ -491,6 +467,12 @@ class DatabaseSelecter(Selecter):
     def __init__(self, options, database):
         Selecter.__init__(self, options)
         self._database = database
+
+        self._host = options.my_hostname
+        self.debug('Selecting for my hostname %r', self._host)
+        exts = options.extensions
+        self._extensions = exts and exts.split(',') or []
+        self.debug('Selecting extensions: %r', self._extensions)
 
         # list of L{TrackModel}; private cache of selected tracks
         self._tracks = []
@@ -592,6 +574,31 @@ class DatabaseSelecter(Selecter):
 
         return True
 
+_DEFAULT_ABOVE = 0.7
+_DEFAULT_BELOW = 1.0
+_DEFAULT_CATEGORY = 'Good'
+_DEFAULT_USER = getpass.getuser()
+
+score_selecter_option_list = [
+    optparse.Option('-u', '--user',
+        action="store", dest="user",
+        help="user (defaults to current user %default)",
+        default=_DEFAULT_USER),
+   optparse.Option('-c', '--category',
+        action="store", dest="category",
+        help="category to make playlist for (defaults to %default)",
+        default=_DEFAULT_CATEGORY),
+    optparse.Option('-a', '--above',
+        action="store", dest="above", type="float",
+        help="lower bound for scores (defaults to %default)",
+        default=_DEFAULT_ABOVE),
+    optparse.Option('-b', '--below',
+        action="store", dest="below", type="float",
+        help="upper bound for scores (defaults to %default)",
+        default=_DEFAULT_BELOW),
+]
+
+
 class DatabaseCategoryOptionParser(OptionParser):
     standard_option_list = OptionParser.standard_option_list + \
         database_selecter_option_list + score_selecter_option_list
@@ -610,15 +617,10 @@ class DatabaseCategorySelecter(DatabaseSelecter):
         self._category = options.category
         self._user = options.user
         self.debug('Selecting for user %r', self._user)
-        self._host = options.my_hostname
-        self.debug('Selecting for my hostname %r', self._host)
         self._above = options.above
         self._below = options.below
         self._random = options.random
         self.debug('Selecting randomly: %r', self._random)
-        exts = options.extensions
-        self._extensions = exts and exts.split(',') or []
-        self.debug('Selecting extensions: %r', self._extensions)
 
     def getTracks(self, limit):
         """
