@@ -5,6 +5,8 @@
 A helper class for Twisted commands.
 """
 
+from twisted.internet import defer
+
 from dad.extern.log import log
 
 from dad.common import logcommand
@@ -26,7 +28,7 @@ class TwistedCommand(logcommand.LogCommand):
 
         def later():
             try:
-                d = self.doLater(args)
+                d = defer.maybeDeferred(self.doLater, args)
             except Exception, e:
                 self.warning('Exception during doLater: %r',
                     log.getExceptionMessage(e))
