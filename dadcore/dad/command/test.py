@@ -125,10 +125,11 @@ class JukeboxMain(log.Loggable):
             self._player.addView(gtkui)
 
     # FIXME: gtk frontend should be some kind of viewer class
-    def _getScheduler(self, options):
+    def _getScheduler(self, options, stdout, database):
         from dad.common import scheduler
         # parse selecter class and arguments
-        self._selecter = selecter.getSelecter(options.selecter)
+        self._selecter = selecter.getSelecter(options.selecter, stdout,
+            database=database)
 
         if not self._selecter:
             return None
@@ -270,7 +271,8 @@ class Jukebox(Gtk2Command):
         self._playerOptions = playerOptions
 
     def doLater(self, args):
-        scheduler = self._main._getScheduler(self.options)
+        db = self.parentCommand.getDatabase()
+        scheduler = self._main._getScheduler(self.options, self.stdout, db)
         if not scheduler:
             return defer.succeed(None)
 
@@ -303,6 +305,38 @@ class Jukebox(Gtk2Command):
         d.addErrback(setupEb)
 
         return d
+
+class Selecter(tcommand.TwistedCommand):
+
+    description = """Select tracks."""
+
+    def addOptions(self):
+        default = 'dad.common.selecter.SimplePlaylistSelecter'
+        self.parser.add_option('', '--selecter',
+            action="store", dest="selecter",
+            help="Selecter class to use (default %default)",
+            default=default)
+
+
+    @defer.inlineCallbacks
+    def doLater(self, args):
+        db = self.parentCommand.getDatabase()
+        sel = selecter.getSelecter(self.options.selecter, self.stdout,
+            database=db)
+
+        while True:
+            selected = yield sel.select()
+            if not selected:
+                break
+
+            text = "# %s - %s\n%s\n" % (
+                " & ".join(selected.artists).encode('utf-8'),
+                selected.title.encode('utf-8'),
+                selected.path.encode('utf-8'))
+            log.debug('main', 'output: %r', text)
+            self.stdout.write(text)
+            self.stdout.flush()
+
 
 class Selector(Gtk2Command):
 
@@ -437,7 +471,7 @@ class Test(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Artist, Selector, Jukebox]
+    subCommandClasses = [Artist, Selecter, Selector, Jukebox]
 
     description = 'Run test applications'
     database = None

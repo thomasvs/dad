@@ -23,6 +23,8 @@ import sys
 import random
 import optparse
 import pickle
+import getpass
+import socket
 
 from twisted.internet import defer
 from twisted.python import reflect
@@ -32,7 +34,7 @@ from dad.common import pathscan
 from dad.extern.log import log
 
 
-def getSelecter(spec, stdout=None):
+def getSelecter(spec, stdout=None, database=None):
     """
     Parse a specification of a selecter to an actual selecter instance.
 
@@ -68,7 +70,7 @@ def getSelecter(spec, stdout=None):
         print "WARNING: make sure you specify options with dashes"
         print "Did not parse %r" % selArgs
 
-    return selecterClass(selOptions)
+    return selecterClass(selOptions, database=database)
 
 
 _DEFAULT_LOOPS = -1
@@ -126,7 +128,7 @@ class Selecter(log.Loggable):
     loadDeferred = None
 
 
-    def __init__(self, options):
+    def __init__(self, options, database=None):
         self._selected = [] # list of internally Selected objects
 
         if not options:
@@ -135,6 +137,11 @@ class Selecter(log.Loggable):
         self.options = options
 
         self._number = 0
+
+        # FIXME: publicize
+        self._loop = 0
+        self._loops = options.loops
+
 
     ### base method implementations
 
@@ -226,6 +233,8 @@ class Selecter(log.Loggable):
 
         def _getCb(result):
             self.info('selected %r', result)
+            if not result:
+                return None
             if not os.path.exists(result.path):
                 self.warning('path %r does not exist', result.path)
                 print 'WARNING: path %r does not exist' % result.path
@@ -321,7 +330,7 @@ class SimplePlaylistSelecter(Selecter):
 
     option_parser_class = SimplePlaylistOptionParser
 
-    def __init__(self, options):
+    def __init__(self, options, database=None):
         Selecter.__init__(self, options)
 
         self._tracks = {}
@@ -433,6 +442,184 @@ class SpreadingArtistSelecter(SimplePlaylistSelecter):
             random.shuffle(res)
 
         return res
+
+_DEFAULT_MY_HOSTNAME = unicode(socket.gethostname())
+
+database_selecter_option_list = [
+    optparse.Option('-e', '--extensions',
+        action="store", dest="extensions",
+        help="file extensions to allow scheduling",
+        default=None),
+    optparse.Option('-m', '--my-hostname',
+        action="store", dest="my_hostname",
+        help="my own hostname (defaults to %default)",
+        default=_DEFAULT_MY_HOSTNAME),
+]
+
+_DEFAULT_ABOVE = 0.7
+_DEFAULT_BELOW = 1.0
+_DEFAULT_CATEGORY = 'Good'
+_DEFAULT_USER = getpass.getuser()
+
+score_selecter_option_list = [
+    optparse.Option('-u', '--user',
+        action="store", dest="user",
+        help="user (defaults to current user %default)",
+        default=_DEFAULT_USER),
+   optparse.Option('-c', '--category',
+        action="store", dest="category",
+        help="category to make playlist for (defaults to %default)",
+        default=_DEFAULT_CATEGORY),
+    optparse.Option('-a', '--above',
+        action="store", dest="above", type="float",
+        help="lower bound for scores (defaults to %default)",
+        default=_DEFAULT_ABOVE),
+    optparse.Option('-b', '--below',
+        action="store", dest="below", type="float",
+        help="upper bound for scores (defaults to %default)",
+        default=_DEFAULT_BELOW),
+]
+
+class DatabaseCategoryOptionParser(OptionParser):
+    standard_option_list = OptionParser.standard_option_list + \
+        database_selecter_option_list + score_selecter_option_list
+
+
+class DatabaseCategorySelecter(Selecter):
+
+    option_parser_class = DatabaseCategoryOptionParser
+
+    logCategory = 'databaseselector'
+
+    # FIXME: can we get around not passing database explicitly ?
+    def __init__(self, options, database):
+        Selecter.__init__(self, options)
+        self._database = database
+
+        self._category = options.category
+        self._user = options.user
+        self.debug('Selecting for user %r', self._user)
+        self._host = options.my_hostname
+        self.debug('Selecting for my hostname %r', self._host)
+        self._above = options.above
+        self._below = options.below
+        self._random = options.random
+        self.debug('Selecting randomly: %r', self._random)
+        exts = options.extensions
+        self._extensions = exts and exts.split(',') or []
+        self.debug('Selecting extensions: %r', self._extensions)
+
+        # list of L{TrackModel}; private cache of selected tracks
+        self._tracks = []
+
+    def load(self):
+        return self._loadLimited(4)
+
+    def _loadLimited(self, limit):
+        # get a few results as fast as possible
+        d = self._database.getPlaylist(self._host, self._user, self._category,
+            self._above, self._below, limit=limit, randomize=self._random)
+        d.addCallback(self._getPlaylistCb, self._host)
+        def eb(f):
+            log.warningFailure(f)
+            return f
+        d.addErrback(eb)
+
+        # we won't wait on this one; it's an internal deferred to get
+        # all items which is slower
+        # FIXME: also gets some we already have, filter them somehow ?
+
+        self.loadDeferred = self._database.getPlaylist(self._host, self._user, self._category,
+            self._above, self._below, randomize=self._random)
+        self.loadDeferred.addCallback(self._getPlaylistCb, self._host, resetLoad=True)
+        self.debug('setting loadDef to %r', self.loadDeferred)
+
+        return d
+
+    def _getPlaylistCb(self, result, host, resetLoad=False):
+        if resetLoad:
+            self.debug('setting loadDef to None')
+            self.loadDeferred = None
+
+        self.debug('Got playlist generator %r', result)
+
+
+        candidates = 0
+        local = 0
+        kept = 0
+
+        # FIXME: this logic about selecting should go somewhere else ?
+        for track in result:
+            candidates += 1
+            if track not in self._tracks:
+                # make sure the track is here
+                best = track.getFragmentFileByHost(host,
+                    extensions=self._extensions)
+                if not best:
+                    self.debug('track %r not on host %r for given extensions'
+                        ', skipping',
+                        track, host)
+                    continue
+
+                local += 1
+
+                artists = track.getArtistNames()
+
+                # make sure we didn't just play a track by any of the artists
+                artistReused = False
+                if self._tracks:
+                    size = min(len(self._tracks), 5)
+                    previousArtists = []
+                    for t, fr, fi in self._tracks[-size:]:
+                        previousArtists.extend(t.getArtistNames())
+
+                    for a in previousArtists:
+                        if a in artists:
+                            self.debug('Already played track by %r', a)
+                            # FIXME: put on reuse pile ?
+                            artistReused = True
+
+                if artistReused:
+                    continue
+
+                fragment, file = best
+                kept += 1
+                artists.sort()
+                self.debug('Got track %d: %r - %r', kept, track.getName(),
+                    artists)
+                self._tracks.append((track, fragment, file))
+                trackmix = fragment.getTrackMix()
+
+                # FIXME: make this fail, then clean up all twisted warnings
+                s = Selected(file.info.path, trackmix, artists=artists, title=track.getName())
+                self.selected(s)
+                self.debug('couch selecter selected %r', s)
+
+        self.debug('%d candidates, %d local, %d kept', candidates, local, kept)
+        if kept == 0:
+            return False
+
+        return True # len(resultList)
+
+    def unselect(self, counter):
+        self.debug('unselect from counter %r', counter)
+        del self._tracks[counter:]
+
+    def getFlavors(self):
+        return [
+            ('Good', 'good songs'),
+            ('Sleep', 'sleepy songs'),
+            ('Rock', 'rock songs'),
+        ]
+
+
+    def setFlavor(self, flavor):
+        self.debug('setting flavor %r', flavor)
+        self._category = flavor
+        self._tracks = []
+        # FIXME: don't poke privately
+        self._selected = []
+        self.setup()
 
 
 if __name__ == '__main__':
