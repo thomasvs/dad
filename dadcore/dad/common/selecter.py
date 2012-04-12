@@ -499,7 +499,25 @@ class DatabaseSelecter(Selecter):
         return self._loadLimited(4)
 
     def _loadLimited(self, limit):
-        raise NotImplementedError
+        # get a few results as fast as possible
+        d = self.getTracks(limit)
+        d.addCallback(self.processTracks, self._host)
+        def eb(f):
+            log.warningFailure(f)
+            return f
+        d.addErrback(eb)
+
+        # we won't wait on this one; it's an internal deferred to get
+        # all items which is slower
+        # FIXME: also gets some we already have, filter them somehow ?
+
+        self.loadDeferred = self.getTracks(limit)
+        self.loadDeferred.addCallback(self.processTracks, self._host,
+            resetLoad=True)
+        self.debug('setting loadDef to %r', self.loadDeferred)
+
+        return d
+
 
     def unselect(self, counter):
         self.debug('unselect from counter %r', counter)
@@ -602,26 +620,13 @@ class DatabaseCategorySelecter(DatabaseSelecter):
         self._extensions = exts and exts.split(',') or []
         self.debug('Selecting extensions: %r', self._extensions)
 
-    def _loadLimited(self, limit):
-        # get a few results as fast as possible
-        d = self._database.getPlaylist(self._host, self._user, self._category,
+    def getTracks(self, limit):
+        """
+        @rtype: a deferred for a generator of L{Track}
+        """
+        return self._database.getPlaylist(self._host, self._user,
+            self._category,
             self._above, self._below, limit=limit, randomize=self._random)
-        d.addCallback(self.processTracks, self._host)
-        def eb(f):
-            log.warningFailure(f)
-            return f
-        d.addErrback(eb)
-
-        # we won't wait on this one; it's an internal deferred to get
-        # all items which is slower
-        # FIXME: also gets some we already have, filter them somehow ?
-
-        self.loadDeferred = self._database.getPlaylist(self._host, self._user, self._category,
-            self._above, self._below, randomize=self._random)
-        self.loadDeferred.addCallback(self.processTracks, self._host, resetLoad=True)
-        self.debug('setting loadDef to %r', self.loadDeferred)
-
-        return d
 
 
     def getFlavors(self):
