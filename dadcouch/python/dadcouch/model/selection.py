@@ -19,7 +19,7 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
     @defer.inlineCallbacks
     def get(self, cb=None, *cbArgs, **cbKWArgs):
         """
-        @returns: a deferred firing a list of L{CouchTrackModel} objects.
+        @returns: a deferred firing a generator of L{CouchTrackModel} objects.
         """
         d = defer.Deferred()
 
@@ -55,4 +55,4 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
             tracks = yield trackRow.getTracks()
             ret.extend(tracks)
 
-        defer.returnValue(ret)
+        defer.returnValue((t for t in ret))

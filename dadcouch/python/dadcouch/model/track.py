@@ -142,6 +142,15 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     def getFragments(self):
         return self.document.getFragments()
 
+    # FIXME: add to iface
+    def getFragmentFileByHost(self, host, extensions=None):
+        """
+        @type  extensions: list of str or None
+        """
+        # for the given track, select the highest quality file on this host
+        return self.document.getFragmentFileByHost(host, extensions)
+
+
 class CouchTrackSelectorModel(base.CouchDBModel):
     # FIXME: this should actually be able to pass results in as they arrive,
     # instead of everything at the end

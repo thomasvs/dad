@@ -328,6 +328,9 @@ class DADDB(database.Database):
 
     @defer.inlineCallbacks
     def getSelection(self, name):
+        """
+        @rtype: L{dad.model.selection.SelectionModel}
+        """
         gen = yield self._internal.viewDocs('view-selections',
             mappings.Selection, key=name, include_docs=True)
 
