@@ -672,6 +672,44 @@ class DatabaseCategorySelecter(DatabaseSelecter):
         self._selected = []
         self.setup()
 
+selection_selecter_option_list = [
+    optparse.Option('-s', '--selection',
+        action="store", dest="selection",
+        help="selection to play"),
+]
+
+
+class DatabaseSelectionOptionParser(OptionParser):
+    standard_option_list = OptionParser.standard_option_list + \
+        database_selecter_option_list + selection_selecter_option_list
+
+
+class DatabaseSelectionSelecter(DatabaseSelecter):
+
+    option_parser_class = DatabaseSelectionOptionParser
+
+    logCategory = 'databaseselectionselector'
+
+    def __init__(self, options, database):
+        DatabaseSelecter.__init__(self, options, database)
+
+        self._selection = options.selection
+        self.debug('Selecting for selection %r', self._selection)
+
+    @defer.inlineCallbacks
+    def getTracks(self, limit):
+        """
+        @rtype: a deferred for a generator of L{Track}
+        """
+        sm = yield self._database.getSelection(self._selection)
+
+        gen = yield sm.get()
+
+        if limit:
+            gen = (t for n, t in enumerate(gen) if n < limit)
+
+        defer.returnValue(gen)
+
 
 if __name__ == '__main__':
     from twisted.internet import reactor
