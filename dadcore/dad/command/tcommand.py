@@ -40,6 +40,7 @@ class TwistedCommand(logcommand.LogCommand):
             def eb(failure):
                 self.stderr.write('Failure: %s\n' %
                     log.getFailureMessage(failure))
+
                 self.reactor.stop()
             d.addErrback(eb)
 

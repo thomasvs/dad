@@ -10,6 +10,7 @@ from twisted.internet import defer
 from dad.audio import common
 from dad.common import logcommand, chromaprint
 from dad.command import tcommand
+from dad.model import track as mtrack
 
 from dadgst.task import level, fingerprint
 
@@ -60,7 +61,10 @@ class ChromaPrint(tcommand.TwistedCommand):
                 self.stdout.write('chromaprint:\n%s\n' % t.fingerprint)
                 continue
 
-            result = yield cpc.lookup(t.duration, t.fingerprint)
+            cp = mtrack.ChromaPrintModel()
+            cp.chromaprint = t.fingerprint
+            cp.duration = t.duration
+            result = yield cpc.lookup(cp)
             if not result:
                 self.stdout.write('Could not look up for fingerprint %r\n',
                     t.fingerprint)
@@ -94,7 +98,9 @@ class ChromaPrint(tcommand.TwistedCommand):
                             # since it's the same musicbrainz id
                             break
 
-                self.stdout.write('%r\n' % fp.metadata)
+                names = [i['name'] for i in fp.artists]
+                self.stdout.write('%s - %s\n' % (
+                    " & ".join(names), fp.title))
             else:
                 print 'ERROR:', result
 
