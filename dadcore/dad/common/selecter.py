@@ -505,62 +505,15 @@ class DatabaseSelecter(Selecter):
         self.debug('unselect from counter %r', counter)
         del self._tracks[counter:]
 
-
-class DatabaseCategoryOptionParser(OptionParser):
-    standard_option_list = OptionParser.standard_option_list + \
-        database_selecter_option_list + score_selecter_option_list
-
-
-class DatabaseCategorySelecter(DatabaseSelecter):
-
-    option_parser_class = DatabaseCategoryOptionParser
-
-    logCategory = 'databaseselector'
-
-    # FIXME: can we get around not passing database explicitly ?
-    def __init__(self, options, database):
-        DatabaseSelecter.__init__(self, options, database)
-
-        self._category = options.category
-        self._user = options.user
-        self.debug('Selecting for user %r', self._user)
-        self._host = options.my_hostname
-        self.debug('Selecting for my hostname %r', self._host)
-        self._above = options.above
-        self._below = options.below
-        self._random = options.random
-        self.debug('Selecting randomly: %r', self._random)
-        exts = options.extensions
-        self._extensions = exts and exts.split(',') or []
-        self.debug('Selecting extensions: %r', self._extensions)
-
-    def _loadLimited(self, limit):
-        # get a few results as fast as possible
-        d = self._database.getPlaylist(self._host, self._user, self._category,
-            self._above, self._below, limit=limit, randomize=self._random)
-        d.addCallback(self._getPlaylistCb, self._host)
-        def eb(f):
-            log.warningFailure(f)
-            return f
-        d.addErrback(eb)
-
-        # we won't wait on this one; it's an internal deferred to get
-        # all items which is slower
-        # FIXME: also gets some we already have, filter them somehow ?
-
-        self.loadDeferred = self._database.getPlaylist(self._host, self._user, self._category,
-            self._above, self._below, randomize=self._random)
-        self.loadDeferred.addCallback(self._getPlaylistCb, self._host, resetLoad=True)
-        self.debug('setting loadDef to %r', self.loadDeferred)
-
-        return d
-
-    def _getPlaylistCb(self, result, host, resetLoad=False):
+    def processTracks(self, gen, host, resetLoad=False):
+        """
+        @param gen: a generator of L{Track}
+        """
         if resetLoad:
             self.debug('setting loadDef to None')
             self.loadDeferred = None
 
-        self.debug('Got playlist generator %r', result)
+        self.debug('Got playlist generator %r', gen)
 
 
         candidates = 0
@@ -568,7 +521,7 @@ class DatabaseCategorySelecter(DatabaseSelecter):
         kept = 0
 
         # FIXME: this logic about selecting should go somewhere else ?
-        for track in result:
+        for track in gen:
             candidates += 1
             if track not in self._tracks:
                 # make sure the track is here
@@ -610,7 +563,8 @@ class DatabaseCategorySelecter(DatabaseSelecter):
                 trackmix = fragment.getTrackMix()
 
                 # FIXME: make this fail, then clean up all twisted warnings
-                s = Selected(file.info.path, trackmix, artists=artists, title=track.getName())
+                s = Selected(file.info.path, trackmix, artists=artists,
+                    title=track.getName())
                 self.selected(s)
                 self.debug('couch selecter selected %r', s)
 
@@ -618,7 +572,57 @@ class DatabaseCategorySelecter(DatabaseSelecter):
         if kept == 0:
             return False
 
-        return True # len(resultList)
+        return True
+
+class DatabaseCategoryOptionParser(OptionParser):
+    standard_option_list = OptionParser.standard_option_list + \
+        database_selecter_option_list + score_selecter_option_list
+
+
+class DatabaseCategorySelecter(DatabaseSelecter):
+
+    option_parser_class = DatabaseCategoryOptionParser
+
+    logCategory = 'databaseselector'
+
+    # FIXME: can we get around not passing database explicitly ?
+    def __init__(self, options, database):
+        DatabaseSelecter.__init__(self, options, database)
+
+        self._category = options.category
+        self._user = options.user
+        self.debug('Selecting for user %r', self._user)
+        self._host = options.my_hostname
+        self.debug('Selecting for my hostname %r', self._host)
+        self._above = options.above
+        self._below = options.below
+        self._random = options.random
+        self.debug('Selecting randomly: %r', self._random)
+        exts = options.extensions
+        self._extensions = exts and exts.split(',') or []
+        self.debug('Selecting extensions: %r', self._extensions)
+
+    def _loadLimited(self, limit):
+        # get a few results as fast as possible
+        d = self._database.getPlaylist(self._host, self._user, self._category,
+            self._above, self._below, limit=limit, randomize=self._random)
+        d.addCallback(self.processTracks, self._host)
+        def eb(f):
+            log.warningFailure(f)
+            return f
+        d.addErrback(eb)
+
+        # we won't wait on this one; it's an internal deferred to get
+        # all items which is slower
+        # FIXME: also gets some we already have, filter them somehow ?
+
+        self.loadDeferred = self._database.getPlaylist(self._host, self._user, self._category,
+            self._above, self._below, randomize=self._random)
+        self.loadDeferred.addCallback(self.processTracks, self._host, resetLoad=True)
+        self.debug('setting loadDef to %r', self.loadDeferred)
+
+        return d
+
 
     def getFlavors(self):
         return [
