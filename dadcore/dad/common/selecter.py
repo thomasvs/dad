@@ -478,7 +478,7 @@ class DatabaseSelecter(Selecter):
         self._tracks = []
 
     def load(self):
-        return self._loadLimited(4)
+        return self._loadLimited(10)
 
     def _loadLimited(self, limit):
         # get a few results as fast as possible
@@ -516,6 +516,8 @@ class DatabaseSelecter(Selecter):
         self.debug('Got playlist generator %r', gen)
 
 
+        alreadyPlayed = []
+
         candidates = 0
         local = 0
         kept = 0
@@ -549,6 +551,7 @@ class DatabaseSelecter(Selecter):
                         if a in artists:
                             self.debug('Already played track by %r', a)
                             # FIXME: put on reuse pile ?
+                            alreadyPlayed.append((track, best))
                             artistReused = True
 
                 if artistReused:
@@ -569,6 +572,28 @@ class DatabaseSelecter(Selecter):
                 self.debug('couch selecter selected %r', s)
 
         self.debug('%d candidates, %d local, %d kept', candidates, local, kept)
+
+        # FIXME: arbitrary limit
+        if kept < 3:
+            self.warning('Only have %d kept tracks', kept)
+            if alreadyPlayed:
+                self.warning('Picking extra from the pile of alreadyPlayed')
+
+                if len(alreadyPlayed) > 3:
+                    alreadyPlayed = alreadyPlayed[:3]
+
+                for track, best in alreadyPlayed:
+                    kept += 1
+                    fragment, file = best
+                    self._tracks.append((track, fragment, file))
+                    trackmix = fragment.getTrackMix()
+
+                    s = Selected(file.info.path, trackmix, artists=artists,
+                        title=track.getName())
+                    self.selected(s)
+                    self.debug('couch selecter selected %r', s)
+
+
         if kept == 0:
             return False
 
