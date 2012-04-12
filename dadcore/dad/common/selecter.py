@@ -480,12 +480,38 @@ score_selecter_option_list = [
         default=_DEFAULT_BELOW),
 ]
 
+class DatabaseSelecter(Selecter):
+    """
+    Abstract base class for selecters using the database.
+    """
+
+    logCategory = 'databaseselecter'
+
+    # FIXME: can we get around not passing database explicitly ?
+    def __init__(self, options, database):
+        Selecter.__init__(self, options)
+        self._database = database
+
+        # list of L{TrackModel}; private cache of selected tracks
+        self._tracks = []
+
+    def load(self):
+        return self._loadLimited(4)
+
+    def _loadLimited(self, limit):
+        raise NotImplementedError
+
+    def unselect(self, counter):
+        self.debug('unselect from counter %r', counter)
+        del self._tracks[counter:]
+
+
 class DatabaseCategoryOptionParser(OptionParser):
     standard_option_list = OptionParser.standard_option_list + \
         database_selecter_option_list + score_selecter_option_list
 
 
-class DatabaseCategorySelecter(Selecter):
+class DatabaseCategorySelecter(DatabaseSelecter):
 
     option_parser_class = DatabaseCategoryOptionParser
 
@@ -493,8 +519,7 @@ class DatabaseCategorySelecter(Selecter):
 
     # FIXME: can we get around not passing database explicitly ?
     def __init__(self, options, database):
-        Selecter.__init__(self, options)
-        self._database = database
+        DatabaseSelecter.__init__(self, options, database)
 
         self._category = options.category
         self._user = options.user
@@ -508,12 +533,6 @@ class DatabaseCategorySelecter(Selecter):
         exts = options.extensions
         self._extensions = exts and exts.split(',') or []
         self.debug('Selecting extensions: %r', self._extensions)
-
-        # list of L{TrackModel}; private cache of selected tracks
-        self._tracks = []
-
-    def load(self):
-        return self._loadLimited(4)
 
     def _loadLimited(self, limit):
         # get a few results as fast as possible
@@ -600,10 +619,6 @@ class DatabaseCategorySelecter(Selecter):
             return False
 
         return True # len(resultList)
-
-    def unselect(self, counter):
-        self.debug('unselect from counter %r', counter)
-        del self._tracks[counter:]
 
     def getFlavors(self):
         return [
