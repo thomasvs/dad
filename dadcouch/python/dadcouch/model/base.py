@@ -12,6 +12,7 @@ class CouchDBModel(scorable.BackedModel, log.Loggable):
     pass
 
 # FIXME: split up further now for selection
+# FIXME: do we need the messy klazz argument to new ?
 
 class CouchBaseDocModel(CouchDBModel):
     """
@@ -24,15 +25,20 @@ class CouchBaseDocModel(CouchDBModel):
     document = None
     documentClass = None # set by subclass
 
-    def new(self, db):
+    @classmethod
+    def new(cls, klazz, db):
         """
         @type  db:   L{dadcouch.database.couch.DADDB}
         """
-        model = self(db)
-        model.document = self.documentClass()
+        model = klazz(db)
+        assert klazz.documentClass, '%r does not have documentClass' % klazz
+        model.document = klazz.documentClass()
+
+        return model
 
 
-class CouchDocModel(CouchDBModel):
+# FIXME: rename to scorable or somesuch
+class CouchDocModel(CouchBaseDocModel):
     """
     I represent an object in a CouchDB database that can be
     stored as a document.
@@ -43,14 +49,16 @@ class CouchDocModel(CouchDBModel):
     document = None
     documentClass = None # set by subclass
 
-    def new(self, db, name, sort=None, mbid=None):
+    @classmethod
+    def new(cls, db, name, sort=None, mbid=None):
         """
         @type  db:   L{dadcouch.database.couch.DADDB}
         @type  name: C{unicode}
         @type  sort: C{unicode}
         @type  mbid: C{unicode}
         """
-        model = CouchDBModel.new(db)
+        model = CouchBaseDocModel.new(cls, db)
+        model = super(CouchDocModel, cls).new(cls, db)
 
         if not sort:
             sort = name
@@ -60,7 +68,6 @@ class CouchDocModel(CouchDBModel):
         model.document.mbid = mbid
         model.document = model.document
         return model
-    new = classmethod(new)
 
     def getUrl(self):
         return self.database.getUrl(self)
