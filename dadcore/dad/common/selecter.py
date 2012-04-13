@@ -659,11 +659,13 @@ class DatabaseCategorySelecter(DatabaseSelecter):
             self._above, self._below, limit=limit, randomize=self._random)
 
 
+    # FIXME: get from categories
     def getFlavors(self):
         return [
             ('Good', 'good songs'),
             ('Sleep', 'sleepy songs'),
             ('Rock', 'rock songs'),
+            ('Trumpet', 'songs with trumpets'),
         ]
 
 
