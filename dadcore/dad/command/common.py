@@ -39,3 +39,7 @@ def expandPaths(paths, stderr=None):
                 yield filePath
         else:
             yield path
+
+def hostname():
+    import socket
+    return unicode(socket.gethostname())

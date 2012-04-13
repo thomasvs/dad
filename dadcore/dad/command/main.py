@@ -57,10 +57,6 @@ def main(argv):
 
     return ret
 
-def _hostname():
-    import socket
-    return unicode(socket.gethostname())
-
 
 class List(tcommand.TwistedCommand):
 
@@ -86,7 +82,7 @@ class Add(tcommand.TwistedCommand):
     def addOptions(self):
         self.parser.add_option('-H', '--hostname',
                           action="store", dest="hostname",
-                          default=_hostname(),
+                          default=common.hostname(),
                           help="override hostname (%default)")
 
     def handleOptions(self, options):
@@ -156,7 +152,7 @@ class Chromaprint(tcommand.TwistedCommand):
     def addOptions(self):
         self.parser.add_option('-H', '--hostname',
                           action="store", dest="hostname",
-                          default=_hostname(),
+                          default=common.hostname(),
                           help="override hostname (%default)")
 
     def handleOptions(self, options):
@@ -231,7 +227,7 @@ class Lookup(tcommand.TwistedCommand):
         
             self.stdout.write('%s\n' % path)
             try:
-                ret = yield self.parentCommand.database.getTracksByHostPath(_hostname(), path)
+                ret = yield self.parentCommand.database.getTracksByHostPath(common.hostname(), path)
             except error.Error, e:
                 if e.status == 404:
                     self.stderr.write('Database or view does not exist.\n')
