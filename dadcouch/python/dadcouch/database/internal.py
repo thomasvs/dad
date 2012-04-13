@@ -283,14 +283,18 @@ class InternalDB(log.Loggable):
 
 
         found = False
+        changed = False
         ret = None
 
         for i, s in enumerate(subject.scores):
             if s.user == userName and s.category == categoryName:
+                found = True
+                if s.score == score:
+                    continue
                 self.debug('Updating score for %r in %r from %r to %r',
                     userName, categoryName, s.score, score)
                 subject.scores[i].score = score
-                found = True
+                changed = True
 
         if not found:
             self.debug('Setting score on %r for %r in %r to %r',
@@ -302,8 +306,13 @@ class InternalDB(log.Loggable):
                 'category': categoryName,
                 'score': score
             })
+            changed = True
 
-        ret = yield self.save(subject)
+        if changed:
+            ret = yield self.save(subject)
+        else:
+            ret = subject
+
         defer.returnValue(ret)
 
     @defer.inlineCallbacks
@@ -348,7 +357,7 @@ class InternalDB(log.Loggable):
 
         # FIXME: maybe we should first get the most recent version,
         #        then update, to avoid conflicts ?
-        self.debug('asked to score subject %r '
+        self.debug('setCalculatedScore: asked to score subject %r '
             'for user %r and category %r to score %r',
             subject, userName, categoryName, score)
 
@@ -362,13 +371,17 @@ class InternalDB(log.Loggable):
 
         found = False
         ret = None
+        changed = False
 
         for i, s in enumerate(subject.calculated_scores):
             if s.user == userName and s.category == categoryName:
+                found = True
+                if s.score == score:
+                    continue
                 self.debug('Updating score for %r in %r from %r to %r',
                     userName, categoryName, s.score, score)
                 subject.calculated_scores[i].score = score
-                found = True
+                changed = True
 
         if not found:
             self.debug('Setting score for %r in %r to %r',
@@ -380,7 +393,12 @@ class InternalDB(log.Loggable):
                 'category': categoryName,
                 'score': score
             })
-        ret = yield self.save(subject)
+            changed = True
+
+        if changed:
+            ret = yield self.save(subject)
+        else:
+            ret = subject
 
         defer.returnValue(ret)
 
