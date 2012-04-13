@@ -2,6 +2,7 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import time
+import random
 
 from twisted.internet import defer
 
@@ -54,5 +55,8 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
 
             tracks = yield trackRow.getTracks()
             ret.extend(tracks)
+
+        # FIXME: don't randomize willy nilly
+        random.shuffle(ret)
 
         defer.returnValue((t for t in ret))
