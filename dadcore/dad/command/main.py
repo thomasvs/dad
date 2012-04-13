@@ -18,7 +18,7 @@ from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
-from dad.command import test, tcommand, category, selection
+from dad.command import test, tcommand, category, score, selection, common
 from dad.task import md5task
 from dad.logic import database
 
@@ -60,39 +60,6 @@ def main(argv):
 def _hostname():
     import socket
     return unicode(socket.gethostname())
-
-
-def _expandPaths(args, stderr):
-    paths = []
-
-    for path in args:
-        try:
-            path = path.decode('utf-8')
-        except UnicodeDecodeError, e:
-            stderr.write('Invalid path %r, skipping\n' % path)
-            continue
-
-        if not os.path.exists(path):
-            stderr.write('Could not find %s\n' % path.encode('utf-8'))
-            continue
-
-        # handle playlist
-        if path.endswith('.m3u'):
-            handle = open(path, 'r')
-            for line in handle.readlines():
-                if line.startswith('#'):
-                    continue
-                filePath = line.decode('utf-8').strip()
-                # FIXME: handle relative paths here
-                if not os.path.exists(filePath):
-                    stderr.write('Could not find %s\n' %
-                        filePath.encode('utf-8'))
-                    continue
-                paths.append(filePath)
-        else:
-            paths.append(path)
-
-    return paths
 
 
 class List(tcommand.TwistedCommand):
@@ -140,7 +107,7 @@ class Add(tcommand.TwistedCommand):
         # FIXME: imports reactor
         from twisted.web import error
 
-        paths = _expandPaths(args, self.stderr)
+        paths = common.expandPaths(args, self.stderr)
 
         failed = []
         for path in paths:
@@ -210,7 +177,7 @@ class Chromaprint(tcommand.TwistedCommand):
         # FIXME: imports reactor
         from twisted.web import error
 
-        paths = _expandPaths(args, self.stderr)
+        paths = common.expandPaths(args, self.stderr)
 
         failed = []
         for path in paths:
