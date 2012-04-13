@@ -249,7 +249,8 @@ class Database(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Add, Chromaprint, List, Lookup, category.Category,
+    subCommandClasses = [Add, Chromaprint, List, Lookup, score.Score,
+        category.Category,
         selection.Selection]
 
     description = 'Interact with database backend.'
