@@ -185,7 +185,7 @@ class TrackModel(scorable.ScorableModel):
 
         @returns: L{Deferred} firing list of L{data.Score}
         """
-        return self._db.getCalculatedScores(self)
+        return self.database.getCalculatedScores(self)
 
 
 

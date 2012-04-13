@@ -120,14 +120,6 @@ class CouchTrackModel(base.ScorableModel, track.TrackModel):
     def getArtistMids(self):
         return self.document.getArtistMids()
 
-    def getCalculatedScores(self, userName=None):
-        """
-        Get a track's calculated scores and resolve their user and category.
-
-        @returns: L{Deferred} firing list of L{data.Score}
-        """
-        return self._db.getCalculatedScores(self)
-
     def setCalculatedScore(self, userName, categoryName, score):
         """
         Set calculated score on a track.
