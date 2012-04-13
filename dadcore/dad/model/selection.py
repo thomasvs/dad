@@ -8,7 +8,7 @@ class Selection(base.Model):
     I am a model for a selection of tracks.
     """
 
-    logCategory = 'trackselectormodel'
+    logCategory = 'selectionmodel'
 
     artists = None
 
