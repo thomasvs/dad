@@ -336,7 +336,12 @@ class DADDB(database.Database):
 
         from dadcouch.model import selection
         m = selection.CouchSelectionModel(self)
-        m.document = list(gen)[0]
+
+        docs = list(gen)
+        if not docs:
+            raise KeyError('No selection %s found' % name)
+
+        m.document = docs[0]
 
         defer.returnValue(m)
 
