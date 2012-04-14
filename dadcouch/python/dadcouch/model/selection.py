@@ -2,7 +2,6 @@
 # vi:si:et:sw=4:sts=4:ts=4
 
 import time
-import random
 
 from twisted.internet import defer
 
@@ -44,7 +43,7 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
         last[0] = time.time()
 
         artists = []
-        ret = []
+        gens = []
 
         # FIXME: reduce this somewhere
         for trackRow in trackList:
@@ -54,9 +53,14 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
             artists.append(mid)
 
             tracks = yield trackRow.getTracks()
-            ret.extend(tracks)
+            gens.append((t for t in tracks))
 
-        # FIXME: don't randomize willy nilly
-        random.shuffle(ret)
+        # see http://stackoverflow.com/questions/243865/how-do-i-merge-two-python-iterators
+        # gets one from each iterator in the list
+        # FIXME: does this exhaust each iterator ?
+        def tmerge(*iterators):
+            for values in zip(*iterators):
+                for value in values:
+                    yield value
 
-        defer.returnValue((t for t in ret))
+        defer.returnValue(tmerge(*gens))
