@@ -579,6 +579,8 @@ class DatabaseSelecter(Selecter):
             if alreadyPlayed:
                 self.warning('Picking extra from the pile of alreadyPlayed')
 
+                random.shuffle(alreadyPlayed)
+
                 if len(alreadyPlayed) > 3:
                     alreadyPlayed = alreadyPlayed[:3]
 
@@ -702,12 +704,18 @@ class DatabaseSelectionSelecter(DatabaseSelecter):
         """
         @rtype: a deferred for a generator of L{Track}
         """
+        rand = True
+
         sm = yield self._database.getSelection(self._selection)
 
         gen = yield sm.get()
 
         if limit:
-            gen = (t for n, t in enumerate(gen) if n < limit)
+            if rand:
+                # FIXME: from gen to iterator and back ?
+                gen = (t for t in random.sample([i for i in gen], limit))
+            else:
+                gen = (t for n, t in enumerate(gen) if n < limit)
 
         defer.returnValue(gen)
 
