@@ -493,7 +493,7 @@ class DatabaseSelecter(Selecter):
         # all items which is slower
         # FIXME: also gets some we already have, filter them somehow ?
 
-        self.loadDeferred = self.getTracks(limit)
+        self.loadDeferred = self.getTracks()
         self.loadDeferred.addCallback(self.processTracks, self._host,
             resetLoad=True)
         self.debug('setting loadDef to %r', self.loadDeferred)
@@ -647,7 +647,7 @@ class DatabaseCategorySelecter(DatabaseSelecter):
         self._random = options.random
         self.debug('Selecting randomly: %r', self._random)
 
-    def getTracks(self, limit):
+    def getTracks(self, limit=None):
         """
         @rtype: a deferred for a generator of L{Track}
         """
@@ -697,7 +697,7 @@ class DatabaseSelectionSelecter(DatabaseSelecter):
         self.debug('Selecting for selection %r', self._selection)
 
     @defer.inlineCallbacks
-    def getTracks(self, limit):
+    def getTracks(self, limit=None):
         """
         @rtype: a deferred for a generator of L{Track}
         """
