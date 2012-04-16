@@ -548,7 +548,9 @@ class InternalDB(log.Loggable):
 
                     self.debug('Setting chromaprint on fragment %r',
                         fragment)
-                    changed = track.fragmentSetChroma(fragment, chromaprint)
+                    changedNow = track.fragmentSetChroma(fragment, chromaprint)
+                    if changedNow:
+                        changed = True
 
 
         if found and changed:
