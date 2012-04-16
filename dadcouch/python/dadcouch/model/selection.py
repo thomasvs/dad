@@ -5,9 +5,12 @@ import time
 
 from twisted.internet import defer
 
+from dad.model import selection
+from dad.common import iterators
+
 from dadcouch.database import mappings
 from dadcouch.model import base
-from dad.model import selection
+
 
 # FIXME: remove track attribute
 class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
@@ -55,12 +58,4 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
             tracks = yield trackRow.getTracks()
             gens.append((t for t in tracks))
 
-        # see http://stackoverflow.com/questions/243865/how-do-i-merge-two-python-iterators
-        # gets one from each iterator in the list
-        # FIXME: does this exhaust each iterator ?
-        def tmerge(*iterators):
-            for values in zip(*iterators):
-                for value in values:
-                    yield value
-
-        defer.returnValue(tmerge(*gens))
+        defer.returnValue(iterators.tmerge(*gens))
