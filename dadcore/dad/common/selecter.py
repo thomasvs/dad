@@ -583,6 +583,7 @@ class DatabaseSelecter(Selecter):
                     alreadyPlayed = alreadyPlayed[:3]
 
                 for track, best in alreadyPlayed:
+                    artists = track.getArtistNames()
                     kept += 1
                     fragment, file = best
                     self._tracks.append((track, fragment, file))
