@@ -22,6 +22,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
     I represent an artist in a CouchDB database.
     """
     documentClass = mappings.Artist
+    logCategory = 'CAModel'
 
     ### artist.ArtistModel implementations
     def getName(self):
@@ -50,7 +51,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
 
     @defer.inlineCallbacks
     def getTracks(self):
-        self.debug('get')
+        self.debug('getTracks')
         # FIXME: this gets all possible tracks for this artist, but maybe
         # this should be more limited ?
         keys = [
@@ -74,6 +75,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
             tm = yield self.database.getTrack(r.trackId)
             tracks.append(tm)
 
+        self.debug('getTracks: returning %r', tracks)
         defer.returnValue(tracks)
 
 
@@ -174,6 +176,8 @@ class ItemTracksByArtist(CouchArtistModel):
 
 
 class CouchArtistSelectorModel(artist.ArtistSelectorModel, base.CouchDBModel):
+
+    logCategory = 'CASelModel'
 
     @defer.inlineCallbacks
     def get(self):

@@ -7,6 +7,7 @@ import datetime
 from dad.audio import level
 from dad.model import track
 from dad.logic import database
+from dad.common import log
 
 from dadcouch.extern.paisley import mapping
 
@@ -321,12 +322,15 @@ class Track(mapping.Document, track.TrackModel):
         for key in LOOKUP_FIELDS + KEYS:
             orig = getattr(fragment.chroma, key, None)
             value = getattr(chroma, key, None)
+            log.log('mappings', 'key %r, original %r, value %r',
+                key, orig, value)
             if value and orig != value:
                 setattr(fragment.chroma, key, value)
                 # if all that changed was the lookedup time, we don't
                 # consider it a change
                 if key != 'lookedup':
                     changed = True
+                log.debug('mappings', 'key %r changed to %r', key, value)
 
         return changed
 

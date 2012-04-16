@@ -549,7 +549,7 @@ class DatabaseSelecter(Selecter):
 
                     for a in previousArtists:
                         if a in artists:
-                            self.debug('Already played track by %r', a)
+                            self.debug('Already played track by %r, not picking %r', a, track)
                             # FIXME: put on reuse pile ?
                             alreadyPlayed.append((track, best))
                             artistReused = True
@@ -560,8 +560,8 @@ class DatabaseSelecter(Selecter):
                 fragment, file = best
                 kept += 1
                 artists.sort()
-                self.debug('Got track %d: %r - %r', kept, track.getName(),
-                    artists)
+                self.debug('Got track %d: %r: %r - %r', kept, track.getId(),
+                    track.getName(), artists)
                 self._tracks.append((track, fragment, file))
                 trackmix = fragment.getTrackMix()
 
