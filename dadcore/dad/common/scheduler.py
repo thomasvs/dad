@@ -258,6 +258,8 @@ class Scheduler(log.Loggable, gobject.GObject):
             self.debug('removing %r', self._scheduled[i])
             del self._scheduled[i]
 
+        self.duration = self._scheduled[-1].start + self._scheduled[-1].duration
+
         # tell the selecter too
         self._selecter.unselect(counter)
 
