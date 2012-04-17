@@ -75,7 +75,7 @@ class MemoryTrackModel(base.ScorableMemoryModel, track.TrackModel):
                     continue
 
                 # metadata only lists one artist
-                model = yield self._db.getOrCreateArtist(
+                model = yield self.database.getOrCreateArtist(
                     name=file.metadata.artist, mbid=file.metadata.mbArtistId)
                 models.append(model)
 
@@ -111,13 +111,13 @@ class MemoryTrackModel(base.ScorableMemoryModel, track.TrackModel):
 
         @returns: L{Deferred} firing list of L{data.Score}
         """
-        return self._db.getScores(self)
+        return self.database.getScores(self)
 
     def setCalculatedScore(self, userName, categoryName, score):
         """
         Set calculated score on a track.
         """
-        return self._db.setCalculatedScore(self, userName, categoryName, score)
+        return self.database.setCalculatedScore(self, userName, categoryName, score)
 
     def getCalculatedScores(self, userName=None):
         """
@@ -125,7 +125,7 @@ class MemoryTrackModel(base.ScorableMemoryModel, track.TrackModel):
 
         @returns: L{Deferred} firing list of L{data.Score}
         """
-        return self._db.getCalculatedScores(self)
+        return self.database.getCalculatedScores(self)
 
         
     # FIXME: need more ?
@@ -144,4 +144,4 @@ class MemoryTrackModel(base.ScorableMemoryModel, track.TrackModel):
 
 class MemoryTrackSelectorModel(track.TrackSelectorModel, base.MemoryModel):
     def get(self):
-        return defer.succeed(self._db._tracks.values())
+        return defer.succeed(self.database._tracks.values())

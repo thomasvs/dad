@@ -58,9 +58,9 @@ class MemoryArtistModel(base.ScorableMemoryModel, artist.ArtistModel):
         return defer.succeed(self.tracks)
 
     def save(self):
-        return self._db.saveArtist(self)
+        return self.database.saveArtist(self)
 
 
 class MemoryArtistSelectorModel(artist.ArtistSelectorModel, base.MemoryModel):
     def get(self):
-        return defer.succeed(self._db._artists.values())
+        return defer.succeed(self.database._artists.values())

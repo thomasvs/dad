@@ -1,17 +1,13 @@
 # -*- Mode: Python; test-case-name: dad.test.test_memorydb_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
-from dad.base import base
-from dad.base import data
+from dad.model import scorable
 
 
-class MemoryModel(base.Model):
+class MemoryModel(scorable.BackedModel):
     """
     I am a base class for models backed by a memory database.
     """
-
-    def __init__(self, memorydb):
-        self._db = memorydb
 
     def get(self, subjectId):
         return
@@ -26,7 +22,7 @@ class ScorableMemoryModel(MemoryModel):
 
 
     def __init__(self, memorydb):
-        MemoryModel.__init__(self, memorydb)
+        scorable.BackedModel.__init__(self, memorydb)
         self.scores = []
 
     def get(self, subjectId):
@@ -36,7 +32,7 @@ class ScorableMemoryModel(MemoryModel):
         return [s for s in self.scores if not userName or s.user == userName]
 
     def setScore(self, userName, categoryName, score):
-        return self._db.setScore(self, userName, categoryName, score)
+        return self.database.setScore(self, userName, categoryName, score)
 
     def score(self, userName, categoryName, score):
-        return self._db.score(self, userName, categoryName, score)
+        return self.database.score(self, userName, categoryName, score)
