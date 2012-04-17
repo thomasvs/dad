@@ -217,7 +217,7 @@ class ArtistSelectorModelTestCase(BaseTestCase):
 
         tm.addFragment(info, metadata=metadata)
         yield self.testdb.save(tm)
-        
+
         # check the artist selector model
         artists = yield asModel.get()
         self.assertEquals(len(artists), 1)
@@ -228,7 +228,7 @@ class ArtistSelectorModelTestCase(BaseTestCase):
 
 
 class DatabaseTestCase(BaseTestCase):
- 
+
     @defer.inlineCallbacks
     def testGetTracks(self):
         tm = self.testdb.newTrack(name=u'first')
@@ -313,7 +313,7 @@ class DatabaseTestCase(BaseTestCase):
         mb = u'9b9b333e-8278-401b-8361-700c14096228'
         metadata.mbTrackId = mb
 
-        tm = yield self.testdb.trackAddFragmentFileByMD5Sum(tm, 
+        tm = yield self.testdb.trackAddFragmentFileByMD5Sum(tm,
             info, metadata)
 
         fragments = yield tm.getFragments()
@@ -335,7 +335,7 @@ class DatabaseTestCase(BaseTestCase):
 
         tm.addFragment(info, metadata=metadata)
         tm = yield self.testdb.save(tm)
- 
+
         # get the right track
         gen = yield self.testdb.getTracksByMBTrackId(mb)
 
@@ -354,7 +354,7 @@ class DatabaseTestCase(BaseTestCase):
 
         tracks = list(gen)
         self.assertEquals(len(tracks), 0)
-   
+
         # add another fragment for the same track
         info = database.FileInfo(u'localhost', u'/tmp/milez.ogg',
             md5sum=u'deadbabe')
@@ -364,7 +364,7 @@ class DatabaseTestCase(BaseTestCase):
         mb = u'9b9b333e-8278-401b-8361-700c14096228'
         metadata.mbTrackId = mb
 
-        yield self.testdb.trackAddFragmentFileByMBTrackId(tm, 
+        yield self.testdb.trackAddFragmentFileByMBTrackId(tm,
             info, metadata)
 
 class DatabaseInteractorTestCase(BaseTestCase):
