@@ -87,7 +87,7 @@ class TrackModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testFragments(self):
-        tm = yield self.testdb.newTrack(name=u'hit me')
+        tm = yield self.testdb.newTrack(name=None)
         yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/first.flac')

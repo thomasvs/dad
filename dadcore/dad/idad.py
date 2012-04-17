@@ -76,6 +76,9 @@ class IDatabase(interface.Interface):
         """
         Return a new track model.
 
+        Name can be None; this allows a track's name to come from
+        metadata or chromaprint info.
+
         @type  name: C{unicode}
         @type  sort: C{unicode}
         @type  mbid: C{unicode}
