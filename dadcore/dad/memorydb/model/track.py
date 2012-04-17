@@ -119,15 +119,6 @@ class MemoryTrackModel(base.ScorableMemoryModel, track.TrackModel):
         """
         return self.database.setCalculatedScore(self, userName, categoryName, score)
 
-    def getCalculatedScores(self, userName=None):
-        """
-        Get a track's calculated scores and resolve their user and category.
-
-        @returns: L{Deferred} firing list of L{data.Score}
-        """
-        return self.database.getCalculatedScores(self)
-
-        
     # FIXME: need more ?
     def get(self, subjectId):
         return defer.succeed(self)

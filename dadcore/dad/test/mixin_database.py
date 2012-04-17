@@ -59,6 +59,7 @@ class TrackModelTestCase(BaseTestCase):
 
         self.assertEquals(tm.getName(), u'hit me')
 
+        self.failUnless(repr(tm))
 
     @defer.inlineCallbacks
     def testScore(self):
@@ -78,16 +79,31 @@ class TrackModelTestCase(BaseTestCase):
         self.assertEquals(scores[0].category, u'Good')
         self.assertEquals(scores[0].score, 0.1)
 
-        # update score
+        # update track score
         yield tm.setScore(u'thomas', u'Good', 0.3)
 
         scores = yield self.testdb.getScores(tm)
         self.assertEquals(scores[0].category, u'Good')
         self.assertEquals(scores[0].score, 0.3)
 
+        # actually score track
+        yield tm.score(u'thomas', u'Good', 0.4)
+
+        scores = yield self.testdb.getScores(tm)
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 0.4)
+
+        # since it's only the track we score, we should get the same
+        # when we calculate
+        scores = yield tm.getCalculatedScores()
+
+        self.assertEquals(scores[0].category, u'Good')
+        self.assertEquals(scores[0].score, 0.4)
+
     @defer.inlineCallbacks
     def testFragments(self):
         tm = yield self.testdb.newTrack(name=None)
+        self.failUnless(tm)
         yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/first.flac')
