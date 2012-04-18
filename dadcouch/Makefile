@@ -18,3 +18,8 @@ check: trial pep8
 doc: python/dadcouch Makefile
 	@mkdir -p doc
 	PYTHONPATH=$$PYTHONPATH:python/dadcouch/extern epydoc -v -o doc/html --exclude test.test_ misc/epyhelp.py dad dadgst dadcouch dadgtk
+
+DB=dad
+
+push:
+	couchapp push --docid _design/dad couchdb http://localhost:5984/$(DB)
