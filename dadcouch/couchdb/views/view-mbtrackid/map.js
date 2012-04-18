@@ -22,6 +22,13 @@ function(doc) {
                     }
                 }
             });
+
+            if (fragment.chroma && fragment.chroma.mbid) {
+                if (!(fragment.chroma.mbid in seen)) {
+                    emit(fragment.chroma.mbid, doc._id);
+                    seen[fragment.chroma.mbid] = 1;
+                }
+            }
         });
     }
 }

@@ -14,16 +14,23 @@ function(doc) {
                 doc.fragments.forEach(
 
                 function(fragment) {
-                    fragment.files.forEach(
-
-                    function(file) {
-                        if (file.metadata && file.metadata.title) {
-                            if (!(file.metadata.title in seen)) {
-                                emit(file.metadata.title, 1);
-                                seen[file.metadata.title] = 1;
-                            }
+                    if (fragment.chroma && fragment.chroma.title) {
+                        if (!(fragment.chroma.title in seen)) {
+                            emit(fragment.chroma.title, 1);
+                            seen[fragment.chroma.title] = 1;
                         }
-                    });
+                    } else {
+                        fragment.files.forEach(
+
+                        function(file) {
+                            if (file.metadata && file.metadata.title) {
+                                if (!(file.metadata.title in seen)) {
+                                    emit(file.metadata.title, 1);
+                                    seen[file.metadata.title] = 1;
+                                }
+                            }
+                        });
+                    }
                 });
             }
 
