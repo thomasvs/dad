@@ -22,6 +22,7 @@ class MemoryArtistModel(base.ScorableMemoryModel, artist.ArtistModel):
         base.ScorableMemoryModel.__init__(self, memorydb)
         self.tracks = []
 
+    @classmethod
     def new(self, db, name, sort=None, mbid=None):
         if not sort:
             sort = name
@@ -31,7 +32,6 @@ class MemoryArtistModel(base.ScorableMemoryModel, artist.ArtistModel):
         model.sortName = sort
         model.mbid = mbid
         return model
-    new = classmethod(new)
 
     ### model implementations
     # FIXME: decide if getName can return this or def; used in __repr__

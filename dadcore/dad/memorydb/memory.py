@@ -1,4 +1,4 @@
-# -*- Mode: Python; test-case-name: dad.test.test_database_memory -*-
+# -*- Mode: Python; test-case-name: dad.test.test_memorydb_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 import pickle
@@ -65,13 +65,18 @@ class MemoryDB(database.Database):
             pickle.dump(self.__dict__, handle, 2)
             handle.close()
 
- 
     ### idad.IDatabase interface
     def newTrack(self, name, sort=None, mbid=None):
-        return track.MemoryTrackModel.new(self, name, sort=sort, mbid=mbid)
+        t = track.MemoryTrackModel.new(self, name, sort=sort, mbid=mbid)
+        self._id += 1
+        t.id = self._id
+        return t
 
     def newArtist(self, name, sort=None, mbid=None):
-        return artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
+        a = artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
+        self._id += 1
+        a.id = self._id
+        return a
 
     @defer.inlineCallbacks
     def getOrCreateArtist(self, name, sort=None, mbid=None):
@@ -139,7 +144,7 @@ class MemoryDB(database.Database):
                 self._artists[name].tracks.append(track)
 
         self._save()
-            
+
         return defer.succeed(track)
 
 
@@ -172,7 +177,7 @@ class MemoryDB(database.Database):
         scores = self._calculatedScores.get(subject, [])
         return defer.succeed(scores)
 
-    
+
     @defer.inlineCallbacks
     def setCalculatedScore(self, subject, userName, categoryName, score):
         found = False
@@ -199,7 +204,7 @@ class MemoryDB(database.Database):
 
         defer.returnValue(subject)
 
- 
+
     def getTracksByHostPath(self, host, path):
         """
         @type  host: unicode

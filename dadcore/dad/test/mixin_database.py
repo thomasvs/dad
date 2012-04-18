@@ -150,6 +150,7 @@ class ArtistModelTestCase(BaseTestCase):
         aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
         yield aModel.save()
         tid = yield aModel.getId()
+        self.failUnless(tid, '%r does not have an id' % aModel)
 
         mid = yield aModel.getMid()
 
@@ -167,6 +168,12 @@ class ArtistModelTestCase(BaseTestCase):
         self.assertEquals(len(tracks), 1)
         rtid = yield aModel.getId()
         self.assertEquals(tid, rtid)
+
+    def testGetMidFailed(self):
+        aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
+        yield aModel.save()
+        tid = yield aModel.getId()
+        self.failUnless(tid, '%r does not have an id' % aModel)
 
     def testScore(self):
         am = yield self.testdb.newArtist(name=u'The Afghan Whigs')
