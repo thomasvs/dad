@@ -67,16 +67,10 @@ class MemoryDB(database.Database):
 
     ### idad.IDatabase interface
     def newTrack(self, name, sort=None, mbid=None):
-        t = track.MemoryTrackModel.new(self, name, sort=sort, mbid=mbid)
-        self._id += 1
-        t.id = self._id
-        return t
+        return track.MemoryTrackModel.new(self, name, sort=sort, mbid=mbid)
 
     def newArtist(self, name, sort=None, mbid=None):
-        a = artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
-        self._id += 1
-        a.id = self._id
-        return a
+        return artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
 
     @defer.inlineCallbacks
     def getOrCreateArtist(self, name, sort=None, mbid=None):
@@ -109,6 +103,9 @@ class MemoryDB(database.Database):
         raise TypeError('Cannot save subject %r' % subject)
 
     def _saveTrack(self, track):
+        if track.id is None:
+            self._id += 1
+            track.id = self._id
         self._tracks[track.id] = track
 
         for fragment in track.fragments:
@@ -348,6 +345,9 @@ class MemoryDB(database.Database):
         """
         @type  artist: L{artist.ArtistModel}
         """
+        if artist.id is None:
+            self._id += 1
+            artist.id = self._id
         # FIXME: use interface, getName ?
         self._artists[artist.name] = artist
         self._save()

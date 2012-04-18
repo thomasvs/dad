@@ -5,14 +5,17 @@
 Additional base classes for model/view/controller.
 """
 
+from dad.common import log
 from dad.base import base
 
 # FIXME: move somewhere else ?
 
-class BackedModel(base.Model):
+class BackedModel(base.Model, log.Loggable):
     """
     I hold data coming from a database.
     """
+
+    logCategory = 'backedmodel'
 
     def __init__(self, database):
         """

@@ -169,11 +169,48 @@ class ArtistModelTestCase(BaseTestCase):
         rtid = yield aModel.getId()
         self.assertEquals(tid, rtid)
 
+    @defer.inlineCallbacks
     def testGetMidFailed(self):
+        # an artist with nothing set does not give an mid
+        aModel = self.testdb.newArtist(None)
+        try:
+            yield aModel.getMid()
+            self.fail('getMid on an empty artist should raise KeyError')
+        except KeyError:
+            pass
+
+    @defer.inlineCallbacks
+    def testGetMidName(self):
+        # an artist with only name gets the name for mid
         aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
+        # before saving, it doesn't have an id
+
+        mid = yield aModel.getMid()
+        self.assertEquals(mid, u'artist:name:The Afghan Whigs')
+
+    @defer.inlineCallbacks
+    def testGetMidMBId(self):
+        # an artist with musicbrainz id gets that for mid
+        aModel = self.testdb.newArtist(name=u'The Afghan Whigs',
+            mbid=u'2feb192c-2363-46d6-b476-1c88a25cb294')
+        # before saving, it doesn't have an id
+
+        mid = yield aModel.getMid()
+        self.assertEquals(mid,
+            u'artist:mbid:2feb192c-2363-46d6-b476-1c88a25cb294')
+
+    @defer.inlineCallbacks
+    def testGetMidId(self):
+        # an artist saved gets id and gets that for mid
+
+        aModel = self.testdb.newArtist(name=u'The Afghan Whigs',
+            mbid=u'2feb192c-2363-46d6-b476-1c88a25cb294')
         yield aModel.save()
         tid = yield aModel.getId()
         self.failUnless(tid, '%r does not have an id' % aModel)
+
+        mid = yield aModel.getMid()
+        self.assertEquals(mid, tid)
 
     def testScore(self):
         am = yield self.testdb.newArtist(name=u'The Afghan Whigs')

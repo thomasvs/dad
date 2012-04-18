@@ -13,6 +13,8 @@ class ArtistModel(scorable.ScorableModel):
     My controller is L{dad.controller.track.ArtistController}
     """
 
+    logCategory = 'artistmodel'
+
     def new(self, db, name, sort=None, mbid=None):
         """
         Return a new artist model.
