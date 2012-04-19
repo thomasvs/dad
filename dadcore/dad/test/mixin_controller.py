@@ -62,7 +62,7 @@ class ArtistControllerTestCase(BaseTestCase):
     def testArtist(self):
         from twisted.internet import reactor
 
-        aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
+        aModel = self.testdb.new('artist', name=u'The Afghan Whigs')
         aController = cartist.ArtistController(aModel)
         aView = FakeArtistView()
         aController.addView(aView)

@@ -34,19 +34,16 @@ class DADDB(database.Database):
         self.dbName = dbName
 
         self._internal = internal.InternalDB(db, dbName)
+        self.registerFactory('track', track.CouchTrackModel)
+        self.registerFactory('artist', artist.CouchArtistModel)
+        self.registerFactory('album', album.CouchAlbumModel)
 
     ## idad.IDatabase interface
-    def newTrack(self, name, sort=None, mbid=None):
-        return track.CouchTrackModel.new(self, name, sort, mbid)
-
     @defer.inlineCallbacks
     def getTrack(self, trackId):
         model = track.CouchTrackModel(self)
         model.document = yield self.map(trackId, mappings.Track)
         defer.returnValue(model)
-
-    def newArtist(self, name, sort=None, mbid=None):
-        return artist.CouchArtistModel.new(self, name, sort, mbid)
 
     @defer.inlineCallbacks
     def getOrCreateArtist(self, name, sort=None, mbid=None):
@@ -54,9 +51,6 @@ class DADDB(database.Database):
         am = yield am.getOrCreate()
         defer.returnValue(am)
         return
-
-    def newAlbum(self, name, sort=None, mbid=None):
-        return album.CouchAlbumModel.new(self, name, sort, mbid)
 
 
     # FIXME: use internal save ?
@@ -184,7 +178,7 @@ class DADDB(database.Database):
 
     def _wrapTrackDocuments(self, gen):
         for doc in gen or []:
-            model = self.newTrack(doc.name)
+            model = self.new('track', doc.name)
             model.document = doc
             yield model
 

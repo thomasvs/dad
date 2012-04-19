@@ -56,6 +56,10 @@ class MemoryDB(database.Database):
             self.debug('%d tracks', len(self._tracks))
             self.debug('%d artists', len(self._artists))
 
+        self.registerFactory('track', track.MemoryTrackModel)
+        self.registerFactory('artist', artist.MemoryArtistModel)
+        # self.registerFactory('album', album.MemoryAlbumModel)
+
     # private methods
     def _save(self):
         # save to disk
@@ -66,12 +70,6 @@ class MemoryDB(database.Database):
             handle.close()
 
     ### idad.IDatabase interface
-    def newTrack(self, name, sort=None, mbid=None):
-        return track.MemoryTrackModel.new(self, name, sort=sort, mbid=mbid)
-
-    def newArtist(self, name, sort=None, mbid=None):
-        return artist.MemoryArtistModel.new(self, name, sort=sort, mbid=mbid)
-
     @defer.inlineCallbacks
     def getOrCreateArtist(self, name, sort=None, mbid=None):
         # look up by mbid or name

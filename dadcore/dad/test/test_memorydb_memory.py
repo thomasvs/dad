@@ -49,7 +49,7 @@ class MemoryDatabasePickleTestCase(MemoryDBPickleTestCase, unittest.TestCase):
 
     @defer.inlineCallbacks
     def testScorePersists(self):
-        t = yield self.testdb.newTrack(name=u'Crap Song')
+        t = self.testdb.new('track', name=u'Crap Song')
         yield self.testdb.save(t)
 
         yield self.testdb.score(t, u'thomas', u'Good', 0.1)

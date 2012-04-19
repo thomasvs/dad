@@ -66,10 +66,13 @@ class IDatabase(interface.Interface):
     I am an interface for databases.
     """
 
-    # FIXME: remove
-    def new():
+    def new(which, *args, **kwargs):
         """
-        Return a new track data object that can be handed to calls.
+        Return a new model object.
+
+        @param which: one of 'track', 'artist', 'album'
+
+        @rtype: L{dad.model.base.BaseModel}
         """
 
     def newTrack(name, sort=None, mbid=None):

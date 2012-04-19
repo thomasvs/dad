@@ -33,7 +33,7 @@ class BaseTestCase(log.Loggable):
         """
         # add a first track
         # FIXME: no name makes sense or not?
-        tm = self.testdb.newTrack(name=None)
+        tm = self.testdb.new('track', name=None)
         yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/first.flac')
@@ -49,12 +49,12 @@ class TrackModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testNewSave(self):
-        tm = yield self.testdb.newTrack(name=u'hit me')
+        tm = self.testdb.new('track', name=u'hit me')
         yield self.testdb.save(tm)
 
     @defer.inlineCallbacks
     def testTrackGetName(self):
-        tm = yield self.testdb.newTrack(name=u'hit me')
+        tm = self.testdb.new('track', name=u'hit me')
         tm = yield self.testdb.save(tm)
 
         self.assertEquals(tm.getName(), u'hit me')
@@ -63,7 +63,7 @@ class TrackModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testScore(self):
-        tm = yield self.testdb.newTrack(name=u'hit me')
+        tm = self.testdb.new('track', name=u'hit me')
 
         # make sure it gets an id
         tm = yield self.testdb.save(tm)
@@ -102,7 +102,7 @@ class TrackModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testFragments(self):
-        tm = yield self.testdb.newTrack(name=None)
+        tm = yield self.testdb.new('track', name=None)
         self.failUnless(tm)
         yield self.testdb.save(tm)
 
@@ -147,7 +147,7 @@ class ArtistModelTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testArtist(self):
-        aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
+        aModel = self.testdb.new('artist', name=u'The Afghan Whigs')
         yield aModel.save()
         tid = yield aModel.getId()
         self.failUnless(tid, '%r does not have an id' % aModel)
@@ -172,7 +172,7 @@ class ArtistModelTestCase(BaseTestCase):
     @defer.inlineCallbacks
     def testGetMidFailed(self):
         # an artist with nothing set does not give an mid
-        aModel = self.testdb.newArtist(None)
+        aModel = self.testdb.new('artist', None)
         try:
             yield aModel.getMid()
             self.fail('getMid on an empty artist should raise KeyError')
@@ -182,7 +182,7 @@ class ArtistModelTestCase(BaseTestCase):
     @defer.inlineCallbacks
     def testGetMidName(self):
         # an artist with only name gets the name for mid
-        aModel = self.testdb.newArtist(name=u'The Afghan Whigs')
+        aModel = self.testdb.new('artist', name=u'The Afghan Whigs')
         # before saving, it doesn't have an id
 
         mid = yield aModel.getMid()
@@ -191,7 +191,7 @@ class ArtistModelTestCase(BaseTestCase):
     @defer.inlineCallbacks
     def testGetMidMBId(self):
         # an artist with musicbrainz id gets that for mid
-        aModel = self.testdb.newArtist(name=u'The Afghan Whigs',
+        aModel = self.testdb.new('artist', name=u'The Afghan Whigs',
             mbid=u'2feb192c-2363-46d6-b476-1c88a25cb294')
         # before saving, it doesn't have an id
 
@@ -202,8 +202,7 @@ class ArtistModelTestCase(BaseTestCase):
     @defer.inlineCallbacks
     def testGetMidId(self):
         # an artist saved gets id and gets that for mid
-
-        aModel = self.testdb.newArtist(name=u'The Afghan Whigs',
+        aModel = self.testdb.new('artist', name=u'The Afghan Whigs',
             mbid=u'2feb192c-2363-46d6-b476-1c88a25cb294')
         yield aModel.save()
         tid = yield aModel.getId()
@@ -213,7 +212,7 @@ class ArtistModelTestCase(BaseTestCase):
         self.assertEquals(mid, tid)
 
     def testScore(self):
-        am = yield self.testdb.newArtist(name=u'The Afghan Whigs')
+        am = self.testdb.new('artist', name=u'The Afghan Whigs')
 
         # make sure it gets an id
         am = yield self.testdb.save(am)
@@ -268,7 +267,7 @@ class ArtistSelectorModelTestCase(BaseTestCase):
         self.assertEquals(count, 1)
 
         # add another track
-        tm = self.testdb.newTrack(name=None)
+        tm = self.testdb.new('track', name=None)
         yield self.testdb.save(tm)
 
         info = database.FileInfo('localhost', '/tmp/second.flac')
@@ -291,7 +290,7 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracks(self):
-        tm = self.testdb.newTrack(name=u'first')
+        tm = self.testdb.new('track', name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac')
         tm.addFragment(info)
         yield self.testdb.save(tm)
@@ -303,7 +302,7 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracksByHostPath(self):
-        tm = self.testdb.newTrack(name=u'first')
+        tm = self.testdb.new('track', name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac')
         tm.addFragment(info)
         yield self.testdb.save(tm)
@@ -338,7 +337,7 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracksByMD5Sum(self):
-        tm = self.testdb.newTrack(name=u'first')
+        tm = self.testdb.new('track', name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/first.flac',
             md5sum=u'deadbeef')
         tm.addFragment(info)
@@ -384,7 +383,7 @@ class DatabaseTestCase(BaseTestCase):
 
     @defer.inlineCallbacks
     def testGetTracksByMBTrackId(self):
-        tm = self.testdb.newTrack(name=u'first')
+        tm = self.testdb.new('track', name=u'first')
         info = database.FileInfo(u'localhost', u'/tmp/milez.flac',
             md5sum=u'deadbeef')
 

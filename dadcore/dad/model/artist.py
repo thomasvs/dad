@@ -15,6 +15,7 @@ class ArtistModel(scorable.ScorableModel):
 
     logCategory = 'artistmodel'
 
+    @classmethod
     def new(self, db, name, sort=None, mbid=None):
         """
         Return a new artist model.
@@ -26,7 +27,6 @@ class ArtistModel(scorable.ScorableModel):
         @rtype: L{dad.model.artist.ArtistModel}
         """
         raise NotImplementedError
-    new = classmethod(new)
 
     def getName(self):
         """

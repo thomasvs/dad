@@ -1,9 +1,11 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: dad.test.test_memorydb_memory -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
 """
 Base implementation of common database methods.
 """
+
+import warnings
 
 from twisted.internet import defer
 
@@ -15,6 +17,37 @@ class Database(log.Loggable):
     """
     Base class for database.
     """
+
+    factories = None
+
+    ## idad.IDatabase interface
+
+    def registerFactory(self, name, klazz):
+        if not self.factories:
+            self.factories = {}
+
+        self.factories[name] = klazz
+
+    def new(self, factory, *args, **kwargs):
+        assert self.factories, "No factories registered"
+        return self.factories[factory].new(self, *args, **kwargs)
+
+    def newTrack(self, name, sort=None, mbid=None):
+        warnings.warn('new() should be used instead of newTrack ()',
+            stacklevel=2)
+        return self.new('track', name, sort, mbid)
+
+    def newArtist(self, name, sort=None, mbid=None):
+        warnings.warn('new() should be used instead of newArtist ()',
+            stacklevel=2)
+        return self.new('artist', name, sort, mbid)
+
+    def newAlbum(self, name, sort=None, mbid=None):
+        warnings.warn('new() should be used instead of newAlbum ()',
+            stacklevel=2)
+        return self.new('album', name, sort, mbid)
+
+
     @defer.inlineCallbacks
     def score(self, model, userName, categoryName, score):
         """
