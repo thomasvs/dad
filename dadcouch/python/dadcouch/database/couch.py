@@ -55,27 +55,6 @@ class DADDB(database.Database):
         defer.returnValue(am)
         return
 
-        # FIXME: remove this code or fold it into the class method
-        # look up by mbid or name
-        mid = None
-        if mbid:
-            mid = u'artist:mbid:' + mbid
-        elif name:
-            mid = u'artist:name:' + name
-
-        if mid:
-            self.debug('Looking up by mid %r', mid)
-            # FIXME: convert to class method ?
-            model = yield artist.CouchArtistModel.new(self, name, sort, mbid)
-            model = yield model.get(mid)
-            self.debug('Looked up by mid %r, model %r', mid, model)
-
-        if not model:
-            self.debug('Creating new artist for mid %r', mid)
-            model = yield artist.CouchArtistModel.new(self, name, sort, mbid)
-
-        defer.returnValue(model)
-
     def newAlbum(self, name, sort=None, mbid=None):
         return album.CouchAlbumModel.new(self, name, sort, mbid)
 
