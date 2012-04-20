@@ -83,6 +83,7 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
         return self.database.save(self)
 
     ### FIXME: to be added to iface ?
+    ### FIXME: make it a class method too
 
     @defer.inlineCallbacks
     def getOrCreate(self):
