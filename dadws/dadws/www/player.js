@@ -33,6 +33,11 @@ Date.prototype.logTime = function() {
     return disp;
 };
 
+var logTime = function () {
+    var d = new Date();
+    return d.logTime();
+}
+
 var mylog = function(line) {
     var d = new Date();
     console.log(d.logTime() + ' ' + line);
@@ -66,13 +71,15 @@ $(document).ready(function() {
         var message = jQuery.parseJSON(evt.data);
         if (message.command == 'load') {
             // load a new track
-            mylog('ws: load: id ' + message.id + ': ' +
-            message.artists + ' - ' + message.title);
+            console.log('%s [%d] ws: load: %s - %s',
+                logTime(), message.id,
+                message.artists.toString(), message.title);
 
             // remove a previous one with the same id
             $('#tr-' + message.id).remove();
             if (message.id in document.audios) {
-                mylog('deleting previous audio for id ' + message.id);
+            console.log('%s [%d] deleting previous audio',
+                logTime(), message.id);
                 delete document.audios[message.id];
             }
 
@@ -90,7 +97,8 @@ $(document).ready(function() {
 
             // clean up when playback ends
             $('#audio-' + message.id).bind('ended', function() {
-                mylog('ended: id ' + message.id);
+            console.log('%s [%d] ended',
+                logTime(), message.id);
                 $('#tr-' + message.id).remove();
                 delete document.audios[message.id];
             });
@@ -105,41 +113,46 @@ $(document).ready(function() {
                     playingId = message.id;
                 }
                 var a = document.audios[message.id];
-                mylog('at.at: id ' + message.id + ': play after ' + (new
-                Date().getTime() - document.start) +
-                ' msec since document.start');
+                console.log('%s [%d] at.at: ' +
+                    'play after %f msec since document start',
+                    logTime(), message.id,
+                    (new Date().getTime() - document.start));
 
                 offsetS = message.offset;
-                mylog('at.at: id ' + message.id + ': start track at ' +
-                offsetS + ' sec');
+                console.log('%s [%d] at.at: fragment starts at %f sec',
+                    logTime(), message.id, offsetS);
 
                 if (remainingMs < 0) {
                     // FIXME: handle forwarding past the end,
                     // which plays from 0
-                    mylog('at.at: id ' + message.id +
-                        ': forward track by ' + (-remainingMs) + ' msec');
                     offsetS += -remainingMs / 1000.0;
+                    console.log('%s [%d] at.at: ' +
+                        'forward track by %f sec to %f sec',
+                        logTime(), message.id, (-remainingMs / 1000.0),
+                        offsetS);
                 }
 
                 // we can only seek after we have metadata
                 function loadSeek(event) {
-                    mylog('loadSeek: id ' + message.id +
-                        ': set currentTime to ' + offsetS);
+                    console.log('%s [%d] loadSeek: set currentTime to %f',
+                        logTime(), message.id, offsetS);
                     a.currentTime = offsetS;
                     a.play();
-                    mylog('loadseek: id ' + message.id +
-                        ': currentTime is now ' + a.currentTime +
-                        ' networkState is ' + a.networkState +
-                        ' readyState is ' + a.readyState +
-                        ' buffered is ' + a.buffered.length
-                        );
-                    a.buffered.each(function(b) {
-                        mylog(b.begin + '-' + b.end);
-                    });
+                    console.log('%s [%d] loadSeek: ' + 
+                        ' currentTime is now %f' + 
+                        ' networkState is %d' + 
+                        ' readyState is %d' + 
+                        ' buffered is %d',
+                        logTime(), message.id, 
+                        a.currentTime, a.networkState, a.readyState,
+                        a.buffered.length);
+                    //a.buffered.each(function(b) {
+                    //    mylog(b.begin + '-' + b.end);
+                    //});
                 }
-                //audio.addEventListener('loadedmetadata', loadSeek, false);
+                audio.addEventListener('loadedmetadata', loadSeek, false);
 
-                audio.addEventListener('canplaythrough', loadSeek, false);
+                //audio.addEventListener('canplaythrough', loadSeek, false);
                 a.play();
                 a.pause();
 
@@ -166,32 +179,36 @@ $(document).ready(function() {
                 });
             }, whenMs);
 
-            mylog('load: id ' + message.id +
-                ': scheduled play at ' + whenMs +
-                ' epoch msec in ' + remainingMs + ' msec');
+            console.log('%s [%d] at.at: ' +
+                'scheduled play at %f epoch msec in %f msec',
+                logTime(), message.id, whenMs, remainingMs);
         }
 
         if (message.command == 'setFlavors') {
             mylog('setting flavors');
-            $.each(message.flavors, function(key, value) {
-                mylog('setting flavor key ' + key + ', value ' + value);
-                name = value[0];
-                desc = value[1];
-                $('#controls > tbody > tr > td > #flavors').append(
-                $('<option>', {
-                    value: name
-                }).text(desc));
-            });
+            if (message.flavors) {
+                $.each(message.flavors, function(key, value) {
+                    mylog('setting flavor key ' + key + ', value ' + value);
+                    name = value[0];
+                    desc = value[1];
+                    $('#controls > tbody > tr > td > #flavors').append(
+                    $('<option>', {
+                        value: name
+                    }).text(desc));
+                });
+            }
         }
 
         // FIXME: currently not used
         if (message.command == 'play') {
-            mylog('Schedule play of ' + message.id +
-                ' at' + (message.when * 1000) + ' sec');
+            console.log('%s [%d] at.at: ' +
+                'schedule play at %f sec',
+                logTime(), message.id, (message.when * 1000));
             at.at(function() {
                 a = document.audios[message.id];
-                mylog('Play ' + a +
-                    (new Date().getTime() - document.start));
+                console.log('%s [%d] at.at: ' +
+                    'play of %o',
+                    logTime(), message.id, a);
                 a.play();
 
             }, message.when * 1000);
@@ -224,6 +241,8 @@ $(document).ready(function() {
             count = Number(id.substr(3));
             if (count > playingId) {
                 mylog('Removing track ' + count);
+                console.log('%s [%d] removing track',
+                    logTime(), count);
                 $(n).remove();
             }
         });
