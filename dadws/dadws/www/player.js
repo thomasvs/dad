@@ -201,13 +201,31 @@ var Player = function(args) {
     var playingId = 0;
     var channel = null;
     var imager = new Imager();
+    var muted = false;
     //imager.disable();
 
+
+    handleMuted = function() {
+        for (i in document.audios) {
+            console.log('%s setting %s muted to %s',
+                logTime(), i, muted);
+            document.audios[i].muted = muted;
+        }
+    }
 
     // public API
     return {
         setChannel: function(arg) {
             channel = arg;
+        },
+        setMuted: function(m) {
+            muted = m;
+            handleMuted();
+        },
+        toggleMute: function() {
+            muted = !muted;
+            console.log('%s muted is now %s', logTime(), muted);
+            handleMuted();
         },
         command_load: function(message) {
 
@@ -235,6 +253,7 @@ var Player = function(args) {
                 '" src="' + message.uri + '" controls="controls"/></td></tr>');
             var audio = $('#audio-' + message.id).get(0);
             document.audios[message.id] = audio;
+            audio.muted = muted;
 
             // clean up when playback ends
             $('#audio-' + message.id).bind('ended', function() {
@@ -391,5 +410,9 @@ $(document).ready(function() {
     $('#controls > tbody > tr > td > #playlist').bind('click', function() {
         mylog('clicked');
         player.reschedule();
+    });
+    $('#controls > tbody > tr > td > #mute').bind('click', function() {
+        mylog('mute clicked');
+        player.toggleMute();
     });
 });
