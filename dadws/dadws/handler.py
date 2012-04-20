@@ -111,6 +111,7 @@ class PlayerTestHandler(websocket.WebSocketHandler, log.Loggable):
             artists=scheduled.artists, title=scheduled.title,
             when=when,
             offset=scheduled.mediaStart / float(1000 * 1000 * 1000),
+            duration=scheduled.duration / float(1000 * 1000 * 1000),
             volume=scheduled.volume)
 
 
