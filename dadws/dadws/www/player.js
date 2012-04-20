@@ -39,8 +39,7 @@ var logTime = function() {
 };
 
 var mylog = function(line) {
-    var d = new Date();
-    console.log(d.logTime() + ' ' + line);
+    console.log(logTime() + ' ' + line);
 };
 
 var debugTimeRanges = function(tr) {
@@ -103,6 +102,7 @@ var loadSeek = function(id, audio, offsetS) {
     //});
 };
 
+// An object that can display artist-related images in the background
 var Imager = function(args) {
     var options = {
         ECHONEST_API_KEY: 'N6E4NIOVYMTHNDM8J',
@@ -152,34 +152,61 @@ var Imager = function(args) {
     };
 };
 
-$(document).ready(function() {
-    var playingId = 0;
+// a WebSocket channel that forwards command messages and can send them back
+var WSChannel = function(args) {
+    var options = {
+        url: null,
+        handler: null
+    };
 
+    if (args) {
+        for (var arg in args) {
+            if (args[arg]) {
+                options[arg] = args[arg];
+            }
+        }
+    }
+
+    var ws;
+
+    if (typeof MozWebSocket != 'undefined') {
+        ws = new MozWebSocket(options.url);
+    } else {
+        ws = new WebSocket(options.url);
+    }
+
+    ws.onmessage = function(evt) {
+        console.log('ws: message: ' + evt.data);
+        var message = jQuery.parseJSON(evt.data);
+        options.handler[message.command](message);
+    };
+
+    // public API
+    return {
+        getWebSocket: function() {
+            return ws;
+        },
+        send: function(message) {
+            ws.send(JSON.stringify(message));
+        }
+    };
+};
+
+// the player slaved to the webchannel
+var Player = function(args) {
+    var playingId = 0;
+    var channel = null;
     var imager = new Imager();
     //imager.disable();
 
-    document.audios = {};
-    document.start = new Date().getTime();
 
-    mylog('Document ready at ' + document.start);
+    // public API
+    return {
+        setChannel: function(arg) {
+            channel = arg;
+        },
+        load: function(message) {
 
-    $('#clock').clock({
-        'timestamp': new Date().getTime()
-    });
-
-    var ws;
-    var url = 'ws' + document.URL.slice(4) + 'test';
-
-    if (typeof MozWebSocket != 'undefined') {
-        ws = new MozWebSocket(url);
-    } else {
-        ws = new WebSocket(url);
-    }
-
-     ws.onmessage = function(evt) {
-        mylog('ws: message: ' + evt.data);
-        var message = jQuery.parseJSON(evt.data);
-        if (message.command == 'load') {
             // load a new track
             console.log('%s [%d] ws: load: %s - %s',
                 logTime(), message.id,
@@ -261,9 +288,8 @@ $(document).ready(function() {
             console.log('%s [%d] at.at: ' +
                 'scheduled play at %f epoch msec in %f msec',
                 logTime(), message.id, whenMs, remainingMs);
-        }
-
-        if (message.command == 'setFlavors') {
+        },
+        setFlavors: function(message) {
             mylog('setting flavors');
             if (message.flavors) {
                 $.each(message.flavors, function(key, value) {
@@ -276,10 +302,10 @@ $(document).ready(function() {
                     }).text(desc));
                 });
             }
-        }
+        },
 
         // FIXME: currently not used
-        if (message.command == 'play') {
+        play: function(message) {
             console.log('%s [%d] at.at: ' +
                 'schedule play at %f sec',
                 logTime(), message.id, (message.when * 1000));
@@ -291,8 +317,53 @@ $(document).ready(function() {
                 a.play();
 
             }, message.when * 1000);
+        },
+
+        reschedule: function() {
+            // remove all newer audio objects not yet playing
+            // FIXME: this should probably done to us by the server instead
+            $('#audio > tbody > tr').each(
+
+            function(i, n) {
+                id = $(n)[0].id;
+                count = Number(id.substr(3));
+                if (count > playingId) {
+                    console.log('%s [%d] removing track',
+                        logTime(), count);
+                    $(n).remove();
+                }
+            });
+
+            flavor = $('#controls > tbody > tr > td > #flavors').val();
+            mylog('rescheduling with flavor ' + flavor);
+
+            channel.send(JSON.stringify({
+                'command': 'reschedule',
+                'since': playingId + 1,
+                'flavor': flavor
+            }));
+            //ws.send('{ "command": "reschedule" }');
         }
+
     };
+};
+
+$(document).ready(function() {
+    document.audios = {};
+    document.start = new Date().getTime();
+
+    mylog('Document ready at ' + document.start);
+
+    $('#clock').clock({
+        'timestamp': new Date().getTime()
+    });
+
+    var player = new Player();
+    var url = 'ws' + document.URL.slice(4) + 'test';
+    var channel = new WSChannel({ 'url': url, 'handler': player });
+    player.setChannel(channel);
+
+    var ws = channel.getWebSocket();
 
     ws.onopen = function(evt) {
         $('#conn_status').html('<b>Connected</b>');
@@ -310,30 +381,6 @@ $(document).ready(function() {
     // hook up the buttons
     $('#controls > tbody > tr > td > #playlist').bind('click', function() {
         mylog('clicked');
-
-        // remove all newer audio objects not yet playing
-        // FIXME: this should probably done to us by the server instead
-        $('#audio > tbody > tr').each(
-
-        function(i, n) {
-            id = $(n)[0].id;
-            count = Number(id.substr(3));
-            if (count > playingId) {
-                mylog('Removing track ' + count);
-                console.log('%s [%d] removing track',
-                    logTime(), count);
-                $(n).remove();
-            }
-        });
-
-        flavor = $('#controls > tbody > tr > td > #flavors').val();
-        mylog('rescheduling with flavor ' + flavor);
-
-        ws.send(JSON.stringify({
-            'command': 'reschedule',
-            'since': playingId + 1,
-            'flavor': flavor
-        }));
-        //ws.send('{ "command": "reschedule" }');
+        player.reschedule();
     });
 });
