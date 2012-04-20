@@ -43,6 +43,52 @@ var mylog = function(line) {
     console.log(d.logTime() + ' ' + line);
 };
 
+var debugTimeRanges = function(tr) {
+    var d = 'TimeRanges of length ' + tr.length;
+
+    if (tr.length) {
+        d += ' (';
+        for (var i = 0; i < tr.length; ++i) {
+            d += ' [' + i + '] ' +
+                tr.start(i) + ' - ' + tr.end(i);
+        }
+        d += ')';
+    }
+    return d;
+};
+
+var getEnumMap = function(object, prefix) {
+    var map = {};
+
+    for (name in object) {
+        if (name.substr(0, prefix.length) == prefix) {
+            map[object[name]] = name;
+        }
+    }
+
+    return map;
+ };
+
+var debugAudio = function(audio) {
+    var READY_STATES = getEnumMap(audio, 'HAVE_');
+    var NETWORK_STATES = getEnumMap(audio, 'NETWORK_');
+
+    s = 'duration ' + audio.duration +
+        ', currentTime ' + audio.currentTime +
+        ', volume ' + audio.volume +
+        ', paused ' + audio.paused +
+        ', ended ' + audio.ended +
+        ', initialTime ' + audio.initialTime +
+        ', startTime ' + audio.startTime +
+        ', networkState ' + NETWORK_STATES[audio.networkState] +
+        ', readyState ' + READY_STATES[audio.readyState] +
+        ', buffered ' + debugTimeRanges(audio.buffered) +
+        ', seekable ' + debugTimeRanges(audio.seekable) +
+        ', played ' + debugTimeRanges(audio.played);
+
+    return s;
+};
+
 // Move these functions to a separate scope ?
 // we can only seek after we have metadata
 var loadSeek = function(id, audio, offsetS) {
@@ -50,23 +96,40 @@ var loadSeek = function(id, audio, offsetS) {
         logTime(), id, offsetS);
     audio.currentTime = offsetS;
     audio.play();
-    console.log('%s [%d] loadSeek: ' +
-        ' currentTime is now %f' +
-        ' networkState is %d' +
-        ' readyState is %d' +
-        ' buffered is %d',
-        logTime(), id,
-        audio.currentTime, audio.networkState, audio.readyState,
-        audio.buffered.length);
+    console.log('%s [%d] loadSeek: %s',
+        logTime(), id, debugAudio(audio));
     //a.buffered.each(function(b) {
     //    mylog(b.begin + '-' + b.end);
     //});
 };
 
+imager = {
+    'API_KEY': 'N6E4NIOVYMTHNDM8J',
+
+    'show': function(artistName) {
+        echonest = new EchoNest(this.API_KEY);
+
+        echonest.artist(artistName).images(
+            function(imageCollection) {
+            var images = [];
+            for (i in imageCollection.data.images) {
+                images.push({
+                    src: imageCollection.data.images[i].url,
+                    fade: 3000
+                });
+            }
+            $.vegas('slideshow', {
+                delay: 10000,
+                backgrounds: images
+            })('overlay', {
+                src: 'vegas/overlays/13.png',
+                opacity: 0.5
+            });
+        });
+    }
+};
 
 $(document).ready(function() {
-    var API_KEY = 'N6E4NIOVYMTHNDM8J';
-    var echonest = new EchoNest(API_KEY);
     var playingId = 0;
 
     document.audios = {};
@@ -165,24 +228,8 @@ $(document).ready(function() {
                 $('#tr-' + message.id).css('font-weight', 'bold');
 
                 // get and show images for this artist
-                echonest.artist(message.artists[0]).images(
-                    function(imageCollection) {
-                    var images = [];
-                    for (i in imageCollection.data.images) {
-                        images.push({
-                            src: imageCollection.data.images[i].url,
-                            fade: 3000
-                        });
-                    }
-                    $.vegas('slideshow', {
-                        delay: 10000,
-                        backgrounds: images
-                    })('overlay', {
-                        src: 'vegas/overlays/13.png',
-                        opacity: 0.5
-                    });
+                imager.show(message.artists[0]);
 
-                });
             }, whenMs);
 
             console.log('%s [%d] at.at: ' +
