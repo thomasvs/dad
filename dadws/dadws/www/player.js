@@ -33,14 +33,34 @@ Date.prototype.logTime = function() {
     return disp;
 };
 
-var logTime = function () {
+var logTime = function() {
     var d = new Date();
     return d.logTime();
-}
+};
 
 var mylog = function(line) {
     var d = new Date();
     console.log(d.logTime() + ' ' + line);
+};
+
+// Move these functions to a separate scope ?
+// we can only seek after we have metadata
+var loadSeek = function(id, audio, offsetS) {
+    console.log('%s [%d] loadSeek: set currentTime to %f',
+        logTime(), id, offsetS);
+    audio.currentTime = offsetS;
+    audio.play();
+    console.log('%s [%d] loadSeek: ' +
+        ' currentTime is now %f' +
+        ' networkState is %d' +
+        ' readyState is %d' +
+        ' buffered is %d',
+        logTime(), id,
+        audio.currentTime, audio.networkState, audio.readyState,
+        audio.buffered.length);
+    //a.buffered.each(function(b) {
+    //    mylog(b.begin + '-' + b.end);
+    //});
 };
 
 
@@ -66,7 +86,8 @@ $(document).ready(function() {
     } else {
         ws = new WebSocket(url);
     }
-    ws.onmessage = function(evt) {
+
+     ws.onmessage = function(evt) {
         mylog('ws: message: ' + evt.data);
         var message = jQuery.parseJSON(evt.data);
         if (message.command == 'load') {
@@ -118,7 +139,7 @@ $(document).ready(function() {
                     logTime(), message.id,
                     (new Date().getTime() - document.start));
 
-                offsetS = message.offset;
+                var offsetS = message.offset;
                 console.log('%s [%d] at.at: fragment starts at %f sec',
                     logTime(), message.id, offsetS);
 
@@ -132,25 +153,10 @@ $(document).ready(function() {
                         offsetS);
                 }
 
-                // we can only seek after we have metadata
-                function loadSeek(event) {
-                    console.log('%s [%d] loadSeek: set currentTime to %f',
-                        logTime(), message.id, offsetS);
-                    a.currentTime = offsetS;
-                    a.play();
-                    console.log('%s [%d] loadSeek: ' + 
-                        ' currentTime is now %f' + 
-                        ' networkState is %d' + 
-                        ' readyState is %d' + 
-                        ' buffered is %d',
-                        logTime(), message.id, 
-                        a.currentTime, a.networkState, a.readyState,
-                        a.buffered.length);
-                    //a.buffered.each(function(b) {
-                    //    mylog(b.begin + '-' + b.end);
-                    //});
-                }
-                audio.addEventListener('loadedmetadata', loadSeek, false);
+                audio.addEventListener('loadedmetadata',
+                    function(event) {
+                        loadSeek(message.id, a, offsetS);
+                    }, false);
 
                 //audio.addEventListener('canplaythrough', loadSeek, false);
                 a.play();
