@@ -33,6 +33,10 @@ Date.prototype.logTime = function() {
     return disp;
 };
 
+var decibelToRaw = function(db) {
+    return Math.pow(10, db / 10.0);
+}
+
 var logTime = function() {
     var d = new Date();
     return d.logTime();
