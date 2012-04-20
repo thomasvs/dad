@@ -182,7 +182,7 @@ var WSChannel = function(args) {
     ws.onmessage = function(evt) {
         console.log('ws: message: ' + evt.data);
         var message = jQuery.parseJSON(evt.data);
-        options.handler[message.command](message);
+        options.handler['command_' + message.command](message);
     };
 
     // public API
@@ -209,7 +209,7 @@ var Player = function(args) {
         setChannel: function(arg) {
             channel = arg;
         },
-        load: function(message) {
+        command_load: function(message) {
 
             // load a new track
             console.log('%s [%d] ws: load: %s - %s',
@@ -293,7 +293,7 @@ var Player = function(args) {
                 'scheduled play at %f epoch msec in %f msec',
                 logTime(), message.id, whenMs, remainingMs);
         },
-        setFlavors: function(message) {
+        command_setFlavors: function(message) {
             mylog('setting flavors');
             if (message.flavors) {
                 $.each(message.flavors, function(key, value) {
@@ -309,7 +309,7 @@ var Player = function(args) {
         },
 
         // FIXME: currently not used
-        play: function(message) {
+        command_play: function(message) {
             console.log('%s [%d] at.at: ' +
                 'schedule play at %f sec',
                 logTime(), message.id, (message.when * 1000));
