@@ -254,10 +254,15 @@ var Player = function(args) {
                     playingId = message.id;
                 }
                 var a = document.audios[message.id];
+
                 console.log('%s [%d] at.at: ' +
-                    'play after %f msec since document start',
+                    'play at %f dB after %f msec since document start',
                     logTime(), message.id,
-                    (new Date().getTime() - document.start));
+                    message.volume, (new Date().getTime() - document.start));
+                a.volume = decibelToRaw(message.volume);
+                // store this so we can set it back when unmuting
+                a.requestedVolume = a.volume;
+                console.log('%f dB is %f absolute', message.volume, a.volume);
 
                 var offsetS = message.offset;
                 console.log('%s [%d] at.at: fragment starts at %f sec',
