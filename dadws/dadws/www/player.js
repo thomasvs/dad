@@ -103,34 +103,60 @@ var loadSeek = function(id, audio, offsetS) {
     //});
 };
 
-imager = {
-    'API_KEY': 'N6E4NIOVYMTHNDM8J',
+var Imager = function(args) {
+    var options = {
+        ECHONEST_API_KEY: 'N6E4NIOVYMTHNDM8J',
+        enabled: true
+    };
 
-    'show': function(artistName) {
-        echonest = new EchoNest(this.API_KEY);
-
-        echonest.artist(artistName).images(
-            function(imageCollection) {
-            var images = [];
-            for (i in imageCollection.data.images) {
-                images.push({
-                    src: imageCollection.data.images[i].url,
-                    fade: 3000
-                });
+    if (args) {
+        for (var arg in args) {
+            if (args[arg]) {
+                options[arg] = args[arg];
             }
-            $.vegas('slideshow', {
-                delay: 10000,
-                backgrounds: images
-            })('overlay', {
-                src: 'vegas/overlays/13.png',
-                opacity: 0.5
-            });
-        });
+        }
     }
+
+    var echonest = new EchoNest(options.ECHONEST_API_KEY);
+
+
+    // public API
+    return {
+        show: function(artistName) {
+            if (!options.enabled) return;
+
+            echonest.artist(artistName).images(
+                function(imageCollection) {
+                var images = [];
+                for (i in imageCollection.data.images) {
+                    images.push({
+                        src: imageCollection.data.images[i].url,
+                        fade: 3000
+                    });
+                }
+                $.vegas('slideshow', {
+                    delay: 10000,
+                    backgrounds: images
+                })('overlay', {
+                    src: 'vegas/overlays/13.png',
+                    opacity: 0.5
+                });
+            });
+        },
+        disable: function() {
+            options.enabled = false;
+        },
+        enable: function() {
+            options.enabled = true;
+        }
+    };
 };
 
 $(document).ready(function() {
     var playingId = 0;
+
+    var imager = new Imager();
+    //imager.disable();
 
     document.audios = {};
     document.start = new Date().getTime();
