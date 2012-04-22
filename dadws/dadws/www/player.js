@@ -37,6 +37,17 @@ var decibelToRaw = function(db) {
     return Math.pow(10, db / 10.0);
 }
 
+// the volume factor cannot be bigger than 1.0 for the audio element
+var clamp = function(factor) {
+    if (factor > 1.0)
+        return 1.0;
+    return factor;
+}
+
+var deCube = function(factor) {
+    return Math.pow(factor, 1 / 3.0);
+}
+
 var logTime = function() {
     var d = new Date();
     return d.logTime();
@@ -278,10 +289,11 @@ var Player = function(args) {
                     'play at %f dB after %f msec since document start',
                     logTime(), message.id,
                     message.volume, (new Date().getTime() - document.start));
-                a.volume = decibelToRaw(message.volume);
+                // FIXME: volume does not seem to be linear at all!
+                a.volume = clamp(deCube(decibelToRaw(message.volume)));
                 // store this so we can set it back when unmuting
-                a.requestedVolume = a.volume;
-                console.log('%f dB is %f absolute', message.volume, a.volume);
+                //a.requestedVolume = a.volume;
+                console.log('%f dB is %f decubed', message.volume, a.volume);
 
                 var offsetS = message.offset;
                 console.log('%s [%d] at.at: fragment starts at %f sec',
