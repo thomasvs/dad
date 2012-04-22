@@ -23,8 +23,28 @@ class List(tcommand.TwistedCommand):
                 " & ".join(track.getArtistNames()), track.getName()))
 
 
+class Duplicates(tcommand.TwistedCommand):
+
+    description = """List all duplicate tracks in the database."""
+
+    @defer.inlineCallbacks
+    def doLater(self, args):
+        db = self.parentCommand.parentCommand.database
+        res = yield db.getDuplicateTracks()
+        count = 0
+
+        for mbtrackid, tracks in res:
+            count += 1
+            self.stdout.write('mbtrackid: %s\n' % mbtrackid)
+            for track in tracks:
+                self.stdout.write('  %s - %s\n' % (
+                    " & ".join(track.getArtistNames()), track.getName()))
+
+        self.stdout.write('%d duplicates\n' % count)
+
+
 class Track(logcommand.LogCommand):
 
-    subCommandClasses = [List, ]
+    subCommandClasses = [Duplicates, List, ]
 
     description = 'Interact with tracks.'
