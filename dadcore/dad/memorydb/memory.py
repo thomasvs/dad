@@ -36,7 +36,7 @@ class MemoryDB(database.Database):
         self._tracks = {} # id -> MemoryTrackModel
         self._artists = {} # dict of artist name -> MemoryArtistModel
         self._categories = {}
-        self._mbTrackIds = {} # mb track id -> MemoryTrackModel
+        self._mbTrackIds = {} # mb track id -> list of MemoryTrackModel
 
         self._hostPath = {} # dict of host -> (dict of path -> MemoryTrackModel
         self._md5sums = {} # dict of md5sum -> MemoryTrackModel
