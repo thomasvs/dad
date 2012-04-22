@@ -20,9 +20,7 @@ from dadcouch.database import mappings
 class CouchDBCommand(tcommand.TwistedCommand):
 
     def addOptions(self):
-        # FIXME: move these options to a place where they don't import reactor
-        from dadcouch.selecter import couch as scouch
-        self.parser.add_options(scouch.couchdb_option_list)
+        self.parser.add_options(couch.couchdb_option_list)
 
     def do(self, args):
         from dadcouch.extern.paisley import client

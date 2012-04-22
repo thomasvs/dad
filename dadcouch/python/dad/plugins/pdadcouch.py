@@ -23,7 +23,7 @@ class CouchDBDatabaseProvider(object):
     name = 'couchdb'
 
     def getOptions(self):
-        from dadcouch.selecter import couch
+        from dadcouch.database import couch
         return couch.couchdb_option_list
 
     def getDatabase(self, options):

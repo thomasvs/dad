@@ -1,6 +1,7 @@
 # -*- Mode: Python; test-case-name: dadcouch.test.test_database_couch -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import optparse
 import time
 import random
 
@@ -14,6 +15,24 @@ from dad.base import database
 from dadcouch.database import mappings, internal
 from dadcouch.model import base, artist, track, album
 
+_DEFAULT_HOST = 'localhost'
+_DEFAULT_PORT = 5984
+_DEFAULT_DB = 'dad'
+
+couchdb_option_list = [
+        optparse.Option('-H', '--host',
+            action="store", dest="host",
+            help="CouchDB hostname (defaults to %default)",
+            default=_DEFAULT_HOST),
+        optparse.Option('-P', '--port',
+            action="store", dest="port", type="int",
+            help="CouchDB port (defaults to %default)",
+            default=_DEFAULT_PORT),
+        optparse.Option('-D', '--database',
+            action="store", dest="database",
+            help="CouchDB database name (defaults to %s)" % _DEFAULT_DB,
+            default=_DEFAULT_DB),
+]
 
 class DADDB(database.Database):
     """
