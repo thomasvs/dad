@@ -16,23 +16,10 @@ from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
-from dad.command import tcommand, category, score, selection, common
+from dad.command import tcommand, category, score, selection, common, track
 from dad.logic import database
 
 from dad.extern.task import task
-
-class List(tcommand.TwistedCommand):
-
-    description = """List all tracks in the database."""
-
-    @defer.inlineCallbacks
-    def doLater(self, args):
-        db = self.parentCommand.database
-        res = yield db.getTracks()
-        for track in res:
-            self.stdout.write('%s - %s\n' % (
-                " & ".join(track.getArtistNames()), track.getName()))
-
 
 class Add(tcommand.TwistedCommand):
     """
@@ -212,7 +199,7 @@ class Database(logcommand.LogCommand):
     @ivar database: the database selected
     """
 
-    subCommandClasses = [Add, Chromaprint, List, Lookup, score.Score,
+    subCommandClasses = [Add, Chromaprint, track.Track, Lookup, score.Score,
         category.Category,
         selection.Selection]
 
