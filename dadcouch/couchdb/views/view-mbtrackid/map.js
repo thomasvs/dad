@@ -1,34 +1,21 @@
 // vi:si:et:sw=4:sts=4:ts=4
 
-// For each track, emit
-// key: mb track id
-// value: doc id
+// For each track
+//   for each different recording musicbrainz id
+//     emit
+//       key:   recording musicbrainz id
+//       value: 1
 
+// !code lib/dad/track.js
 
 function(doc) {
-    var seen = {};
-
     if (doc.type == 'track') {
-        doc.fragments.forEach(
+        ids = track.getAllMBIds(doc);
 
-        function(fragment) {
-            fragment.files.forEach(
-
-            function(file) {
-                if (file.metadata && file.metadata.mb_track_id) {
-                    if (!(file.metadata.mb_track_id in seen)) {
-                        emit(file.metadata.mb_track_id, doc._id);
-                        seen[file.metadata.mb_track_id] = 1;
-                    }
-                }
-            });
-
-            if (fragment.chroma && fragment.chroma.mbid) {
-                if (!(fragment.chroma.mbid in seen)) {
-                    emit(fragment.chroma.mbid, doc._id);
-                    seen[fragment.chroma.mbid] = 1;
-                }
+        ids.forEach(
+            function(id) {
+                emit(id, 1);
             }
-        });
+        );
     }
 }

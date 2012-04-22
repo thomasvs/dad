@@ -1,4 +1,39 @@
-// convert doc.artist member to an object with name/sortname/id/mbid/mid
+// get the musicbrainz id for the given track
+function getMBId(doc) {
+    return getAllMBIds(doc)[0];
+}
+
+// get a list of all possible musicbrainz id's, in order of certainty
+// chromaprint musicbrainz id's are more certain than metadata ones
+function getAllMBIds(doc) {
+    var ret = [];
+
+    doc.fragments.forEach(
+        function(fragment) {
+            if (fragment.chroma && fragment.chroma.mbid) {
+                if (ret.indexOf(fragment.chroma.mbid) == -1) {
+                    ret.push(fragment.chroma.mbid);
+                }
+            }
+        }
+    );
+
+    doc.fragments.forEach(
+        function(fragment) {
+            fragment.files.forEach(
+                function(file) {
+                    if (file.metadata && file.metadata.mb_track_id) {
+                        if (ret.indexOf(file.metadata.mb_track_id) == -1) {
+                            ret.push(file.metadata.mb_track_id);
+                        }
+                    }
+                }
+            );
+        }
+    );
+
+    return ret;
+}
 
 function getArtistMid(artist) {
     mid = null;
@@ -69,6 +104,7 @@ function getAlbumFromTrackAlbum(album) {
     return o;
 }
 
+// convert doc.artist member to an object with name/sortname/id/mbid/mid
 function getArtistFromTrackArtist(artist) {
     var o = {};
 
@@ -134,6 +170,8 @@ function getArtistsFromChroma(chroma) {
 }
 var track = {
 
+    getMBId: getMBId,
+    getAllMBIds: getAllMBIds,
     getArtistMid: getArtistMid,
     getMetadataArtistMid: getMetadataArtistMid,
     getAlbumMid: getAlbumMid,
@@ -169,7 +207,9 @@ var track = {
                             fragment.files.forEach(
                                 function(file) {
                                     if (file.metadata && file.metadata.artist) {
-                                        // FIXME: for now we emit artist as id, but maybe we should do null and adapt the code ?
+                                        // FIXME: for now we emit artist as id,
+                                        // but maybe we should do null and
+                                        // adapt the code ?
                                         a = getArtistFromMetadata(file.metadata);
                                         artists[a.mid] = a;
                                     }
@@ -209,7 +249,9 @@ var track = {
                         fragment.files.forEach(
                             function(file) {
                                 if (file.metadata && file.metadata.album) {
-                                        // FIXME: for now we emit album as id, but maybe we should do null and adapt the code ?
+                                        // FIXME: for now we emit album as id,
+                                        // but maybe we should do null and
+                                        // adapt the code ?
                                     a = getAlbumFromMetadata(file.metadata);
                                     albums[a.mid] = a;
                                 }
@@ -270,6 +312,8 @@ var track = {
 
 // CommonJS bindings
 if (typeof(exports) === 'object') {
+    exports.getMBId = track.getMBId;
+    exports.getAllMBIds = track.getAllMBIds;
     exports.getArtists = track.getArtists;
     exports.getAlbums = track.getAlbums;
     exports.getArtistMid = track.getArtistMid;
