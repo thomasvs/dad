@@ -10,13 +10,13 @@ from twisted.internet import defer
 
 from dad.plugins import pdadcouch
 
-from dadcouch.extern.paisley.test import test_util
+from dadcouch.extern.paisley.test import util
 
 from dadcouch.database import couch
 
 from dad.test import mixin_database
 
-class DADDBTestCase(test_util.CouchDBTestCase):
+class DADDBTestCase(util.CouchDBTestCase):
 
     """
     @type db:    L{paisley.client.CouchDB}
@@ -25,7 +25,7 @@ class DADDBTestCase(test_util.CouchDBTestCase):
 
     @defer.inlineCallbacks
     def setUp(self):
-        test_util.CouchDBTestCase.setUp(self)
+        util.CouchDBTestCase.setUp(self)
 
         # set up database
 
@@ -39,7 +39,8 @@ class DADDBTestCase(test_util.CouchDBTestCase):
             os.path.join(thisDir, '..', '..', '..', 'couchdb'))
         (status, output) = commands.getstatusoutput(
             "couchapp push --docid _design/dad " + \
-            "%s http://localhost:%d/dadtest/" % (couchPath, self.wrapper.port))
+            "%s http://%s:%s@localhost:%d/dadtest/" % (
+                couchPath, 'testpaisley', 'testpaisley', self.wrapper.port))
         self.failIf(status, "Could not execute couchapp: %s" % output)
 
 
