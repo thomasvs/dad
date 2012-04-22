@@ -472,7 +472,7 @@ class InternalDB(log.Loggable):
         self.debug('get track for mb track id %r', mbTrackId)
 
         ret = yield self.viewDocs('view-mbtrackid', mappings.Track,
-            include_docs=True, key=mbTrackId)
+            reduce=False, include_docs=True, key=mbTrackId)
 
         defer.returnValue(ret)
 
