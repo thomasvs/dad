@@ -3,3 +3,16 @@
   - as a unit that can be called from a GUI too as background tasks
 - when a file already is in the database for another host, with same md5sum,
   don't level
+- last.fm posting of played tracks
+- user login on the webpage
+- rate from webpage
+- track played tracks in db, per host and player id
+- create an object to hold recently played tracks, which can be queried by selecter/scheduler
+- album playback mode
+- store online tracks
+- deploy an online CC-only player, all tracks being remote
+- make it possible to combine selectors on the fly
+- show how many rated tracks are not on the local computer
+- import all old DAD songs and ratings
+- use SQL as database in core, using e.g. sqlite
+
