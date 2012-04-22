@@ -290,6 +290,20 @@ class DADDB(database.Database):
         return self.db.url_template % ('/_utils/document.html?%s/%s' % (
             self.dbName, model.document.id))
 
+    @defer.inlineCallbacks
+    def getDuplicateTracks(self):
+        ret = []
+
+        gen = yield self._internal.viewDocs('view-mbtrackid',
+            mappings.ViewRow, group_level=1)
+
+        duplicates = [row.key for row in gen if row.value > 1]
+
+        for mbtrackid in duplicates:
+            gen = yield self.getTracksByMBTrackId(mbtrackid)
+            ret.append((mbtrackid, list(gen)))
+
+        defer.returnValue(ret)
 
     @defer.inlineCallbacks
     def getSelections(self):

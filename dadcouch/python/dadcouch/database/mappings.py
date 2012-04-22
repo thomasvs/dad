@@ -636,3 +636,12 @@ class SelectionRow(mapping.Document):
     def fromDict(self, d):
         self.id = d['id']
         self.name = d['key']
+
+# map generic view
+class ViewRow:
+
+    def fromDict(self, d):
+        # reduce results don't have id
+        self.id = d.get('id', None)
+        self.key = d['key']
+        self.value = d['value']

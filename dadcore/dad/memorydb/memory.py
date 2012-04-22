@@ -338,6 +338,15 @@ class MemoryDB(database.Database):
 
         defer.returnValue(ret)
 
+    def getDuplicateTracks(self):
+        ret = []
+
+        for mbtrackid, tracks in self._mbTrackIds.items():
+            if len(tracks) > 1:
+                ret.append((mbtrackid, tracks))
+
+        return ret
+
     ### implementation methods
     def saveArtist(self, artist):
         """

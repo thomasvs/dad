@@ -426,6 +426,54 @@ class DatabaseTestCase(BaseTestCase):
         yield self.testdb.trackAddFragmentFileByMBTrackId(tm,
             info, metadata)
 
+    @defer.inlineCallbacks
+    def testGetDuplicateTracks(self):
+        tm = self.testdb.new('track', name=u'Milez iz Ded')
+        info = database.FileInfo(u'localhost', u'/tmp/milez.flac',
+            md5sum=u'deadbeef')
+
+        metadata = database.TrackMetadata()
+        metadata.artist = u'The Afghan Whigs'
+        mb = u'9b9b333e-8278-401b-8361-700c14096228'
+        metadata.mbTrackId = mb
+
+        tm.addFragment(info, metadata=metadata)
+        tm1 = yield self.testdb.save(tm)
+
+        tm = self.testdb.new('track', name=u'Milez iz Ded')
+        info = database.FileInfo(u'localhost', u'/tmp/untitled.oga',
+            md5sum=u'beefdead')
+
+        metadata = database.TrackMetadata()
+        metadata.artist = u'The Afghan Whigs'
+        mb = u'9b9b333e-8278-401b-8361-700c14096228'
+        metadata.mbTrackId = mb
+
+        tm.addFragment(info, metadata=metadata)
+        tm2 = yield self.testdb.save(tm)
+
+        # add a third unrelated track
+        tm = self.testdb.new('track', name=u'other track')
+        info = database.FileInfo(u'localhost', u'/tmp/other.flac',
+            md5sum=u'feebdade')
+
+        metadata = database.TrackMetadata()
+        metadata.artist = u'Unknown'
+        metadata.mbTrackId = u'very-different-mb-id'
+
+        tm.addFragment(info, metadata=metadata)
+        yield self.testdb.save(tm)
+
+        gen = yield self.testdb.getDuplicateTracks()
+        duplicates = list(gen)
+        self.assertEquals(len(duplicates), 1)
+        mbtrackid, tracks = duplicates[0]
+        self.assertEquals(mbtrackid, mb)
+        self.assertEquals(len(tracks), 2)
+        self.failUnless(tm1.getId() in [t.getId() for t in tracks])
+        self.failUnless(tm2.getId() in [t.getId() for t in tracks])
+
+
 class DatabaseInteractorTestCase(BaseTestCase):
 
     def setUp(self):

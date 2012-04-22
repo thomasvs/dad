@@ -215,6 +215,12 @@ class IDatabase(interface.Interface):
         Used for debugging.
         """
 
+    def getDuplicateTracks():
+        """
+        @rtype: a deferred firing a generator for tuples of mbid, list of
+                tracks
+        """
+
 class IMetadataGetter(interface.Interface):
     def getMetadata(path, runner=None):
         """
