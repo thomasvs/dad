@@ -314,9 +314,10 @@ var Player = function(args) {
                         loadSeek(message.id, a, offsetS);
                     }, false);
 
-                //audio.addEventListener('canplaythrough', loadSeek, false);
                 a.play();
-                a.pause();
+                // chrome doesn't fire the event above, so pausing it
+                // breaks it
+                //a.pause();
 
                 $('#tr-' + message.id).css('font-weight', 'bold');
 
