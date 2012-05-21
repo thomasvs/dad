@@ -86,6 +86,12 @@ class Add(tcommand.TwistedCommand):
             else:
                 self.stdout.write('Audio file already in database.\n')
 
+            # now chromaprint
+            # FIXME: decide if this is how we want to delegate chromaprinting?
+            c = self.parentCommand.subCommands['chromaprint']
+            yield c.doLater([path, ])
+
+
         if failed:
             for path, e in failed:
                 self.stdout.write('Failed to add %s:\n' % path.encode('utf-8'))
