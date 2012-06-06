@@ -1,6 +1,7 @@
 # -*- Mode: Python -*-
 # vi:si:et:sw=4:sts=4:ts=4
 
+import random
 import time
 
 from twisted.internet import defer
@@ -56,6 +57,9 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
             artists.append(mid)
 
             tracks = yield trackRow.getTracks()
+            tracks = list(tracks)
+            random.shuffle(tracks)
             gens.append((t for t in tracks))
+            random.shuffle(gens)
 
         defer.returnValue(iterators.tmerge(*gens))
