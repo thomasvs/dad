@@ -146,7 +146,7 @@ class DADDB(database.Database):
         return self._internal.getCategories()
 
     @defer.inlineCallbacks
-    def getTracksByHostPath(self, host, path):
+    def getTracksByHostPath(self, host, path=None):
         """
         Look up tracks by path.
         Can return multiple tracks for a path; for example, multiple
@@ -154,7 +154,7 @@ class DADDB(database.Database):
 
 
         @type  host: unicode
-        @type  path: unicode
+        @type  path: unicode or None
 
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{track.TrackModel}

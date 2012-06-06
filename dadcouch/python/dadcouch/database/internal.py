@@ -413,28 +413,38 @@ class InternalDB(log.Loggable):
 
     # FIXME: all of these are currently duplicated; move to internal
     @defer.inlineCallbacks
-    def getTracksByHostPath(self, host, path):
+    def getTracksByHostPath(self, host, path=None):
         """
         Look up tracks by path.
         Can return multiple tracks for a path; for example, multiple
         fragments.
 
-
         @type  host: unicode
-        @type  path: unicode
+        @type  path: unicode or None
 
         ### FIXME:
         @rtype: L{defer.Deferred} firing list of L{mappings.Track}
         """
         assert type(host) is unicode, \
             'host is type %r, not unicode' % type(host)
-        assert type(path) is unicode, \
-            'host is type %r, not unicode' % type(path)
+        if path:
+            assert type(path) is unicode, \
+                'host is type %r, not unicode' % type(path)
 
         self.debug('get track for host %r and path %r', host, path)
 
+        kwargs = {
+            'include_docs': True
+        }
+        if path:
+            kwargs['key'] = [host, path]
+        else:
+            kwargs['startkey'] = [host, ""]
+            kwargs['endkey'] = [host, ENDKEY_STRING]
+
+
         ret = yield self.viewDocs('view-host-path', mappings.Track,
-            include_docs=True, key=[host, path])
+            **kwargs)
 
         defer.returnValue(ret)
 
