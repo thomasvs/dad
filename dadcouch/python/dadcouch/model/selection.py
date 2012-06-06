@@ -13,10 +13,11 @@ from dadcouch.database import mappings
 from dadcouch.model import base
 
 
-# FIXME: remove track attribute
 class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
 
     documentClass = mappings.Selection
+
+    document = None # set from outside; mappings.Selection
 
     # base class implementations
 
@@ -31,8 +32,6 @@ class CouchSelectionModel(selection.Selection, base.CouchBaseDocModel):
         last = [time.time(), ]
         start = last[0]
 
-
-        
         self.debug('filtering on artist_mids %r', self.document.artist_mids)
 
         from dadcouch.model import artist
