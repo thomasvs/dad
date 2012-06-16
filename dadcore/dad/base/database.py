@@ -126,7 +126,7 @@ class Database(log.Loggable):
                 if not key in pairs:
                     pairs[key] = []
                 pairs[key].append((score.score, 'artist'))
-        
+
         for ((user, category), scoreModels) in pairs.items():
             track = None
             artists = []

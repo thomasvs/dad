@@ -97,9 +97,9 @@ class DADDB(database.Database):
     @defer.inlineCallbacks
     def setScore(self, subject, userName, categoryName, score):
         """
-        @type subject: L{base.ScorableModel}
+        @type subject: L{base.CouchScorableModel}
         """
-        assert isinstance(subject, base.ScorableModel), \
+        assert isinstance(subject, base.CouchScorableModel), \
             "subject %r is not a scorable" % subject
         if not subject.document:
             subject = yield subject.getOrCreate()
@@ -114,7 +114,7 @@ class DADDB(database.Database):
         """
         @returns: deferred firing list of L{data.Score}
         """
-        assert isinstance(subject, base.ScorableModel), \
+        assert isinstance(subject, base.CouchScorableModel), \
             "subject %r is not scorable" % subject
         return self._internal.getScores(subject.document)
 

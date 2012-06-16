@@ -12,7 +12,7 @@ from dadcouch.database import mappings
 
 
 # FIXME: remove track attribute
-class CouchTrackModel(base.ScorableModel, track.TrackModel):
+class CouchTrackModel(base.CouchScorableModel, track.TrackModel):
     """
     I represent a track in a CouchDB database.
 

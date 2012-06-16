@@ -17,7 +17,7 @@ from dadcouch.extern.paisley import views
 # FIXME: should be possible to create a new one through AppModel
 # either empty or from db
 # FIXME: remove artist for document
-class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
+class CouchArtistModel(base.CouchScorableModel, artist.ArtistModel):
     """
     I represent an artist in a CouchDB database.
     """

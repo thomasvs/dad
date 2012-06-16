@@ -12,7 +12,7 @@ from dadcouch.database import mappings
 from dadcouch.model import base
 
 
-class CouchAlbumModel(base.ScorableModel, album.AlbumModel):
+class CouchAlbumModel(base.CouchScorableModel, album.AlbumModel):
     """
     I represent an album in a CouchDB database.
     """

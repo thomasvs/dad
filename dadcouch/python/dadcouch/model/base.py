@@ -73,7 +73,7 @@ class CouchDocModel(CouchBaseDocModel):
         return self.database.getUrl(self)
         
 
-class ScorableModel(CouchDocModel):
+class CouchScorableModel(CouchDocModel):
     """
     I represent a subject in a CouchDB database that can be scored.
     """
