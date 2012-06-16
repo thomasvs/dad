@@ -5,10 +5,9 @@
 from twisted.internet import defer
 
 from dad.model import scorable
-from dad.common import log
 
 
-class CouchDBModel(scorable.BackedModel, log.Loggable):
+class CouchDBModel(scorable.BackedModel):
     pass
 
 # FIXME: split up further now for selection
