@@ -123,11 +123,11 @@ class CouchArtistModel(base.ScorableModel, artist.ArtistModel):
                     am = CouchArtistModel(self.database)
                     am.document = doc
                     artists.append(am)
- 
+
             # FIXME: multiple matches, find best one ? maybe mbid first ?
             defer.returnValue(artists[0])
             return
-            
+
         except Exception, e:
                 self.warningFailure(failure.Failure(e))
                 self.controller.doViews('error', "failed to populate",
@@ -171,7 +171,7 @@ class ItemTracksByArtist(CouchArtistModel):
 
     def getTrackCount(self):
         return self.tracks
-    
+
     def __repr__(self):
         return '<ItemTracksByArtist %r>' % self.name
 
