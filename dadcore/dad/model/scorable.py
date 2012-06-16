@@ -34,7 +34,8 @@ class BackedModel(base.Model, log.Loggable):
 
         @rtype: instance of subclass of L{BackedModel}
         """
-        raise NotImplementedError, '%r does not implement getOrCreate' % self.__class__
+        raise NotImplementedError, \
+            '%r does not implement getOrCreate' % self.__class__
 
 
     def getUrl(self):
@@ -53,6 +54,8 @@ class ScorableModel(BackedModel):
 
     def getCategories(self):
         """
+        @rtype:   L{twisted.internet.defer.deferred} firing
+                  L{types.GeneratorType} for C{str}
         @returns: deferred firing generator of category names.
         """
         raise NotImplementedError
@@ -61,7 +64,7 @@ class ScorableModel(BackedModel):
         """
         Get a subject's scores.
 
-        @rtype: deferred firing generator of user, category, score
+        @returns: deferred firing generator of user, category, score
         """
         raise NotImplementedError
 
