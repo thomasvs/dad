@@ -76,7 +76,7 @@ class DADDB(database.Database):
     @defer.inlineCallbacks
     def save(self, item):
         """
-        @type item; L{base.CouchDocModel}
+        @type item: L{base.CouchDocModel}
         """
         if isinstance(item, base.CouchDocModel):
             stored = yield self._internal.saveDoc(item.document)

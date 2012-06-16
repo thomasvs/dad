@@ -9,13 +9,13 @@ from dad.common import log
 class ChromaPrintModel(base.Model):
     """
     @type  chromaprint: C{str}
-    @param duration:    duration of the track, in seconds
+    @ivar  duration:    duration of the track, in seconds
     @type  duration:    C{float}
     @type  mbid:        C{str}
-    @param artists:     list of dict of name, mbid of artists
+    @ivar  artists:     list of dict of name, mbid of artists
     @type  artists:     list of dict of C{unicode} -> C{unicode}
     @type  title:       C{unicode}
-    type  lookedup:     L{datetime.datetime}
+    @type  lookedup:    L{datetime.datetime}
     """
     chromaprint = None
     duration = None

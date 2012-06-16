@@ -79,6 +79,7 @@ class Database(log.Loggable):
         Recalculate the aggregate track score of a track, taking into account
         artist and album scores.
 
+        @param tm: the trackmodel to recalculate score for
         @type  tm: L{dad.model.track.TrackModel}
         """
         self.debug('recalculateTrackScore for %r', tm)
