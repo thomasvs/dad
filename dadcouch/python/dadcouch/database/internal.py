@@ -3,7 +3,6 @@
 
 import os
 import sys
-import datetime
 
 from twisted.internet import defer
 
@@ -212,7 +211,7 @@ class InternalDB(log.Loggable):
         d.callback(None)
 
         return d
-            
+
     def resolveDictIds(self, obj, idAttr, objAttr, klazz,
             getter=getattr, setter=setattr):
         return self.resolveIds(obj, idAttr, objAttr, klazz,
