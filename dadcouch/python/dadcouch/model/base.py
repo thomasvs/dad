@@ -36,8 +36,7 @@ class CouchBaseDocModel(CouchDBModel):
         return model
 
 
-# FIXME: rename to scorable or somesuch
-class CouchDocModel(CouchBaseDocModel):
+class CouchBackedModel(CouchBaseDocModel):
     """
     I represent an object in a CouchDB database that can be
     stored as a document.
@@ -57,7 +56,7 @@ class CouchDocModel(CouchBaseDocModel):
         @type  mbid: C{unicode}
         """
         model = CouchBaseDocModel.new(cls, db)
-        model = super(CouchDocModel, cls).new(cls, db)
+        model = super(CouchBackedModel, cls).new(cls, db)
 
         if not sort:
             sort = name
@@ -70,9 +69,9 @@ class CouchDocModel(CouchBaseDocModel):
 
     def getUrl(self):
         return self.database.getUrl(self)
-        
 
-class CouchScorableModel(CouchDocModel):
+
+class CouchScorableModel(CouchBackedModel):
     """
     I represent a subject in a CouchDB database that can be scored.
     """

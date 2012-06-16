@@ -76,9 +76,9 @@ class DADDB(database.Database):
     @defer.inlineCallbacks
     def save(self, item):
         """
-        @type item: L{base.CouchDocModel}
+        @type item: L{base.CouchBackedModel}
         """
-        if isinstance(item, base.CouchDocModel):
+        if isinstance(item, base.CouchBackedModel):
             stored = yield self._internal.saveDoc(item.document)
             # FIXME: for now, look it up again to maintain the track illusion
             item.document = yield self._internal.db.map(
