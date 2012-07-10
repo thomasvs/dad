@@ -59,6 +59,7 @@ class Add(tcommand.TwistedCommand):
         for path in paths:
             path = os.path.abspath(path)
             self.stdout.write('%s\n' % path.encode('utf-8'))
+            self.stdout.flush()
 
             d = interactor.add(path, hostname=self.hostname)
             d.addErrback(log.warningFailure)
@@ -89,7 +90,8 @@ class Add(tcommand.TwistedCommand):
             # now chromaprint
             # FIXME: decide if this is how we want to delegate chromaprinting?
             c = self.parentCommand.subCommands['chromaprint']
-            yield c.doLater([path, ])
+            # commands deal with arguments which are not unicode, so decode
+            yield c.doLater([path.encode('utf-8'), ])
 
 
         if failed:
@@ -121,6 +123,7 @@ class Chromaprint(tcommand.TwistedCommand):
             defer.returnValue(3)
             return
 
+        self.debug('Chromaprint: args %r', args)
         interactor = database.DatabaseInteractor(
             self.parentCommand.database,
             self.parentCommand.runner)
