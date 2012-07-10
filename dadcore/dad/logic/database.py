@@ -55,7 +55,7 @@ class DatabaseInteractor(log.Loggable):
         """
         ret = ([], [])
 
-        self.debug('Adding %s', path)
+        self.debug('Adding %r', path)
         if not os.path.exists(path):
             raise PathError(path)
 
