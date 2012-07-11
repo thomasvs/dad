@@ -66,8 +66,8 @@ class ChromaPrint(tcommand.TwistedCommand):
             cp.duration = t.duration
             result = yield cpc.lookup(cp)
             if not result:
-                self.stdout.write('Could not look up for fingerprint %r\n',
-                    t.fingerprint)
+                self.stdout.write('Could not look up for fingerprint %r\n' % (
+                    t.fingerprint, ))
                 continue
 
             fp, decoded = result
