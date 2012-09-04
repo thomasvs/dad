@@ -47,7 +47,7 @@ class List(tcommand.TwistedCommand):
         for cat in ret:
             self.stdout.write('%s\n' % cat)
         self.stdout.write('%d categories\n' % len(ret))
- 
+
 
 class Category(logcommand.LogCommand):
 
