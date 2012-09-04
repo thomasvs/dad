@@ -13,7 +13,7 @@ from dad import idad
 
 from dad.common import log
 from dad.common import logcommand
-from dad.command import test
+from dad.command import test, tcommand
 from dad.task import md5task
 from dad.command import database
 
@@ -77,7 +77,7 @@ class MD5(logcommand.LogCommand):
         self.reactor.stop()
 
 
-class Dad(logcommand.LogCommand):
+class Dad(tcommand.LogReactorCommand):
     usage = "%prog %command"
     description = """DAD is a digital audio database.
 
@@ -105,6 +105,6 @@ You can get help on subcommands by using the -h option to the subcommand.
             sys.exit(0)
 
     def parse(self, argv):
-        log.debug("dad", "dad %s" % " ".join(argv))
-        logcommand.LogCommand.parse(self, argv)
+        log.debug("dad", "parsing command line: dad %s" % " ".join(argv))
+        return tcommand.LogReactorCommand.parse(self, argv)
 
