@@ -1,3 +1,4 @@
+* figure out if we can remove things from the couchdbmodel hierarchy
 * populate track list one by one instead of after resolving all
 * write tests for model.daddb
 * move controllers to a base class
