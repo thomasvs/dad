@@ -10,3 +10,6 @@
 [submodule "dadws/dadws/www/vegas"]
 	path = dadws/dadws/www/vegas
 	url = https://github.com/jaysalvat/vegas.git
+[submodule "dadcore/dad/extern/python-command"]
+	path = dadcore/dad/extern/python-command
+	url = https://github.com/thomasvs/python-command.git
