@@ -24,9 +24,12 @@ from dadgtk.views import player as vplayer
 
 class Gtk2Command(tcommand.TwistedCommand):
     def installReactor(self):
+        self.debug('installing gtk2reactor')
         from dadgtk.twisted import gtk2reactor
         gtk2reactor.install()
-        tcommand.TwistedCommand.installReactor(self)
+        from twisted.internet import reactor
+
+        tcommand.TwistedCommand.installReactor(self, reactor=reactor)
 
 
 class Artist(Gtk2Command):
