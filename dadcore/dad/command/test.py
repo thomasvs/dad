@@ -5,6 +5,7 @@
 The entry point for test applications.
 """
 
+import os
 import optparse
 
 from twisted.internet import defer
@@ -317,6 +318,11 @@ class Selecter(tcommand.TwistedCommand):
             help="Selecter class to use (default %default)",
             default=default)
 
+        self.parser.add_option('-e', '--existing',
+            action="store_true", dest="existing",
+            help="Only select existing files (default %default)",
+            default=default)
+
 
     @defer.inlineCallbacks
     def doLater(self, args):
@@ -328,6 +334,9 @@ class Selecter(tcommand.TwistedCommand):
             selected = yield sel.select()
             if not selected:
                 break
+
+            if not os.path.exists(selected.path):
+                continue
 
             text = "# %s - %s\n%s\n" % (
                 " & ".join(selected.artists).encode('utf-8'),
