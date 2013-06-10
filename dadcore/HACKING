@@ -18,6 +18,7 @@ Testing
 - selecter:
   python dad/common/selecter.py -h
   By default, selects from tracks.pickle
+  dad test selecter --selecter=dad.common.selecter.DatabaseCategorySelecter:--user=thomas:--category=Sleep
 - example jukebox:
   - simple playlist:
   - couch-based:
