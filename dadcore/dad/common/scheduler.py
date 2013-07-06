@@ -233,12 +233,15 @@ class Scheduler(log.Loggable, gobject.GObject):
         """
         self.info('asked to schedule, asking selecter to select track')
         d = self._selecter.select()
+        def selectCb(s):
+            if not s: return
+            self.add_track(s)
         # FIXME: should we be doing this ourselves ?
-        d.addCallback(lambda (s): self.add_track(s))
+        d.addCallback(selectCb)
         # FIXME: we do a second one here because we need two to get started
         # but doing this always seems wrong
         d.addCallback(lambda _: self._selecter.select())
-        d.addCallback(lambda (s): self.add_track(s))
+        d.addCallback(selectCb)
         return d
 
     def reschedule(self, counter, flavor=None):
