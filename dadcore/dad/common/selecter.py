@@ -482,7 +482,7 @@ class DatabaseSelecter(Selecter):
         self._tracks = []
 
     def load(self):
-        return self._loadLimited(10)
+        return self._loadLimited(3)
 
     def _loadLimited(self, limit):
         # get a few results as fast as possible
