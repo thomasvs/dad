@@ -51,7 +51,8 @@ class GstPlayer(player.Player):
 
         ac = gst.element_factory_make('audioconvert')
         queue = gst.element_factory_make('queue')
-        
+
+        self.debug('parsing sink %s' % sink)
         # parse the sink as a bin, linking to the unconnected pad
         sink = gst.parse_launch('bin. ( %s )' % sink)
         # FIXME: changed to find_unlinked_pad in gstreamer 0.10.20
