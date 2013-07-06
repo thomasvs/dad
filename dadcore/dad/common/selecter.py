@@ -725,6 +725,76 @@ class DatabaseSelectionSelecter(DatabaseSelecter):
 
         defer.returnValue(gen)
 
+class DatabasePlaylistOptionParser(OptionParser):
+    standard_option_list = OptionParser.standard_option_list + \
+        database_selecter_option_list + playlist_selecter_option_list
+
+
+class DatabasePlaylistSelecter(DatabaseSelecter):
+    """
+    I simply select tracks from a tracks playlist, linear or random.
+
+    Each track gets played once.  When all tracks are played, the process
+    is repeated.
+
+    @ivar  _tracks: dict of path -> list of trackmix
+    @type  _tracks: dict of str -> list of L{dad.audio.mixing.TrackMix}
+    """
+
+    option_parser_class = DatabasePlaylistOptionParser
+
+    def __init__(self, options, database=None):
+        DatabaseSelecter.__init__(self, options, database)
+
+
+        self._playlist = self.options.playlist
+        self._random = self.options.random
+        self._loop = 0
+        self._loops = self.options.loops
+        self.debug('Creating selecter, for %d loops', self._loops)
+        self.debug('Random: %r', self._random)
+
+
+    @defer.inlineCallbacks
+    def getTracks(self, limit=None):
+        print 'getTracks: loop', self._loop, 'loops', self._loops
+        self._loop += 1
+
+        ret = []
+
+        files = open(self._playlist).readlines()
+        files = [line for line in files if not line.startswith('#')]
+
+        self.debug('%d files', len(files))
+        for path in files:
+            if not path.startswith(os.path.sep) and self._playlist:
+                path = os.path.join(os.path.dirname(self._playlist), path)
+            path = path.strip()
+            # FIXME: checking the file is expensive
+            # if not os.path.exists(path):
+            #    print "%s does not exist, skipping" % path
+            #    continue
+            try:
+                models = yield self._database.getTracksByHostPath(unicode(self._host), unicode(path))
+            except KeyError:
+                print "%s not in db, skipping" % path
+                continue
+            except IndexError:
+                print "path %s does not have trackmix object in pickle" % path
+                continue
+
+
+            m = list(models)
+            if m:
+                ret.append(m[0])
+            else:
+                print "path %s not in db" % path
+
+
+        self.debug('getTracks: returngin %d tracks' % len(ret))
+        defer.returnValue((r for r in ret))
+        return
+
 
 if __name__ == '__main__':
     from twisted.internet import reactor
