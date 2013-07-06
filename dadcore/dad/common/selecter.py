@@ -287,8 +287,9 @@ class Selecter(log.Loggable):
 
         Can return a deferred which will be waited on.
         """
-        self._loop += 1
         self.debug('setup')
+        # self._loop += 1
+        # self.debug('setup: incing loop, now %d' % self._loop)
         return self.load()
 
     def load(self):
