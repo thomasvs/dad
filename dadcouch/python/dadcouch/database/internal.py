@@ -428,7 +428,7 @@ class InternalDB(log.Loggable):
             'host is type %r, not unicode' % type(host)
         if path:
             assert type(path) is unicode, \
-                'host is type %r, not unicode' % type(path)
+                'path is type %r, not unicode' % type(path)
 
         self.debug('get track for host %r and path %r', host, path)
 

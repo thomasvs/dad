@@ -194,6 +194,7 @@ class Selecter(log.Loggable):
 
         def loadCb(result):
             self._loop += 1
+            self.debug('loadCb: incing loop, now %d' % self._loop)
             if result is None:
                 self.warning('get(): no tracks match')
                 raise IndexError('no tracks match')
