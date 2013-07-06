@@ -307,16 +307,18 @@ class Selecter(log.Loggable):
     def getFlavors(self):
         pass
 
+playlist_selecter_option_list = [
+        optparse.Option('-p', '--playlist',
+            action="store", dest="playlist",
+            help="A playlist file to play tracks from"),
+]
 
 class SimplePlaylistOptionParser(OptionParser):
     standard_option_list = OptionParser.standard_option_list + [
         optparse.Option('-t', '--tracks',
             action="store", dest="tracks",
             help="A tracks pickle to read trackmix data from"),
-        optparse.Option('-p', '--playlist',
-            action="store", dest="playlist",
-            help="A playlist file to play tracks from"),
-    ]
+        ] + playlist_selecter_option_list
 
 
 class SimplePlaylistSelecter(Selecter):
